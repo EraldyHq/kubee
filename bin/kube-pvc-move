@@ -1,0 +1,92 @@
+#!/bin/bash
+# Move a local-path pv
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# Not finished, you should apply the command one by one manually for now
+# Prerequisites:
+#   * You should have the ssh private key on the source host
+#   * Rsync on both nodes
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!
+# Original Idea: # https://stackoverflow.com/questions/71708673/how-to-move-pv-from-one-kubernetes-node-to-another
+
+# There is no direct way of moving a rancher.io/local-path pv
+# Since the data is only available on the node the pv has been provisioned on.
+
+# to move the pv, the data has to be moved first. Then the pv has to be patched to point to the new host.
+
+# Check if the app name is provided
+echo "You need to perform the command below manually"
+exit 1
+
+PV_NAME=$1
+TARGET_NODE=188.245.43.250
+TARGET_NODE_HOSTNAME=kube-server-01.eraldy.com
+TARGET_USER=beau
+
+# Get path
+# The location of the pv in the filesystem can be found by checking spec.hostPath.path of the pv.
+PV_FS_PATH=$(kubectl get pv "$PV_NAME" -o jsonpath='{.spec.local.path}')
+
+# Creating the path on the target
+# shellcheck disable=SC2029
+ssh $TARGET_USER@$TARGET_NODE "sudo mkdir -p $PV_FS_PATH"
+# shellcheck disable=SC2029
+ssh $TARGET_USER@$TARGET_NODE "sudo chown $TARGET_USER $PV_FS_PATH"
+
+
+# You local rsync needs to start a remote rsync from the SSH on the remote server but is unable to find it since it's probably not in its path.
+
+rsync \
+	-e "ssh -o StrictHostKeyChecking=no" \
+	--rsync-path="sudo rsync" \
+	--rsh=ssh \
+	-ravz \
+	"$PV_FS_PATH" \
+	$TARGET_USER@$TARGET_NODE:"$PV_FS_PATH"
+
+# where:
+# a=archive
+# r=recursive
+# -v=verbose - increase verbosity
+# z=compress
+# --rsync-path=PROGRAM     specify the rsync to run on remote machine
+
+
+# Create the new pv definition
+NEW_PV_DEF=pv_def.yml # The path to the new yaml definition file
+kubectl patch pv "$PV_NAME" -p \
+  "{
+    \"metadata\": {
+     		\"annotations\": {
+     		  \"local.path.provisioner/selected-node\": \"$TARGET_NODE_HOSTNAME\"
+     		}
+     },
+    \"spec\": {
+      \"nodeAffinity\": {
+        \"required\": {
+          \"nodeSelectorTerms\":[
+            {
+              \"matchExpressions\": [
+                {
+                    \"key\":\"kubernetes.io/hostname\",
+                    \"operator\": \"In\",
+                    \"values\":[
+                      \"$TARGET_NODE_HOSTNAME\"
+                    ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }" \
+  --dry-run=client -o yaml > $NEW_PV_DEF
+
+# The `pv-protection` finalizer needs to be removed, otherwise the following patch command will not be successful.
+kubectl patch pv "$PV_NAME" --type='json' -p='[{"op": "remove", "path": "/metadata/finalizers/0"}]'
+
+# Apply the new volume definition after the `pv-protection` has been removed
+# The fields that need to be changed in the pv are immutable, so we have to force the changes causing the api to recreate the pv.
+kubectl apply --force -f $NEW_PV_DEF
+
+

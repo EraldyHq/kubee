@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# Shows the process inside a Pod
+# The log and error handling
+# We still need to use the set command
+# because shellcheck does not see them and want use to add
+# exit check everywhere
+set -Eeuo pipefail
+# echo and error_handling should be in your bashrc.d directory
+
+# Check if the app is provided
+if [ -z "$1" ]; then
+    echo "Usage: $0 <app name>"
+    exit 1
+fi
+
+NAME=$1
+SLEEPING=1
+
+echo Getting Pod Name and Namespace for app "$NAME"
+APP_LABEL="app.kubernetes.io/name=$NAME"
+# the name label as seen here: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
+# label app.kubernetes.io/name=prometheus
+read -r POD_NAME POD_NAMESPACE <<< "$(kubectl get pod -o custom-columns=NAME:.metadata.name,NAMESPACE:.metadata.namespace --no-headers -l "$APP_LABEL" -A)"
+
+if [ -z "$POD_NAME" ]; then
+    echo "Error: Pod not found with label $APP_LABEL"
+    exit 1
+fi
+echo Pod Name: "$POD_NAME"
+echo Pod Namespace: "$POD_NAMESPACE"
+
+# Prints the top process of a pod
+# Arguments:
+#   $1 - Pod name
+#   $2 - Pod namespace
+pod_top(){
+  local POD_NAME=$1
+  local POD_NAMESPACE=$2
+  read -r  CPU MEM <<< "$(kubectl top pod "$POD_NAME" --namespace="$POD_NAMESPACE" | awk '{ if(NR>1) print $2, $3 }')"
+      # PS=$(kubectl exec -it "$POD_NAME" --namespace="$NAME" -- ps auxww --sort -command)
+      # https://www.gnu.org/software/gawk/manual/html_node/Printf.html
+      PS=$(kubectl exec -it "$POD_NAME" --namespace="$POD_NAMESPACE" -- ps auxww --sort -command | awk '
+      BEGIN { print "PID          CPU     MEM (MB)  COMMAND"
+              print "----      ------     --------  ----------------" }
+            { if(NR>1) printf "%-10s %5s %12.2f  %s %s %s %s\n", $2, $3, $6/1024, $11, $12, $13, $14}
+            ')
+      # Trying to print in MB
+      # RSS is the amount of memory in Bytes (1024)
+      #PS=$(kubectl exec -it "$POD_NAME" --namespace="$NAME" -- ps auxww --sort -command | awk 'NR=1 {printf "%-10s %-10s %-10s\n", $2, $3, $6 } NR>1 {printf "%-10s %-10s %-10s\n", $2, $3, $6/1024 " MB"}')
+      printf "Pod: %s\n * CPU: %s\n * MEM: %s\n%s\n\nSleeping %s sec" "$POD_NAME" "$CPU" "$MEM" "$PS" "$SLEEPING"
+}
+
+# Prints the top processes of all pods in the given namespace
+# $1 - Namespace
+list_pods (){
+  local POD_NAMESPACE=$1
+  # Fetch all running pods in the given namespace
+  POD_NAMES=$(kubectl get pods --namespace="$POD_NAMESPACE" -o jsonpath='{.items[*].metadata.name}' --field-selector=status.phase=Running)
+  for POD_NAME in $POD_NAMES; do
+    pod_top "$POD_NAME" "$POD_NAMESPACE"
+  done
+}
+
+while sleep $SLEEPING; do
+  printf '%s\n' "$(clear; pod_top "$POD_NAME" "$POD_NAMESPACE")"
+done
+
+
+

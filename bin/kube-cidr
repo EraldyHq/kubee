@@ -1,0 +1,18 @@
+#!/bin/bash
+# Return the CIDR of pods
+
+######################
+# Standard Library and conf
+######################
+# The log and error handling
+# We still need to use the set command
+# because shellcheck does not see them and want use to add
+# exit check everywhere
+set -Eeuo pipefail
+# echo and error_handling should be in your bashrc.d directory
+
+
+######################
+# Main
+######################
+kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.podCIDR}{"\n"}{end}'

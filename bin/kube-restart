@@ -1,0 +1,75 @@
+#!/bin/bash
+
+######################
+# Standard Library and conf
+######################
+# The log and error handling
+# We still need to use the set command
+# because shellcheck does not see them and want use to add
+# exit check everywhere
+set -Eeuo pipefail
+# echo and error_handling should be in your bashrc.d directory
+
+# Load echo package
+source bashlib-echo.sh
+
+######################
+# Main
+######################
+
+# Check if app is provided
+if [ -z "$1" ]; then
+    echo "Please provide a name."
+    echo "Usage: $0 <app name>"
+    exit 1
+fi
+
+APP_NAME=$1
+APP_LABEL=app.kubernetes.io/name="$APP_NAME"
+
+# Function to search for a resource type across all namespaces
+search_resource() {
+    local RESOURCE_TYPE=$1
+    kubectl get "$RESOURCE_TYPE" --all-namespaces -l "$APP_LABEL" -o jsonpath='{range .items[*]}{.metadata.namespace}{" "}{.metadata.name}{"\n"}{end}' 2>/dev/null
+}
+
+# Search for deployments
+DEPLOYMENTS=$(search_resource deployment)
+DEPLOYMENT_COUNT=$(echo "$DEPLOYMENTS" | sed '/^\s*$/d' | wc -l )
+if [ "$DEPLOYMENT_COUNT" -gt 1 ]; then
+    echo "Error: Multiple deployments found with label app.kubernetes.io/name=$APP_NAME:"
+    echo "$DEPLOYMENTS"
+    exit 1
+fi;
+
+if [ "$DEPLOYMENT_COUNT" -eq 1 ]; then
+    read -r NAMESPACE DEPLOYMENT_NAME <<< "$DEPLOYMENTS"
+    echo "Deployment found: $DEPLOYMENT_NAME in namespace: $NAMESPACE"
+    echo "Restarting"
+    kubectl rollout restart deployment/"$DEPLOYMENT_NAME" -n "$NAMESPACE"
+    exit 0
+fi
+
+echo "No Deployment found. Searching a Statefulset"
+STATEFULSETS=$(search_resource statefulset)
+STATEFULSET_COUNT=$(echo "$STATEFULSETS" | sed '/^\s*$/d' | wc -l )
+
+if [ "$STATEFULSET_COUNT" -gt 1 ]; then
+    echo "Error: Multiple statefulset found with label app.kubernetes.io/name=$APP_NAME:"
+    echo "$STATEFULSETS"
+    exit 1
+fi;
+
+if [ "$STATEFULSET_COUNT" -eq 1 ]; then
+    read -r NAMESPACE STATEFULSET_NAME <<< $STATEFULSETS
+    echo "StatefulSet found: $STATEFULSET_NAME in namespace: $NAMESPACE"
+    echo "Restarting"
+    kubectl rollout restart statefulset/"$STATEFULSET_NAME" -n "$NAMESPACE"
+    exit 0
+fi
+
+echo::err"No deployment or statefulset found for the app $APP_NAME (with the label $APP_LABEL)"
+exit 1
+
+
+

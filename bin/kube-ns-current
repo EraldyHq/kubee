@@ -1,0 +1,21 @@
+#!/bin/bash
+# Set the current kubernetes namespace
+
+######################
+# Standard Library and conf
+######################
+# The log and error handling
+# We still need to use the set command
+# because shellcheck does not see them and want use to add
+# exit check everywhere
+set -Eeuo pipefail
+# echo and error_handling should be in your bashrc.d directory
+
+NS_CURRENT=${1:-}
+if [ "$NS_CURRENT" != "" ]; then
+  kubectl config set-context --current --namespace="$NS_CURRENT"
+else
+  # --minify: Displays only the current context's information
+  kubectl config view --minify --output 'jsonpath={..namespace}'
+fi
+

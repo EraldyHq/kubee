@@ -1,0 +1,68 @@
+#!/bin/bash
+# @name kube-app-apply
+# @brief Run kustomize apply to an app from anywhere
+# @description
+#     With this script, you can apply kustomize to an app that is located below the directory `$KUBE_APP_HOME`
+#     You can then run it from anywhere (any working directories)
+#
+#
+
+set -Eeuo pipefail
+source bashlib-echo.sh
+source bashlib-error.sh
+error::set_trap
+
+usage(){
+  echo "Usage:"
+  echo ""
+  echo '```bash'
+  echo "$(basename "$0") <app name>"
+  echo '```'
+  echo ""
+  echo 'Note:'
+  # shellcheck disable=SC2016
+  echo '* The `$KUBE_APP_HOME` environment variable should be set to a directory that'
+  echo "  has kustomize applications as subdirectories"
+  # shellcheck disable=SC2016
+  echo '* The script will run'
+  echo '```bash'
+  # shellcheck disable=SC2016
+  echo 'kubectl apply -k $KUBE_APP_HOME/<app name>'
+  echo '```'
+}
+
+######################
+# Main
+######################
+
+if [ -z "$1" ]; then
+    usage
+    echo:err "The app name is mandatory"
+    exit 1
+fi
+
+if [ "$1" = "-h" ]; then
+  usage
+  exit 0
+fi
+
+
+KUBE_APP_NAME=$1
+if [ -z "$KUBE_APP_HOME" ]; then
+  echo:err "The KUBE_APP_HOME is mandatory and was not found"
+fi
+KUBE_APP_DIRECTORY=$KUBE_APP_HOME/$KUBE_APP_NAME
+
+
+if [ ! -d "$KUBE_APP_DIRECTORY" ]; then
+  echo::err "The app directory $KUBE_APP_DIRECTORY does not exist"
+  exit 1
+fi
+
+pushd "$KUBE_APP_DIRECTORY"
+
+kubectl apply -k .
+
+popd
+
+echo::success "Done"

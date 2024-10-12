@@ -1,0 +1,52 @@
+#!/bin/bash
+# Connect with bash to a pod
+
+######################
+# Standard Library and conf
+######################
+# The log and error handling
+# We still need to use the set command
+# because shellcheck does not see them and want use to add
+# exit check everywhere
+set -Eeuo pipefail
+
+
+######################
+# Main
+######################
+
+# Check if the app name is provided
+if [ -z "$1" ]; then
+    echo "Usage: $0 <app name>"
+    exit 1
+fi
+
+APP_NAME=$1
+
+POD_SHELL=${2:-}
+if [ "$POD_SHELL" == "" ]; then
+  if [ "$APP_NAME" == "prometheus" ]; then
+    POD_SHELL=/bin/sh
+    else
+    POD_SHELL=/bin/bash
+  fi
+fi
+
+if [ "$APP_NAME" == "busybox" ]; then
+    kubectl run -it busybox-pod --image=busybox:1.36.1 --restart=Never --rm -n default
+    exit 0
+fi
+
+echo Getting Pod Name and Namespace for app "$APP_NAME"
+APP_LABEL="app.kubernetes.io/name=$APP_NAME"
+# the name label as seen here: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
+# label app.kubernetes.io/name=prometheus
+read -r POD_NAME POD_NAMESPACE <<< "$(kubectl get pod -o custom-columns=NAME:.metadata.name,NAMESPACE:.metadata.namespace --no-headers -l "$APP_LABEL" -A)"
+
+if [ -z "$POD_NAME" ]; then
+    echo "Error: Pod not found with label $APP_LABEL"
+    exit 1
+fi
+echo Pod Name: "$POD_NAME"
+echo Pod Namespace: "$POD_NAMESPACE"
+kubectl exec -it "$POD_NAME" -n "$POD_NAMESPACE" -- "$POD_SHELL"
