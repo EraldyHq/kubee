@@ -1,10 +1,9 @@
-# Kube - A library of Kubernetes Utilities
-
+# Kube - A Library of Kubernetes Utilities
 
 
 ## About
 
-A library of Kubernetes bash utilities.
+A library of Kubernetes Utilities.
 
 
 ## List
@@ -13,6 +12,15 @@ A library of Kubernetes bash utilities.
 * [kube-app-env](docs/kube-app-env.md) - Direnv extension: set the name, namespace, kubeconfig and directory of an app as environment
 
 
-## Dependencies
+## Installation
 
-You should install [bash-lib](https://github.com/gerardnico/bash-lib)
+* Mac / Linux
+```bash
+brew install gerardnico/tap/kube
+```
+
+
+## Dev 
+
+* Dependencies: You should install [bash-lib](https://github.com/gerardnico/bash-lib)
+* The scripts are written in `bash`
