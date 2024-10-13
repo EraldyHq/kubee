@@ -10,7 +10,8 @@ A library of Kubernetes Utilities.
 
 ## Kustomize App Utilities
 
-### Prerequisites
+### Direnv App Configuration
+
 
 * These utilities expect all Kustomize apps to be below the same directory located by `$KUBE_APP_HOME` environment variable.
 * The name of an app is the name of a subdirectory that contains a `kustomization.yml` file.
@@ -22,12 +23,22 @@ eval "$(kube-app-env directoryName [namespaceName])"
 ```
 * Each app expects a `kubeconfig` file located at `~/.kube/config-<app name>` with the default context set with the same app namespace
 
+### app.kubernetes.io/name
+Utilities will try to find an app via the `app.kubernetes.io/name` label.
+
+`app.kubernetes.io/name=$APP_NAME`
 
 ### Usage / Documentation
 
 Once the prerequisites are met, you can run these commands from anywhere with only the `app name` as argument:
 * [kube-app-apply](docs/kube-app-apply.md) - to apply an app (ie `kustomize apply`)
+
+## List
+
 * [kube-app-restart](docs/kube-app-restart.md) - to execute a rollout restart
+* [kube-bash](docs/kube-bash.md) - to log with bash in a pod by app name
+* [kube-cidr](docs/kube-cidr.md) - print the cidr by pods
+* [kube-logs](docs/kube-logs.md) - print the log of pods by app name
 
 
 ## Installation

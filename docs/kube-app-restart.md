@@ -1,3 +1,11 @@
+# kube-app-restart
+
+Restart a deployment by app name
+
+## Overview
+
+Restart a deployment by app name
+
 
 
 ## Help

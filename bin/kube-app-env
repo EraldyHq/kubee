@@ -1,5 +1,5 @@
 #!/bin/bash
-# @name
+# @name kube-app-env
 # @description Print the environment for the app
 # such as kubeconfig and app name
 # used with direnv

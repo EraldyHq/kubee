@@ -1,17 +1,10 @@
 #!/bin/bash
 
-######################
-# Standard Library and conf
-######################
-# The log and error handling
-# We still need to use the set command
-# because shellcheck does not see them and want use to add
-# exit check everywhere
-set -Eeuo pipefail
-# echo and error_handling should be in your bashrc.d directory
 
-# Load echo package
+set -Eeuo pipefail
 source bashlib-echo.sh
+source bashlib-error.sh
+error::set_trap
 
 ######################
 # Main
@@ -62,13 +55,13 @@ fi;
 
 if [ "$STATEFULSET_COUNT" -eq 1 ]; then
     read -r NAMESPACE STATEFULSET_NAME <<< $STATEFULSETS
-    echo "StatefulSet found: $STATEFULSET_NAME in namespace: $NAMESPACE"
-    echo "Restarting"
+    echo::info "StatefulSet found: $STATEFULSET_NAME in namespace: $NAMESPACE"
+    echo:info "Restarting"
     kubectl rollout restart statefulset/"$STATEFULSET_NAME" -n "$NAMESPACE"
     exit 0
 fi
 
-echo::err"No deployment or statefulset found for the app $APP_NAME (with the label $APP_LABEL)"
+echo::err "No deployment or statefulset found for the app $APP_NAME (with the label $APP_LABEL)"
 exit 1
 
 

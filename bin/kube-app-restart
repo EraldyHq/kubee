@@ -1,12 +1,11 @@
 #!/bin/bash
+# @name kube-app-restart
+# @brief Restart a deployment by app name
+# @description
+#     Restart a deployment by app name
+#
+#
 
-######################
-# Standard Library and conf
-######################
-# The log and error handling
-# We still need to use the set command
-# because shellcheck does not see them and want use to add
-# exit check everywhere
 set -Eeuo pipefail
 
 source bashlib-error.sh
