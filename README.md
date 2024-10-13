@@ -32,11 +32,11 @@ A library of Kubernetes Utilities.
 brew install --HEAD gerardnico/tap/kube
 ```
 
-## What is an app for app scripts?
+## What is an app name?
 
 In all `app` scripts, you need to give an `app name` as argument.
 
-The scripts will try to find resource for an app:
+The scripts will try to find resources for an app:
 * via the `app.kubernetes.io/name=$APP_NAME` label
 * or via the `.envrc` of an app directory
 
