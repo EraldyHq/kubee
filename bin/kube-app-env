@@ -1,4 +1,5 @@
 #!/bin/bash
+# @name
 # @description Print the environment for the app
 # such as kubeconfig and app name
 # used with direnv
@@ -19,14 +20,66 @@ source bashlib-error.sh
 error::set_trap
 
 
+
+usage(){
+
+  echo ""
+  echo "A direnv extension to set the environment of an Kubernetes Kustomize App"
+  echo ""
+  echo "To avoid executing app in a bad namespace, you would use"
+  echo "this direnv extension to set the app environment."
+  echo ""
+  echo "Executing:"
+  echo '```bash'
+  echo "$(basename "$0") <app name> <app namespace>"
+  echo '```'
+  # shellcheck disable=SC2016
+  echo 'where'
+  # shellcheck disable=SC2016
+  echo '* `app name` is the name of an app directory below `$KUBE_APP_HOME`'
+  # shellcheck disable=SC2016
+  echo '* `app namespace` is the kubernetes namespace (default to the `app name` value)'
+  echo ''
+  echo "This command will output the export statement of the app environment"
+  # shellcheck disable=SC2016
+  echo 'that can be used in your `.envrc` (see below). ie'
+  echo '```bash'
+  echo 'export KUBECONFIG=xxx'
+  echo "export KUBE_APP_NAME=xxx"
+  echo "export KUBE_APP_NAMESPACE=xxx"
+  echo "export KUBE_APP_DIRECTORY=xxx"
+  echo '```'
+  echo 'Prerequisites:'
+  # shellcheck disable=SC2016
+  echo '* The `$KUBE_APP_HOME` environment variable should be set to a directory that'
+  echo "  contains kustomize applications"
+  echo ''
+  # shellcheck disable=SC2016
+  echo 'Usage with `dirvenv`: '
+  # shellcheck disable=SC2016
+  echo 'In your `.envrc` of your Kustomize Kubernetes App'
+  echo '```bash'
+  echo "eval ($(basename "$0") <app name> <app namespace>)"
+  echo '```'
+  echo ""
+
+
+}
+
 ######################
 # Main
 ######################
 
 # Check if the app name is provided
 if [ -z "$1" ]; then
-    echo "Usage: $0 <app name> <app namespace>"
+    usage
+    echo:err "The app name is mandatory"
     exit 1
+fi
+
+if [ "$1" == "-h" ]; then
+  usage
+  exit 0
 fi
 
 KUBE_APP_NAME=$1
@@ -53,7 +106,12 @@ if [[ $(uname -a) =~ "CYGWIN" ]];  then
   KUBECONFIG=$(cygpath -aw "$KUBECONFIG")
 fi
 
-KUBE_APP_DIRECTORY=$HOME/code/kube-argocd/$KUBE_APP_NAME
+if [ -z "$KUBE_APP_HOME" ]; then
+  echo:err "The KUBE_APP_HOME environment variable is mandatory and was not found"
+  echo:err "Add it in your bashrc or OS environment variables"
+  exit 1
+fi
+KUBE_APP_DIRECTORY=$KUBE_APP_HOME/$KUBE_APP_NAME
 if [ ! -d "$KUBE_APP_DIRECTORY" ]; then
   echo::err "The app directory $KUBE_APP_DIRECTORY does not exist"
   exit 1

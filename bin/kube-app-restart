@@ -8,10 +8,68 @@
 # because shellcheck does not see them and want use to add
 # exit check everywhere
 set -Eeuo pipefail
-# echo and error_handling should be in your bashrc.d directory
+
+source bashlib-error.sh
+error::set_trap
+
+usage(){
+
+  echo ""
+  echo "Restart an app"
+  echo ""
+  echo '```bash'
+  echo "$(basename "$0") [app name]"
+  echo '```'
+  # shellcheck disable=SC2016
+  echo 'where `app name` is'
+  # shellcheck disable=SC2016
+  echo '* optional if you run the command in the app directory (default to: `$KUBE_APP_NAME`)'
+  echo '* mandatory otherwise'
+  echo ''
+  echo 'Note:'
+  # shellcheck disable=SC2016
+  echo '* The `app namespace` is set by direnv via the `$KUBE_APP_NAMESPACE` env'
+  echo '* The executed command is:'
+  echo '```bash'
+  # shellcheck disable=SC2016
+  echo 'kubectl rollout restart -n $KUBE_APP_NAMESPACE deployment $KUBE_APP_NAME'
+  echo '```'
+
+}
+
+
+KUBE_APP_NAME=${1:-$KUBE_APP_NAME}
+if [[ "$KUBE_APP_NAME" =~ -h|help ]] ; then
+  usage
+  exit 0
+fi
+
+if [ -z "$KUBE_APP_HOME" ]; then
+  echo:err "The KUBE_APP_HOME environment variable is mandatory and was not found"
+  echo:err "Add it in your bashrc or OS environment variables"
+  exit 1
+fi
+KUBE_APP_DIRECTORY=$KUBE_APP_HOME/$KUBE_APP_NAME
+
+if [ ! -d "$KUBE_APP_DIRECTORY" ]; then
+  echo::err "The app directory $KUBE_APP_DIRECTORY does not exist"
+  exit 1
+fi
+
+pushd "$KUBE_APP_DIRECTORY"
+
+# The namespace should be set via direnv
+if [ -z "$KUBE_APP_NAMESPACE" ]; then
+  echo::err "The app namespace env 'KUBE_APP_NAMESPACE' was not set by direnv"
+  exit 1
+fi
 
 ######################
 # Main
 ######################
 
 kubectl rollout restart -n "$KUBE_APP_NAMESPACE" deployment "$KUBE_APP_NAME"
+
+popd
+
+echo::success "Done"

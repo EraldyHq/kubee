@@ -49,10 +49,11 @@ fi
 
 KUBE_APP_NAME=$1
 if [ -z "$KUBE_APP_HOME" ]; then
-  echo:err "The KUBE_APP_HOME is mandatory and was not found"
+  echo:err "The KUBE_APP_HOME environment variable is mandatory and was not found"
+  echo:err "Add it in your bashrc or OS environment variables"
+  exit 1
 fi
 KUBE_APP_DIRECTORY=$KUBE_APP_HOME/$KUBE_APP_NAME
-
 
 if [ ! -d "$KUBE_APP_DIRECTORY" ]; then
   echo::err "The app directory $KUBE_APP_DIRECTORY does not exist"
