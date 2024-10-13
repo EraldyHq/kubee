@@ -1,8 +1,10 @@
 #!/bin/bash
 # @name kube-app-restart
-# @brief Restart a deployment by app name
+# @brief Restart a workload (deployment/statefulset) by app name
 # @description
-#     Restart a deployment by app name
+#     Restart a workload by app name
+#     A deployment or statefulset is searched with the label `app.kubernetes.io/name=<app name>`
+#     and restarted if found with the command `kubectl rollout restart`
 #
 #
 
@@ -14,7 +16,7 @@ error::set_trap
 usage(){
 
   echo ""
-  echo "Restart an app"
+  echo "Restart an app (ie rollout restart a deployment or statefulset)"
   echo ""
   echo '```bash'
   echo "$(basename "$0") [app name]"
@@ -25,50 +27,57 @@ usage(){
   echo '* optional if you run the command in the app directory (default to: `$KUBE_APP_NAME`)'
   echo '* mandatory otherwise'
   echo ''
-  echo 'Note:'
-  # shellcheck disable=SC2016
-  echo '* The `app namespace` is set by direnv via the `$KUBE_APP_NAMESPACE` env'
-  echo '* The executed command is:'
-  echo '```bash'
-  # shellcheck disable=SC2016
-  echo 'kubectl rollout restart -n $KUBE_APP_NAMESPACE deployment $KUBE_APP_NAME'
-  echo '```'
+
 
 }
 
-
-KUBE_APP_NAME=${1:-$KUBE_APP_NAME}
-if [[ "$KUBE_APP_NAME" =~ -h|help ]] ; then
-  usage
-  exit 0
-fi
-
-if [ -z "$KUBE_APP_HOME" ]; then
-  echo:err "The KUBE_APP_HOME environment variable is mandatory and was not found"
-  echo:err "Add it in your bashrc or OS environment variables"
-  exit 1
-fi
-KUBE_APP_DIRECTORY=$KUBE_APP_HOME/$KUBE_APP_NAME
-
-if [ ! -d "$KUBE_APP_DIRECTORY" ]; then
-  echo::err "The app directory $KUBE_APP_DIRECTORY does not exist"
-  exit 1
-fi
-
-pushd "$KUBE_APP_DIRECTORY"
-
-# The namespace should be set via direnv
-if [ -z "$KUBE_APP_NAMESPACE" ]; then
-  echo::err "The app namespace env 'KUBE_APP_NAMESPACE' was not set by direnv"
-  exit 1
-fi
+set -Eeuo pipefail
+source bashlib-echo.sh
+source bashlib-error.sh
+error::set_trap
 
 ######################
 # Main
 ######################
 
-kubectl rollout restart -n "$KUBE_APP_NAMESPACE" deployment "$KUBE_APP_NAME"
+# Check if app is provided
+APP_NAME=${1:-$KUBE_APP_NAME}
+if [ $APP_NAME == "" ]; then
+    usage
+    echo:err "An app name should be provided as argument or the KUBE_APP_NAME env should be not empty"
+    exit 1
+fi
 
-popd
 
-echo::success "Done"
+if [[ $APP_NAME =~ -h|help ]]; then
+  usage
+  exit
+fi
+
+echo::info "Searching a deployment"
+read -r DEPLOYMENT_NAME NAMESPACE  <<< "$(kube::get_resource_by_app_name $APP_NAME deployment)"
+if [ "$DEPLOYMENT_NAME" != "" ]; then
+    echo::info "Deployment found: $DEPLOYMENT_NAME in namespace: $NAMESPACE"
+    echo::info "Restarting"
+    COMMAND="kubectl rollout restart deployment/$DEPLOYMENT_NAME -n $NAMESPACE"
+    echo::info "Executing: $COMMAND"
+    eval $COMMAND
+    exit 0
+fi
+
+echo::info "No Deployment found. Searching a Statefulset"
+read -r STATEFULSET_NAME NAMESPACE <<< "$(kube::get_resource_by_app_name $APP_NAME statefulset)"
+if [ "$STATEFULSET_NAME" != "" ]; then
+    echo::info "StatefulSet found: $STATEFULSET_NAME in namespace: $NAMESPACE"
+    echo:info "Restarting"
+    COMMAND="kubectl rollout restart statefulset/$STATEFULSET_NAME -n $NAMESPACE"
+    echo::info "Executing: $COMMAND"
+    eval $COMMAND
+    exit 0
+fi
+
+echo::err "No deployment or statefulset found for the app $APP_NAME (with the label $(kube::get_app_label $APP_NAME)"
+exit 1
+
+
+

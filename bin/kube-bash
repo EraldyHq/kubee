@@ -57,7 +57,11 @@ fi
 
 echo::info "Getting Pod Name and Namespace for app $APP_NAME"
 
-read -r POD_NAME POD_NAMESPACE <<< "$(kube::get_pod "$APP_NAME")"
+read -r POD_NAME POD_NAMESPACE <<< "$(kube::get_resource_by_app_name "$APP_NAME" pod)"
+if [ -z "$POD_NAME" ]; then
+    echo "Error: Pod not found with label $(kube::get_app_label $APP_NAME)"
+    exit 1
+fi
 
 echo::info "Pod Name: $POD_NAME"
 echo::info "Pod Namespace: $POD_NAMESPACE"

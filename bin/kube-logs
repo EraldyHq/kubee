@@ -25,10 +25,7 @@ fi
 APP_NAME=$1
 
 echo Getting Pod Name and Namespace for app "$APP_NAME"
-APP_LABEL="app.kubernetes.io/name=$APP_NAME"
-# the name label as seen here: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
-# label app.kubernetes.io/name=prometheus
-read -r POD_NAME POD_NAMESPACE <<< "$(kubectl get pod -o custom-columns=NAME:.metadata.name,NAMESPACE:.metadata.namespace --no-headers -l "$APP_LABEL" -A)"
+read -r POD_NAME POD_NAMESPACE <<< "$(kube::get_resource_by_app_name "$APP_NAME" pod)"
 
 if [ -z "$POD_NAME" ]; then
     echo "Error: Pod not found with label $APP_LABEL"
