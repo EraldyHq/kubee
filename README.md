@@ -6,7 +6,7 @@
 A library of Kubernetes Utilities.
 
 
-## List
+## List and documentation
 
 
 * [kube-app-apply](docs/kube-app-apply.md) - apply a kustomize app (ie `kustomize apply`)
@@ -27,7 +27,7 @@ A library of Kubernetes Utilities.
 
 ## Installation
 
-* Mac / Linux with HomeBrew
+* Mac / Linux / Windows WSL with HomeBrew
 ```bash
 brew install --HEAD gerardnico/tap/kube
 ```
