@@ -2,10 +2,9 @@
 
 ## Overview
 
-Print the environment for the app
-such as kubeconfig and app name
-used with direnv
-Usage: `eval "$(kube-app-env app-name)"`
+Print the export environment statement for the app
+
+Used in a direnv setup
 
 
 
