@@ -1,14 +1,37 @@
 #!/bin/bash
+# @name kube-memory
+# @brief Return the cpu and memory of pods
+# @description
+#     Return the cpu and memory of pods
+#
+
+set -Eeuo pipefail
+source bashlib-echo.sh
+source bashlib-error.sh
+error::set_trap
 
 ######################
-# Standard Library and conf
+# Main
 ######################
-# The log and error handling
-# We still need to use the set command
-# because shellcheck does not see them and want use to add
-# exit check everywhere
-set -Eeuo pipefail
-# echo and error_handling should be in your bashrc.d directory
+
+usage(){
+  echo "Usage:"
+  echo ""
+  echo "Return the cpu and memory of pods"
+  echo ""
+  echo '```bash'
+  # shellcheck disable=SC2005
+  echo "$(basename "$0")"
+  echo '```'
+}
+
+# Help ?
+HELP=${1:-}
+if [[ $HELP =~ -h|help ]]; then
+  usage
+  exit
+fi
+
 
 # Show all pods cpu and memory
 kubectl top pods -A

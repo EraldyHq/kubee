@@ -1,30 +1,56 @@
 #!/bin/bash
+# @name kube-top
+# @brief Shows the process inside a Pod
+# @description
+#     Shows the process inside a Pod
+#
+#
 
-# Shows the process inside a Pod
-# The log and error handling
-# We still need to use the set command
-# because shellcheck does not see them and want use to add
-# exit check everywhere
 set -Eeuo pipefail
-# echo and error_handling should be in your bashrc.d directory
+source bashlib-echo.sh
+source bashlib-error.sh
+error::set_trap
+
+######################
+# Main
+######################
+
+usage(){
+  echo "Usage:"
+  echo ""
+  echo "Shows the top process inside a Pod"
+  echo ""
+  echo '```bash'
+  echo "$(basename "$0") <app name>"
+  echo '```'
+  # shellcheck disable=SC2016
+  echo ''
+
+}
+
+# Help ?
+APP_NAME=${1:-}
+if [[ $APP_NAME =~ -h|help ]]; then
+  usage
+  exit
+fi
 
 # Check if the app is provided
-if [ -z "$1" ]; then
-    echo "Usage: $0 <app name>"
+if [ "$APP_NAME" == "" ]; then
+    usage
+    echo::err "The app name is mandatory"
     exit 1
 fi
 
-NAME=$1
+APP_NAME=$1
 SLEEPING=1
 
-echo Getting Pod Name and Namespace for app "$NAME"
-APP_LABEL="app.kubernetes.io/name=$NAME"
-# the name label as seen here: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
-# label app.kubernetes.io/name=prometheus
-read -r POD_NAME POD_NAMESPACE <<< "$(kubectl get pod -o custom-columns=NAME:.metadata.name,NAMESPACE:.metadata.namespace --no-headers -l "$APP_LABEL" -A)"
+echo Getting Pod Name and Namespace for app "$APP_NAME"
 
-if [ -z "$POD_NAME" ]; then
-    echo "Error: Pod not found with label $APP_LABEL"
+read -r POD_NAME POD_NAMESPACE <<< "$(kube::get_resource_by_app_name "$APP_NAME" "pod")"
+
+if [ "$POD_NAME" == "" ]; then
+    echo::err "Error: Pod not found with label $(kube::get_app_label "$APP_NAME")"
     exit 1
 fi
 echo Pod Name: "$POD_NAME"
@@ -38,7 +64,7 @@ pod_top(){
   local POD_NAME=$1
   local POD_NAMESPACE=$2
   read -r  CPU MEM <<< "$(kubectl top pod "$POD_NAME" --namespace="$POD_NAMESPACE" | awk '{ if(NR>1) print $2, $3 }')"
-      # PS=$(kubectl exec -it "$POD_NAME" --namespace="$NAME" -- ps auxww --sort -command)
+      # PS=$(kubectl exec -it "$POD_NAME" --namespace="$APP_NAME" -- ps auxww --sort -command)
       # https://www.gnu.org/software/gawk/manual/html_node/Printf.html
       PS=$(kubectl exec -it "$POD_NAME" --namespace="$POD_NAMESPACE" -- ps auxww --sort -command | awk '
       BEGIN { print "PID          CPU     MEM (MB)  COMMAND"
@@ -47,7 +73,7 @@ pod_top(){
             ')
       # Trying to print in MB
       # RSS is the amount of memory in Bytes (1024)
-      #PS=$(kubectl exec -it "$POD_NAME" --namespace="$NAME" -- ps auxww --sort -command | awk 'NR=1 {printf "%-10s %-10s %-10s\n", $2, $3, $6 } NR>1 {printf "%-10s %-10s %-10s\n", $2, $3, $6/1024 " MB"}')
+      #PS=$(kubectl exec -it "$POD_NAME" --namespace="$APP_NAME" -- ps auxww --sort -command | awk 'NR=1 {printf "%-10s %-10s %-10s\n", $2, $3, $6 } NR>1 {printf "%-10s %-10s %-10s\n", $2, $3, $6/1024 " MB"}')
       printf "Pod: %s\n * CPU: %s\n * MEM: %s\n%s\n\nSleeping %s sec" "$POD_NAME" "$CPU" "$MEM" "$PS" "$SLEEPING"
 }
 

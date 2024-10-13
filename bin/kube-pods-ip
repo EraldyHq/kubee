@@ -1,22 +1,43 @@
 #!/bin/bash
-# Shows the pods ip (node name can be given for a smaller subset)
+# @name kube-pods-ip
+# @brief Shows the pods ip
+# @description
+#     Shows the pods ip
+#     A node name can be given to show only the pods of a node
+#
 
-######################
-# Standard Library and conf
-######################
-# The log and error handling
-# We still need to use the set command
-# because shellcheck does not see them and want use to add
-# exit check everywhere
 set -Eeuo pipefail
-# echo and error_handling should be in your bashrc.d directory
+source bashlib-echo.sh
+source bashlib-error.sh
+error::set_trap
 
 ######################
 # Main
 ######################
 
+usage(){
+  echo "Usage:"
+  echo ""
+  echo "Shows the pods ip"
+  echo ""
+  echo '```bash'
+  echo "$(basename "$0") [node name]"
+  echo '```'
+  # shellcheck disable=SC2016
+  echo 'If `node name` is provided, the pods of this node will only be shown'
+
+}
+
+# Help ?
+NODE_NAME=${1:-}
+if [[ $NODE_NAME =~ -h|help ]]; then
+  usage
+  exit
+fi
+
+
 # Check if the node name is provided
-if [ -n "$1" ]; then
+if [ "$NODE_NAME" != "" ]; then
   NAMESPACE_JSONPATH="{range .items[?(@.spec.nodeName==\"$1\")]}{.status.podIP}{\" \"}{.metadata.name}{\"\n\"}{end}"
   # shellcheck disable=SC2016
   AWK_PRINTF='

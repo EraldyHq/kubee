@@ -1,0 +1,73 @@
+#!/bin/bash
+# @name kube-app-events
+# @brief Returns the events of an app
+# @description
+#     Returns the events of an pods that belongs to an app
+#     The pods are searched with the label `app.kubernetes.io/name=<app name>`
+#
+#
+
+set -Eeuo pipefail
+
+source bashlib-error.sh
+error::set_trap
+
+usage(){
+
+  echo ""
+  echo "Get the events of an app"
+  echo ""
+  echo '```bash'
+  echo "$(basename "$0") [app name]"
+  echo '```'
+  # shellcheck disable=SC2016
+  echo 'where `app name` is'
+  # shellcheck disable=SC2016
+  echo '* optional if you run the command in the app directory (default to: `$KUBE_APP_NAME`)'
+  echo '* mandatory otherwise'
+  echo ''
+
+
+}
+
+set -Eeuo pipefail
+source bashlib-echo.sh
+source bashlib-error.sh
+error::set_trap
+
+######################
+# Main
+######################
+
+# Check if app is provided
+APP_NAME=${1:-$KUBE_APP_NAME}
+if [ "$APP_NAME" == "" ]; then
+    usage
+    echo:err "An app name should be provided as argument or the KUBE_APP_NAME env should be not empty"
+    exit 1
+fi
+
+# Help?
+if [[ $APP_NAME =~ -h|help ]]; then
+  usage
+  exit
+fi
+
+APP_NAME=$1
+echo "Getting pod name"
+read -r POD_NAME NS_NAME <<< "$(kube::get_resource_by_app_name "$APP_NAME" pod)"
+
+if [ "$POD_NAME" == "" ]; then
+    echo::err "No pod found with the label $(kube::get_app_label "$APP_NAME")"
+    exit 1
+fi
+
+echo "Getting pod events"
+# Note: To see what fields are possible you can use kubectl describe on any event.
+COMMAND="kubectl get event --namespace $NS_NAME --field-selector involvedObject.name=$POD_NAME"
+echo::info "Executing: $COMMAND"
+eval "$COMMAND"
+
+echo ""
+echo "Note: If there is no event, check the namespace events"
+

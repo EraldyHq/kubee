@@ -1,21 +1,54 @@
 #!/bin/bash
-# Set the current kubernetes namespace
+# @name kube-ns-current
+# @brief Get or set the current namespace in kubeconfig
+# @description
+#     Get or set the current namespace in kubeconfig
+#
 
-######################
-# Standard Library and conf
-######################
-# The log and error handling
-# We still need to use the set command
-# because shellcheck does not see them and want use to add
-# exit check everywhere
 set -Eeuo pipefail
-# echo and error_handling should be in your bashrc.d directory
+source bashlib-echo.sh
+source bashlib-error.sh
+error::set_trap
 
+######################
+# Main
+######################
+
+usage(){
+  echo "Usage:"
+  echo ""
+  echo "Get or set the current namespace in kubeconfig"
+  echo ""
+  echo '```bash'
+  # shellcheck disable=SC2005
+  echo "$(basename "$0") [namespace name]"
+  echo '```'
+  # shellcheck disable=SC2016
+  echo 'If `namespace name` is '
+  echo '* not empty, set the current namespace to this value'
+  echo '* otherwise, get the current namespace'
+}
+
+# Help ?
 NS_CURRENT=${1:-}
-if [ "$NS_CURRENT" != "" ]; then
-  kubectl config set-context --current --namespace="$NS_CURRENT"
-else
-  # --minify: Displays only the current context's information
-  kubectl config view --minify --output 'jsonpath={..namespace}'
+if [[ $NS_CURRENT =~ -h|help ]]; then
+  usage
+  exit
 fi
+
+# Set or Get
+if [ "$NS_CURRENT" != "" ]; then
+  echo::info "Setting the current namespace to $NS_CURRENT"
+  COMMAND="kubectl config set-context --current --namespace=$NS_CURRENT"
+  echo::info "Executing: $COMMAND"
+  eval "$COMMAND"
+  echo::success "Done"
+  exit
+fi
+# --minify: Displays only the current context's information
+COMMAND="kubectl config view --minify --output 'jsonpath={..namespace}'"
+echo::info "Executing: $COMMAND"
+eval "$COMMAND"
+echo::success "Done"
+
 

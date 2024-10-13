@@ -1,23 +1,46 @@
 #!/bin/bash
-# Shows the pods ip (node name can be given for a smaller subset)
+# @name kube-ns-events
+# @brief Get the events of a namespace
+# @description
+#     Get the events of a namespace
+#
 
-######################
-# Standard Library and conf
-######################
-# The log and error handling
-# We still need to use the set command
-# because shellcheck does not see them and want use to add
-# exit check everywhere
 set -Eeuo pipefail
-# echo and error_handling should be in your bashrc.d directory
+source bashlib-echo.sh
+source bashlib-error.sh
+error::set_trap
 
-# Check if the app name is provided
-if [ -z "$1" ]; then
-    echo "Usage: $0 <namespace>"
-    exit 1
+######################
+# Main
+######################
+
+usage(){
+  echo "Usage:"
+  echo ""
+  echo "Get the events of a namespace"
+  echo ""
+  echo '```bash'
+  # shellcheck disable=SC2005
+  echo "$(basename "$0") [namespace name]"
+  echo '```'
+}
+
+# Help ?
+NS_NAME=${1:-}
+if [[ $NS_NAME =~ -h|help ]]; then
+  usage
+  exit
 fi
 
-NS_NAME=$1
+if [ "$NS_NAME" = "" ]; then
+  usage
+  echo:err "A namespace is mandatory as argument"
+fi
 
-kubectl get event --namespace "$NS_NAME"
+
+COMMAND="kubectl get event --namespace $NS_NAME"
+echo::info "Executing: $COMMAND"
+eval "$COMMAND"
+echo::success "Done"
+
 

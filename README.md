@@ -35,10 +35,18 @@ Once the prerequisites are met, you can run these commands from anywhere with on
 
 ## List
 
-* [kube-app-restart](docs/kube-app-restart.md) - to execute a rollout restart
-* [kube-bash](docs/kube-bash.md) - to log with bash in a pod by app name
+* [kube-app-events](docs/kube-app-events.md) - shows the events of an app
+* [kube-app-logs](docs/kube-app-logs.md) - print the logs of pods by app name
+* [kube-app-restart](docs/kube-app-restart.md) - execute a rollout restart
+* [kube-app-top](docs/kube-app-top.md) - shows the top processes of an app
+* [kube-bash](docs/kube-bash.md) - log with bash in a pod
 * [kube-cidr](docs/kube-cidr.md) - print the cidr by pods
-* [kube-logs](docs/kube-logs.md) - print the log of pods by app name
+* [kube-memory](docs/kube-memory.md) - print the cpu and memory used by pods
+* [kube-ns-current](docs/kube-ns-current.md) - set or show the current namespace
+* [kube-ns-events](docs/kube-ns-events.md) - show the event of a namespace
+* [kube-pods-ip](docs/kube-pods-ip.md) - show the ip of pods
+* [kube-pvc-move](docs/kube-pvc-move.md) - move a pvc (Automation not finished)
+
 
 
 ## Installation
