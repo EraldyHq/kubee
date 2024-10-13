@@ -1,20 +1,13 @@
 #!/bin/bash
 # @name kube-app-env
-# @description Print the environment for the app
-# such as kubeconfig and app name
-# used with direnv
-# Usage: `eval "$(kube-app-env app-name)"`
+# @description
+#   Print the export environment statement for the app
+#
+#   Used in a direnv setup
 
-######################
-# Standard Library and conf
-######################
-# The log and error handling
-# We still need to use the set command
-# because shellcheck does not see them and want use to add
-# exit check everywhere
+
+
 set -Eeuo pipefail
-
-# Load echo package and set error trap
 source bashlib-echo.sh
 source bashlib-error.sh
 error::set_trap
