@@ -13,6 +13,7 @@ A library of Kubernetes Utilities.
 * [kube-app-env](docs/kube-app-env.md) - print the environment configuration of an app 
 * [kube-app-events](docs/kube-app-events.md) - shows the events of an app
 * [kube-app-logs](docs/kube-app-logs.md) - print the logs of pods by app name
+* [kube-app-pods](docs/kube-app-pods.md) - watch/list the pods of an app
 * [kube-app-restart](docs/kube-app-restart.md) - execute a rollout restart
 * [kube-app-top](docs/kube-app-top.md) - shows the top processes of an app
 * [kube-bash](docs/kube-bash.md) - log with bash in a pod

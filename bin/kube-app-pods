@@ -1,0 +1,50 @@
+#!/bin/bash
+# @name kube-app-pods
+# @brief Shows the pods of an app
+# @description
+#     Shows the pod of an app via the label `app.kubernetes.io/name=$APP_NAME`
+#
+#
+
+set -Eeuo pipefail
+source bashlib-echo.sh
+source bashlib-error.sh
+error::set_trap
+
+######################
+# Main
+######################
+
+usage(){
+  echo "Usage:"
+  echo ""
+  echo "Shows the pods of an app"
+  echo ""
+  echo '```bash'
+  echo "$(basename "$0") <app name>"
+  echo '```'
+  # shellcheck disable=SC2016
+  echo ''
+
+}
+
+# Help ?
+APP_NAME=${1:-}
+if [[ $APP_NAME =~ -h|help ]]; then
+  usage
+  exit
+fi
+
+# Check if the app is provided
+if [ "$APP_NAME" == "" ]; then
+    usage
+    echo::err "The app name is mandatory"
+    exit 1
+fi
+
+APP_NAME=$1
+
+APP_LABEL=$(kube::get_app_label "$APP_NAME")
+
+kubectl get pod --watch -l "$APP_LABEL"
+
