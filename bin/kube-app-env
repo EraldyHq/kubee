@@ -81,8 +81,8 @@ KUBE_APP_NAMESPACE=${2:-$KUBE_APP_NAME}
 KUBECONFIG=$HOME/.kube/config-$KUBE_APP_NAME
 
 if [ ! -f "$KUBECONFIG" ]; then
-  echo::err"The KUBECONFIG file $KUBECONFIG for the app $KUBE_APP_NAME does not exist"
-  echo::err"You will not be able to connect to the cluster"
+  echo::err "The KUBECONFIG file $KUBECONFIG for the app $KUBE_APP_NAME does not exist"
+  echo::err "You will not be able to connect to the cluster"
   exit 1
 fi
 

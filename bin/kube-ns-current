@@ -49,6 +49,7 @@ fi
 COMMAND="kubectl config view --minify --output 'jsonpath={..namespace}'"
 echo::info "Executing: $COMMAND"
 eval "$COMMAND"
+echo ""
 echo::success "Done"
 
 
