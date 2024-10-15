@@ -10,13 +10,13 @@ A library of Kubernetes Utilities.
 
 
 * [kube-app-apply](docs/kube-app-apply.md) - apply a kustomize app (ie `kustomize apply`)
+* [kube-app-bash](docs/kube-app-bash.md) - get a shell into an app or your cluster
 * [kube-app-env](docs/kube-app-env.md) - print the environment configuration of an app 
 * [kube-app-events](docs/kube-app-events.md) - shows the events of an app
 * [kube-app-logs](docs/kube-app-logs.md) - print the logs of pods by app name
 * [kube-app-pods](docs/kube-app-pods.md) - watch/list the pods of an app
 * [kube-app-restart](docs/kube-app-restart.md) - execute a rollout restart
 * [kube-app-top](docs/kube-app-top.md) - shows the top processes of an app
-* [kube-bash](docs/kube-bash.md) - log with bash in a pod
 * [kube-cidr](docs/kube-cidr.md) - print the cidr by pods
 * [kube-memory](docs/kube-memory.md) - print the cpu and memory used by pods
 * [kube-ns-current](docs/kube-ns-current.md) - set or show the current namespace
