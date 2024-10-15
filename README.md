@@ -65,7 +65,7 @@ See [Contribute/Dev](contribute.md)
 
 ## Kubectl Plugins
 
-To make these utilities [kubectl plugin][Kubectl plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/), 
+To make these utilities [Kubectl plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/), 
 you can rename them from `kube-` to `kubectl-`
 
 They should then show up
