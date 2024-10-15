@@ -1,15 +1,86 @@
 #!/bin/bash
+# @name kube-app-sshd
+# @brief Explorer the volumes of an app via a temporary SSH server
+# @description
+#     This script:
+#     * starts a sshd privilege pod
+#     * mount the volumes of the app at `/volumes`
+#     * so that you can use an SCP/SFTP file editor
+#
+#     See also [kubectl-sshd](https://github.com/ottoyiu/kubectl-sshd)
+#     if you can't start a privileged pod
+#
 
+set -Eeuo pipefail
+source bashlib-error.sh
+error::set_trap
 source bashlib-kube.sh
 source bashlib-eval.sh
+source bashlib-path.sh
 
-APP_NAME=$1
+VOLUME_MOUNT_PATH=/volumes
+
+usage(){
+
+  echo "Usage:"
+  echo ""
+  echo "Start a temporary SSH pod where the volume of the app pod have been mapped to \`$VOLUME_MOUNT_PATH\`"
+  echo ""
+  echo '```bash'
+  echo "$(basename "$0") <app name> <public key>"
+  echo '```'
+  # shellcheck disable=SC2016
+  echo 'where:'
+  # shellcheck disable=SC2016
+  echo '* `app name` is used in the label `app.kubernetes.io/name=<app name>` to select the pod'
+  # shellcheck disable=SC2016
+  echo '* `public key` is the path of the public key that should be authorized to connect as `root` (Default to `KUBE_PUBLIC_KEY` env)'
+
+}
+
+# Args
+APP_NAME=${1:-}
+KUBE_PUBLIC_KEY=${KUBE_PUBLIC_KEY:-}
+PUBLIC_KEY=${2:-$KUBE_PUBLIC_KEY}
+
+# The mount is on root, the user should be root
+USER_NAME=root
+
+if [ "$APP_NAME" == "" ]; then
+  usage
+  echo::err "A app name is mandatory as first argument"
+  exit 1
+fi
+# Help?
+if [[ $APP_NAME =~ -h|help ]]; then
+  usage
+  exit
+fi
+
+if [ "$PUBLIC_KEY" == "" ]; then
+  usage
+  echo::err "A public key path is mandatory as second argument"
+  exit 1
+fi
+if ! path::is_absolute "$PUBLIC_KEY"; then
+  PUBLIC_KEY="$HOME/.ssh/$PUBLIC_KEY"
+fi
+if [ ! -f "$PUBLIC_KEY" ]; then
+  echo::err "The public key $PUBLIC_KEY does not exist"
+  exit 1
+fi
+PUBLIC_KEY_CONTENT=$(cat "$PUBLIC_KEY")
+
 echo::info "Getting the pod data for the App $APP_NAME"
 read -r POD_NAME POD_NAMESPACE POD_NODE_NAME POD_UID <<< "$(kube::get_resource_by_app_name --type pod --custom-columns "NAME:.metadata.name,NAMESPACE:.metadata.namespace,NODE_NAME:.spec.nodeName,NODE_UID:.metadata.uid" "$APP_NAME")"
 
 MANIFEST_YAML=/tmp/sshd-pod.yaml
-SSHD_POD_NAME="$POD_NAME-sshd"
+SSHD_POD_NAME="sshd-$APP_NAME"
 SSHD_POD_ID="$POD_NAMESPACE/$SSHD_POD_NAME"
+SSHD_PORT=2222
+
+# https://github.com/linuxserver/docker-openssh-server
+# https://github.com/linuxserver/docker-openssh-server/blob/master/root/etc/s6-overlay/s6-rc.d/init-openssh-server-config/run
 # Create the Kubernetes manifest
 cat << EOF > $MANIFEST_YAML
 apiVersion: v1
@@ -22,13 +93,22 @@ spec:
   containers:
   - name: sshd
     image: linuxserver/openssh-server:latest
+    env:
+      - name: PUBLIC_KEY
+        value: "$PUBLIC_KEY_CONTENT"
+      - name: PASSWORD_ACCESS
+        value: "false"
+      - name: LOG_STDOUT
+        value: "true"
+      - name: USER_NAME
+        value: "$USER_NAME"
     ports:
-    - containerPort: 22
+    - containerPort: $SSHD_PORT
     securityContext:
       privileged: true
     volumeMounts:
     - name: kubelet-pods
-      mountPath: /var/lib/kubelet/pods
+      mountPath: $VOLUME_MOUNT_PATH
     - name: ssh-key
       mountPath: /root/.ssh
   volumes:
@@ -40,18 +120,42 @@ spec:
     emptyDir: {}
 EOF
 
-echo::info "Creating the pod $SSHD_POD_ID"
+echo::info "Creating the pod $SSHD_POD_ID to read the volume of $POD_NAMESPACE/$POD_NAME"
 eval::command "kubectl apply -f $MANIFEST_YAML"
 
-# Wait for the pod to be running
 echo "Waiting for the pod $SSHD_POD_ID to be running..."
-eval::command "kubectl wait --for=condition=Ready pod/$SSHD_POD_ID --timeout=60s"
+eval::command "kubectl wait --for=condition=Ready -n $POD_NAMESPACE pod/$SSHD_POD_NAME --timeout=60s"
 
-echo::info "Copy the local SSH key to the pod"
-eval::command "kubectl cp ~/.ssh/id_rsa $SSHD_POD_ID:/root/.ssh/id_rsa"
 
-echo::info "Set correct permissions for the SSH key"
-eval::command "kubectl exec -n $POD_NAMESPACE $SSHD_POD_NAME -- chmod 600 /root/.ssh/id_rsa"
+if [ $USER_NAME = "root" ]; then
+  echo::info "Add the public key to the authorized_keys"
+  # The docker image copy the authorized key only on user creation
+  # See `lsiown "${USER_NAME}":"${USER_NAME}" /config` at https://github.com/linuxserver/docker-openssh-server/blob/master/root/etc/s6-overlay/s6-rc.d/init-adduser/run
+  # because root is not created, we do it ourself
+  eval::command "kubectl exec -n $POD_NAMESPACE $SSHD_POD_NAME -- /bin/bash -c \"mkdir -p ~/.ssh && echo '$PUBLIC_KEY_CONTENT' >> ~/.ssh/authorized_keys && chmod 600 -R ~/.ssh\""
+fi
 
-echo "SSHD Pod setup complete. You can now SSH into the pod using:"
-echo "kubectl exec -it -n $POD_NAMESPACE $SSHD_POD_NAME -- /bin/bash"
+POD_PORT=2222
+LOCAL_PORT=2222
+echo::success "SSHD Pod setup complete."
+echo::success ""
+echo::success "You can now SSH into the pod."
+echo::success ""
+echo::success "* with kubectl:"
+echo::success "    kubectl exec -it -n $POD_NAMESPACE $SSHD_POD_NAME -- /bin/bash'"
+echo::success ""
+echo::success "* with a SCP/SFTP client on:"
+echo::success "      - host: localhost:$LOCAL_PORT"
+echo::success "      - user: $USER_NAME"
+echo::success "      - with your private key"
+echo::success ""
+echo::success "The volumes of the pod $POD_NAME are available at '$VOLUME_MOUNT_PATH'"
+echo::success ""
+echo::success "Creating the tunnel"
+echo::success "Once finished, press Ctrl+C to terminate and delete the pod"
+eval::command "kubectl port-forward -n $POD_NAMESPACE pod/$SSHD_POD_NAME $POD_PORT:$LOCAL_PORT"
+
+echo::info "Cleaning up"
+echo::info "Deleting the pod $SSHD_POD_ID"
+eval::command "kubectl delete pod -n $POD_NAMESPACE $SSHD_POD_NAME"
+echo::success "Done"

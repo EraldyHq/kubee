@@ -16,6 +16,7 @@ A library of Kubernetes Utilities.
 * [kube-app-logs](docs/kube-app-logs.md) - print the logs of pods by app name
 * [kube-app-pods](docs/kube-app-pods.md) - watch/list the pods of an app
 * [kube-app-restart](docs/kube-app-restart.md) - execute a rollout restart
+* [kube-app-sshd](docs/kube-app-sshd.md) - Explore the volumes of an app via a temporary SSH server
 * [kube-app-top](docs/kube-app-top.md) - shows the top processes of an app
 * [kube-cidr](docs/kube-cidr.md) - print the cidr by pods
 * [kube-memory](docs/kube-memory.md) - print the cpu and memory used by pods

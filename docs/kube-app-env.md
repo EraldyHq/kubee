@@ -37,3 +37,6 @@ eval (kube-app-env <app name> <app namespace>)
 Prerequisites:
 * The `$KUBE_APP_HOME` environment variable should be set to a directory that
   contains kustomize applications
+
+
+To get the cluster and namespace in your prompt, check [kube-ps1](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/kube-ps1)
