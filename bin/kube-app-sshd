@@ -1,0 +1,57 @@
+#!/bin/bash
+
+source bashlib-kube.sh
+source bashlib-eval.sh
+
+APP_NAME=$1
+echo::info "Getting the pod data for the App $APP_NAME"
+read -r POD_NAME POD_NAMESPACE POD_NODE_NAME POD_UID <<< "$(kube::get_resource_by_app_name --type pod --custom-columns "NAME:.metadata.name,NAMESPACE:.metadata.namespace,NODE_NAME:.spec.nodeName,NODE_UID:.metadata.uid" "$APP_NAME")"
+
+MANIFEST_YAML=/tmp/sshd-pod.yaml
+SSHD_POD_NAME="$POD_NAME-sshd"
+SSHD_POD_ID="$POD_NAMESPACE/$SSHD_POD_NAME"
+# Create the Kubernetes manifest
+cat << EOF > $MANIFEST_YAML
+apiVersion: v1
+kind: Pod
+metadata:
+  name: $SSHD_POD_NAME
+  namespace: $POD_NAMESPACE
+spec:
+  nodeName: $POD_NODE_NAME
+  containers:
+  - name: sshd
+    image: linuxserver/openssh-server:latest
+    ports:
+    - containerPort: 22
+    securityContext:
+      privileged: true
+    volumeMounts:
+    - name: kubelet-pods
+      mountPath: /var/lib/kubelet/pods
+    - name: ssh-key
+      mountPath: /root/.ssh
+  volumes:
+  - name: kubelet-pods
+    hostPath:
+      path: /var/lib/kubelet/pods/$POD_UID/volumes
+      type: Directory
+  - name: ssh-key
+    emptyDir: {}
+EOF
+
+echo::info "Creating the pod $SSHD_POD_ID"
+eval::command "kubectl apply -f $MANIFEST_YAML"
+
+# Wait for the pod to be running
+echo "Waiting for the pod $SSHD_POD_ID to be running..."
+eval::command "kubectl wait --for=condition=Ready pod/$SSHD_POD_ID --timeout=60s"
+
+echo::info "Copy the local SSH key to the pod"
+eval::command "kubectl cp ~/.ssh/id_rsa $SSHD_POD_ID:/root/.ssh/id_rsa"
+
+echo::info "Set correct permissions for the SSH key"
+eval::command "kubectl exec -n $POD_NAMESPACE $SSHD_POD_NAME -- chmod 600 /root/.ssh/id_rsa"
+
+echo "SSHD Pod setup complete. You can now SSH into the pod using:"
+echo "kubectl exec -it -n $POD_NAMESPACE $SSHD_POD_NAME -- /bin/bash"

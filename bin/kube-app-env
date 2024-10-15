@@ -50,6 +50,8 @@ usage(){
   echo '* The `$KUBE_APP_HOME` environment variable should be set to a directory that'
   echo "  contains kustomize applications"
   echo ''
+  echo ''
+  echo 'To get the cluster and namespace in your prompt, check [kube-ps1](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/kube-ps1)'
 
 
 }
