@@ -58,11 +58,14 @@ fi
 
 SHELL_NAME=${2:-}
 if [ "$SHELL_NAME" == "" ]; then
-  if [ "$APP_NAME" == "prometheus" ]; then
-    SHELL_NAME=/bin/sh
-    else
-    SHELL_NAME=/bin/bash
-  fi
+  case "$APP_NAME" in
+    "prometheus"|"vault")
+      SHELL_NAME=/bin/sh;
+      ;;
+    *)
+      SHELL_NAME=/bin/bash
+    ;;
+  esac
 fi
 
 BUSY_BOX_IMAGE=busybox:1.36.1
@@ -75,8 +78,8 @@ fi
 echo::info "Getting Pod Name and Namespace for app $APP_NAME"
 
 read -r POD_NAME POD_NAMESPACE <<< "$(kube::get_resource_by_app_name "$APP_NAME" pod)"
-if [ -z "$POD_NAME" ]; then
-    echo "Error: Pod not found with label $(kube::get_app_label "$APP_NAME")"
+if [ "$POD_NAME" == "" ]; then
+    echo::err "Pod not found with label $(kube::get_app_label "$APP_NAME")"
     exit 1
 fi
 
@@ -90,4 +93,5 @@ if [ "$SHELL_NAME" == "ephemeral" ]; then
 fi
 
 echo::info "Starting the shell $SHELL_NAME on the pod $POD_NAMESPACE/$POD_NAME"
+# Note: -c ${CONTAINER_NAME} is mandatory for pods that have more than a single container.
 kubectl exec -it "$POD_NAME" -n "$POD_NAMESPACE" -- "$SHELL_NAME"
