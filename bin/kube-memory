@@ -4,6 +4,7 @@
 # @description
 #     Return the cpu and memory of pods
 #
+#     Check also [kube-capacity](https://github.com/robscott/kube-capacity)
 
 set -Eeuo pipefail
 source bashlib-echo.sh

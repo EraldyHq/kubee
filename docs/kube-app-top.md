@@ -6,6 +6,8 @@ Shows the process inside a Pod
 
 Shows the process inside a Pod
 
+See als [ktop plugin](https://github.com/vladimirvivien/ktop)
+
 
 
 ## Help

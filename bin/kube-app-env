@@ -17,44 +17,39 @@ error::set_trap
 usage(){
 
   echo ""
-  echo "A direnv extension to set the environment of an Kubernetes Kustomize App"
+  # shellcheck disable=SC2016
+  echo 'Note: This command is intended to be used in a `.envrc` file executed by `dirvenv`'
+  echo 'See the end section'
   echo ""
-  echo "To avoid executing app in a bad namespace, you would use"
-  echo "this direnv extension to set the app environment."
+  echo "Usage: Print the environment variables of a Kubernetes App"
+  echo "to set them automatically by App directory with direnv"
   echo ""
   echo "Executing:"
   echo '```bash'
-  echo "$(basename "$0") <app name> <app namespace>"
+  echo "$(basename "$0") <app name> [<app namespace>]"
   echo '```'
+  echo "will output:"
   # shellcheck disable=SC2016
-  echo 'where'
-  # shellcheck disable=SC2016
-  echo '* `app name` is the name of an app directory below `$KUBE_APP_HOME`'
-  # shellcheck disable=SC2016
-  echo '* `app namespace` is the kubernetes namespace (default to the `app name` value)'
-  echo ''
-  echo "This command will output the export statement of the app environment"
-  # shellcheck disable=SC2016
-  echo 'that can be used in your `.envrc` (see below). ie'
   echo '```bash'
-  echo 'export KUBECONFIG=xxx'
-  echo "export KUBE_APP_NAME=xxx"
-  echo "export KUBE_APP_NAMESPACE=xxx"
-  echo "export KUBE_APP_DIRECTORY=xxx"
+  echo 'export KUBECONFIG=xxx         # value=~/.kube/config-<App Name>'
+  echo "export KUBE_APP_NAME=xxx      # value=App Name"
+  echo "export KUBE_APP_NAMESPACE=xxx # value=App Namespace (Default to App Name if not set)"
+  echo "export KUBE_APP_DIRECTORY=xxx # value=\$KUBE_APP_HOME/<App Name>"
   echo '```'
+  echo ''
+  echo 'Envrc/Direnv Usage:'
+  # shellcheck disable=SC2016
+  echo 'In a `.envrc` file executed by `dirvenv`, you would set:'
+  echo '```bash'
+  echo "eval ($(basename "$0") <app name> <app namespace>)"
+  echo '```'
+
+  # shellcheck disable=SC2016
   echo 'Prerequisites:'
   # shellcheck disable=SC2016
   echo '* The `$KUBE_APP_HOME` environment variable should be set to a directory that'
   echo "  contains kustomize applications"
   echo ''
-  # shellcheck disable=SC2016
-  echo 'Usage with `dirvenv`: '
-  # shellcheck disable=SC2016
-  echo 'In your `.envrc` of your Kustomize Kubernetes App'
-  echo '```bash'
-  echo "eval ($(basename "$0") <app name> <app namespace>)"
-  echo '```'
-  echo ""
 
 
 }

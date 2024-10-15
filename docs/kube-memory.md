@@ -6,6 +6,8 @@ Return the cpu and memory of pods
 
 Return the cpu and memory of pods
 
+Check also [kube-capacity](https://github.com/robscott/kube-capacity)
+
 
 
 ## Help

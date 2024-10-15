@@ -11,33 +11,29 @@ Used in a direnv setup
 ## Help
 
 
-A direnv extension to set the environment of an Kubernetes Kustomize App
+Note: This command is intended to be used in a `.envrc` file executed by `dirvenv`
+See the end section
 
-To avoid executing app in a bad namespace, you would use
-this direnv extension to set the app environment.
+Usage: Print the environment variables of a Kubernetes App
+to set them automatically by App directory with direnv
 
 Executing:
 ```bash
-kube-app-env <app name> <app namespace>
+kube-app-env <app name> [<app namespace>]
 ```
-where
-* `app name` is the name of an app directory below `$KUBE_APP_HOME`
-* `app namespace` is the kubernetes namespace (default to the `app name` value)
-
-This command will output the export statement of the app environment
-that can be used in your `.envrc` (see below). ie
+will output:
 ```bash
-export KUBECONFIG=xxx
-export KUBE_APP_NAME=xxx
-export KUBE_APP_NAMESPACE=xxx
-export KUBE_APP_DIRECTORY=xxx
+export KUBECONFIG=xxx         # value=~/.kube/config-<App Name>
+export KUBE_APP_NAME=xxx      # value=App Name
+export KUBE_APP_NAMESPACE=xxx # value=App Namespace (Default to App Name if not set)
+export KUBE_APP_DIRECTORY=xxx # value=$KUBE_APP_HOME/<App Name>
+```
+
+Envrc/Direnv Usage:
+In a `.envrc` file executed by `dirvenv`, you would set:
+```bash
+eval (kube-app-env <app name> <app namespace>)
 ```
 Prerequisites:
 * The `$KUBE_APP_HOME` environment variable should be set to a directory that
   contains kustomize applications
-
-Usage with `dirvenv`: 
-In your `.envrc` of your Kustomize Kubernetes App
-```bash
-eval (kube-app-env <app name> <app namespace>)
-```

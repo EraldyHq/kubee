@@ -4,6 +4,7 @@
 # @description
 #     Shows the process inside a Pod
 #
+#     See als [ktop plugin](https://github.com/vladimirvivien/ktop)
 #
 
 set -Eeuo pipefail
