@@ -1,6 +1,6 @@
 #!/bin/bash
-# @name kube-app-sshd
-# @brief Explorer the volumes of an app via a temporary SSH server
+# @name kube-app-file-explorer
+# @brief Explore the volume of a pod via SCP/SFTP
 # @description
 #     This script:
 #     * starts a sshd privilege pod
@@ -24,7 +24,9 @@ usage(){
 
   echo "Usage:"
   echo ""
-  echo "Start a temporary SSH pod where the volume of the app pod have been mapped to \`$VOLUME_MOUNT_PATH\`"
+  echo "Explore the volume of a pod via SCP/SFTP"
+  echo ""
+  echo "This command will start a temporary SSH pod where the volume of the app pod have been mapped to \`$VOLUME_MOUNT_PATH\`"
   echo ""
   echo '```bash'
   echo "$(basename "$0") <app name> <public key>"
