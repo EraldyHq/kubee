@@ -13,10 +13,10 @@ A library of Kubernetes Utilities.
 * [kube-app-bash](docs/kube-app-bash.md) - get a shell into an app or your cluster
 * [kube-app-env](docs/kube-app-env.md) - print the environment configuration of an app 
 * [kube-app-events](docs/kube-app-events.md) - shows the events of an app
+* [kube-app-file-explorer](docs/kube-app-file-explorer.md) - Explore the files of an app via SCP/SFTP
 * [kube-app-logs](docs/kube-app-logs.md) - print the logs of pods by app name
 * [kube-app-pods](docs/kube-app-pods.md) - watch/list the pods of an app
 * [kube-app-restart](docs/kube-app-restart.md) - execute a rollout restart
-* [kube-app-sshd](docs/kube-app-explorer) - Explore the volumes of an app via a temporary SSH server
 * [kube-app-top](docs/kube-app-top.md) - shows the top processes of an app
 * [kube-cidr](docs/kube-cidr.md) - print the cidr by pods
 * [kube-memory](docs/kube-memory.md) - print the cpu and memory used by pods
