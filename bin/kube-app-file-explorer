@@ -15,7 +15,7 @@ set -Eeuo pipefail
 source bashlib-error.sh
 error::set_trap
 source bashlib-kube.sh
-source bashlib-eval.sh
+source bashlib-command.sh
 source bashlib-path.sh
 
 VOLUME_MOUNT_PATH=/volumes
@@ -123,10 +123,10 @@ spec:
 EOF
 
 echo::info "Creating the pod $SSHD_POD_ID to read the volume of $POD_NAMESPACE/$POD_NAME"
-eval::command "kubectl apply -f $MANIFEST_YAML"
+command:echo_eval "kubectl apply -f $MANIFEST_YAML"
 
 echo "Waiting for the pod $SSHD_POD_ID to be running..."
-eval::command "kubectl wait --for=condition=Ready -n $POD_NAMESPACE pod/$SSHD_POD_NAME --timeout=60s"
+command:echo_eval "kubectl wait --for=condition=Ready -n $POD_NAMESPACE pod/$SSHD_POD_NAME --timeout=60s"
 
 
 if [ $USER_NAME = "root" ]; then
@@ -134,7 +134,7 @@ if [ $USER_NAME = "root" ]; then
   # The docker image copy the authorized key only on user creation
   # See `lsiown "${USER_NAME}":"${USER_NAME}" /config` at https://github.com/linuxserver/docker-openssh-server/blob/master/root/etc/s6-overlay/s6-rc.d/init-adduser/run
   # because root is not created, we do it ourself
-  eval::command "kubectl exec -n $POD_NAMESPACE $SSHD_POD_NAME -- /bin/bash -c \"mkdir -p ~/.ssh && echo '$PUBLIC_KEY_CONTENT' >> ~/.ssh/authorized_keys && chmod 600 -R ~/.ssh\""
+  command:echo_eval "kubectl exec -n $POD_NAMESPACE $SSHD_POD_NAME -- /bin/bash -c \"mkdir -p ~/.ssh && echo '$PUBLIC_KEY_CONTENT' >> ~/.ssh/authorized_keys && chmod 600 -R ~/.ssh\""
 fi
 
 POD_PORT=2222
@@ -155,9 +155,9 @@ echo::success "The volumes of the pod $POD_NAME are available at '$VOLUME_MOUNT_
 echo::success ""
 echo::success "Creating the tunnel"
 echo::success "Once finished, press Ctrl+C to terminate and delete the pod"
-eval::command "kubectl port-forward -n $POD_NAMESPACE pod/$SSHD_POD_NAME $POD_PORT:$LOCAL_PORT"
+command:echo_eval "kubectl port-forward -n $POD_NAMESPACE pod/$SSHD_POD_NAME $POD_PORT:$LOCAL_PORT"
 
 echo::info "Cleaning up"
 echo::info "Deleting the pod $SSHD_POD_ID"
-eval::command "kubectl delete pod -n $POD_NAMESPACE $SSHD_POD_NAME"
+command:echo_eval "kubectl delete pod -n $POD_NAMESPACE $SSHD_POD_NAME"
 echo::success "Done"
