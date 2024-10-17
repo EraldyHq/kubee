@@ -10,6 +10,7 @@ source bashlib-echo.sh
 source bashlib-error.sh
 source bashlib-path.sh
 source bashlib-command.sh
+source bashlib-crypto.sh
 error::set_trap
 
 HELP=${1:-}
@@ -25,37 +26,13 @@ if [[ $HELP =~ -h|--help|help ]]; then
   exit
 fi
 
+
+
 # base 64 encoded, X.509v3 certificate
-CERTIFICATES=$(grep 'client-certificate-data' "$HOME"/.kube/config | awk '{print $2}' | base64 -d)
-
-# Go into a temporary directory because we split the certificates into 2 files
-TEMP_DIR=$(path::create_temp_directory "kube")
-pushd "$TEMP_DIR" > /dev/null 2>&1
-
-# csplit to split the PEM certificates in 2
-# csplit [option]… input pattern…
-# https://www.gnu.org/software/coreutils/manual/html_node/csplit-invocation.html#csplit-invocation
-INPUT=-
-PATTERN="-----BEGIN CERTIFICATE-----"
-PREFIX="xx"
-REPEAT_COUNT_PATTERN='{*}'
-csplit  "--prefix=$PREFIX" --elide-empty-files "$INPUT" "/$PATTERN/" "$REPEAT_COUNT_PATTERN" <<< "$CERTIFICATES" > /dev/null 2>&1
-
-# Loop over the create files and print them in plain
-INDEX=1
-for FILE in ./"$PREFIX"*; do
-      echo::echo ""
-      echo::echo "####################################"
-      echo::echo "# Certificate $INDEX"
-      echo::echo "####################################"
-      echo::echo ""
-      openssl x509 -text -noout < "$FILE"
-      ((INDEX++))
-
-done
-
-# Go back
-popd > /dev/null 2>&1
-
-# Clean things up
+TEMP_DIR=$(mktemp --directory)
+TEMP_PEM=$TEMP_DIR/temp.pem
+grep 'client-certificate-data' "$HOME"/.kube/config | awk '{print $2}' | base64 -d > "$TEMP_PEM"
+# openssl storeutl permits to read a bundle does not take stdin as input
+crypto::certificate_to_text "$TEMP_PEM"
 rm -rf "$TEMP_DIR"
+

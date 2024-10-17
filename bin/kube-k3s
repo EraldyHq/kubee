@@ -30,12 +30,22 @@ if [[ $HELP =~ -h|help ]]; then
   exit
 fi
 
+# Where all PKI material are stored
+TLS_HOME=/var/lib/rancher/k3s/server
+
+# Print the expiration
 function cert_expiration(){
-    find /var/lib/rancher/k3s/server/tls -name '*.crt' | while read -r CERT_FILE; do
+    find $TLS_HOME/tls -name '*.crt' | while read -r CERT_FILE; do
       NOT_AFTER="$(openssl x509 -text -in "$CERT_FILE" | grep Not\ After)"
       printf "%s\n%s\n\n" "$(basename "$CERT_FILE")" "$NOT_AFTER";
     done
 }
 
+# Print the certs (bundle included)
+function cert_print(){
+    CRT_FILE_URI=$1
+    openssl storeutl -noout -text -certs "$CRT_FILE_URI"
+}
 
 cert_expiration
+
