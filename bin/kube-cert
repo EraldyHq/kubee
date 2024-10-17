@@ -28,19 +28,20 @@ fi
 # base 64 encoded, X.509v3 certificate
 CERTIFICATES=$(grep 'client-certificate-data' "$HOME"/.kube/config | awk '{print $2}' | base64 -d)
 
-
+# Go into a temporary directory because we split the certificates into 2 files
 TEMP_DIR=$(path::create_temp_directory "kube")
-
 pushd "$TEMP_DIR" > /dev/null 2>&1
 
+# csplit to split the PEM certificates in 2
+# csplit [option]… input pattern…
 # https://www.gnu.org/software/coreutils/manual/html_node/csplit-invocation.html#csplit-invocation
 INPUT=-
 PATTERN="-----BEGIN CERTIFICATE-----"
 PREFIX="xx"
 REPEAT_COUNT_PATTERN='{*}'
-# csplit [option]… input pattern…
 csplit  "--prefix=$PREFIX" --elide-empty-files "$INPUT" "/$PATTERN/" "$REPEAT_COUNT_PATTERN" <<< "$CERTIFICATES" > /dev/null 2>&1
 
+# Loop over the create files and print them in plain
 INDEX=1
 for FILE in ./"$PREFIX"*; do
       echo::echo ""
@@ -53,6 +54,8 @@ for FILE in ./"$PREFIX"*; do
 
 done
 
+# Go back
 popd > /dev/null 2>&1
 
+# Clean things up
 rm -rf "$TEMP_DIR"
