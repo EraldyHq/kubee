@@ -1,0 +1,41 @@
+#!/bin/bash
+# @name kube-k3s
+# @brief k3s specific scripts
+# @description
+#     K3s specific scripts that should be used on the server
+#
+
+set -Eeuo pipefail
+source bashlib-error.sh
+error::set_trap
+
+usage(){
+  echo "Usage:"
+  echo ""
+  echo ""
+  echo '```bash'
+  # shellcheck disable=SC2005
+  echo "$(basename "$0") command"
+  echo '```'
+  echo "where: command may be:"
+  # shellcheck disable=SC2016
+  echo '  * `cert` : Print the certificates and their expiration date'
+
+}
+
+# Help ?
+HELP=${1:-}
+if [[ $HELP =~ -h|help ]]; then
+  usage
+  exit
+fi
+
+function cert_expiration(){
+    find /var/lib/rancher/k3s/server/tls -name '*.crt' | while read -r CERT_FILE; do
+      NOT_AFTER="$(openssl x509 -text -in "$CERT_FILE" | grep Not\ After)"
+      printf "%s\n%s\n\n" "$CERT_FILE" "$NOT_AFTER";
+    done
+}
+
+
+cert_expiration

@@ -20,6 +20,7 @@ A library of Kubernetes Utilities.
 * [kube-app-top](docs/kube-app-top.md) - shows the top processes of an app
 * [kube-cert](docs/kube-cert.md) - print the kubeconfig cert in plain text
 * [kube-cidr](docs/kube-cidr.md) - print the cidr by pods
+* [kube-k3s](docs/kube-cidr.md) - collection of k3s utilities
 * [kube-memory](docs/kube-memory.md) - print the cpu and memory used by pods
 * [kube-ns-current](docs/kube-ns-current.md) - set or show the current namespace
 * [kube-ns-events](docs/kube-ns-events.md) - show the event of a namespace
