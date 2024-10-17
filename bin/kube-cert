@@ -8,31 +8,67 @@
 set -Eeuo pipefail
 source bashlib-echo.sh
 source bashlib-error.sh
-source bashlib-path.sh
-source bashlib-command.sh
-source bashlib-crypto.sh
 error::set_trap
 
-HELP=${1:-}
-if [[ $HELP =~ -h|--help|help ]]; then
+usage(){
+
   echo "Usage:"
   echo ''
-  echo 'Return the kubeconfig certs in plain text'
+  echo 'Return the certs in plain text'
   echo ''
   echo '```bash'
   # shellcheck disable=SC2005
-  echo "$(basename "$0")"
+  echo "$(basename "$0") command"
   echo '```'
+  echo "where: command may be:"
+  # shellcheck disable=SC2016
+  echo '  * `config` : Print the client certificate in the kubeconfig file'
+  # shellcheck disable=SC2016
+  echo '  * `secret` : Print the client certificate in a secret'
+
+}
+HELP=${1:-}
+if [[ $HELP =~ -h|--help|help ]]; then
+  usage
   exit
 fi
 
+function print_cert_secret(){
+  # <() is a https://en.wikipedia.org/wiki/Process_substitution to give a file (ie URI)
+  SECRET_NAME=$1
+  SECRET_NAMESPACE=$2
+  openssl storeutl -noout -text <(kubectl get secret -n "$SECRET_NAMESPACE" "$SECRET_NAME" -o jsonpath='{.data.tls\.crt}' | base64 -d)
+}
+
+function print_cert_kubeconfig(){
+  # openssl storeutl permits to read a bundle. Take a file as input
+  openssl storeutl -noout -text <(grep 'client-certificate-data' "$HOME"/.kube/config | awk '{print $2}' | base64 -d)
+}
+
+args=$(getopt -l "no-header:" -o "s:h" -- "$@")
+# eval set to set the positional arguments back to $args
+eval set -- "$args"
+
+while [[ $# -gt 0 ]]
+do
+   case $1 in
+   "config")
+    print_cert_kubeconfig
+    exit
+    ;;
+  "secret")
+    print_cert_secret "${args[@]}"
+    exit
+    ;;
+  *)
+    usage
+    echo::err "command $1 not found"
+    exit 1
+   esac
+done
 
 
-# base 64 encoded, X.509v3 certificate
-TEMP_DIR=$(mktemp --directory)
-TEMP_PEM=$TEMP_DIR/temp.pem
-grep 'client-certificate-data' "$HOME"/.kube/config | awk '{print $2}' | base64 -d > "$TEMP_PEM"
-# openssl storeutl permits to read a bundle does not take stdin as input
-crypto::certificate_to_text "$TEMP_PEM"
-rm -rf "$TEMP_DIR"
+
+
+
 

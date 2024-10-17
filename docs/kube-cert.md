@@ -12,8 +12,11 @@ Return the kubeconfig cert in plain text
 
 Usage:
 
-Return the kubeconfig certs in plain text
+Return the certs in plain text
 
 ```bash
-kube-cert
+kube-cert command
 ```
+where: command may be:
+  * `config` : Print the client certificate in the kubeconfig file
+  * `secret` : Print the client certificate in a secret

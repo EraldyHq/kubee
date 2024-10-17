@@ -9,17 +9,27 @@ set -Eeuo pipefail
 source bashlib-error.sh
 error::set_trap
 
+# Where all PKI material are stored
+TLS_HOME=/var/lib/rancher/k3s/server/tls
+
 usage(){
+
   echo "Usage:"
   echo ""
   echo ""
   echo '```bash'
   # shellcheck disable=SC2005
-  echo "$(basename "$0") command"
+  echo "$(basename "$0") command args"
   echo '```'
   echo "where: command may be:"
   # shellcheck disable=SC2016
-  echo '  * `cert` : Print the certificates and their expiration date'
+  echo '  * `certs_expiration` : Print the certificates and their expiration date'
+  # shellcheck disable=SC2016
+  echo '  * `cert_print` : Print a single pem file'
+  # shellcheck disable=SC2016
+  echo '  * `cert_secret_print` : Print a kubernetes TLS cert secret'
+  echo ""
+  echo "All certs should be relative name (This script adds the directory: $TLS_HOME)"
 
 }
 
@@ -30,22 +40,32 @@ if [[ $HELP =~ -h|help ]]; then
   exit
 fi
 
-# Where all PKI material are stored
-TLS_HOME=/var/lib/rancher/k3s/server
 
-# Print the expiration
-function cert_expiration(){
-    find $TLS_HOME/tls -name '*.crt' | while read -r CERT_FILE; do
-      NOT_AFTER="$(openssl x509 -text -in "$CERT_FILE" | grep Not\ After)"
-      printf "%s\n%s\n\n" "$(basename "$CERT_FILE")" "$NOT_AFTER";
-    done
-}
 
-# Print the certs (bundle included)
-function cert_print(){
-    CRT_FILE_URI=$1
-    openssl storeutl -noout -text -certs "$CRT_FILE_URI"
-}
+args=$(getopt -l "no-header:" -o "s:h" -- "$@")
+# eval set to set the positional arguments back to $args
+eval set -- "$args"
 
-cert_expiration
+while [[ $# -gt 0 ]]
+do
+   case $1 in
+   "certs_expiration")
+    crypto::certs_expiration $TLS_HOME
+    exit
+    ;;
+  "cert_print")
+    crypto::cert_print $TLS_HOME/"$2"
+    exit
+    ;;
+  "cert_secret_print")
+    openssl storeutl -noout -text <(kubectl get secret -n kube-system k3s-serving -o jsonpath='{.data.tls\.crt}' | base64 -d)
+
+    exit
+    ;;
+  *)
+    usage
+    echo::err "command $1 not found"
+    exit 1
+   esac
+done
 
