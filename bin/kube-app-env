@@ -10,6 +10,7 @@
 set -Eeuo pipefail
 source bashlib-echo.sh
 source bashlib-error.sh
+source bashlib-path.sh
 error::set_trap
 
 
@@ -26,13 +27,13 @@ usage(){
   echo ""
   echo "Executing:"
   echo '```bash'
-  echo "$(basename "$0") <app name> [<app namespace>]"
+  echo "$(basename "$0") [<app name>] [<app namespace>]"
   echo '```'
   echo "will output:"
   # shellcheck disable=SC2016
   echo '```bash'
   echo 'export KUBECONFIG=xxx         # value=~/.kube/config-<App Name>'
-  echo "export KUBE_APP_NAME=xxx      # value=App Name"
+  echo "export KUBE_APP_NAME=xxx      # value=App Name (Default to the current directory name)"
   echo "export KUBE_APP_NAMESPACE=xxx # value=App Namespace (Default to App Name if not set)"
   echo "export KUBE_APP_DIRECTORY=xxx # value=\$KUBE_APP_HOME/<App Name>"
   echo '```'
@@ -60,20 +61,17 @@ usage(){
 # Main
 ######################
 
-# Check if the app name is provided
-if [ -z "$1" ]; then
-    usage
-    echo:err "The app name is mandatory"
-    exit 1
-fi
 
-if [ "$1" == "-h" ]; then
+
+CURRENT_DIRECTORY_NAME=$(basename `pwd`)
+KUBE_APP_NAME=${1:-"$CURRENT_DIRECTORY_NAME"}
+KUBE_APP_NAMESPACE=${2:-"$KUBE_APP_NAME"}
+
+# Help ?
+if [[ "$KUBE_APP_NAME" =~ -h|--help|help ]]; then
   usage
   exit 0
 fi
-
-KUBE_APP_NAME=$1
-KUBE_APP_NAMESPACE=${2:-$KUBE_APP_NAME}
 
 KUBECONFIG=$HOME/.kube/config-$KUBE_APP_NAME
 

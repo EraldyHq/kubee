@@ -18,6 +18,7 @@ A library of Kubernetes Utilities.
 * [kube-app-pods](docs/kube-app-pods.md) - watch/list the pods of an app
 * [kube-app-restart](docs/kube-app-restart.md) - execute a rollout restart
 * [kube-app-top](docs/kube-app-top.md) - shows the top processes of an app
+* [kube-cert](docs/kube-cert.md) - print the kubeconfig cert in plain text
 * [kube-cidr](docs/kube-cidr.md) - print the cidr by pods
 * [kube-memory](docs/kube-memory.md) - print the cpu and memory used by pods
 * [kube-ns-current](docs/kube-ns-current.md) - set or show the current namespace

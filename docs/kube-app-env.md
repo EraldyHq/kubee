@@ -19,12 +19,12 @@ to set them automatically by App directory with direnv
 
 Executing:
 ```bash
-kube-app-env <app name> [<app namespace>]
+kube-app-env [<app name>] [<app namespace>]
 ```
 will output:
 ```bash
 export KUBECONFIG=xxx         # value=~/.kube/config-<App Name>
-export KUBE_APP_NAME=xxx      # value=App Name
+export KUBE_APP_NAME=xxx      # value=App Name (Default to the current directory name)
 export KUBE_APP_NAMESPACE=xxx # value=App Namespace (Default to App Name if not set)
 export KUBE_APP_DIRECTORY=xxx # value=$KUBE_APP_HOME/<App Name>
 ```

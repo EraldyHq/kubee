@@ -1,0 +1,22 @@
+#!/bin/bash
+# @name kube-cert
+# @brief Return the kubeconfig cert in plain text
+# @description
+#     Return the kubeconfig cert in plain text
+#
+
+HELP=${1:-}
+if [[ $HELP =~ -h|--help|help ]]; then
+  echo "Usage:"
+  echo ''
+  echo 'Return the kubeconfig cert in plain text'
+  echo ''
+  echo '```bash'
+  # shellcheck disable=SC2005
+  echo "$(basename "$0")"
+  echo '```'
+  exit
+fi
+
+# base 64 encoded, X.509v3 certificate
+grep 'client-certificate-data' "$HOME"/.kube/config | awk '{print $2}' | base64 -d | openssl x509 -text
