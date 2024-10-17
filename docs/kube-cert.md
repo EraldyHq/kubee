@@ -12,7 +12,7 @@ Return the kubeconfig cert in plain text
 
 Usage:
 
-Return the kubeconfig cert in plain text
+Return the kubeconfig certs in plain text
 
 ```bash
 kube-cert

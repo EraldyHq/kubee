@@ -5,11 +5,18 @@
 #     Return the kubeconfig cert in plain text
 #
 
+set -Eeuo pipefail
+source bashlib-echo.sh
+source bashlib-error.sh
+source bashlib-path.sh
+source bashlib-command.sh
+error::set_trap
+
 HELP=${1:-}
 if [[ $HELP =~ -h|--help|help ]]; then
   echo "Usage:"
   echo ''
-  echo 'Return the kubeconfig cert in plain text'
+  echo 'Return the kubeconfig certs in plain text'
   echo ''
   echo '```bash'
   # shellcheck disable=SC2005
@@ -19,4 +26,33 @@ if [[ $HELP =~ -h|--help|help ]]; then
 fi
 
 # base 64 encoded, X.509v3 certificate
-grep 'client-certificate-data' "$HOME"/.kube/config | awk '{print $2}' | base64 -d | openssl x509 -text
+CERTIFICATES=$(grep 'client-certificate-data' "$HOME"/.kube/config | awk '{print $2}' | base64 -d)
+
+
+TEMP_DIR=$(path::create_temp_directory "kube")
+
+pushd "$TEMP_DIR" > /dev/null 2>&1
+
+# https://www.gnu.org/software/coreutils/manual/html_node/csplit-invocation.html#csplit-invocation
+INPUT=-
+PATTERN="-----BEGIN CERTIFICATE-----"
+PREFIX="xx"
+REPEAT_COUNT_PATTERN='{*}'
+# csplit [option]… input pattern…
+csplit  "--prefix=$PREFIX" --elide-empty-files "$INPUT" "/$PATTERN/" "$REPEAT_COUNT_PATTERN" <<< "$CERTIFICATES" > /dev/null 2>&1
+
+INDEX=1
+for FILE in ./"$PREFIX"*; do
+      echo::echo ""
+      echo::echo "####################################"
+      echo::echo "# Certificate $INDEX"
+      echo::echo "####################################"
+      echo::echo ""
+      openssl x509 -text -noout < "$FILE"
+      ((INDEX++))
+
+done
+
+popd > /dev/null 2>&1
+
+rm -rf "$TEMP_DIR"
