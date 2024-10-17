@@ -33,7 +33,7 @@ fi
 function cert_expiration(){
     find /var/lib/rancher/k3s/server/tls -name '*.crt' | while read -r CERT_FILE; do
       NOT_AFTER="$(openssl x509 -text -in "$CERT_FILE" | grep Not\ After)"
-      printf "%s\n%s\n\n" "$CERT_FILE" "$NOT_AFTER";
+      printf "%s\n%s\n\n" "$(basename "$CERT_FILE")" "$NOT_AFTER";
     done
 }
 
