@@ -34,6 +34,8 @@ A library of Kubernetes Utilities.
 * Mac / Linux / Windows WSL with HomeBrew
 ```bash
 brew install --HEAD gerardnico/tap/kube
+# Add the libraries directory into your path in your `.bashrc` file
+export PATH=$(brew --prefix bashlib)/lib:$PATH
 ```
 
 ## What is an app name?
