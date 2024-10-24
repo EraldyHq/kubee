@@ -17,15 +17,15 @@ usage(){
 
   echo "Usage:"
   echo ""
-  echo "Get a shell into a pod or your cluster"
+  echo "Get a shell into a pod or your cluster with busybox"
   echo ""
   echo '```bash'
-  echo "$(basename "$0") <app name> <shell name>"
+  echo "$(basename "$0") --shell <shell name> <app name>"
   echo '```'
   echo ""
   echo "where:"
   # shellcheck disable=SC2016
-  echo '* `app name` may be:'
+  echo '* `app name` default to the env `KUBE_APP_NAME` may be:'
   # shellcheck disable=SC2016
   echo '    * an app name (used with the label `app.kubernetes.io/name=<app name>` select the target pod)'
   # shellcheck disable=SC2016
@@ -35,7 +35,7 @@ usage(){
   # shellcheck disable=SC2016
   echo '  * a shell path (ie `bash`, `sh`, `bin/bash`)'
   # shellcheck disable=SC2016
-  echo '  * or `ephemeral` to start busybox as an ephemeral container'
+  echo '  * or `ephemeral` to add busybox as an ephemeral container if your container app has no shell'
 
 }
 
@@ -43,20 +43,50 @@ usage(){
 # Main
 ######################
 
+# Set
+APP_NAME=${KUBE_APP_NAME:-}
+SHELL_NAME=""
+
+# Normalization
+# A shell option with an option argument
+args=$(getopt --longoptions "shell:"  --options "s:"  -- "$@")
+# eval set to set the positional arguments back to $args
+eval set -- "$args"
+
+# Loop
+while [[ $# -gt 0 ]]
+do
+   case "$1" in
+    "--shell"|"-s")
+      shift
+      SHELL_NAME=$1
+      shift;
+    ;;
+    --)
+      # Starts argument
+      shift
+      break
+      ;;
+    *)
+      APP_NAME=$1
+      shift
+      ;;
+  esac
+done
+
 # Check if the app name is provided
-if [ -z "$1" ]; then
+if [ "$APP_NAME" == "" ]; then
     usage
+    echo::err "An app name was not found"
     exit 1
 fi
 
-APP_NAME=$1
-
-if [[ "$APP_NAME" =~ -h|help ]]; then
+if [[ "$APP_NAME" =~ "-h"|"help"|"--help" ]]; then
   usage
   exit
 fi
 
-SHELL_NAME=${2:-}
+# Set the known default shell
 if [ "$SHELL_NAME" == "" ]; then
   case "$APP_NAME" in
     "prometheus"|"vault")
