@@ -10,25 +10,25 @@
 set -Eeuo pipefail
 source bashlib-echo.sh
 source bashlib-error.sh
+source bashlib-doc.sh
 error::set_trap
 
-usage(){
-  echo "Usage:"
-  echo ""
-  echo '```bash'
-  echo "$(basename "$0") <app name>"
-  echo '```'
-  echo ""
-  echo 'Note:'
-  # shellcheck disable=SC2016
-  echo '* The `$KUBE_APP_HOME` environment variable should be set to a directory that'
-  echo "  has kustomize applications as subdirectories"
-  # shellcheck disable=SC2016
-  echo '* The script will run'
-  echo '```bash'
-  # shellcheck disable=SC2016
-  echo 'kubectl apply -k $KUBE_APP_HOME/<app name>'
-  echo '```'
+synopsis(){
+
+  cat << EOF
+\`\`\`bash
+$(basename "$0") \<app name\>
+\`\`\`
+
+Note:
+* The \`\KUBE_APP_HOME\` environment variable should be set to a directory that
+  has kustomize applications as subdirectories"
+* The script will run
+\`\`\`bash
+kubectl apply -k \$KUBE_APP_HOME/\<app name\>
+\`\`\`
+EOF
+
 }
 
 ######################
@@ -36,31 +36,20 @@ usage(){
 ######################
 
 if [ -z "$1" ]; then
-    usage
+    doc::help
     echo:err "The app name is mandatory"
     exit 1
 fi
 
-if [ "$1" = "-h" ]; then
-  usage
+if [[ "$1" =~ "-h"|"--help"|"help" ]]; then
+  doc::help
   exit 0
 fi
 
 
 KUBE_APP_NAME=$1
-if [ -z "$KUBE_APP_HOME" ]; then
-  echo:err "The KUBE_APP_HOME environment variable is mandatory and was not found"
-  echo:err "Add it in your bashrc or OS environment variables"
-  exit 1
-fi
-KUBE_APP_DIRECTORY=$KUBE_APP_HOME/$KUBE_APP_NAME
 
-if [ ! -d "$KUBE_APP_DIRECTORY" ]; then
-  echo::err "The app directory $KUBE_APP_DIRECTORY does not exist"
-  exit 1
-fi
-
-pushd "$KUBE_APP_DIRECTORY"
+kube::pushd_to_app_dir "$KUBE_APP_NAME"
 
 kubectl apply -k .
 

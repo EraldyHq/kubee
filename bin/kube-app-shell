@@ -8,12 +8,13 @@
 
 set -Eeuo pipefail
 source bashlib-echo.sh
+source bashlib-doc.sh
+source bashlib-bash.sh
+source bashlib-kube.sh
 source bashlib-error.sh
 error::set_trap
-source bashlib-kube.sh
 
-
-usage(){
+synopsis(){
 
   echo "Usage:"
   echo ""
@@ -44,7 +45,7 @@ usage(){
 ######################
 
 # Set
-APP_NAME=${KUBE_APP_NAME:-}
+APP_NAME=${KUBE_APP_NAME:-} # default
 SHELL_NAME=""
 
 # Normalization
@@ -65,7 +66,6 @@ do
     --)
       # Starts argument
       shift
-      break
       ;;
     *)
       APP_NAME=$1
@@ -76,15 +76,16 @@ done
 
 # Check if the app name is provided
 if [ "$APP_NAME" == "" ]; then
-    usage
+    doc::help
     echo::err "An app name was not found"
     exit 1
 fi
 
 if [[ "$APP_NAME" =~ "-h"|"help"|"--help" ]]; then
-  usage
+  doc::help
   exit
 fi
+
 
 # Set the known default shell
 if [ "$SHELL_NAME" == "" ]; then
@@ -97,6 +98,14 @@ if [ "$SHELL_NAME" == "" ]; then
     ;;
   esac
 fi
+
+
+# Go to the app dir and pop at err and exit
+pushd "$(kube::get_app_dir "$APP_NAME")"
+bash::trap 'popd' EXIT # execute also on error
+echo "$(direnv export bash)"
+exit
+
 
 BUSY_BOX_IMAGE=busybox:1.36.1
 if [ "$APP_NAME" == "busybox" ]; then
