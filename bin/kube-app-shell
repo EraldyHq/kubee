@@ -16,7 +16,6 @@ error::set_trap
 
 synopsis(){
 
-  echo "Usage:"
   echo ""
   echo "Get a shell into a pod or your cluster with busybox"
   echo ""
@@ -25,6 +24,7 @@ synopsis(){
   echo '```'
   echo ""
   echo "where:"
+  echo ""
   # shellcheck disable=SC2016
   echo '* `app name` default to the env `KUBE_APP_NAME` may be:'
   # shellcheck disable=SC2016
@@ -45,7 +45,7 @@ synopsis(){
 ######################
 
 # Set
-APP_NAME=${KUBE_APP_NAME:-} # default
+APP_NAME=""
 SHELL_NAME=""
 
 # Normalization
@@ -76,9 +76,11 @@ done
 
 # Check if the app name is provided
 if [ "$APP_NAME" == "" ]; then
-    doc::help
-    echo::err "An app name was not found"
-    exit 1
+    if ! APP_NAME=$(kube::get_app_name_from_env); then
+      doc::help
+      echo::err "An app name was not found"
+      exit 1
+    fi
 fi
 
 if [[ "$APP_NAME" =~ "-h"|"help"|"--help" ]]; then
@@ -100,11 +102,7 @@ if [ "$SHELL_NAME" == "" ]; then
 fi
 
 
-# Go to the app dir and pop at err and exit
-pushd "$(kube::get_app_dir "$APP_NAME")"
-bash::trap 'popd' EXIT # execute also on error
-echo "$(direnv export bash)"
-exit
+kube::set_app_env_up "$APP_NAME"
 
 
 BUSY_BOX_IMAGE=busybox:1.36.1
