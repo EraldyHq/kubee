@@ -1,6 +1,6 @@
 # kube-app-env
 
-## Overview
+# DESCRIPTION
 
 Print the export environment statement for the app
 
@@ -8,7 +8,7 @@ Used in a direnv setup
 
 
 
-## Help
+# USAGE
 
 
 Note: This command is intended to be used in a `.envrc` file executed by `dirvenv`

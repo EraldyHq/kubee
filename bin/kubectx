@@ -1,0 +1,36 @@
+#!/bin/bash
+
+
+KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA=${KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA:-}
+if [ "$KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA" == "" ]; then
+  KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA=
+fi
+
+kube::config(){
+
+  cat <<-EOF
+apiVersion: v1
+clusters:
+  - name: default
+    cluster:
+      certificate-authority-data: $KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA
+      server: $KUBE_X_CLUSTER_SERVER
+contexts:
+  - context:
+      cluster: default
+      namespace: $KUBE_X_NAMESPACE
+      user: default
+    name: $KUBE_X_NAME
+current-context: beau@hetzner
+kind: Config
+preferences: {}
+users:
+  - name: default
+    user:
+      client-certificate-data: $KUBE_X_CLIENT_CERTIFICATE_DATA
+      client-key-data: $KUBE_X_CLIENT_KEY_DATA
+EOF
+
+}
+
+kubectl --kubeconfig <(kube::config) "$@"

@@ -1,5 +1,4 @@
 #!/bin/bash
-# @name kube-app-file-explorer
 # @brief Explore the volume of a pod via SCP/SFTP
 # @description
 #     This script:
