@@ -1,31 +1,85 @@
 #!/bin/bash
 
+set -Eeuo pipefail
+# shellcheck source=./bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+error::set_trap
+# shellcheck source=./bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=./bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 
-KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA=${KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA:-}
-if [ "$KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA" == "" ]; then
-  KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA=
+synopsis(){
+  cat <<EOF
+\`\`\`bash
+$(basename "$0") [-n|--namespace namespaceName] [kubectl args]
+\`\`\`
+
+The namespace is mandatory. It should be given via:
+
+* the \`KUBE_X_NAMESPACE\`
+* or the \`-n|--namespace\` flag
+EOF
+}
+
+if [ "${1:-}" == "synopsis " ]; then
+  synopsis
+  exit
 fi
+
+args=()
+KUBE_X_NAMESPACE=${KUBE_X_NAMESPACE:-}
+while [[ $# -gt 0 ]]
+do
+   if [[ "$1" =~ "-n"|"--namespace" ]]; then
+     shift
+     KUBE_X_NAMESPACE="$1"
+    else
+    args+=("$1")
+   fi
+   shift
+done
+
+
+if [ "${KUBE_X_NAMESPACE:-}" == "" ]; then
+  doc::help synopsis
+  echo::err "The KUBE_X_NAMESPACE env is not defined. You can also defined it inline with the '-n' flag"
+  exit 1
+fi
+
+
+# Env
+KUBE_X_USER=${KUBE_X_USER:-"default"}
+KUBE_X_CLUSTER=${KUBE_X_CLUSTER:-"default"}
+KUBE_X_CONTEXT_NAME=${KUBE_X_CONTEXT_NAME:-"$KUBE_X_USER@$KUBE_X_CLUSTER/$KUBE_X_NAMESPACE"}
+KUBE_X_PASS_HOME="kube-x"
+
+# Cert
+KUBE_X_CLIENT_CERTIFICATE_DATA=$(pass "$KUBE_X_PASS_HOME/users/$KUBE_X_USER/client-certificate-data")
+KUBE_X_CLIENT_KEY_DATA=$(pass "$KUBE_X_PASS_HOME/users/$KUBE_X_USER/client-key-data")
+KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA=$(pass "$KUBE_X_PASS_HOME/clusters/$KUBE_X_CLUSTER/certificate-authority-data")
+KUBE_X_CLUSTER_SERVER=$(pass "$KUBE_X_PASS_HOME/clusters/$KUBE_X_CLUSTER/server")
 
 kube::config(){
 
   cat <<-EOF
 apiVersion: v1
 clusters:
-  - name: default
+  - name: $KUBE_X_CLUSTER
     cluster:
       certificate-authority-data: $KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA
       server: $KUBE_X_CLUSTER_SERVER
 contexts:
   - context:
-      cluster: default
+      cluster: $KUBE_X_CLUSTER
       namespace: $KUBE_X_NAMESPACE
-      user: default
-    name: $KUBE_X_NAME
-current-context: beau@hetzner
+      user: $KUBE_X_USER
+    name: $KUBE_X_CONTEXT_NAME
+current-context: $KUBE_X_CONTEXT_NAME
 kind: Config
 preferences: {}
 users:
-  - name: default
+  - name: $KUBE_X_USER
     user:
       client-certificate-data: $KUBE_X_CLIENT_CERTIFICATE_DATA
       client-key-data: $KUBE_X_CLIENT_KEY_DATA
@@ -33,4 +87,4 @@ EOF
 
 }
 
-kubectl --kubeconfig <(kube::config) "$@"
+kubectl --kubeconfig <(kube::config) "${args[@]}"
