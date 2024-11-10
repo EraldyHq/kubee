@@ -8,10 +8,6 @@
 #
 #
 
-set -Eeuo pipefail
-
-source bashlib-error.sh
-error::set_trap
 
 usage(){
 
@@ -35,6 +31,11 @@ set -Eeuo pipefail
 source bashlib-echo.sh
 source bashlib-error.sh
 error::set_trap
+
+if [[ "${1:-}" == "synopsis" ]]; then
+  usage
+  exit
+fi
 
 ######################
 # Main

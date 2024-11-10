@@ -15,10 +15,10 @@ error::set_trap
 usage(){
 
   echo ""
-  echo "Get the events of an app"
+  echo "Get the events of an app or namespace"
   echo ""
   echo '```bash'
-  echo "$(basename "$0") [app name]"
+  echo "$(basename "$0") --scope [namespace|app] "
   echo '```'
   # shellcheck disable=SC2016
   echo 'where `app name` is'
@@ -39,6 +39,11 @@ error::set_trap
 # Main
 ######################
 
+if [[ "${1:-}" == "synopsis" ]]; then
+  usage
+  exit
+fi
+
 # Check if app is provided
 APP_NAME=${1:-$KUBE_APP_NAME}
 if [ "$APP_NAME" == "" ]; then
@@ -53,21 +58,35 @@ if [[ $APP_NAME =~ -h|help ]]; then
   exit
 fi
 
-APP_NAME=$1
-echo "Getting pod name"
-read -r POD_NAME NS_NAME <<< "$(kube::get_resource_by_app_name "$APP_NAME" pod)"
 
-if [ "$POD_NAME" == "" ]; then
-    echo::err "No pod found with the label $(kube::get_app_label "$APP_NAME")"
-    exit 1
+SCOPE="app"
+if [ $SCOPE == "app" ]; then
+
+  APP_NAME=$1
+  echo "Getting pod name"
+  read -r POD_NAME NS_NAME <<< "$(kube::get_resource_by_app_name "$APP_NAME" pod)"
+
+  if [ "$POD_NAME" == "" ]; then
+      echo::err "No pod found with the label $(kube::get_app_label "$APP_NAME")"
+      exit 1
+  fi
+
+  echo "Getting pod events"
+  # Note: To see what fields are possible you can use kubectl describe on any event.
+  COMMAND="kubectl get event --namespace $NS_NAME --field-selector involvedObject.name=$POD_NAME"
+  echo::info "Executing: $COMMAND"
+  eval "$COMMAND"
+
+  echo ""
+  echo "Note: If there is no event, check the namespace events"
+  exit
 fi
 
-echo "Getting pod events"
-# Note: To see what fields are possible you can use kubectl describe on any event.
-COMMAND="kubectl get event --namespace $NS_NAME --field-selector involvedObject.name=$POD_NAME"
+COMMAND="kubectl get event --namespace $NS_NAME"
 echo::info "Executing: $COMMAND"
 eval "$COMMAND"
+echo::success "Done"
 
-echo ""
-echo "Note: If there is no event, check the namespace events"
+
+
 

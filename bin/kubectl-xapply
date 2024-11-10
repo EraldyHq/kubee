@@ -35,14 +35,19 @@ EOF
 # Main
 ######################
 
+if [[ "${1:-}" == "synopsis" ]]; then
+  synopsis
+  exit
+fi
+
 if [ -z "$1" ]; then
-    doc::help
+    doc::help synopsis
     echo:err "The app name is mandatory"
     exit 1
 fi
 
 if [[ "$1" =~ "-h"|"--help"|"help" ]]; then
-  doc::help
+  doc::help synopsis
   exit 0
 fi
 

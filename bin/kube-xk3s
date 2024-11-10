@@ -7,6 +7,7 @@
 
 set -Eeuo pipefail
 source bashlib-error.sh
+source bashlib-echo.sh
 error::set_trap
 
 # Where all PKI material are stored
@@ -32,6 +33,11 @@ usage(){
   echo "All certs should be relative name (This script adds the directory: $TLS_HOME)"
 
 }
+
+if [[ "${1:-}" == "synopsis" ]]; then
+  usage
+  exit
+fi
 
 # Help ?
 HELP=${1:-}

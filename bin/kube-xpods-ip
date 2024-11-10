@@ -28,6 +28,11 @@ usage(){
 
 }
 
+if [[ "${1:-}" == "synopsis" ]]; then
+  usage
+  exit
+fi
+
 # Help ?
 NODE_NAME=${1:-}
 if [[ $NODE_NAME =~ -h|help ]]; then

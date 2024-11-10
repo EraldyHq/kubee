@@ -44,6 +44,11 @@ synopsis(){
 # Main
 ######################
 
+if [[ "${1:-}" == "synopsis" ]]; then
+  synopsis
+  exit
+fi
+
 # Set
 APP_NAME=""
 SHELL_NAME=""
@@ -77,14 +82,14 @@ done
 # Check if the app name is provided
 if [ "$APP_NAME" == "" ]; then
     if ! APP_NAME=$(kube::get_app_name_from_env); then
-      doc::help
+      doc::help synopsis
       echo::err "An app name was not found"
       exit 1
     fi
 fi
 
 if [[ "$APP_NAME" =~ "-h"|"help"|"--help" ]]; then
-  doc::help
+  doc::help synopsis
   exit
 fi
 

@@ -63,9 +63,15 @@ usage(){
 
 
 
-CURRENT_DIRECTORY_NAME=$(basename `pwd`)
+CURRENT_DIRECTORY_NAME=$(basename "$PWD")
 KUBE_APP_NAME=${1:-"$CURRENT_DIRECTORY_NAME"}
 KUBE_APP_NAMESPACE=${2:-"$KUBE_APP_NAME"}
+
+# Help ?
+if [[ "$KUBE_APP_NAME" = "synopsis" ]]; then
+  usage
+  exit 0
+fi
 
 # Help ?
 if [[ "$KUBE_APP_NAME" =~ -h|--help|help ]]; then

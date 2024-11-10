@@ -9,23 +9,23 @@ A library of Kubernetes Utilities eXtension
 ## List and documentation
 
 
-* [kube-x-apply](docs/bin/kube-x-apply) - apply a kustomize app (ie `kustomize apply`)
-* [kube-x-shell](docs/bin/kube-x-shell) - get a shell into an app or your cluster
-* [kube-x-env](docs/bin/kube-x-env.md) - print the environment configuration of an app 
-* [kube-x-events](docs/bin/kube-x-events.md) - shows the events of an app
-* [kube-x-file-explorer](docs/bin/kube-x-file-explorer.md) - Explore the files of an app via SCP/SFTP
-* [kube-x-logs](docs/bin/kube-x-logs.md) - print the logs of pods by app name
-* [kube-x-pods](docs/bin/kube-x-pods.md) - watch/list the pods of an app
-* [kube-x-restart](docs/bin/kube-x-restart.md) - execute a rollout restart
-* [kube-x-top](docs/bin/kube-x-top.md) - shows the top processes of an app
-* [kube-cert](docs/bin/kube-x-cert) - print the kubeconfig cert in plain text
-* [kube-cidr](docs/bin/kube-x-cidr) - print the cidr by pods
-* [kube-k3s](docs/bin/kube-x-cidr) - collection of k3s utilities
+* [kubectl-xapply](docs/bin/kubectl-xapply) - apply a kustomize app (ie `kustomize apply`)
+* [kubectl-xshell](docs/bin/kubectl-xshell) - get a shell into an app or your cluster
+* [kube-x-env](docs/bin/kubectl-xenv) - print the environment configuration of an app 
+* [kube-x-events](docs/bin/kubectl-xevent) - shows the events of an app
+* [kube-x-file-explorer](docs/bin/kubectl-xvolume-explorer) - Explore the files of an app via SCP/SFTP
+* [kube-xlogs](docs/bin/kubectl-xlogs) - print the logs of pods by app name
+* [kube-xpods](docs/bin/kubectl-xpods) - watch/list the pods of an app
+* [kube-xrestart](docs/bin/kubectl-xrestart) - execute a rollout restart
+* [kube-xtop](docs/bin/kubectl-xtop) - shows the top processes of an app
+* [kube-xcert](build/docs/bin/kubectl-xcert.md) - print the kubeconfig cert in plain text
+* [kube-cidr](docs/bin/kubectl-xcidr) - print the cidr by pods
+* [kube-k3s](docs/bin/kubectl-xcidr) - collection of k3s utilities
 * [kube-memory](docs/bin/kube-x-memory) - print the cpu and memory used by pods
-* [kube-ns-current](docs/bin/kube-x-ns-current) - set or show the current namespace
-* [kube-ns-events](docs/bin/kube-x-ns-events) - show the event of a namespace
-* [kube-pods-ip](docs/bin/kube-x-pods-ip) - show the ip of pods
-* [kube-pvc-move](docs/bin/kube-x-pvc-move) - move a pvc (Automation not finished)
+* [kube-ns-current](docs/bin/kubectl-xns) - set or show the current namespace
+* [kube-ns-events](docs/bin/kubectl-xevents) - show the event of a namespace
+* [kube-pods-ip](docs/bin/kube-xpods-ip) - show the ip of pods
+* [kube-pvc-move](docs/bin/kube-xpvc-move) - move a pvc (Automation not finished)
 
 
 
@@ -55,7 +55,7 @@ In this configuration:
 * Each app expects a `kubeconfig` file located at `~/.kube/config-<app name>` with the default context set with the same app namespace
 * Each app directory have a `.envrc` that:
   * is run by `direnv` 
-  * sets the app environment via the [kube-x-env](docs/bin/kube-x-env.md) script
+  * sets the app environment via the [kube-x-env](docs/bin/kubectl-xenv) script
 ```bash
 # kube-x-env` is a direnv extension that set the name, namespace, kubeconfig and directory of an app as environment
 # so that you don't execute an app in a bad namespace, context ever. 

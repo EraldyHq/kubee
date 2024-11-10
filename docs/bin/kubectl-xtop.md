@@ -1,6 +1,6 @@
 # kube-top
 
-Shows the process inside a Pod
+Shows the CPU and memory process inside a Pod
 
 ## Overview
 
@@ -10,12 +10,6 @@ See als [ktop plugin](https://github.com/vladimirvivien/ktop)
 
 
 
-## Help
+## SYNOPSIS
 
-Usage:
-
-Shows the top process inside a Pod
-
-```bash
-kube-app-top <app name>
-```
+${SYNOPSIS}

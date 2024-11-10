@@ -9,7 +9,7 @@ set -Eeuo pipefail
 source bashlib-error.sh
 error::set_trap
 
-usage(){
+synopsis(){
   echo "Usage:"
   echo ""
   echo '```bash'
@@ -19,10 +19,15 @@ usage(){
 
 }
 
+if [[ "${1:-}" == "synopsis" ]]; then
+  synopsis
+  exit
+fi
+
 # Help ?
 HELP=${1:-}
 if [[ $HELP =~ -h|help ]]; then
-  usage
+  synopsis
   exit
 fi
 

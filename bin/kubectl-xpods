@@ -15,7 +15,7 @@ error::set_trap
 # Main
 ######################
 
-usage(){
+synopsis(){
   echo "Usage:"
   echo ""
   echo "Shows the pods of an app"
@@ -28,16 +28,22 @@ usage(){
 
 }
 
+# Synopsis
+if [[ "${1:-}" == "synopsis" ]]; then
+  synopsis
+  exit
+fi
+
 # Help ?
 APP_NAME=${1:-}
 if [[ $APP_NAME =~ -h|help ]]; then
-  usage
+  synopsis
   exit
 fi
 
 # Check if the app is provided
 if [ "$APP_NAME" == "" ]; then
-    usage
+    synopsis
     echo::err "The app name is mandatory"
     exit 1
 fi

@@ -20,7 +20,8 @@
 #
 #     See [pv-migrate](https://github.com/utkuozdemir/pv-migrate)
 
-if [[ $1 =~ -h|help ]]; then
+
+if [[ $1 =~ -h|help|"synopsis" ]]; then
   echo "This script need to be performed manually line by line"
   exit
 fi

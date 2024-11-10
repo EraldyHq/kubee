@@ -30,6 +30,11 @@ usage(){
 
 }
 
+if [[ "${1:-}" == "synopsis" ]]; then
+  usage
+  exit
+fi
+
 # Check if the app name is provided
 if [ -z "$1" ]; then
     usage

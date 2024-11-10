@@ -49,6 +49,11 @@ secret_synopsis(){
 }
 
 HELP=${1:-}
+if [[ $HELP == "synopsis" ]]; then
+  doc::help synopsis
+  exit
+fi
+
 if [[ $HELP =~ -h|--help|help ]]; then
   doc::help synopsis
   exit

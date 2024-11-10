@@ -9,6 +9,8 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
 # shellcheck source=./bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 
+
+
 synopsis(){
   cat <<EOF
 \`\`\`bash
@@ -22,7 +24,7 @@ The namespace is mandatory. It should be given via:
 EOF
 }
 
-if [ "${1:-}" == "synopsis " ]; then
+if [ "${1:-}" == "synopsis" ]; then
   synopsis
   exit
 fi

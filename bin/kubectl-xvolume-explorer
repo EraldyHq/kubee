@@ -39,6 +39,12 @@ usage(){
 
 }
 
+if [[ "${1:-}" == "synopsis" ]]; then
+  usage
+  exit
+fi
+
+
 # Args
 APP_NAME=${1:-}
 KUBE_PUBLIC_KEY=${KUBE_PUBLIC_KEY:-}

@@ -29,6 +29,11 @@ usage(){
 
 }
 
+if [[ "${1:-}" == "synopsis" ]]; then
+  usage
+  exit
+fi
+
 # Help ?
 APP_NAME=${1:-}
 if [[ $APP_NAME =~ -h|help ]]; then
@@ -94,4 +99,6 @@ while sleep $SLEEPING; do
 done
 
 
-
+# Note: Return the cpu and memory of pods
+# Show all pods cpu and memory
+# kubectl top pods -A

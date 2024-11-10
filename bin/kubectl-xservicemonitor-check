@@ -32,6 +32,11 @@ usage(){
 
 }
 
+if [[ "${1:-}" == "synopsis" ]]; then
+  usage
+  exit
+fi
+
 # Help ?
 APP_NAME=${1:-}
 if [[ $APP_NAME =~ -h|help ]]; then

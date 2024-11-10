@@ -14,7 +14,7 @@ error::set_trap
 # Main
 ######################
 
-usage(){
+synopsis(){
   echo "Usage:"
   echo ""
   echo "Get or set the current namespace in kubeconfig"
@@ -29,10 +29,16 @@ usage(){
   echo '* otherwise, get the current namespace'
 }
 
+# Synopsis
+if [[ "${1:-}" == "synopsis" ]]; then
+  synopsis
+  exit
+fi
+
 # Help ?
 NS_CURRENT=${1:-}
 if [[ $NS_CURRENT =~ -h|help ]]; then
-  usage
+  synopsis
   exit
 fi
 
