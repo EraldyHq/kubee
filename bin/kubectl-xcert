@@ -1,20 +1,20 @@
 #!/bin/bash
-# @name kube-cert
-# @brief Return the kubeconfig cert in plain text
-# @description
-#     Return the kubeconfig cert in plain text
-#
+
 
 set -Eeuo pipefail
-source bashlib-echo.sh
-source bashlib-error.sh
+# shellcheck source=./bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
 error::set_trap
+# shellcheck source=./bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=./bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 
-usage(){
+synopsis(){
 
   echo "Usage:"
   echo ''
-  echo 'Return the certs in plain text'
+  echo 'Return kubernetes certs in plain text'
   echo ''
   echo '```bash'
   # shellcheck disable=SC2005
@@ -22,50 +22,116 @@ usage(){
   echo '```'
   echo "where: command may be:"
   # shellcheck disable=SC2016
-  echo '  * `config` : Print the client certificate in the kubeconfig file'
+  echo '  * `config-client` : Print the client certificate chain found in the kubeconfig file'
+  # shellcheck disable=SC2016
+  echo '  * `config-cluster` : Print the cluster certificate authority in the kubeconfig file'
   # shellcheck disable=SC2016
   echo '  * `secret` : Print the client certificate in a secret'
 
 }
+
+secret_synopsis(){
+
+  echo "Usage:"
+  echo ''
+  echo 'Return the certs in plain text from a Kubernetes secret'
+  echo ''
+  echo '```bash'
+  # shellcheck disable=SC2005
+  echo "$(basename "$0") secret [-n|--namespace namespace] name"
+  echo '```'
+  echo "where: command may be:"
+  # shellcheck disable=SC2016
+  echo '  * `n` : The namespace (default to KUBE_X_NAMESPACE)'
+  # shellcheck disable=SC2016
+  echo '  * `name` : The secret name'
+
+}
+
 HELP=${1:-}
 if [[ $HELP =~ -h|--help|help ]]; then
-  usage
+  doc::help synopsis
   exit
 fi
 
 function print_cert_secret(){
+
+  SECRET_NAME=""
+  SECRET_NAMESPACE=${KUBE_X_NAMESPACE:-}
+  # The get secret command
+  GET_SECRET_COMMAND=("kubectl" "get" "secret" "-o" "jsonpath='{.data.tls\.crt}'")
+  args=$(getopt -l "namespace:" -o "n:" -- "$@")
+  # eval set to set the positional arguments back to $args
+  eval set -- "$args"
+  while [[ $# -gt 0 ]]
+  do
+     case "$1" in
+      "-n"|"--namespace")
+        shift
+        SECRET_NAMESPACE="$1"
+        shift
+        ;;
+      "--")
+        shift
+        ;;
+      *)
+        SECRET_NAME="$1"
+        break
+     esac
+  done
+
+  if [ "$SECRET_NAMESPACE" != "" ]; then
+      GET_SECRET_COMMAND+=("-n" "$SECRET_NAMESPACE")
+  fi
+  if [ "$SECRET_NAME" == "" ]; then
+    doc::help secret_synopsis
+    echo::err "A secret name is mandatory"
+    return 1
+  fi
+  GET_SECRET_COMMAND+=("$SECRET_NAME")
+
   # <() is a https://en.wikipedia.org/wiki/Process_substitution to give a file (ie URI)
-  SECRET_NAME=$1
-  SECRET_NAMESPACE=$2
-  openssl storeutl -noout -text <(kubectl get secret -n "$SECRET_NAMESPACE" "$SECRET_NAME" -o jsonpath='{.data.tls\.crt}' | base64 -d)
+  openssl storeutl -noout -text <("${GET_SECRET_COMMAND[@]}" | base64 -d)
+
 }
 
-function print_cert_kubeconfig(){
+function print_cert_client_kubeconfig(){
   # openssl storeutl permits to read a bundle. Take a file as input
-  openssl storeutl -noout -text <(grep 'client-certificate-data' "$HOME"/.kube/config | awk '{print $2}' | base64 -d)
+  # <() is a https://en.wikipedia.org/wiki/Process_substitution to give a file (ie URI)
+  openssl storeutl -noout -text <(kubectl config view --minify --raw --output 'jsonpath={..user.client-certificate-data}' | base64 -d)
 }
 
-args=$(getopt -l "no-header:" -o "s:h" -- "$@")
-# eval set to set the positional arguments back to $args
-eval set -- "$args"
+function print_cert_cluster_kubeconfig(){
+  # openssl storeutl permits to read a bundle. Take a file as input
+  # <() is a https://en.wikipedia.org/wiki/Process_substitution to give a file (ie URI)
+  openssl storeutl -noout -text <(kubectl config view --minify --raw --output 'jsonpath={..cluster.certificate-authority-data}' | base64 -d)
+}
 
-while [[ $# -gt 0 ]]
-do
-   case $1 in
-   "config")
-    print_cert_kubeconfig
-    exit
+COMMAND=${1:-}
+if [ "$COMMAND" == "" ]; then
+    doc::help synopsis
+    echo::err "A command is mandatory"
+    exit 1
+fi
+shift
+
+
+case "$COMMAND" in
+  "config-client")
+    print_cert_client_kubeconfig
+    ;;
+  "config-cluster")
+    print_cert_cluster_kubeconfig
     ;;
   "secret")
-    print_cert_secret "${args[@]}"
-    exit
+    print_cert_secret "$@" || error::exit $?
     ;;
   *)
-    usage
+    doc::help synopsis
     echo::err "command $1 not found"
     exit 1
-   esac
-done
+esac
+
 
 
 

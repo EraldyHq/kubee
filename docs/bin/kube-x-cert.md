@@ -1,22 +1,17 @@
-# kube-cert
+% kubectl-xcert(1) Version Latest | Print kubernetes certificates in plain text
 
-Return the kubeconfig cert in plain text
 
 ## Overview
 
 Return the kubeconfig cert in plain text
 
+## SYNOPSIS
 
+${SYNOPSIS}
 
-## Help
-
-Usage:
-
-Return the certs in plain text
+## Example
 
 ```bash
-kube-cert command
+export KUBECONFIG=~/.kube/config
+kubectl-xcert config-client
 ```
-where: command may be:
-  * `config` : Print the client certificate in the kubeconfig file
-  * `secret` : Print the client certificate in a secret

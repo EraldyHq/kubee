@@ -19,24 +19,47 @@ to set them automatically by App directory with direnv
 
 Executing:
 ```bash
-kube-app-env [<app name>] [<app namespace>]
-```
-will output:
-```bash
-export KUBECONFIG=xxx         # value=~/.kube/config-<App Name>
-export KUBE_APP_NAME=xxx      # value=App Name (Default to the current directory name)
-export KUBE_APP_NAMESPACE=xxx # value=App Namespace (Default to App Name if not set)
-export KUBE_APP_DIRECTORY=xxx # value=$KUBE_APP_HOME/<App Name>
+kube-app-env
 ```
 
 Envrc/Direnv Usage:
 In a `.envrc` file executed by `dirvenv`, you would set:
 ```bash
-eval (kube-app-env <app name> <app namespace>)
+eval (kube-app-env)
 ```
-Prerequisites:
-* The `$KUBE_APP_HOME` environment variable should be set to a directory that
-  contains kustomize applications
-
 
 To get the cluster and namespace in your prompt, check [kube-ps1](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/kube-ps1)
+
+# LIST
+
+
+## NAMESPACE
+
+```bash
+export KUBE_X_NAMESPACE=xxx     
+```
+The Namespace is defined in order by:
+* the `KUBE_X_NAMESPACE` env if set
+* the [KUBE_APP_NAME](#KUBE_APP_NAME) if the namespace exists, 
+* default ultimately to the config file namespace
+
+# ENV
+
+## KUBE_APP_NAME
+
+```bash
+export KUBE_X_APP_NAME=xxx
+``` 
+Default to the working directory name 
+
+## KUBE_APP_HOME
+
+The `$KUBE_APP_HOME` environment variable should be set to a directory 
+that contains applications.
+
+## KUBE_X_NAMESPACE
+
+The `KUBE_X_NAMESPACE` environment variable defines the [namespace](#namespace).
+
+
+
