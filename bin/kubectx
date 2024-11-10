@@ -48,17 +48,8 @@ if [ "${KUBE_X_NAMESPACE:-}" == "" ]; then
 fi
 
 
-# Env
-KUBE_X_USER=${KUBE_X_USER:-"default"}
-KUBE_X_CLUSTER=${KUBE_X_CLUSTER:-"default"}
-KUBE_X_CONTEXT_NAME=${KUBE_X_CONTEXT_NAME:-"$KUBE_X_USER@$KUBE_X_CLUSTER/$KUBE_X_NAMESPACE"}
-KUBE_X_PASS_HOME="kube-x"
-
-# Cert
-KUBE_X_CLIENT_CERTIFICATE_DATA=$(pass "$KUBE_X_PASS_HOME/users/$KUBE_X_USER/client-certificate-data")
-KUBE_X_CLIENT_KEY_DATA=$(pass "$KUBE_X_PASS_HOME/users/$KUBE_X_USER/client-key-data")
-KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA=$(pass "$KUBE_X_PASS_HOME/clusters/$KUBE_X_CLUSTER/certificate-authority-data")
-KUBE_X_CLUSTER_SERVER=$(pass "$KUBE_X_PASS_HOME/clusters/$KUBE_X_CLUSTER/server")
+# Get env
+eval "$(kubectx-env)"
 
 kube::config(){
 
@@ -83,6 +74,7 @@ users:
     user:
       client-certificate-data: $KUBE_X_CLIENT_CERTIFICATE_DATA
       client-key-data: $KUBE_X_CLIENT_KEY_DATA
+      token: $KUBE_X_CLIENT_TOKEN
 EOF
 
 }

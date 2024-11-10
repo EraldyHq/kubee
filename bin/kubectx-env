@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Env
+KUBE_X_USER=${KUBE_X_USER:-"default"}
+echo "KUBE_X_USER=$KUBE_X_USER"
+KUBE_X_CLUSTER=${KUBE_X_CLUSTER:-"default"}
+echo "KUBE_X_CLUSTER=$KUBE_X_CLUSTER"
+KUBE_X_CONTEXT_NAME=${KUBE_X_CONTEXT_NAME:-"$KUBE_X_USER@$KUBE_X_CLUSTER/$KUBE_X_NAMESPACE"}
+echo "KUBE_X_CONTEXT_NAME=$KUBE_X_CONTEXT_NAME"
+KUBE_X_PASS_HOME=${KUBE_X_PASS_HOME:-"kube-x"}
+echo "KUBE_X_PASS_HOME=$KUBE_X_PASS_HOME"
+
+# Client
+PASS_CLIENT_TOKEN_PATH="$KUBE_X_PASS_HOME/users/$KUBE_X_USER/client-token"
+# Token?
+if ! KUBE_X_CLIENT_TOKEN=$(pass "$PASS_CLIENT_TOKEN_PATH" 2>/dev/null); then
+  KUBE_X_CLIENT_TOKEN=""
+  PASS_CLIENT_CERT_PATH="$KUBE_X_PASS_HOME/users/$KUBE_X_USER/client-certificate-data"
+  if ! KUBE_X_CLIENT_CERTIFICATE_DATA=$(pass "$PASS_CLIENT_CERT_PATH" 2>/dev/null); then
+    echo::err "No client token or client certificate has been found in pass at $PASS_CLIENT_TOKEN_PATH and $PASS_CLIENT_CERT_PATH respectively"
+    exit 1
+  fi
+  # Private Key
+  PASS_CLIENT_KEY_DATA="$KUBE_X_PASS_HOME/users/$KUBE_X_USER/client-key-data"
+  if ! KUBE_X_CLIENT_KEY_DATA=$(pass "$PASS_CLIENT_KEY_DATA" 2>/dev/null); then
+    echo::err "No client key has been found in pass at $PASS_CLIENT_TOKEN_PATH and $PASS_CLIENT_CERT_PATH respectively"
+    exit 1
+  fi
+fi
+echo "KUBE_X_CLIENT_TOKEN=$KUBE_X_CLIENT_TOKEN"
+echo "KUBE_X_CLIENT_CERTIFICATE_DATA=$KUBE_X_CLIENT_CERTIFICATE_DATA"
+echo "KUBE_X_CLIENT_KEY_DATA=$KUBE_X_CLIENT_KEY_DATA"
+
+PASS_CLUSTER_CERT_PATH="$KUBE_X_PASS_HOME/clusters/$KUBE_X_CLUSTER/certificate-authority-data"
+if ! KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA=$(pass "$PASS_CLUSTER_CERT_PATH" 2>/dev/null); then
+  echo::err "No cluster certificate authority has been found in pass at $PASS_CLUSTER_CERT_PATH"
+  exit 1
+fi
+echo "KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA=$KUBE_X_CLUSTER_CERTIFICATE_AUTHORITY_DATA"
+
+PASS_CLUSTER_SERVER_PATH="$KUBE_X_PASS_HOME/clusters/$KUBE_X_CLUSTER/server"
+if ! KUBE_X_CLUSTER_SERVER=$(pass "$PASS_CLUSTER_SERVER_PATH" 2>/dev/null); then
+  echo::err "No cluster server has been found in pass at $PASS_CLUSTER_PASS_CLUSTER_SERVER_PATH"
+  exit 1
+fi
+echo "KUBE_X_CLUSTER_SERVER=$KUBE_X_CLUSTER_SERVER"
