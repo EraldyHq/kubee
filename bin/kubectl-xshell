@@ -16,28 +16,24 @@ error::set_trap
 
 synopsis(){
 
-  echo ""
-  echo "Get a shell into a pod or your cluster with busybox"
-  echo ""
-  echo '```bash'
-  echo "$(basename "$0") --shell <shell name> <app name>"
-  echo '```'
-  echo ""
-  echo "where:"
-  echo ""
-  # shellcheck disable=SC2016
-  echo '* `app name` default to the env `KUBE_APP_NAME` may be:'
-  # shellcheck disable=SC2016
-  echo '    * an app name (used with the label `app.kubernetes.io/name=<app name>` select the target pod)'
-  # shellcheck disable=SC2016
-  echo '    * or `busybox` to run a standalone busybox pod'
-  # shellcheck disable=SC2016
-  echo '* `shell name` may be:'
-  # shellcheck disable=SC2016
-  echo '  * a shell path (ie `bash`, `sh`, `bin/bash`)'
-  # shellcheck disable=SC2016
-  echo '  * or `ephemeral` to add busybox as an ephemeral container if your container app has no shell'
+cat <<EOF
 
+Get a shell into your application pod or your cluster with busybox
+
+\`\`\`bash
+$(basename "$0") [--shell|-s shellName [--namespace|-n namespace] <app name>
+\`\`\`
+
+where:
+
+* \`app name\` (Default to \`KUBE_X_APP_NAME\`) may be:
+    * an app name (used with the label \`app.kubernetes.io/name=<app name>\` to select the target pod)
+    * or \`busybox\` to run a standalone busybox pod
+* \`--shell|-s shell name\` may be:'
+  * a shell path (ie \`bash\`, \`sh\`, \`bin/bash\`)
+  * or \`ephemeral\` to add busybox as an ephemeral container if your container app has no shell
+* \`--namespace|-n namespace\` to override the default namespace
+EOF
 }
 
 ######################
@@ -50,15 +46,16 @@ if [[ "${1:-}" == "synopsis" ]]; then
 fi
 
 # Set
-APP_NAME=""
+KUBE_X_APP_NAME=""
 SHELL_NAME=""
 
 # Normalization
 # A shell option with an option argument
-args=$(getopt --longoptions "shell:"  --options "s:"  -- "$@")
+args=$(getopt --longoptions "shell:,help,namespace"  --options "s:hn"  -- "$@")
 # eval set to set the positional arguments back to $args
 eval set -- "$args"
 
+export KUBE_X_NAMESPACE
 # Loop
 while [[ $# -gt 0 ]]
 do
@@ -68,35 +65,31 @@ do
       SHELL_NAME=$1
       shift;
     ;;
+    "-h"|"--help")
+      doc::help synopsis
+      exit
+    ;;
+    "-n"|"--namespace")
+      shift
+      KUBE_X_NAMESPACE="$1"
+      shift
+    ;;
     --)
       # Starts argument
       shift
       ;;
     *)
-      APP_NAME=$1
+      KUBE_X_APP_NAME=$1
       shift
       ;;
   esac
 done
 
-# Check if the app name is provided
-if [ "$APP_NAME" == "" ]; then
-    if ! APP_NAME=$(kube::get_app_name_from_env); then
-      doc::help synopsis
-      echo::err "An app name was not found"
-      exit 1
-    fi
-fi
-
-if [[ "$APP_NAME" =~ "-h"|"help"|"--help" ]]; then
-  doc::help synopsis
-  exit
-fi
 
 
 # Set the known default shell
 if [ "$SHELL_NAME" == "" ]; then
-  case "$APP_NAME" in
+  case "$KUBE_X_APP_NAME" in
     "prometheus"|"vault")
       SHELL_NAME=/bin/sh;
       ;;
@@ -107,21 +100,22 @@ if [ "$SHELL_NAME" == "" ]; then
 fi
 
 
-kube::set_app_env_up "$APP_NAME"
-
-
 BUSY_BOX_IMAGE=busybox:1.36.1
-if [ "$APP_NAME" == "busybox" ]; then
-    kubectl run -it busybox-pod --image=$BUSY_BOX_IMAGE --restart=Never --rm -n default
+if [ "$KUBE_X_APP_NAME" == "busybox" ]; then
+    KUBE_X_NAMESPACE=${KUBE_X_NAMESPACE:-"default"}
+    echo::info "Starting busybox in the namespace ${KUBE_X_NAMESPACE}"
+    $KUBE_X_KUBECTL run -it busybox-pod --image=$BUSY_BOX_IMAGE --restart=Never --rm
     exit 0
 fi
 
+# Set the env
+eval "$(kubectl-xenv "$KUBE_X_APP_NAME")"
 
-echo::info "Getting Pod Name and Namespace for app $APP_NAME"
+echo::info "Getting Pod Name and Namespace for app $KUBE_X_APP_NAME"
 
-read -r POD_NAME POD_NAMESPACE <<< "$(kube::get_resource_by_app_name "$APP_NAME" pod)"
+read -r POD_NAME POD_NAMESPACE <<< "$(kube::get_resource_by_app_name "$KUBE_X_APP_NAME" pod)"
 if [ "$POD_NAME" == "" ]; then
-    echo::err "Pod not found with label $(kube::get_app_label "$APP_NAME")"
+    echo::err "Pod not found with label $(kube::get_app_label "$KUBE_X_APP_NAME")"
     exit 1
 fi
 

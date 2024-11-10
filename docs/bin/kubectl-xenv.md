@@ -1,65 +1,49 @@
-# kube-app-env
-
+% kubectl-xenv(1) Version Latest | Print the export environment variables
 # DESCRIPTION
 
-Print the export environment statement for the app
+Print the export environment statements.
 
-Used in a direnv setup
+# USAGE AND EXAMPLE
 
-
-
-# USAGE
-
-
-Note: This command is intended to be used in a `.envrc` file executed by `dirvenv`
-See the end section
-
-Usage: Print the environment variables of a Kubernetes App
-to set them automatically by App directory with direnv
-
-Executing:
-```bash
-kube-app-env
-```
-
-Envrc/Direnv Usage:
-In a `.envrc` file executed by `dirvenv`, you would set:
-```bash
-eval (kube-app-env)
-```
-
-To get the cluster and namespace in your prompt, check [kube-ps1](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/kube-ps1)
-
-# LIST
-
-
-## NAMESPACE
+This script is used by all `kube-x` scripts to set the [environment](#ENVIRONMENT)
 
 ```bash
-export KUBE_X_NAMESPACE=xxx     
+eval $(kubectl-xenv $APP_NAME)
 ```
-The Namespace is defined in order by:
-* the `KUBE_X_NAMESPACE` env if set
-* the [KUBE_APP_NAME](#KUBE_APP_NAME) if the namespace exists, 
-* default ultimately to the config file namespace
 
-# ENV
+# SYNOPSIS
 
-## KUBE_APP_NAME
+${SYNOPSIS}
+
+
+# ENVIRONMENT
+
+You can override the default environment values by creating a `.envrc` located
+in the app directory (ie `KUBE_X_APP_HOME/KUBE_X_APP_NAME`).
+
+
+## KUBE_X_APP_NAME
 
 ```bash
 export KUBE_X_APP_NAME=xxx
-``` 
-Default to the working directory name 
+```  
+* Default to the current directory name if it is below the [KUBE_X_APP_HOME](#KUBE_X_APP_HOME)
+* Mandatory Otherwise
 
-## KUBE_APP_HOME
+## KUBE_X_APP_HOME
 
-The `$KUBE_APP_HOME` environment variable should be set to a directory 
-that contains applications.
+The `$KUBE_X_APP_HOME` environment variable defines a directory that contains applications.
+
+It should be set in your `.bashrc`
 
 ## KUBE_X_NAMESPACE
 
-The `KUBE_X_NAMESPACE` environment variable defines the [namespace](#namespace).
+The `KUBE_X_NAMESPACE` environment variable defines the `namespace`.
+
+* Default to [KUBE_X_APP_NAME](#KUBE_X_APP_NAME) if it exists
+* Otherwise, to the `kubeconfig` current namespace
 
 
+# TIP
 
+To get the env in the prompt such as cluster and namespace, check [kube-ps1](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/kube-ps1)

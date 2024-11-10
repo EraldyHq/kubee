@@ -15,9 +15,6 @@ TLS_HOME=/var/lib/rancher/k3s/server/tls
 
 usage(){
 
-  echo "Usage:"
-  echo ""
-  echo ""
   echo '```bash'
   # shellcheck disable=SC2005
   echo "$(basename "$0") command args"
