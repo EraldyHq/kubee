@@ -101,10 +101,13 @@ if [ "$SHELL_NAME" == "" ]; then
   esac
 fi
 
-
-BUSY_BOX_IMAGE=busybox:1.36.1
+# Busy box is a special kind of app
+# That does have any pod or directory
 if [ "$KUBE_X_APP_NAME" == "busybox" ]; then
+    # Env for BusyBox
     KUBE_X_NAMESPACE=${KUBE_X_NAMESPACE:-"default"}
+    BUSY_BOX_IMAGE=busybox:1.36.1
+    KUBE_X_KUBECTL=${KUBE_X_KUBECTL:-"kubectl"}
     echo::info "Starting busybox in the namespace ${KUBE_X_NAMESPACE}"
     $KUBE_X_KUBECTL run -it busybox-pod --image=$BUSY_BOX_IMAGE --restart=Never --rm
     exit 0
@@ -128,7 +131,7 @@ echo::info "Pod Namespace: $POD_NAMESPACE"
 
 if [ "$SHELL_NAME" == "ephemeral" ]; then
   echo::info "Starting a ephemeral busybox shell on the pod $POD_NAMESPACE/$POD_NAME"
-  kubectl debug -it --image=$BUSY_BOX_IMAGE -n "$POD_NAMESPACE" --target="$POD_NAME" ephemeral-shell
+  $KUBE_X_KUBECTL debug -it --image=$BUSY_BOX_IMAGE -n "$POD_NAMESPACE" --target="$POD_NAME" ephemeral-shell
   exit 0
 fi
 
