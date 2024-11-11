@@ -8,7 +8,7 @@
 
 # shellcheck source=./bashlib-error.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
-error::strict_mode
+error::set_strict_mode
 error::set_trap
 # shellcheck source=./bashlib-echo.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
