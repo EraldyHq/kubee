@@ -6,9 +6,9 @@
 #   Used in a direnv setup
 
 
-set -Eeuo pipefail
 # shellcheck source=./bashlib-error.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+error::strict_mode
 error::set_trap
 # shellcheck source=./bashlib-echo.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
@@ -30,19 +30,31 @@ test_connection(){
   fi
   echo::err "No connection could be made with the cluster"
 
-  if [ -z "$KUBECONFIG" ]; then
-      echo::err "Note: No KUBECONFIG env found"
-  else
-    if [ ! -f "$KUBECONFIG" ]; then
-      echo::err "The KUBECONFIG env file ($KUBECONFIG) does not exist"
-    else
-      echo::info "The file ($KUBECONFIG) may have bad cluster info"
-      echo::err "Note: The config is:"
-      kubectl config view
-      echo::err "We got the following output"
-      echo::err "$OUTPUT"
-    fi
-  fi
+  case "$KUBE_X_KUBECTL" in
+    "kubectl")
+      if [ -z "$KUBECONFIG" ]; then
+            echo::err "Note: No KUBECONFIG env found"
+      else
+          if [ ! -f "$KUBECONFIG" ]; then
+            echo::err "The KUBECONFIG env file ($KUBECONFIG) does not exist"
+          else
+            echo::info "The file ($KUBECONFIG) may have bad cluster info"
+            echo::err "Note: The config is:"
+            kubectl config view
+          fi
+      fi
+      ;;
+    "kubectx")
+        echo::err "Note: The kubectx config is:"
+        kubectx config view --raw
+      ;;
+    *)
+        echo::err "The KUBE_X_KUBECTL value $KUBE_X_KUBECTL is unknown";
+        ;;
+  esac
+
+  echo::err "We got the following output from the connection"
+  echo::err "$OUTPUT"
   return 1
 
 }
@@ -68,11 +80,6 @@ EOF
 
 KUBE_X_APP_NAME=${1:-}
 
-if [ "${KUBE_X_APP_HOME:-}" == "" ]; then
-  echo:err "The KUBE_X_APP_HOME environment variable is mandatory and was not found"
-  echo:err "Add it in your bashrc or OS environment variables"
-  exit 1
-fi
 
 # Synopsis
 if [[ "$KUBE_X_APP_NAME" = "synopsis" ]]; then
@@ -86,15 +93,32 @@ if [[ "$KUBE_X_APP_NAME" =~ -h|--help|help ]]; then
   exit 0
 fi
 
+###########################
+# Kube App home
+###########################
+if [ "${KUBE_X_APP_HOME:-}" == "" ]; then
+  echo::err "The KUBE_X_APP_HOME environment variable is mandatory and was not found"
+  echo::err "Add it in your bashrc or OS environment variables"
+  exit 1
+fi
+
 
 ###########################
 # App Name
 ###########################
 if [ "$KUBE_X_APP_NAME" == "" ]; then
-  if ! KUBE_X_APP_NAME=$(path::relative_to "$PWD" "$KUBE_X_APP_HOME"); then
+  IFS=":"; for KUBE_X_HOME in $KUBE_X_APP_HOME; do
+      if [ ! -d "$KUBE_X_HOME" ]; then
+        echo::warn "The HOME path ($KUBE_X_HOME) set in KUBE_X_APP_HOME does not exist or is not a directory"
+        continue
+      fi
+      KUBE_X_APP_NAME=$(path::relative_to "$PWD" "$KUBE_X_HOME") || continue
+      break
+  done
+  if [ "$KUBE_X_APP_NAME" == "" ]; then
       echo::err "App name could not be determined."
       echo::err "* No app name was passed as parameter"
-      echo::err "* The working directory ($PWD) is not under the KUBE_X_APP_HOME ($KUBE_X_APP_HOME)"
+      echo::err "* The working directory ($PWD) is not under a KUBE_X_APP_HOME path ($KUBE_X_APP_HOME)"
       exit 1
   fi
 fi
@@ -104,12 +128,20 @@ echo "export KUBE_X_APP_NAME=$KUBE_X_APP_NAME"
 ###########################
 # envrc: Load the user env
 ###########################
-# App Dir
-KUBE_X_APP_DIR=$KUBE_X_APP_HOME/$KUBE_X_APP_NAME
-if [ ! -d "$KUBE_X_APP_DIR" ]; then
-  echo::err "The app directory $KUBE_X_APP_DIR does not exist"
+KUBE_X_APP_DIR=""
+IFS=":"; for KUBE_X_HOME in $KUBE_X_APP_HOME; do
+  APP_DIR=$KUBE_X_HOME/$KUBE_X_APP_NAME
+  if [ -d "$APP_DIR" ]; then
+    KUBE_X_APP_DIR="$APP_DIR"
+    break
+  fi
+done
+if [ "$KUBE_X_APP_DIR" == "" ]; then
+  echo::err "No sub-directory with the name $KUBE_X_APP_NAME was found under the KUBE_X_APP_HOME paths ($KUBE_X_APP_HOME)"
   exit 1
 fi
+echo "export KUBE_X_APP_DIR=$KUBE_X_APP_DIR"
+
 # Go to the app dir and pop at err and exit
 pushd "$KUBE_X_APP_DIR" >/dev/null || return 1
 bash::trap 'popd >/dev/null' EXIT # EXIT execute also on error

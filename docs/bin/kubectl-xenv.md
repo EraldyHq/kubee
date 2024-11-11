@@ -8,8 +8,12 @@ Print the export environment statements.
 This script is used by all `kube-x` scripts to set the [environment](#ENVIRONMENT)
 
 ```bash
-eval $(kubectl-xenv $APP_NAME)
+KUBE_X_ENV=$(kubectl-xenv "$KUBE_X_APP_NAME")
+eval "$KUBE_X_ENV"
 ```
+
+Note: The substitution is not in the eval because bash would not stop the script otherwise
+even with the `-Ee` options.
 
 # SYNOPSIS
 
@@ -32,9 +36,16 @@ export KUBE_X_APP_NAME=xxx
 
 ## KUBE_X_APP_HOME
 
-The `$KUBE_X_APP_HOME` environment variable defines a directory that contains applications.
+The `$KUBE_X_APP_HOME` environment variable defines a path environment variable where each path is a directory that contains 
+applications.
 
 It should be set in your `.bashrc`
+
+Example:
+```bash
+export KUBE_X_APP_HOME=$HOME/my-kube-apps:$HOME/my-other-kube-apps
+```
+
 
 ## KUBE_X_NAMESPACE
 

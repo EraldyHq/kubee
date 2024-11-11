@@ -1,18 +1,20 @@
 #!/bin/bash
-# @name kube-bash
-# @brief Start bash in a pod via bash
-# @description
-#     Connect with a shell (bash by default) to a pod by app name
-#
-#
 
-set -Eeuo pipefail
-source bashlib-echo.sh
-source bashlib-doc.sh
-source bashlib-bash.sh
-source bashlib-kube.sh
-source bashlib-error.sh
+
+# shellcheck source=./bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+error::strict_mode
 error::set_trap
+# shellcheck source=./bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=./bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+# shellcheck source=./bashlib-bash.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
+# shellcheck source=./bashlib-kube.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-kube.sh"
+
+
 
 synopsis(){
 
@@ -109,7 +111,9 @@ if [ "$KUBE_X_APP_NAME" == "busybox" ]; then
 fi
 
 # Set the env
-eval "$(kubectl-xenv "$KUBE_X_APP_NAME")"
+# The substitution is not in the eval because bash would not stop the script otherwise
+KUBE_X_ENV=$(kubectl-xenv "$KUBE_X_APP_NAME") || exit $?
+eval "$KUBE_X_ENV"
 
 echo::info "Getting Pod Name and Namespace for app $KUBE_X_APP_NAME"
 
@@ -130,4 +134,4 @@ fi
 
 echo::info "Starting the shell $SHELL_NAME on the pod $POD_NAMESPACE/$POD_NAME"
 # Note: -c ${CONTAINER_NAME} is mandatory for pods that have more than a single container.
-kubectl exec -it "$POD_NAME" -n "$POD_NAMESPACE" -- "$SHELL_NAME"
+$KUBE_X_KUBECTL exec -it "$POD_NAME" -n "$POD_NAMESPACE" -- "$SHELL_NAME"
