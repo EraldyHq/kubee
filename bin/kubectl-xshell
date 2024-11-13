@@ -105,24 +105,12 @@ fi
 # That does have any pod or directory
 if [ "$KUBE_X_APP_NAME" == "busybox" ]; then
 
-    KUBE_X_BUSY_BOX_IMAGE="alpine/curl:8.9.1"
-    # KUBE_X_BUSY_BOX_IMAGE=busybox:1.36.1
-    # https://busybox.net/ is a
-    # lightweight GNU environment any small or embedded system
-    # where a subsets of the clients are reimplemented
-    # Example: wget: https://git.busybox.net/busybox/tree/networking/wget.c?h=1_32_stable
-    # Busybox does not have curl
-    #
-    # A solution is to use alpine instead
-    # It's busybox + a minimal package manager and libc implementation such that you can trivially do
-    # `apk add --no-cache curl`
-    # https://github.com/docker-library/busybox/issues/47
-
+    KUBE_X_BUSYBOX_IMAGE=${KUBE_X_BUSYBOX_IMAGE:-}
     # Env for BusyBox
     KUBE_X_NAMESPACE=${KUBE_X_NAMESPACE:-"default"}
     KUBE_X_KUBECTL=${KUBE_X_KUBECTL:-"kubectl"}
     echo::info "Starting busybox in the namespace ${KUBE_X_NAMESPACE}"
-    $KUBE_X_KUBECTL run -it busybox-pod --image=$KUBE_X_BUSY_BOX_IMAGE --restart=Never --rm
+    $KUBE_X_KUBECTL run -it busybox-pod --image="$KUBE_X_BUSYBOX_IMAGE" --restart=Never --rm
     exit 0
 fi
 
