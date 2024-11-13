@@ -102,24 +102,21 @@ if [ "$SHELL_NAME" == "" ]; then
 fi
 
 # Busybox is not a real app
+KUBE_X_APP_NAME=""
 if [ "$APP_NAME" != "busybox" ]; then
   KUBE_X_APP_NAME=$APP_NAME
 fi
 
 # Set the env
 # The substitution is not in the eval because bash would not stop the script otherwise
-KUBE_X_ENV=$(kubectl-xenv "$KUBE_X_APP_NAME") || exit $?
+KUBE_X_ENV=$(source kubectl-xenv "$KUBE_X_APP_NAME") || exit $?
 eval "$KUBE_X_ENV"
 
 # Busy box is a special kind of app
 # That does have any pod or directory
-if [ "$KUBE_X_APP_NAME" == "busybox" ]; then
+if [ "$APP_NAME" == "busybox" ]; then
 
-
-    # Env for BusyBox
-    KUBE_X_APP_NAMESPACE=${KUBE_X_APP_NAMESPACE:-"default"}
-
-    echo::info "Starting busybox in the namespace ${KUBE_X_APP_NAMESPACE}"
+    echo::info "Starting busybox ${KUBE_X_BUSYBOX_IMAGE} in the namespace ${KUBE_X_CONNECTION_NAMESPACE}"
     $KUBE_X_KUBECTL run -it busybox-pod --image="$KUBE_X_BUSYBOX_IMAGE" --restart=Never --rm
     exit 0
 
