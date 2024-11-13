@@ -42,7 +42,7 @@ secret_synopsis(){
   echo '```'
   echo "where: command may be:"
   # shellcheck disable=SC2016
-  echo '  * `n` : The namespace (default to KUBE_X_NAMESPACE)'
+  echo '  * `n` : The namespace (default to KUBE_X_APP_NAMESPACE)'
   # shellcheck disable=SC2016
   echo '  * `name` : The secret name'
 
@@ -62,7 +62,7 @@ fi
 function print_cert_secret(){
 
   SECRET_NAME=""
-  SECRET_NAMESPACE=${KUBE_X_NAMESPACE:-}
+  SECRET_NAMESPACE=${KUBE_X_APP_NAMESPACE:-}
   # The get secret command
   GET_SECRET_COMMAND=("kubectl" "get" "secret" "-o" "jsonpath='{.data.tls\.crt}'")
   args=$(getopt -l "namespace:" -o "n:" -- "$@")

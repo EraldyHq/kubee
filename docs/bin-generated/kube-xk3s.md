@@ -1,20 +1,14 @@
-# kube-k3s
+% kube-xk3s(1) Version Latest | k3s specific scripts
+# DESCRIPTION
 
-k3s specific scripts
-
-## Overview
 
 K3s specific scripts that should be used on the server
 
 
-
-## Help
-
-Usage:
-
+# SYNOPSIS
 
 ```bash
-kube-k3s command args
+kube-xk3s command args
 ```
 where: command may be:
   * `certs_expiration` : Print the certificates and their expiration date
@@ -22,3 +16,4 @@ where: command may be:
   * `cert_secret_print` : Print a kubernetes TLS cert secret
 
 All certs should be relative name (This script adds the directory: /var/lib/rancher/k3s/server/tls)
+

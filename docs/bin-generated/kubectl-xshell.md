@@ -1,28 +1,27 @@
-# kube-bash
+% kube-xshell(1) Version Latest | Start a shell in a pod
+
+
+# DESCRIPTION
 
 Start a shell in a pod
 
-## Overview
-
 Connect with a shell (bash by default) to a pod by app name
 
+# SYNOPSIS
 
 
-## Help
-
-Usage:
-
-Get a shell into a pod or your cluster
+Get a shell into your application pod or your cluster with busybox
 
 ```bash
-kube-app-bash --shell <shell name> <app name>
+kubectl-xshell [--shell|-s shellName [--namespace|-n namespace] <app name>
 ```
 
 where:
-* `app name` default to the env `KUBE_APP_NAME` may be:
-    * an app name (used with the label `app.kubernetes.io/name=<app name>` select the target pod)
-    * or `busybox` to run a standalone busybox pod
-* `shell name` may be:
-  * a shell path (ie `bash`, `sh`, `bin/bash`)
-  * or `ephemeral` to add busybox as an ephemeral container if your container has no shell
 
+* `app name` (Default to `KUBE_X_APP_NAME`) may be:
+    * an app name (used with the label `app.kubernetes.io/name=<app name>` to select the target pod)
+    * or `busybox` to run a standalone busybox pod
+* `--shell|-s shell name` may be:'
+  * a shell path (ie `bash`, `sh`, `bin/bash`)
+  * or `ephemeral` to add busybox as an ephemeral container if your container app has no shell
+* `--namespace|-n namespace` to override the default namespace

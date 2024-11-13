@@ -15,7 +15,7 @@ A library of Kubernetes Utilities eXtension
 * [kube-x-events](docs/bin/kubectl-xevent) - shows the events of an app
 * [kube-x-file-explorer](docs/bin/kubectl-xvolume-explorer) - Explore the files of an app via SCP/SFTP
 * [kube-xlogs](docs/bin/kubectl-xlogs) - print the logs of pods by app name
-* [kube-xpods](docs/bin/kubectl-xpods) - watch/list the pods of an app
+* [kube-xpods](docs/bin/kubectl-xpod) - watch/list the pods of an app
 * [kube-xrestart](docs/bin/kubectl-xrestart) - execute a rollout restart
 * [kube-xtop](docs/bin/kubectl-xtop) - shows the top processes of an app
 * [kube-xcert](docs/bin-generated/kubectl-xcert.md) - print the kubeconfig cert in plain text

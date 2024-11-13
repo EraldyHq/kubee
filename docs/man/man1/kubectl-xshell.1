@@ -14,30 +14,41 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "" "" "" "" ""
+.TH "kube-xshell" "1" "" "Version Latest" "Start a shell in a pod"
 .hy
-.SH kube-bash
+.SH DESCRIPTION
 .PP
 Start a shell in a pod
-.SS Overview
 .PP
 Connect with a shell (bash by default) to a pod by app name
-.SS Help
+.SH SYNOPSIS
 .PP
-Usage:
-.PP
-Get a shell into a pod or your cluster
+Get a shell into your application pod or your cluster with busybox
 .IP
 .nf
 \f[C]
-kube-app-bash --shell <shell name> <app name>
+kubectl-xshell [--shell|-s shellName [--namespace|-n namespace] <app name>
 \f[R]
 .fi
 .PP
-where: * \f[V]app name\f[R] default to the env \f[V]KUBE_APP_NAME\f[R]
-may be: * an app name (used with the label
-\f[V]app.kubernetes.io/name=<app name>\f[R] select the target pod) * or
-\f[V]busybox\f[R] to run a standalone busybox pod * \f[V]shell name\f[R]
-may be: * a shell path (ie \f[V]bash\f[R], \f[V]sh\f[R],
-\f[V]bin/bash\f[R]) * or \f[V]ephemeral\f[R] to add busybox as an
-ephemeral container if your container has no shell
+where:
+.IP \[bu] 2
+\f[V]app name\f[R] (Default to \f[V]KUBE_X_APP_NAME\f[R]) may be:
+.RS 2
+.IP \[bu] 2
+an app name (used with the label
+\f[V]app.kubernetes.io/name=<app name>\f[R] to select the target pod)
+.IP \[bu] 2
+or \f[V]busybox\f[R] to run a standalone busybox pod
+.RE
+.IP \[bu] 2
+\f[V]--shell|-s shell name\f[R] may be:\[cq]
+.RS 2
+.IP \[bu] 2
+a shell path (ie \f[V]bash\f[R], \f[V]sh\f[R], \f[V]bin/bash\f[R])
+.IP \[bu] 2
+or \f[V]ephemeral\f[R] to add busybox as an ephemeral container if your
+container app has no shell
+.RE
+.IP \[bu] 2
+\f[V]--namespace|-n namespace\f[R] to override the default namespace

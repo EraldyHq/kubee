@@ -7,11 +7,12 @@
 
 * `KUBE_X_USER`: the username (default to `default`)
 * `KUBE_X_CLUSTER`: the cluster name (default to `default`)
-* `KUBE_X_NAMESPACE`: the namespace (mandatory) - can be passed via the `-n` option
+
 
 # DERIVED
 
-* `KUBE_X_CONTEXT_NAME`: the context name in the config file. Derived as `$KUBE_X_USER@$KUBE_X_CLUSTER/$KUBE_X_NAMESPACE`
+* `KUBE_X_CONNECTION_NAMESPACE`: the connection namespace. See [how the namespace is determined](kubectl-xenv.md#namespace-order-of-precedence)
+* `KUBE_X_CONTEXT_NAME`: the context name in the config file. Derived as `$KUBE_X_USER@$KUBE_X_CLUSTER/$KUBE_X_APP_NAMESPACE`
 * `KUBE_X_PASS_HOME`: the home directory in pass
 
 # Location of secret

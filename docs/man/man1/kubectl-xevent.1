@@ -14,22 +14,20 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "" "" "" "" ""
+.TH "kubectl-xevent" "1" "" "Version Latest" "Returns events"
 .hy
-.SH kube-app-events
+.SH DESCRIPTION
 .PP
-Returns the events of an app
-.SS Overview
+Returns the events of: * an app (of the pods that belongs to an app).
+The pods are searched with the label
+\f[V]app.kubernetes.io/name=<app name>\f[R] * or a namespace
+.SH SYNOPSIS
 .PP
-Returns the events of an pods that belongs to an app The pods are
-searched with the label \f[V]app.kubernetes.io/name=<app name>\f[R]
-.SS Help
-.PP
-Get the events of an app
+Get the events of an app or namespace
 .IP
 .nf
 \f[C]
-kube-app-events [app name]
+kubectl-xevent --scope [namespace|app] 
 \f[R]
 .fi
 .PP

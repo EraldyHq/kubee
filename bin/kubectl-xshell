@@ -48,7 +48,7 @@ if [[ "${1:-}" == "synopsis" ]]; then
 fi
 
 # Set
-KUBE_X_APP_NAME=""
+APP_NAME=""
 SHELL_NAME=""
 
 # Normalization
@@ -57,7 +57,7 @@ args=$(getopt --longoptions "shell:,help,namespace"  --options "s:hn"  -- "$@")
 # eval set to set the positional arguments back to $args
 eval set -- "$args"
 
-export KUBE_X_NAMESPACE
+export KUBE_X_APP_NAMESPACE
 # Loop
 while [[ $# -gt 0 ]]
 do
@@ -73,7 +73,7 @@ do
     ;;
     "-n"|"--namespace")
       shift
-      KUBE_X_NAMESPACE="$1"
+      KUBE_X_APP_NAMESPACE="$1"
       shift
     ;;
     --)
@@ -81,7 +81,7 @@ do
       shift
       ;;
     *)
-      KUBE_X_APP_NAME=$1
+      APP_NAME=$1
       shift
       ;;
   esac
@@ -91,7 +91,7 @@ done
 
 # Set the known default shell
 if [ "$SHELL_NAME" == "" ]; then
-  case "$KUBE_X_APP_NAME" in
+  case "$APP_NAME" in
     "prometheus"|"vault")
       SHELL_NAME=/bin/sh;
       ;;
@@ -101,23 +101,31 @@ if [ "$SHELL_NAME" == "" ]; then
   esac
 fi
 
-# Busy box is a special kind of app
-# That does have any pod or directory
-if [ "$KUBE_X_APP_NAME" == "busybox" ]; then
-
-    KUBE_X_BUSYBOX_IMAGE=${KUBE_X_BUSYBOX_IMAGE:-}
-    # Env for BusyBox
-    KUBE_X_NAMESPACE=${KUBE_X_NAMESPACE:-"default"}
-    KUBE_X_KUBECTL=${KUBE_X_KUBECTL:-"kubectl"}
-    echo::info "Starting busybox in the namespace ${KUBE_X_NAMESPACE}"
-    $KUBE_X_KUBECTL run -it busybox-pod --image="$KUBE_X_BUSYBOX_IMAGE" --restart=Never --rm
-    exit 0
+# Busybox is not a real app
+if [ "$APP_NAME" != "busybox" ]; then
+  KUBE_X_APP_NAME=$APP_NAME
 fi
 
 # Set the env
 # The substitution is not in the eval because bash would not stop the script otherwise
 KUBE_X_ENV=$(kubectl-xenv "$KUBE_X_APP_NAME") || exit $?
 eval "$KUBE_X_ENV"
+
+# Busy box is a special kind of app
+# That does have any pod or directory
+if [ "$KUBE_X_APP_NAME" == "busybox" ]; then
+
+
+    # Env for BusyBox
+    KUBE_X_APP_NAMESPACE=${KUBE_X_APP_NAMESPACE:-"default"}
+
+    echo::info "Starting busybox in the namespace ${KUBE_X_APP_NAMESPACE}"
+    $KUBE_X_KUBECTL run -it busybox-pod --image="$KUBE_X_BUSYBOX_IMAGE" --restart=Never --rm
+    exit 0
+
+fi
+
+
 
 echo::info "Getting Pod Name and Namespace for app $KUBE_X_APP_NAME"
 

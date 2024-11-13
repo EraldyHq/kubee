@@ -8,7 +8,7 @@ Print the export environment statements.
 This script is used by all `kube-x` scripts to set the [environment](#ENVIRONMENT)
 
 ```bash
-KUBE_X_ENV=$(kubectl-xenv "$KUBE_X_APP_NAME")
+KUBE_X_ENV=$(source kubectl-xenv "$KUBE_X_APP_NAME")
 eval "$KUBE_X_ENV"
 ```
 
@@ -22,8 +22,6 @@ ${SYNOPSIS}
 
 # ENVIRONMENT
 
-You can override the default environment values by creating a `.envrc` located
-in the app directory (ie `KUBE_X_APP_HOME/KUBE_X_APP_NAME`).
 
 
 ## KUBE_X_APP_NAME
@@ -31,8 +29,31 @@ in the app directory (ie `KUBE_X_APP_HOME/KUBE_X_APP_NAME`).
 ```bash
 export KUBE_X_APP_NAME=xxx
 ```  
-* Default to the current directory name if it is below the [KUBE_X_APP_HOME](#KUBE_X_APP_HOME)
-* Mandatory Otherwise
+Default to the current directory name if it is below the [KUBE_X_APP_HOME](#KUBE_X_APP_HOME)
+
+The kubernetes objects are searched with the label `app.kubernetes.io/name=<app name>`
+
+
+## KUBE_X_APP_NAMESPACE
+
+The `KUBE_X_APP_NAMESPACE` environment variable defines the `namespace` of the app
+and is used to determine the [connection namespace](#namespace-order-of-precedence) 
+
+## KUBE_X_DEFAULT_NAMESPACE
+
+`KUBE_X_DEFAULT_NAMESPACE` defines the default [connection namespace](#namespace-order-of-precedence)
+when no [namespace has been found](#namespace-order-of-precedence)
+
+## KUBE_X_KUBECTL
+
+`KUBE_X_KUBECTL` defines the `kubectl` client used.
+
+The possible values are:
+  * `kubectl`: the default
+  * `kubectx`: to use [kubectx](kubectx.md) to get:
+    * the users and cluster data from the pass store manager.
+    * the [namespace from the environment](#namespace-order-of-precedence)
+
 
 ## KUBE_X_APP_HOME
 
@@ -46,13 +67,46 @@ Example:
 export KUBE_X_APP_HOME=$HOME/my-kube-apps:$HOME/my-other-kube-apps
 ```
 
+## KUBE_X_BUSYBOX_IMAGE
 
-## KUBE_X_NAMESPACE
+The image used by [kubectl-xshell](kubectl-xshell.md) when asking for a shell in a busybox.
 
-The `KUBE_X_NAMESPACE` environment variable defines the `namespace`.
+Default to [ghcr.io/gerardnico/busybox:latest](https://github.com/gerardnico/busybox/pkgs/container/busybox)
 
-* Default to [KUBE_X_APP_NAME](#KUBE_X_APP_NAME) if it exists
-* Otherwise, to the `kubeconfig` current namespace
+```bash
+export KUBE_X_BUSYBOX_IMAGE=ghcr.io/gerardnico/busybox:latest
+```
+
+## Connection Namespace
+
+The connection namespace is a derived environment variable `KUBE_X_CONNECTION_NAMESPACE` used by [kubectx](kubectx.md).
+
+### Namespace Order of precedence
+
+
+In order, the connection namespace value used is:
+* `default` if the flag `--all-namespace` is passed
+* the option value of the flag `-n|--namespace`
+* [KUBE_X_APP_NAMESPACE](#KUBE_X_APP_NAME)
+* [KUBE_X_APP_NAME](#KUBE_X_APP_NAME) if set
+* [KUBE_X_DEFAULT_NAMESPACE](#KUBE_X_APP_NAME) if it exists
+* Otherwise, for the [KUBE_X_KUBECTL](#KUBE_X_KUBECTL) value of:
+    * `kubectx`: `default`
+    * `kubectl`: the `kubeconfig` current namespace value
+
+### Mandatory Namespace
+
+The namespace is only mandatory for the [kubectl-xapply](kubectl-xapply.md)
+command.
+
+Otherwise, it's determined by a label global search on the app name. 
+
+## How
+
+### How to set my own environment variable by app scope
+
+You can override the default environment values by creating a `.envrc` located
+in the app directory (ie `KUBE_X_APP_HOME/KUBE_X_APP_NAME`).
 
 
 # TIP

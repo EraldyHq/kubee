@@ -9,7 +9,43 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
 # shellcheck source=./bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 
+# @description test the connection to the cluster
+test_connection(){
 
+  if OUTPUT=$(kubectl --kubeconfig <(kube::config) cluster-info); then
+    echo::info "Test Connection succeeded"
+    return 0;
+  fi
+  echo::err "No connection could be made with the cluster"
+
+  case "$KUBE_X_KUBECTL" in
+    "kubectl")
+      if [ -z "$KUBECONFIG" ]; then
+            echo::err "Note: No KUBECONFIG env found"
+      else
+          if [ ! -f "$KUBECONFIG" ]; then
+            echo::err "The KUBECONFIG env file ($KUBECONFIG) does not exist"
+          else
+            echo::info "The file ($KUBECONFIG) may have bad cluster info"
+            echo::err "Note: The config is:"
+            kubectl config view
+          fi
+      fi
+      ;;
+    "kubectx")
+        echo::err "Note: The kubectx config is:"
+        kubectx config view --raw
+      ;;
+    *)
+        echo::err "The KUBE_X_KUBECTL value $KUBE_X_KUBECTL is unknown";
+        ;;
+  esac
+
+  echo::err "We got the following output from the connection"
+  echo::err "$OUTPUT"
+  return 1
+
+}
 
 synopsis(){
   cat <<EOF
@@ -17,9 +53,11 @@ synopsis(){
 $(basename "$0") [-n|--namespace namespaceName] [kubectl args]
 \`\`\`
 
-The namespace is mandatory. It should be given via:
+where:
 
-* the \`KUBE_X_NAMESPACE\`
+* \`-n|--namespace\` specifies the \`namespace\` default to \`KUBE_X_APP_NAMESPACE\` or \`KUBE_X_DEFAULT_NAMESPACE\` and ultimately to \`default\`.
+
+* the
 * or the \`-n|--namespace\` flag
 EOF
 }
@@ -30,7 +68,8 @@ if [ "${1:-}" == "synopsis" ]; then
 fi
 
 args=()
-KUBE_X_NAMESPACE=${KUBE_X_NAMESPACE:-}
+
+KUBE_X_APP_NAMESPACE=${KUBE_X_APP_NAMESPACE:-}
 while [[ $# -gt 0 ]]
 do
    case  "$1" in
@@ -40,12 +79,12 @@ do
         echo::err "The -n or --namespace flag expects a value"
         exit 1
       fi
-      KUBE_X_NAMESPACE="$1"
+      KUBE_X_APP_NAMESPACE="$1"
       ;;
     --all-namespaces)
       # The created kubeconfig needs a namespace
       # In a all-namespace query we set it to default
-      KUBE_X_NAMESPACE="default"
+      KUBE_X_APP_NAMESPACE="default"
       args+=("$1")
       ;;
     *)
@@ -56,15 +95,9 @@ do
 done
 
 
-if [ "${KUBE_X_NAMESPACE:-}" == "" ]; then
-  doc::help synopsis
-  echo::err "The KUBE_X_NAMESPACE env is not defined. You can also defined it inline with the '-n' flag"
-  exit 1
-fi
-
 
 # Get env
-KUBECTX_ENV=$(kubectx-env "$KUBE_X_NAMESPACE") || error::exit $?
+KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
 eval "$KUBECTX_ENV"
 
 
@@ -126,7 +159,7 @@ clusters:
 contexts:
   - context:
       cluster: $KUBE_X_CLUSTER
-      namespace: $KUBE_X_NAMESPACE
+      namespace: $KUBE_X_CONNECTION_NAMESPACE
       user: $KUBE_X_USER
     name: $KUBE_X_CONTEXT_NAME
 current-context: $KUBE_X_CONTEXT_NAME
@@ -141,5 +174,17 @@ users:
 EOF
 
 }
+
+###########################
+# Connection test
+###########################
+# We test the connection because otherwise the user
+# may get a message that a resource could not be found
+# where the culprit should have been the connection
+# Test Connection
+test_connection
+
+
+
 
 kubectl --kubeconfig <(kube::config) "${args[@]}"

@@ -4,7 +4,7 @@ Get the events of a namespace
 
 ## Overview
 
-Get the events of a namespace
+
 
 
 
