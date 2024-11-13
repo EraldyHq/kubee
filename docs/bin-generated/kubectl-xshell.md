@@ -25,3 +25,4 @@ where:
 * `shell name` may be:
   * a shell path (ie `bash`, `sh`, `bin/bash`)
   * or `ephemeral` to add busybox as an ephemeral container if your container has no shell
+

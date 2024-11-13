@@ -10,7 +10,7 @@ A library of Kubernetes Utilities eXtension
 
 
 * [kubectl-xapply](docs/bin/kubectl-xapply) - apply a kustomize app (ie `kustomize apply`)
-* [kubectl-xshell](docs/bin/kubectl-xshell) - get a shell into an app or your cluster
+* [kubectl-xshell](docs/bin-generated/kubectl-xshell.md) - get a shell from a busybox container or a pod
 * [kube-x-env](docs/bin/kubectl-xenv) - print the environment configuration of an app 
 * [kube-x-events](docs/bin/kubectl-xevent) - shows the events of an app
 * [kube-x-file-explorer](docs/bin/kubectl-xvolume-explorer) - Explore the files of an app via SCP/SFTP
@@ -18,7 +18,7 @@ A library of Kubernetes Utilities eXtension
 * [kube-xpods](docs/bin/kubectl-xpods) - watch/list the pods of an app
 * [kube-xrestart](docs/bin/kubectl-xrestart) - execute a rollout restart
 * [kube-xtop](docs/bin/kubectl-xtop) - shows the top processes of an app
-* [kube-xcert](build/docs/bin/kubectl-xcert.md) - print the kubeconfig cert in plain text
+* [kube-xcert](docs/bin-generated/kubectl-xcert.md) - print the kubeconfig cert in plain text
 * [kube-cidr](docs/bin/kubectl-xcidr) - print the cidr by pods
 * [kube-k3s](docs/bin/kubectl-xcidr) - collection of k3s utilities
 * [kube-memory](docs/bin/kube-x-memory) - print the cpu and memory used by pods
