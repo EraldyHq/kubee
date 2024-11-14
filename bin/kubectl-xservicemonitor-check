@@ -115,7 +115,7 @@ echo::success "Service Monitor $SERVICE_MONITOR_NAME found in the Prometheus Con
 echo::success "Service Monitor should work."
 echo::success ""
 echo::success " If not check the logs for any configuration/scrape problem"
-echo::success "   kube-logs $PROMETHEUS_OBJECT_NAME"
+echo::success "   kubectl-xlogs $PROMETHEUS_OBJECT_NAME"
 
 
 
