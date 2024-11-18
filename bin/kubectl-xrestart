@@ -9,7 +9,7 @@
 #
 
 
-usage(){
+synopsis(){
 
   echo ""
   echo "Restart an app (ie rollout restart a deployment or statefulset)"
@@ -20,20 +20,26 @@ usage(){
   # shellcheck disable=SC2016
   echo 'where `app name` is'
   # shellcheck disable=SC2016
-  echo '* optional if you run the command in the app directory (default to: `$KUBE_APP_NAME`)'
+  echo '* optional if you run the command in the app directory (default to: `$KUBE_X_APP_NAME`)'
   echo '* mandatory otherwise'
   echo ''
 
 
 }
 
-set -Eeuo pipefail
-source bashlib-echo.sh
-source bashlib-error.sh
+# shellcheck source=./bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+error::set_strict_mode
 error::set_trap
+# shellcheck source=./bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=./bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+# shellcheck source=./bashlib-kube.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-kube.sh"
 
 if [[ "${1:-}" == "synopsis" ]]; then
-  usage
+  synopsis
   exit
 fi
 
@@ -41,44 +47,46 @@ fi
 # Main
 ######################
 
-# Check if app is provided
-APP_NAME=${1:-$KUBE_APP_NAME}
-if [ "$APP_NAME" == "" ]; then
-    usage
-    echo:err "An app name should be provided as argument or the KUBE_APP_NAME env should be not empty"
+KUBE_X_APP_NAME=${1:-}
+
+# Help
+if [[ "$KUBE_X_APP_NAME" =~ -h|--help|help ]]; then
+  doc::help synopsis
+  exit
+fi
+
+# Get env
+KUBECTX_ENV=$(source kubectl-xenv "$KUBE_X_APP_NAME") || error::exit $?
+eval "$KUBECTX_ENV"
+
+if [ "$KUBE_X_APP_NAME" == "" ]; then
+    doc::help synopsis
+    echo:err "An app name should be provided as argument or the KUBE_X_APP_NAME env should not be empty"
     exit 1
 fi
 
 
-if [[ $APP_NAME =~ -h|help ]]; then
-  usage
-  exit
-fi
-
 echo::info "Searching a deployment"
-read -r DEPLOYMENT_NAME NAMESPACE  <<< "$(kube::get_resource_by_app_name "$APP_NAME" deployment)"
+read -r DEPLOYMENT_NAME NAMESPACE  <<< "$(kube::get_resource_by_app_name "$KUBE_X_APP_NAME" deployment)"
 if [ "$DEPLOYMENT_NAME" != "" ]; then
     echo::info "Deployment found: $DEPLOYMENT_NAME in namespace: $NAMESPACE"
     echo::info "Restarting"
-    COMMAND="kubectl rollout restart deployment/$DEPLOYMENT_NAME -n $NAMESPACE"
+    COMMAND="$KUBE_X_KUBECTL rollout restart deployment/$DEPLOYMENT_NAME -n $NAMESPACE"
     echo::info "Executing: $COMMAND"
     eval "$COMMAND"
     exit 0
 fi
 
 echo::info "No Deployment found. Searching a Statefulset"
-read -r STATEFULSET_NAME NAMESPACE <<< "$(kube::get_resource_by_app_name "$APP_NAME" statefulset)"
+read -r STATEFULSET_NAME NAMESPACE <<< "$(kube::get_resource_by_app_name "$KUBE_X_APP_NAME" statefulset)"
 if [ "$STATEFULSET_NAME" != "" ]; then
     echo::info "StatefulSet found: $STATEFULSET_NAME in namespace: $NAMESPACE"
-    echo:info "Restarting"
-    COMMAND="kubectl rollout restart statefulset/$STATEFULSET_NAME -n $NAMESPACE"
+    echo::info "Restarting"
+    COMMAND="$KUBE_X_KUBECTL rollout restart statefulset/$STATEFULSET_NAME -n $NAMESPACE"
     echo::info "Executing: $COMMAND"
     eval "$COMMAND"
     exit 0
 fi
 
-echo::err "No deployment or statefulset found for the app $APP_NAME (with the label $(kube::get_app_label $APP_NAME)"
+echo::err "No deployment or statefulset found for the app $"$KUBE_X_APP_NAME" (with the label $(kube::get_app_label "$KUBE_X_APP_NAME")"
 exit 1
-
-
-
