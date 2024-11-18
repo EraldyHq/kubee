@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+# Doc: https://prometheus.io/docs/alerting/latest/clients/
+# Ve openapi: https://raw.githubusercontent.com/prometheus/alertmanager/refs/heads/main/api/v2/openapi.yaml
+# https://editor.swagger.io/
+# Clients are expected to continuously re-send alerts as long as they are still active (usually on the order of 30 seconds to 3 minutes
+# An alert is considered as resolved if it has not been updated/resend after a configurable timeout.
+# ie resolve_timeout: 30m
+# API: https://petstore.swagger.io/?url=https://raw.githubusercontent.com/prometheus/alertmanager/main/api/v2/openapi.yaml
+
+
+# shellcheck source=./bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+set -TCEeuo pipefail
+error::set_trap
+# shellcheck source=./bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=./bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+
+synopsis(){
+  cat <<EOF
+\`\`\`bash
+$(basename "$0") [--api-url API-URL] action [name]
+\`\`\`
+
+where:
+
+* \`action\` can be:
+  * \`send\` - send/fire an alert
+  * \`get\` - get all alerts
+* \`name\` is the alert name (mandatory for send and resolve)
+* \`--api-url\` defines the API URL (http://localhost:9093/api/v2), default to \`KUBI_ALERT_MANAGER_API_URL\`
+
+EOF
+}
+
+if [ "${1:-}" == "synopsis" ]; then
+  synopsis
+  exit
+fi
+
+args=$(getopt -l "api-url:help" -o "u:h" -- "$@")
+# eval set to set the positional arguments back to $args
+eval set -- "$args"
+
+ACTION=""
+ALERT_NAME=""
+KUBI_ALERT_MANAGER_API_URL=${KUBI_ALERT_MANAGER_API_URL:-}
+while [[ $# -gt 0 ]]; do
+   case $1 in
+    "--api-url"|"-u")
+      shift
+      KUBI_ALERT_MANAGER_API_URL=$1
+      shift
+      ;;
+    "--help"|"-h")
+      doc::help synopsis
+      exit
+      ;;
+    "--")
+      shift
+      ;;
+    *)
+      if [ "$ACTION" = "" ]; then
+        ACTION="$1"
+        shift
+        continue;
+      fi
+      if [ "$ALERT_NAME" = "" ]; then
+        ALERT_NAME="$1"
+        shift
+        continue;
+      fi
+      doc::help synopsis
+      echo::err "The third argument ($1) was unexpected"
+      exit 1
+      ;;
+    esac
+done
+
+if [ "$ACTION" == "" ]; then
+  doc::help synopsis
+  echo::err "An action name is mandatory"
+  exit 1
+fi
+
+
+
+if [ "$KUBI_ALERT_MANAGER_API_URL" == "" ]; then
+  doc::help synopsis
+  echo::err "The alert API URL is mandatory"
+  exit 1
+fi
+ALERTS_ENDPOINT="$KUBI_ALERT_MANAGER_API_URL/alerts"
+
+ENVS=()
+ENVS+=("--fail")
+
+ALERT_MANAGER_USER=$(pass alert-manager/user)
+ALERT_MANAGER_PASSWORD=$(pass alert-manager/password)
+ENVS+=("--user" "$ALERT_MANAGER_USER:$ALERT_MANAGER_PASSWORD")
+
+
+# Note on the post data
+# Labels (Identity) The labels of each alert are used to identify identical instances of an alert and to perform deduplication.
+# Annotation: The annotations are always set to those received most recently and are not identifying an alert.
+# The generatorURL field is a unique back-link which identifies the causing entity of this alert in the client.
+
+case "$ACTION" in
+  "send")
+
+    if [ "$ALERT_NAME" == "" ]; then
+      doc::help synopsis
+      echo::err "An alert name is mandatory"
+      exit 1
+    fi
+
+    echo::info "Firing up alert $ALERT_NAME to $ALERTS_ENDPOINT"
+    # Both startsAt and endsAt timestamp are optional.
+    # #If startsAt is omitted, the current time is assigned by the Alertmanager. endsAt is only set if the end time of an alert is known.
+    BODY="[{
+                    \"startsAt\": \"2024-11-18T18:59:03.316Z\",
+                    \"endsAt\": \"2024-11-19T18:59:03.316Z\",
+                    \"labels\": {
+                        \"alertname\": \"$ALERT_NAME\"
+                    },
+                    \"annotations\": {
+                        \"summary\": \"High latency is high!\",
+                        \"severity\":\"warning\",
+                        \"instance\": \"$ALERT_NAME.example.net\",
+                        \"service\": \"my-service\"
+                    },
+                    \"generatorURL\": \"http://prometheus.eraldy.com/back\"
+                }]"
+    # Should be minified otherwise we get 400
+    BODY=$(jq -rc . <<< $BODY)
+    # write-out add the http code as last line in the RESPONSE
+    if ! RESPONSE=$(curl -s "${ENVS[@]}" --write-out '%{http_code}' -XPOST $ALERTS_ENDPOINT \
+      --header "Content-Type: application/json" \
+      --data $BODY); then
+      HTTP_CODE=$(tail -n1 <<< "$RESPONSE")  # get the last line
+      CONTENT=$(sed '$ d' <<< "$RESPONSE")   # get all but the last line which contains the status code
+      if [ "$HTTP_CODE" != "200" ]; then
+        echo::err "Bad response code of $HTTP_CODE"
+        echo::echo "Content: "$CONTENT
+        exit $HTTP_CODE
+      fi
+    fi
+    echo::success "Success"
+    ;;
+
+  "get")
+    curl "${ENVS[@]}" -XGET $ALERTS_ENDPOINT # | jq '{ alertname: .[].labels.alertname, instance: .[].labels.instance }'
+    # Get active alert
+    # curl -X GET $KUBI_ALERT_MANAGER_API_URL/?active=true
+    ;;
+  *)
+    doc::help synopsis
+    echo::err "The action $ACTION is unknown"
+    exit 1
+esac
