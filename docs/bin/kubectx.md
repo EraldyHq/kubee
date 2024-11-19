@@ -30,3 +30,9 @@ kubectl config view --minify --raw --output 'jsonpath={$.clusters[0].certificate
 kubectl config view --minify --raw --output 'jsonpath={$.clusters[0].server}' | pass insert -m "$KUBE_X_PASS_HOME/clusters/$KUBE_X_CLUSTER/server"
 ```
 
+## Other kubectl replacement project
+
+* https://github.com/sbstp/kubie
+* kubectx
+* kubens
+
