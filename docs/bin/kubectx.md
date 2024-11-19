@@ -32,6 +32,7 @@ kubectl config view --minify --raw --output 'jsonpath={$.clusters[0].server}' | 
 
 ## Other kubectl replacement project
 
+* fuzzy kubectl https://github.com/kubermatic/fubectl
 * https://github.com/sbstp/kubie
 * kubectx
 * kubens
