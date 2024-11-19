@@ -51,3 +51,10 @@ kubectl config view --minify --raw --output \[aq]jsonpath={$.clusters[0].certifi
 kubectl config view --minify --raw --output \[aq]jsonpath={$.clusters[0].server}\[aq] | pass insert -m \[dq]$KUBE_X_PASS_HOME/clusters/$KUBE_X_CLUSTER/server\[dq]
 \f[R]
 .fi
+.SS Other kubectl replacement project
+.IP \[bu] 2
+fubectl: fuzzy kubectl (https://github.com/kubermatic/fubectl)
+.IP \[bu] 2
+kubie (https://github.com/sbstp/kubie)
+.IP \[bu] 2
+kubectx/kubens (https://github.com/ahmetb/kubectx)

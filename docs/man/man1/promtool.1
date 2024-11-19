@@ -20,7 +20,7 @@
 .PP
 The
 PromTool (https://prometheus.io/docs/prometheus/latest/command-line/promtool/)
-cli driven by env
+cli driven by env with XTras.
 .SH EXAMPLE
 .IP
 .nf
@@ -37,26 +37,32 @@ current directory.
 .PP
 The \f[V]PromTool\f[R] is executed with: * the Prometheus docker image *
 only the working directory available
-.SH Environment Variable
+.SH EXTRAS
+.SS PrometheusRule Check
 .PP
-This script will create automatically the following options based on the
-environment
+The command \f[V]check prometheusRule prometheusRuleFile\f[R] permits to
+check a Prometheus
+Rule (https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.PrometheusRule)
 .SS The url flag
 .PP
-The \f[V]--url\f[R] flag (The URL for the Prometheus server) is created
-via the \f[V]KUBE_X_PROM_URL\f[R] (default to
+This script will set the \f[V]--url\f[R] flag (The URL for the
+Prometheus server) if the \f[V]KUBE_X_PROM_URL\f[R] is set (default to
 \f[V]http://localhost:9090\f[R])
-.SS The http.config.file
+.SS Basic Auth
 .PP
-The \f[V]--http.config.file\f[R] defines the HTTP client configuration
-file for promtool to connect to Prometheus.
+This script will set the \f[V]--http.config.file\f[R] (It defines the
+HTTP client configuration file for promtool to connect to Prometheus)
+with \f[V]Basic Auth\f[R] configuration.
 .PP
-We support creating it for \f[V]Basic Auth\f[R] with secrets stored in
+The \f[V]Basic Auth\f[R] credentials should be stored in
 pass (https://www.passwordstore.org/)
-.PP
-List: * For the basic_auth
+.IP \[bu] 2
+For the basic_auth
 user (https://prometheus.io/docs/alerting/latest/configuration/#http_config):
-\f[V]KUBE_X_PROM_BASIC_AUTH_PASS_USER\f[R]
+the env \f[V]KUBE_X_PROM_BASIC_AUTH_PASS_USER\f[R] gives its path
+.PD 0
+.P
+.PD
 .IP
 .nf
 \f[C]
@@ -67,7 +73,7 @@ pass \[dq]$KUBE_X_PROM_BASIC_AUTH_PASS_USER\[dq]
 .IP \[bu] 2
 For the basic_auth
 password (https://prometheus.io/docs/alerting/latest/configuration/#http_config):
-\f[V]KUBE_X_PROM_BASIC_AUTH_PASS_PASSWORD\f[R]
+the env \f[V]KUBE_X_PROM_BASIC_AUTH_PASS_PASSWORD\f[R] gives its path
 .IP
 .nf
 \f[C]
@@ -79,6 +85,8 @@ pass \[dq]$KUBE_X_PROM_BASIC_AUTH_PASS_PASSWORD\[dq]
 .IP
 .nf
 \f[C]
+This tool adds also the command \[ga]promtool check prometheusRules\[ga] to check one \[ga]PrometheusRule\[ga] CRD file of \[ga]Prometheus Operator\[ga].
+
 usage: promtool [<flags>] <command> [<args> ...]
 
 Tooling for the Prometheus monitoring system.

@@ -10,8 +10,9 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 
 synopsis(){
+
   cat <<EOF
-This tool adds also the command \`promtool check prometheusRules`\ to check one \`PrometheusRule` CRD file of \`Prometheus Operator\`.
+This tool adds also the command \`promtool check prometheusRules\` to check one \`PrometheusRule\` CRD file of \`Prometheus Operator\`.
 
 EOF
     docker run "${DOCKER_OPTIONS[@]}" prom/prometheus:latest --help

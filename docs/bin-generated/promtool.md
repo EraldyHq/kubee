@@ -1,7 +1,7 @@
 % promtool(1) Version Latest | Promtool shipped in Docker
 # DESCRIPTION
 
-The [PromTool](https://prometheus.io/docs/prometheus/latest/command-line/promtool/) cli driven by [env](#environment-variable)
+The [PromTool](https://prometheus.io/docs/prometheus/latest/command-line/promtool/) cli driven by [env](#environment-variable) with XTras.
 
 # EXAMPLE
 
@@ -13,45 +13,47 @@ promtool test rules test.yml
 The files (`metrics.prom`, `test.yml`) should be in the current directory.
 
 
+
 # EXECUTION
 
 The `PromTool` is executed with:
 * the Prometheus docker image 
 * only the working directory available
 
+# EXTRAS
 
-# Environment Variable
+## PrometheusRule Check
 
-This script will create automatically the following options based on the [environment](#environment-variable)
+The command `check prometheusRule prometheusRuleFile` permits to check a [Prometheus Rule](https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.PrometheusRule)
 
 ## The url flag
 
-The `--url` flag (The URL for the Prometheus server) is created
-via the `KUBE_X_PROM_URL` (default to `http://localhost:9090`)
+This script will set the `--url` flag (The URL for the Prometheus server) 
+if the `KUBE_X_PROM_URL` is set (default to `http://localhost:9090`)
 
-## The http.config.file
+### Basic Auth
 
-The `--http.config.file` defines the HTTP client configuration file for promtool to connect to Prometheus.
+This script will set the `--http.config.file` (It defines the HTTP client configuration file for promtool to connect to Prometheus)
+with `Basic Auth` configuration.
 
-We support creating it for `Basic Auth` with secrets stored in [pass](https://www.passwordstore.org/)
+The `Basic Auth` credentials should be stored in [pass](https://www.passwordstore.org/)
 
-List:
-* For the [basic_auth user](https://prometheus.io/docs/alerting/latest/configuration/#http_config): `KUBE_X_PROM_BASIC_AUTH_PASS_USER`  
+* For the [basic_auth user](https://prometheus.io/docs/alerting/latest/configuration/#http_config): the env `KUBE_X_PROM_BASIC_AUTH_PASS_USER` gives its path  
 ```bash
 # ie this command should return the user
 pass "$KUBE_X_PROM_BASIC_AUTH_PASS_USER"
 ```
-* For the [basic_auth password](https://prometheus.io/docs/alerting/latest/configuration/#http_config): `KUBE_X_PROM_BASIC_AUTH_PASS_PASSWORD` 
+* For the [basic_auth password](https://prometheus.io/docs/alerting/latest/configuration/#http_config): the env `KUBE_X_PROM_BASIC_AUTH_PASS_PASSWORD` gives its path 
 ```bash
 # ie this command should return the password
 pass "$KUBE_X_PROM_BASIC_AUTH_PASS_PASSWORD"
 ```
 
-
-
 # SYNOPSIS
 
 ```bash
+This tool adds also the command `promtool check prometheusRules` to check one `PrometheusRule` CRD file of `Prometheus Operator`.
+
 usage: promtool [<flags>] <command> [<args> ...]
 
 Tooling for the Prometheus monitoring system.
