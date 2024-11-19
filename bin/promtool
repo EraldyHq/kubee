@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+# shellcheck source=./bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+error::set_strict_mode
+error::set_trap
+# shellcheck source=./bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=./bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+
+PROM_TOOL_ARGS=("$@")
+if [ "${1:-}" == "synopsis" ]; then
+  HELP_ASKED=1
+  PROM_TOOL_ARGS=("--help")
+fi
+
+# Docker options
+DOCKER_OPTIONS=()
+DOCKER_OPTIONS+=("--name" "promtool")
+DOCKER_OPTIONS+=("--rm")
+DOCKER_OPTIONS+=("-it")
+DOCKER_OPTIONS+=("--entrypoint" "promtool")
+DOCKER_OPTIONS+=("-v" "$PWD:/prometheus")
+
+args=$(getopt -l "help,url,http.config.file" -o "h" -- "$@")
+# eval set to set the positional arguments back to $args
+eval set -- "$args"
+
+# Check if help was asked
+HELP_ASKED=${HELP_ASKED:-0}
+KUBE_X_PROM_URL=${KUBE_X_PROM_URL:-"http://localhost:9090"}
+while [[ $# -gt 0 ]]
+do
+   case $1 in
+    "--help"|"-h")
+     HELP_ASKED=1
+     ;;
+    "--url")
+     shift
+     KUBE_X_PROM_URL="$1"
+     ;;
+   "--http.config.file")
+      shift
+      KUBE_X_HTTP_CONFIG_FILE="$1"
+      ;;
+   esac
+   shift
+done
+
+
+if ([ "${PROM_TOOL_ARGS[0]}" == 'check' ] && [[ "${PROM_TOOL_ARGS[1]:-}" =~ 'healthy'|'ready' ]]) || ([[ "${PROM_TOOL_ARGS[0]}" =~ 'query'|'push' ]]); then
+
+  # Url and http.config.file are passed only if the help
+  # is not asked
+  if [ "$HELP_ASKED" != "1" ]; then
+
+    PROM_TOOL_ARGS+=("--url" "${KUBE_X_PROM_URL}")
+
+    if [ "${KUBE_X_PROM_BASIC_AUTH_PASS_USER:-}" != "" ] && [ "${KUBE_X_HTTP_CONFIG_FILE:-}" == "" ]; then
+      # https://prometheus.io/docs/alerting/latest/configuration/#http_config
+      CONFIG_FILE=$(cat <<EOF
+basic_auth:
+  username: $(pass "${KUBE_X_PROM_BASIC_AUTH_PASS_USER}")
+  password: $(pass "${KUBE_X_PROM_BASIC_AUTH_PASS_PASSWORD}")
+EOF
+)
+      # Creating the config file in memory
+      # and mounting it into docker
+      LOCAL_PATH=/dev/shm/promtool-config-file
+      DOCKER_PATH=/tmp/promtool-config-file
+      echo "$CONFIG_FILE" >| $LOCAL_PATH
+      DOCKER_OPTIONS+=("-v" "$LOCAL_PATH:$DOCKER_PATH")
+
+      # Args
+      PROM_TOOL_ARGS+=("--http.config.file" $DOCKER_PATH)
+
+    fi
+  fi
+
+fi
+
+docker run \
+  "${DOCKER_OPTIONS[@]}" \
+  prom/prometheus:latest \
+  "${PROM_TOOL_ARGS[@]}"

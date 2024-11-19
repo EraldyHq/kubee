@@ -12,5 +12,5 @@ kube-x-collector https://host/metrics | head 20
 
 # SYNOPSIS
 
-${SYNOPSIS}
+kube-x-collector URL
 

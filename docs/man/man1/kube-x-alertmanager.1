@@ -34,6 +34,29 @@ is considered as resolved if it has not been updated/resend after the
 resolve_timeout: 30m
 \f[R]
 .fi
+.SH ENV
+.IP \[bu] 2
+\f[V]KUBE_X_ALERT_MANAGER_URL\f[R]: the url of Alert Manager
+.IP \[bu] 2
+\f[V]KUBE_X_ALERT_MANAGER_BASIC_AUTH_PASS_USER\f[R]: the path in
+pass (https://www.passwordstore.org/) to the basic auth user
+.IP
+.nf
+\f[C]
+# ie this command should return the user
+pass $KUBE_X_ALERT_MANAGER_BASIC_AUTH_PASS_USER
+\f[R]
+.fi
+.IP \[bu] 2
+\f[V]KUBE_X_ALERT_MANAGER_BASIC_AUTH_PASS_PASSWORD\f[R]: the path in
+pass (https://www.passwordstore.org/) to the basic auth password
+.IP
+.nf
+\f[C]
+# ie this command should return the password
+pass $KUBE_X_ALERT_MANAGER_BASIC_AUTH_PASS_PASSWORD
+\f[R]
+.fi
 .SH SYNOPSIS
 .IP
 .nf

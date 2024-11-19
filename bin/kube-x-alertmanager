@@ -167,9 +167,16 @@ CURL_OPTIONS+=("-s")
 CURL_OPTIONS+=("--fail")
 
 # Auth
-if ALERT_MANAGER_USER=$(pass alert-manager/user); then
-  ALERT_MANAGER_PASSWORD=$(pass alert-manager/password)
-  CURL_OPTIONS+=("--user" "$ALERT_MANAGER_USER:$ALERT_MANAGER_PASSWORD")
+if [ "${KUBE_X_ALERT_MANAGER_BASIC_AUTH_PASS_USER:-}" != "" ]; then
+  if ALERT_MANAGER_USER=$(pass $KUBE_X_ALERT_MANAGER_BASIC_AUTH_PASS_USER); then
+    if [ "${KUBE_X_ALERT_MANAGER_BASIC_AUTH_PASS_PASSWORD:-}" == "" ]; then
+      echo::err "The basic auth password env KUBE_X_ALERT_MANAGER_BASIC_AUTH_PASS_PASSWORD is not set or empty"
+      echo::err "The value is mandatory because the basic auth user env KUBE_X_ALERT_MANAGER_BASIC_AUTH_PASS_USER"
+      exit 1
+    fi
+    ALERT_MANAGER_PASSWORD=$(pass $KUBE_X_ALERT_MANAGER_BASIC_AUTH_PASS_PASSWORD)
+    CURL_OPTIONS+=("--user" "$ALERT_MANAGER_USER:$ALERT_MANAGER_PASSWORD")
+  fi
 fi
 
 case $API_METHOD in

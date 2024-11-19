@@ -12,6 +12,20 @@ An alert is considered as resolved if it has not been updated/resend after the `
 resolve_timeout: 30m
 ```
 
+# ENV
+
+* `KUBE_X_ALERT_MANAGER_URL`: the url of Alert Manager
+* `KUBE_X_ALERT_MANAGER_BASIC_AUTH_PASS_USER`: the path in [pass](https://www.passwordstore.org/) to the basic auth user
+```bash
+# ie this command should return the user
+pass $KUBE_X_ALERT_MANAGER_BASIC_AUTH_PASS_USER
+```
+* `KUBE_X_ALERT_MANAGER_BASIC_AUTH_PASS_PASSWORD`: the path in [pass](https://www.passwordstore.org/) to the basic auth password
+```bash
+# ie this command should return the password
+pass $KUBE_X_ALERT_MANAGER_BASIC_AUTH_PASS_PASSWORD
+```
+
 # SYNOPSIS
 
 ${SYNOPSIS}
