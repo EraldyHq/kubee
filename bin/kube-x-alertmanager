@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
 
-
 # shellcheck source=./bashlib-error.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
-set -TCEeuo pipefail
+error::set_strict_mode
 error::set_trap
 # shellcheck source=./bashlib-echo.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
@@ -16,31 +15,44 @@ post_alerts(){
   # Labels (Identity) The labels of each alert are used to identify identical instances of an alert and to perform deduplication.
   # Annotation: The annotations are always set to those received most recently and are not identifying an alert.
   # The generatorURL field is a unique back-link which identifies the causing entity of this alert in the client.
-    if [ "${1:}" == "" ]; then
+    if [ "${1:-}" == "" ]; then
       doc::help synopsis
       echo::err "An alert name is mandatory"
       exit 1
     fi
+    ALERT_NAME=$1
+    echo::info "Signaling alert $ALERT_NAME to $API_URL_ENDPOINT"
+    echo::debug "Curl Options: ${CURL_OPTIONS[*]}"
 
-    echo::info "Firing up alert $ARGS to $API_URL_ENDPOINT"
-    # Both startsAt and endsAt timestamp are optional.
-    # #If startsAt is omitted, the current time is assigned by the Alertmanager. endsAt is only set if the end time of an alert is known.
+    # Rules:
+    # * No space in name and value in labels and annotations otherwise we get `400000000`
+    # * Should be minified otherwise we get `400`
+    # * Both startsAt and endsAt timestamp are optional.
+    #   If startsAt is omitted, the current time is assigned by the Alertmanager.
+    #   endsAt is only set if the end time of an alert is known.
+    #   Example:
+    #   \"startsAt\": \"2024-11-18T18:59:03.316Z\",
+    #   \"endsAt\": \"2024-11-19T18:59:03.316Z\",
+    #
+    # For debug: minimal working body is '[{"labels":{"alertname":"test"}}]'
     BODY="[{
-                    \"startsAt\": \"2024-11-18T18:59:03.316Z\",
-                    \"endsAt\": \"2024-11-19T18:59:03.316Z\",
-                    \"labels\": {
-                        \"alertname\": \"$ARGS\"
-                    },
-                    \"annotations\": {
-                        \"summary\": \"High latency is high!\",
-                        \"severity\":\"warning\",
-                        \"instance\": \"$ARGS.example.net\",
-                        \"service\": \"my-service\"
-                    },
-                    \"generatorURL\": \"http://prometheus.eraldy.com/back\"
-                }]"
-    # Should be minified otherwise we get 400
-    BODY=$(jq -rc . <<< $BODY)
+            \"labels\": {
+                \"alertname\": \"$ALERT_NAME\"
+            },
+            \"annotations\": {
+                 \"summary\": \"high-latency\",
+                 \"severity\":\"warning\",
+                 \"instance\": \"yolo.example.net\",
+                 \"service\": \"my-service\"
+            },
+            \"generatorURL\": \"http://hostname-with-problem/path\"
+    }]"
+    if ! BODY=$(jq -rc . <<< $BODY); then
+      echo::err "The body is not a valid json"
+      echo::err "${BODY}"
+      return 1
+    fi
+    echo::debug "Body: ${BODY}"
     # write-out add the http code as last line in the RESPONSE
     if ! RESPONSE=$(curl "${CURL_OPTIONS[@]}" --write-out '%{http_code}' $API_URL_ENDPOINT \
       --header "Content-Type: application/json" \
@@ -53,7 +65,7 @@ post_alerts(){
         exit $HTTP_CODE
       fi
     fi
-    echo::success "Success"
+    echo::success "Alert $ALERT_NAME was signaled"
 }
 synopsis(){
   cat <<EOF
@@ -86,8 +98,9 @@ args=$(getopt -l "--url:help" -o "u:h" -- "$@")
 # eval set to set the positional arguments back to $args
 eval set -- "$args"
 
-PATH=""
-METHOD=""
+# API prefix to not fucked up the PATH variable
+API_PATH=""
+API_METHOD=""
 ARGS=()
 KUBE_X_ALERT_MANAGER_URL=${KUBE_X_ALERT_MANAGER_URL:-}
 while [[ $# -gt 0 ]]; do
@@ -105,29 +118,24 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     *)
-      if [ "$PATH" = "" ]; then
-        PATH="$1"
+      if [ "$API_PATH" = "" ]; then
+        API_PATH="$1"
         shift
         continue;
       fi
-      if [ "$METHOD" = "" ]; then
-        METHOD="$1"
+      if [ "$API_METHOD" = "" ]; then
+        API_METHOD="$1"
         shift
         continue;
       fi
-      if [ "$ARGS" = "" ]; then
-        ARGS+=("$1")
-        shift
-        continue;
-      fi
-      doc::help synopsis
-      echo::err "The third argument ($1) was unexpected"
-      exit 1
+      ARGS+=("$1")
+      shift
+      continue;
       ;;
     esac
 done
 
-if [ "$PATH" == "" ]; then
+if [ "$API_PATH" == "" ]; then
   doc::help synopsis
   echo::err "A path is mandatory"
   exit 1
@@ -136,19 +144,20 @@ fi
 if [ "$KUBE_X_ALERT_MANAGER_URL" == "" ]; then
   doc::help synopsis
   echo::err "The alert manager URL is mandatory"
+  echo::err "Set it via the --url flag or the KUBE_X_ALERT_MANAGER_URL env"
   exit 1
 fi
 
-case $PATH in
+case $API_PATH in
   "alerts"|"status"|"receivers"|"silences"|"alerts/groups")
     ;;
   silence*)
     ;;
   *)
-    echo::err "The path $PATH is not supported"
+    echo::err "The path $API_PATH is not supported"
     echo::err "See https://petstore.swagger.io/?url=https://raw.githubusercontent.com/prometheus/alertmanager/main/api/v2/openapi.yaml"
 esac
-API_URL_ENDPOINT="$KUBE_X_ALERT_MANAGER_URL/api/v2/$PATH"
+API_URL_ENDPOINT="$KUBE_X_ALERT_MANAGER_URL/api/v2/$API_PATH"
 
 
 CURL_OPTIONS=()
@@ -163,15 +172,15 @@ if ALERT_MANAGER_USER=$(pass alert-manager/user); then
   CURL_OPTIONS+=("--user" "$ALERT_MANAGER_USER:$ALERT_MANAGER_PASSWORD")
 fi
 
-case $METHOD in
+case $API_METHOD in
   "post")
     CURL_OPTIONS+=("-XPOST")
-    case $PATH in
+    case $API_PATH in
       "alerts")
         post_alerts "${ARGS[@]}"
         ;;
       *)
-        echo::err "Post on $PATH is not yet supported"
+        echo::err "Post on $API_PATH is not yet supported"
         exit 1
         ;;
     esac
@@ -182,7 +191,7 @@ case $METHOD in
     ;;
   *)
     doc::help synopsis
-    echo::err "The method $METHOD is unknown"
+    echo::err "The method $API_METHOD is unknown"
     exit 1
 esac
 
