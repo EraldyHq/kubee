@@ -1,4 +1,4 @@
-% kube-xk3s(1) Version Latest | k3s specific scripts
+% kube-x-k3s(1) Version Latest | k3s specific scripts
 # DESCRIPTION
 
 
@@ -8,7 +8,7 @@ K3s specific scripts that should be used on the server
 # SYNOPSIS
 
 ```bash
-kube-xk3s command args
+kube-x-k3s command args
 ```
 where: command may be:
   * `certs_expiration` : Print the certificates and their expiration date

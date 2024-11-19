@@ -1,4 +1,4 @@
-% kube-xpods-ip(1) Version Latest | Shows the pods ip
+% kube-x-pods-ip(1) Version Latest | Shows the pods ip
 # NAME
 
 Shows the pods ip

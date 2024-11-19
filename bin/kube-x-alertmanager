@@ -1,0 +1,188 @@
+#!/usr/bin/env bash
+
+
+
+# shellcheck source=./bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+set -TCEeuo pipefail
+error::set_trap
+# shellcheck source=./bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=./bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+
+post_alerts(){
+  # Note on the post data
+  # Labels (Identity) The labels of each alert are used to identify identical instances of an alert and to perform deduplication.
+  # Annotation: The annotations are always set to those received most recently and are not identifying an alert.
+  # The generatorURL field is a unique back-link which identifies the causing entity of this alert in the client.
+    if [ "${1:}" == "" ]; then
+      doc::help synopsis
+      echo::err "An alert name is mandatory"
+      exit 1
+    fi
+
+    echo::info "Firing up alert $ARGS to $API_URL_ENDPOINT"
+    # Both startsAt and endsAt timestamp are optional.
+    # #If startsAt is omitted, the current time is assigned by the Alertmanager. endsAt is only set if the end time of an alert is known.
+    BODY="[{
+                    \"startsAt\": \"2024-11-18T18:59:03.316Z\",
+                    \"endsAt\": \"2024-11-19T18:59:03.316Z\",
+                    \"labels\": {
+                        \"alertname\": \"$ARGS\"
+                    },
+                    \"annotations\": {
+                        \"summary\": \"High latency is high!\",
+                        \"severity\":\"warning\",
+                        \"instance\": \"$ARGS.example.net\",
+                        \"service\": \"my-service\"
+                    },
+                    \"generatorURL\": \"http://prometheus.eraldy.com/back\"
+                }]"
+    # Should be minified otherwise we get 400
+    BODY=$(jq -rc . <<< $BODY)
+    # write-out add the http code as last line in the RESPONSE
+    if ! RESPONSE=$(curl "${CURL_OPTIONS[@]}" --write-out '%{http_code}' $API_URL_ENDPOINT \
+      --header "Content-Type: application/json" \
+      --data $BODY); then
+      HTTP_CODE=$(tail -n1 <<< "$RESPONSE")  # get the last line
+      CONTENT=$(sed '$ d' <<< "$RESPONSE")   # get all but the last line which contains the status code
+      if [ "$HTTP_CODE" != "200" ]; then
+        echo::err "Bad response code of $HTTP_CODE"
+        echo::echo "Content: "$CONTENT
+        exit $HTTP_CODE
+      fi
+    fi
+    echo::success "Success"
+}
+synopsis(){
+  cat <<EOF
+\`\`\`bash
+$(basename "$0") [--url alert-manager-url] path method [name]
+\`\`\`
+
+where:
+* \`path\` can be all [path apis](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/prometheus/alertmanager/main/api/v2/openapi.yaml)
+* \`method\` can be:
+  * \`post\` - post (only for alerts)
+  * \`get\`  - get (no filtering for now)
+* \`name\` is a mandatory alert name to post a test alerts
+* \`--url|-u\` defines the Alert Manager URL (\`http://localhost:9093\`), default to \`KUBE_X_ALERT_MANAGER_URL\`
+
+# Example
+To trigger a test alert:
+\`\`\`bash
+$(basename "$0") alerts post test
+\`\`\`
+EOF
+}
+
+if [ "${1:-}" == "synopsis" ]; then
+  synopsis
+  exit
+fi
+
+args=$(getopt -l "--url:help" -o "u:h" -- "$@")
+# eval set to set the positional arguments back to $args
+eval set -- "$args"
+
+PATH=""
+METHOD=""
+ARGS=()
+KUBE_X_ALERT_MANAGER_URL=${KUBE_X_ALERT_MANAGER_URL:-}
+while [[ $# -gt 0 ]]; do
+   case $1 in
+    "--url"|"-u")
+      shift
+      KUBE_X_ALERT_MANAGER_URL=$1
+      shift
+      ;;
+    "--help"|"-h")
+      doc::help synopsis
+      exit
+      ;;
+    "--")
+      shift
+      ;;
+    *)
+      if [ "$PATH" = "" ]; then
+        PATH="$1"
+        shift
+        continue;
+      fi
+      if [ "$METHOD" = "" ]; then
+        METHOD="$1"
+        shift
+        continue;
+      fi
+      if [ "$ARGS" = "" ]; then
+        ARGS+=("$1")
+        shift
+        continue;
+      fi
+      doc::help synopsis
+      echo::err "The third argument ($1) was unexpected"
+      exit 1
+      ;;
+    esac
+done
+
+if [ "$PATH" == "" ]; then
+  doc::help synopsis
+  echo::err "A path is mandatory"
+  exit 1
+fi
+
+if [ "$KUBE_X_ALERT_MANAGER_URL" == "" ]; then
+  doc::help synopsis
+  echo::err "The alert manager URL is mandatory"
+  exit 1
+fi
+
+case $PATH in
+  "alerts"|"status"|"receivers"|"silences"|"alerts/groups")
+    ;;
+  silence*)
+    ;;
+  *)
+    echo::err "The path $PATH is not supported"
+    echo::err "See https://petstore.swagger.io/?url=https://raw.githubusercontent.com/prometheus/alertmanager/main/api/v2/openapi.yaml"
+esac
+API_URL_ENDPOINT="$KUBE_X_ALERT_MANAGER_URL/api/v2/$PATH"
+
+
+CURL_OPTIONS=()
+# silence don't show progress bar
+CURL_OPTIONS+=("-s")
+# fail if any error
+CURL_OPTIONS+=("--fail")
+
+# Auth
+if ALERT_MANAGER_USER=$(pass alert-manager/user); then
+  ALERT_MANAGER_PASSWORD=$(pass alert-manager/password)
+  CURL_OPTIONS+=("--user" "$ALERT_MANAGER_USER:$ALERT_MANAGER_PASSWORD")
+fi
+
+case $METHOD in
+  "post")
+    CURL_OPTIONS+=("-XPOST")
+    case $PATH in
+      "alerts")
+        post_alerts "${ARGS[@]}"
+        ;;
+      *)
+        echo::err "Post on $PATH is not yet supported"
+        exit 1
+        ;;
+    esac
+    ;;
+  "get")
+    CURL_OPTIONS+=("-XGET")
+    curl "${CURL_OPTIONS[@]}" $API_URL_ENDPOINT # | jq '{ alertname: .[].labels.alertname, instance: .[].labels.instance }'
+    ;;
+  *)
+    doc::help synopsis
+    echo::err "The method $METHOD is unknown"
+    exit 1
+esac
+

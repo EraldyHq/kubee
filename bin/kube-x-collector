@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Get only metrics from a URL
+
+if [ "${1:-}" == "synopsis" ]; then
+  echo "$(basename "$0") URL"
+  exit
+fi
+
+curl -s "$1" | grep '^[a-z]' | sed 's/{.*//g' | sort | uniq -c | sort -nr
+

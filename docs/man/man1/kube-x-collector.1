@@ -14,23 +14,20 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "kube-xpods-ip" "1" "" "Version Latest" "Shows the pods ip"
+.TH "kube-x-collector" "1" "" "Version Latest" "Shows the unique metrics of a Prometheus collector"
 .hy
-.SH NAME
+.SH DESCRIPTION
 .PP
-Shows the pods ip A node name can be given to show only the pods of a
-node
-.SH SYNOPSIS
+Shows the unique metrics of a Prometheus collector by cardinality
+.SH EXAMPLE
 .PP
-Usage:
-.PP
-Shows the pods ip
+The first 20 high cardinality metrics
 .IP
 .nf
 \f[C]
-kube-xpods-ip [node name]
+kube-x-collector https://host/metrics | head 20
 \f[R]
 .fi
+.SH SYNOPSIS
 .PP
-If \f[V]node name\f[R] is provided, the pods of this node will only be
-shown
+${SYNOPSIS}

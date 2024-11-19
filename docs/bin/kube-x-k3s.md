@@ -1,4 +1,4 @@
-% kube-xk3s(1) Version Latest | k3s specific scripts
+% kube-x-k3s(1) Version Latest | k3s specific scripts
 # DESCRIPTION
 
 

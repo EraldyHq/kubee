@@ -24,8 +24,8 @@ A library of Kubernetes Utilities eXtension
 * [kube-memory](docs/bin/kube-x-memory) - print the cpu and memory used by pods
 * [kube-ns-current](docs/bin/kubectl-xns) - set or show the current namespace
 * [kube-ns-events](docs/bin/kubectl-xevents) - show the event of a namespace
-* [kube-pods-ip](docs/bin/kube-xpods-ip) - show the ip of pods
-* [kube-pvc-move](docs/bin/kube-xpvc-move) - move a pvc (Automation not finished)
+* [kube-pods-ip](docs/bin/kube-x-pods-ip) - show the ip of pods
+* [kube-pvc-move](docs/bin/kube-x-pvc-move) - move a pvc (Automation not finished)
 
 
 
