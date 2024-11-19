@@ -23,7 +23,7 @@ DOCKER_OPTIONS+=("-it")
 DOCKER_OPTIONS+=("--entrypoint" "promtool")
 DOCKER_OPTIONS+=("-v" "$PWD:/prometheus")
 
-args=$(getopt -l "help,url,http.config.file" -o "h" -- "$@")
+args=$(getopt -l "help,url,http.config.file,debug,no-debug,version,run" -o "h" -- "$@")
 # eval set to set the positional arguments back to $args
 eval set -- "$args"
 
