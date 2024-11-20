@@ -21,6 +21,7 @@ post_alerts(){
       exit 1
     fi
     ALERT_NAME=$1
+    SEVERITY=${2:-"critical"}
     echo::info "Signaling alert $ALERT_NAME to $API_URL_ENDPOINT"
     echo::debug "Curl Options: ${CURL_OPTIONS[*]}"
 
@@ -35,21 +36,24 @@ post_alerts(){
     #   \"endsAt\": \"2024-11-19T18:59:03.316Z\",
     #
     # For debug: minimal working body is '[{"labels":{"alertname":"test"}}]'
-    BODY="[{
+    #
+    # Labels are on what the route engine works
+    # That's why the severity is a label
+    BODY_NON_MINIFIED="[{
             \"labels\": {
-                \"alertname\": \"$ALERT_NAME\"
+                \"alertname\": \"$ALERT_NAME\",
+                \"severity\":\"$SEVERITY\"
             },
             \"annotations\": {
                  \"summary\": \"high-latency\",
-                 \"severity\":\"warning\",
                  \"instance\": \"yolo.example.net\",
                  \"service\": \"my-service\"
             },
             \"generatorURL\": \"http://hostname-with-problem/path\"
     }]"
-    if ! BODY=$(jq -rc . <<< $BODY); then
+    if ! BODY=$(jq -rc . <<< $BODY_NON_MINIFIED); then
       echo::err "The body is not a valid json"
-      echo::err "${BODY}"
+      echo::err "Body: ${BODY_NON_MINIFIED}"
       return 1
     fi
     echo::debug "Body: ${BODY}"
@@ -195,6 +199,28 @@ case $API_METHOD in
   "get")
     CURL_OPTIONS+=("-XGET")
     curl "${CURL_OPTIONS[@]}" $API_URL_ENDPOINT # | jq '{ alertname: .[].labels.alertname, instance: .[].labels.instance }'
+    ;;
+  "check")
+    # we could check the `status` property of the `alertmanager` CRD
+    # ie https://kube.i.eraldy.com/#/customresourcedefinition/alertmanagers.monitoring.coreos.com/kube-prometheus/alertmanager?namespace=kube-prometheus
+    # Example where you see the reconciliation time and an error if the status is not true
+    # status:
+    #  conditions:
+    #    - lastTransitionTime: '2024-11-19T11:14:36Z'
+    #      message: ''
+    #      observedGeneration: 8
+    #      reason: ''
+    #      status: 'True'
+    #      type: Available
+    #    - lastTransitionTime: '2024-11-20T15:08:19Z'
+    #      message: ''
+    #      observedGeneration: 8
+    #      reason: ''
+    #      status: 'True'
+    #      type: Reconciled
+
+    # Event also
+    # AlertmanagerConfig opsgenie was rejected due to invalid configuration: root route must define a receiver
     ;;
   *)
     doc::help synopsis
