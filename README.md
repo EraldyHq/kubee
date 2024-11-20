@@ -46,6 +46,15 @@ The scripts will try to find resources for an app:
 * via the `app.kubernetes.io/name=$APP_NAME` label
 * or via the `.envrc` of an app directory
 
+Problem: We need multiple apps in the same directory
+because an operator may ship multiple CRD definitions.
+
+Example: the Prometheus Operator
+* prometheus (Prometheus CRD)
+* alertmanager (AlertManager CRD)
+* pushgateway
+* node exporter
+
 
 ### What is Envrc App Definition?
 
