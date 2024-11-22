@@ -49,6 +49,8 @@ The scripts will try to find resources for an app:
 Problem: We need multiple apps in the same directory
 because an operator may ship multiple CRD definitions.
 
+See: app.kubernetes.io/part-of: argocd
+
 Example: the Prometheus Operator
 * prometheus (Prometheus CRD)
 * alertmanager (AlertManager CRD)
