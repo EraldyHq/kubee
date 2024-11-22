@@ -1,18 +1,24 @@
 #!/usr/bin/env bash
 
-# shellcheck source=./bashlib-error.sh
+# shellcheck source=../../bash-lib/lib/bashlib-error.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
 error::set_strict_mode
 error::set_trap
-# shellcheck source=./bashlib-echo.sh
+# shellcheck source=../../bash-lib/lib/bashlib-echo.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
-# shellcheck source=./bashlib-doc.sh
+# shellcheck source=../../bash-lib/lib/bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-command.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
 
 synopsis(){
 
   cat <<EOF
-This tool adds also the command \`promtool check prometheusRules\` to check one \`PrometheusRule\` CRD file of \`Prometheus Operator\`.
+This tool adds also this command for the \`PrometheusRule\` CRD file of \`Prometheus Operator\`
+
+* \`promtool check prometheusRules\` to check the rules inside a \`PrometheusRule\`
+* \`promtool test prometheusRules\` to execute unit test with \`PrometheusRule\` as source of rules.
+  The command will collect the rules from the child \`PrometheusRule\` CRD file and set the \`rule_files\` property
 
 EOF
     docker run "${DOCKER_OPTIONS[@]}" prom/prometheus:latest --help
@@ -42,9 +48,62 @@ check_prometheus_rule(){
 
 }
 
+
+test_prometheus_rule(){
+
+  TEST_FILE_PATH=${1:-}
+  if [ "$TEST_FILE_PATH" == "" ]; then
+    doc::help synopsis
+    echo::err "The path of the test file is mandatory"
+    exit 1
+  fi
+  if [ ! -f "$TEST_FILE_PATH" ]; then
+    echo::err "The test ($TEST_FILE_PATH) does not exist"
+    exit 1
+  fi
+
+  # Create and mount the file
+  RULE_LOCAL_SHM_PATH=/dev/shm/prometheus-rules.yml
+  # Reset it, create it emtpy
+  cat /dev/null >| $RULE_LOCAL_SHM_PATH
+
+  while IFS= read -r -d '' CRD_FILE_PATH; do
+
+    if yq -e '.kind == "PrometheusRule"' "$CRD_FILE_PATH" >/dev/null 2>&1; then
+
+      # shellcheck disable=SC2016
+      yq eval-all '. as $item ireduce ({}; . * $item )' <(yq '.spec' "$CRD_FILE_PATH") $RULE_LOCAL_SHM_PATH >| $RULE_LOCAL_SHM_PATH
+
+    fi
+
+  done < <(find . -type f \( -name "*.yaml" -o -name '*.yml' \) -print0)
+
+  echo::debug "Created Rules: $(cat $RULE_LOCAL_SHM_PATH)"
+
+  # Mount it
+  RULE_DOCKER_PATH=/tmp/prometheus-rules
+  DOCKER_OPTIONS+=("-v" "$RULE_LOCAL_SHM_PATH:$RULE_DOCKER_PATH")
+
+  # Update the test file with the rule_files property
+  TEST_BASE_NAME=$(basename "$TEST_FILE_PATH")
+  TEST_LOCAL_SHM_PATH="/dev/shm/$TEST_BASE_NAME"
+  # Reset it, create it emtpy
+  cat "$TEST_FILE_PATH" >| "$TEST_LOCAL_SHM_PATH"
+  # Add the rule_files
+  yq  ".rule_files = [ \"$RULE_DOCKER_PATH\" ]" "$TEST_FILE_PATH" >| "$TEST_LOCAL_SHM_PATH"
+  echo::debug "Created Test File:\n$(cat "$TEST_LOCAL_SHM_PATH")"
+  # Map into docker
+  TEST_DOCKER_PATH="/tmp/$TEST_BASE_NAME"
+  DOCKER_OPTIONS+=("-v" "$TEST_LOCAL_SHM_PATH:$TEST_DOCKER_PATH")
+
+  # Run
+  command::echo_eval "docker run ${DOCKER_OPTIONS[*]} prom/prometheus:latest test rules $TEST_DOCKER_PATH"
+
+}
+
 # Docker options
 DOCKER_OPTIONS=()
-DOCKER_OPTIONS+=("--name" "promtool")
+DOCKER_OPTIONS+=("--name" "$(basename "$0")")
 DOCKER_OPTIONS+=("--rm")
 DOCKER_OPTIONS+=("-it")
 DOCKER_OPTIONS+=("--entrypoint" "promtool")
@@ -107,10 +166,22 @@ echo::debug "Action: $ACTION"
 echo::debug "Method: $METHOD"
 
 # Prometheus Rule Check
-if [ "$ACTION" == 'check' ] && [[ "${METHOD}" =~ 'prometheusrules'|'prometheusrule' ]]; then
-  check_prometheus_rule "${ARGS[@]}"
-  exit
+if [[ "${METHOD}" =~ 'prometheusrules'|'prometheusrule' ]]; then
+  case "$ACTION" in
+    'check')
+    check_prometheus_rule "${ARGS[@]}"
+    exit
+    ;;
+    'test')
+     test_prometheus_rule "${ARGS[@]}"
+     exit
+    ;;
+    *)
+      doc::help synopsis
+      echo::err "The action $ACTION is not a valid action for a prometheus Rule"
+  esac
 fi
+
 
 # Url and http.config.file
 # They are passed
@@ -118,10 +189,10 @@ fi
 # * for the commands:
 #    `check healthy|ready`
 #    `query|push`
-if (
-    ([ "$ACTION" == 'check' ] && [[ "${METHOD}" =~ 'healthy'|'ready' ]]) ||
-    ([[ "${ACTION}" =~ 'query'|'push' ]])
-  ) && [ "$HELP_ASKED" != "1" ]; then
+if {
+    { [ "$ACTION" == 'check' ] && [[ "${METHOD}" =~ 'healthy'|'ready' ]]; } ||
+    [[ "${ACTION}" =~ 'query'|'push' ]]
+  } && [ "$HELP_ASKED" != "1" ]; then
 
   PROM_TOOL_ARGS+=("--url" "${KUBE_X_PROM_URL}")
 
@@ -142,7 +213,7 @@ EOF
     DOCKER_OPTIONS+=("-v" "$LOCAL_PATH:$DOCKER_PATH")
 
     # Args
-    PROM_TOOL_ARGS+=("--http.config.file" $DOCKER_PATH)
+    PROM_TOOL_ARGS+=("--http.config.file" "$DOCKER_PATH")
 
   fi
 
