@@ -1,9 +1,14 @@
 % promtool(1) Version Latest | Promtool shipped in Docker
 # DESCRIPTION
 
-The [PromTool](https://prometheus.io/docs/prometheus/latest/command-line/promtool/) cli driven by [env](#environment-variable) with XTras.
+The [PromTool](https://prometheus.io/docs/prometheus/latest/command-line/promtool/) cli  with [XTras](#extras)
+
+ie
+* driven by `environment-variable`
+* Prometheus Kubernetes Operator CRD aware
 
 # EXAMPLE
+
 
 ```bash
 cat metrics.prom | promtool check metrics
@@ -18,13 +23,23 @@ The files (`metrics.prom`, `test.yml`) should be in the current directory.
 
 The `PromTool` is executed with:
 * the Prometheus docker image 
-* only the working directory available
+* where only the working directory tree is available
 
 # EXTRAS
 
 ## PrometheusRule Check
 
 The command `check prometheusRule prometheusRuleFile` permits to check a [Prometheus Rule](https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.PrometheusRule)
+
+## PrometheusRule test
+
+This command enhances the [promtool test](https://prometheus.io/docs/prometheus/latest/command-line/promtool/#promtool-test) command so that the
+`rule_files` is generated from [Prometheus Rule](https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.PrometheusRule).
+
+The command `test prometheusRule testFile` will:
+* scan all directory recursively for [Prometheus Rule](https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.PrometheusRule)
+* create a temporary rule file from them
+* inject it into the `testFile` as value of the `rule_files` property.
 
 ## The url flag
 

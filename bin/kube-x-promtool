@@ -18,7 +18,6 @@ This tool adds also this command for the \`PrometheusRule\` CRD file of \`Promet
 
 * \`promtool check prometheusRules\` to check the rules inside a \`PrometheusRule\`
 * \`promtool test prometheusRules\` to execute unit test with \`PrometheusRule\` as source of rules.
-  The command will collect the rules from the child \`PrometheusRule\` CRD file and set the \`rule_files\` property
 
 EOF
     docker run "${DOCKER_OPTIONS[@]}" prom/prometheus:latest --help
