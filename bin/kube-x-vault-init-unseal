@@ -7,6 +7,12 @@
 # We would then loose the files
 #
 
+# Synopsis
+if [ "${1:-}" == "synopsis" ]; then
+  basename "$0"
+  exit
+fi
+
 ## We should make it possible to unseal only by giving the unseal file
 
 # Set variables for files

@@ -61,20 +61,4 @@ KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
 eval "$KUBECTX_ENV"
 
 
-###########################
-# Connection test
-###########################
-# We test the connection because otherwise the user
-# may get a message that a resource could not be found
-# where the culprit should have been the connection
-# Test Connection
-# test_connection
-
-# Config does not work with process substitution (ie /dev/
-# It seems that it starts another process deleting/closing the file descriptor
-touch /dev/shm/kube-x-config
-trap "rm /dev/shm/kube-x-config" exit
-chmod 0600 /dev/shm/kube-x-config
-source kube-x-config.sh >| /dev/shm/kube-x-config
-
-helm --kubeconfig /dev/shm/kube-x-config "${args[@]}"
+helm "${args[@]}"

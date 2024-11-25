@@ -6,17 +6,38 @@
 A library of Kubernetes Utilities eXtension
 
 
+## Extras
+
+### Vault
+
+Init a vault after installation with [kube-x-vault-init](docs/bin-generated/kube-x-vault-init-unseal.md)
+
+### PromTool
+
+Validate and test PrometheusRules with [kube-x-promtool](docs/bin-generated/kube-x-promtool.md)
+
+### Alert Manager
+
+Query and send alert to the Prometheus Alert Manager with [kube-x-alertmanager](docs/bin-generated/kube-x-alertmanager.md)
+
+### Xshell
+
+* [Xshell](docs/bin-generated/kubectl-xshell.md) - get a shell from a busybox container or a pod
+
+### Ephemere KubeConfig stored in pass
+
+Generate a Ephemere Kubeconfig from pass with [kube-x-config](docs/lib/kube-x-config.md)
+
 ## List and documentation
 
-
-* [kubectl-xapply](docs/bin/kubectl-xapply) - apply a kustomize app (ie `kustomize apply`)
-* [kubectl-xshell](docs/bin-generated/kubectl-xshell.md) - get a shell from a busybox container or a pod
+* [xshell](docs/bin-generated/kubectl-xshell.md) - get a shell from a busybox container or a pod
+* [xapply](docs/bin/kubectl-xapply) - apply a kustomize app (ie `kustomize apply`)
 * [kube-x-env](docs/bin/kubectl-xenv) - print the environment configuration of an app 
 * [kube-x-events](docs/bin/kubectl-xevent) - shows the events of an app
 * [kube-x-file-explorer](docs/bin/kubectl-xvolume-explorer) - Explore the files of an app via SCP/SFTP
-* [kube-xlogs](docs/bin/kubectl-xlogs) - print the logs of pods by app name
-* [kube-xpods](docs/bin/kubectl-xpod) - watch/list the pods of an app
-* [kube-xrestart](docs/bin/kubectl-xrestart) - execute a rollout restart
+* [kubectl-xlogs](docs/bin/kubectl-xlogs) - print the logs of pods by app name
+* [kubectl-xpods](docs/bin/kubectl-xpod) - watch/list the pods of an app
+* [kubectl-xrestart](docs/bin/kubectl-xrestart) - execute a rollout restart
 * [kube-xtop](docs/bin/kubectl-xtop) - shows the top processes of an app
 * [kube-xcert](docs/bin-generated/kubectl-xcert.md) - print the kubeconfig cert in plain text
 * [kube-cidr](docs/bin/kubectl-xcidr) - print the cidr by pods
