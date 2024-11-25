@@ -50,7 +50,7 @@ when no [namespace has been found](#namespace-order-of-precedence)
 
 The possible values are:
   * `kubectl`: the default
-  * `kubectx`: to use [kubectx](kubectx.md) to get:
+  * `kubectx`: to use [kubectx](kube-x-kubectl) to get:
     * the users and cluster data from the pass store manager.
     * the [namespace from the environment](#namespace-order-of-precedence)
 
@@ -79,7 +79,7 @@ export KUBE_X_BUSYBOX_IMAGE=ghcr.io/gerardnico/busybox:latest
 
 ## Connection Namespace
 
-The connection namespace is a derived environment variable `KUBE_X_CONNECTION_NAMESPACE` used by [kubectx](kubectx.md).
+The connection namespace is a derived environment variable `KUBE_X_CONNECTION_NAMESPACE` used by [kubectx](kube-x-kubectl).
 
 ### Namespace Order of precedence
 

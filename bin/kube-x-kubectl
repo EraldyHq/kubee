@@ -108,8 +108,10 @@ eval "$KUBECTX_ENV"
 # may get a message that a resource could not be found
 # where the culprit should have been the connection
 # Test Connection
-test_connection
+# Debug
+if [ "$BASHLIB_ECHO_LEVEL" == "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
+  test_connection
+fi
 
 
-
-kubectl --kubeconfig <(source kube-x-config.sh) "${args[@]}"
+kubectl "${args[@]}"
