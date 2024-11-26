@@ -54,6 +54,11 @@ do
    shift
 done
 
+# With Helm, if the namespace is not specified, it defaults to `default`
+if [ "$KUBE_X_APP_NAMESPACE" == "" ]; then
+  doc::help synopsis
+  echo::err "The app namespace should be specified"
+fi
 
 
 # Get env
