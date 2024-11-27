@@ -27,9 +27,11 @@ if [ "${1:-}" == "synopsis" ]; then
   exit
 fi
 
-args=()
+args=("$@")
 
+# Parsing
 KUBE_X_APP_NAMESPACE=${KUBE_X_APP_NAMESPACE:-}
+COMMAND=""
 while [[ $# -gt 0 ]]
 do
    case  "$1" in
@@ -45,19 +47,21 @@ do
       # The created kubeconfig needs a namespace
       # In a all-namespace query we set it to default
       KUBE_X_APP_NAMESPACE="default"
-      args+=("$1")
       ;;
     *)
-      args+=("$1")
+      if [ "$COMMAND" == "" ]; then
+        COMMAND=$1
+      fi
       ;;
    esac
    shift
 done
 
 # With Helm, if the namespace is not specified, it defaults to `default`
-if [ "$KUBE_X_APP_NAMESPACE" == "" ]; then
+if [ "$KUBE_X_APP_NAMESPACE" == "" ] && [[ "$COMMAND" =~ install|uninstall ]]; then
   doc::help synopsis
-  echo::err "The app namespace should be specified"
+  echo::err "The app namespace should be specified for install and uninstall"
+  exit 1
 fi
 
 
