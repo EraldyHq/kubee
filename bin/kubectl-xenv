@@ -196,14 +196,19 @@ echo "# The busybox image to use for a shell in a busybox or ephemeral container
 KUBE_X_BUSYBOX_IMAGE=${KUBE_X_BUSYBOX_IMAGE:-ghcr.io/gerardnico/busybox:latest}
 echo "KUBE_X_BUSYBOX_IMAGE=$KUBE_X_BUSYBOX_IMAGE"
 
-# Config does not work with process substitution (ie /dev/
-# It seems that it starts another process deleting/closing the file descriptor
-touch /dev/shm/kube-x-config
-# Trap work exit  also on source
-# https://stackoverflow.com/questions/69614179/bash-trap-not-working-when-script-is-sourced
-# As what we want is to delete it after the main script
-# We just output the trap statement
-echo 'trap "rm /dev/shm/kube-x-config" EXIT'
-chmod 0600 /dev/shm/kube-x-config
-source kube-x-config.sh >| /dev/shm/kube-x-config
-echo "export KUBECONFIG=/dev/shm/kube-x-config"
+if [ "$KUBECONFIG" == "" ]; then
+  # Config does not work with process substitution (ie /dev/
+  # It seems that it starts another process deleting/closing the file descriptor
+  touch /dev/shm/kube-x-config
+  # Trap work exit  also on source
+  # https://stackoverflow.com/questions/69614179/bash-trap-not-working-when-script-is-sourced
+  # As what we want is to delete it after the main script
+  # We just output the trap statement
+  echo 'trap "rm /dev/shm/kube-x-config" EXIT'
+  chmod 0600 /dev/shm/kube-x-config
+  source kube-x-config.sh >| /dev/shm/kube-x-config
+  echo "export KUBECONFIG=/dev/shm/kube-x-config"
+fi
+if [ ! -f "$KUBECONFIG" ]; then
+  echo::warn "The \$KUBECONFIG variable points to the file $KUBECONFIG that does not exist"
+fi
