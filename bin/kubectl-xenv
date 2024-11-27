@@ -190,12 +190,6 @@ echo "# The directory for the kubeconfig data in the pass store manager"
 KUBE_X_PASS_HOME=${KUBE_X_PASS_HOME:-"kube-x"}
 echo "KUBE_X_PASS_HOME=$KUBE_X_PASS_HOME"
 
-# Kubectl
-echo ""
-echo "# The name of the kubectl cli (kubectl or kubectx)"
-KUBE_X_KUBECTL=${KUBE_X_KUBECTL:-"kubectl"}
-echo "KUBE_X_KUBECTL=$KUBE_X_KUBECTL"
-
 # Busybox
 echo ""
 echo "# The busybox image to use for a shell in a busybox or ephemeral container"

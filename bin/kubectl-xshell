@@ -117,7 +117,7 @@ eval "$KUBE_X_ENV"
 if [ "$APP_NAME" == "busybox" ]; then
 
     echo::info "Starting busybox ${KUBE_X_BUSYBOX_IMAGE} in the namespace ${KUBE_X_CONNECTION_NAMESPACE}"
-    $KUBE_X_KUBECTL run -it busybox-pod --image="$KUBE_X_BUSYBOX_IMAGE" --restart=Never --rm
+    kubectl run -it busybox-pod --image="$KUBE_X_BUSYBOX_IMAGE" --restart=Never --rm
     exit 0
 
 fi
@@ -137,10 +137,10 @@ echo::info "Pod Namespace: $POD_NAMESPACE"
 
 if [ "$SHELL_NAME" == "ephemeral" ]; then
   echo::info "Starting a ephemeral busybox shell on the pod $POD_NAMESPACE/$POD_NAME"
-  $KUBE_X_KUBECTL debug -it --image=$BUSY_BOX_IMAGE -n "$POD_NAMESPACE" --target="$POD_NAME" ephemeral-shell
+  kubectl debug -it --image=$BUSY_BOX_IMAGE -n "$POD_NAMESPACE" --target="$POD_NAME" ephemeral-shell
   exit 0
 fi
 
 echo::info "Starting the shell $SHELL_NAME on the pod $POD_NAMESPACE/$POD_NAME"
 # Note: -c ${CONTAINER_NAME} is mandatory for pods that have more than a single container.
-$KUBE_X_KUBECTL exec -it "$POD_NAME" -n "$POD_NAMESPACE" -- "$SHELL_NAME"
+kubectl exec -it "$POD_NAME" -n "$POD_NAMESPACE" -- "$SHELL_NAME"

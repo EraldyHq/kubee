@@ -12,34 +12,25 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 # @description test the connection to the cluster
 test_connection(){
 
-  if OUTPUT=$(kubectl --kubeconfig <(source kube-x-config.sh) cluster-info); then
+  if OUTPUT=$(kubectl cluster-info); then
     echo::info "Test Connection succeeded"
     return 0;
   fi
   echo::err "No connection could be made with the cluster"
 
-  case "$KUBE_X_KUBECTL" in
-    "kubectl")
-      if [ -z "$KUBECONFIG" ]; then
-            echo::err "Note: No KUBECONFIG env found"
+
+  if [ "${KUBECONFIG:-}" == "" ]; then
+        echo::err "Note: No KUBECONFIG env found"
+  else
+      if [ ! -f "$KUBECONFIG" ]; then
+        echo::err "The KUBECONFIG env file ($KUBECONFIG) does not exist"
       else
-          if [ ! -f "$KUBECONFIG" ]; then
-            echo::err "The KUBECONFIG env file ($KUBECONFIG) does not exist"
-          else
-            echo::info "The file ($KUBECONFIG) may have bad cluster info"
-            echo::err "Note: The config is:"
-            kubectl config view
-          fi
+        echo::info "The file ($KUBECONFIG) may have bad cluster info"
+        echo::err "Note: The config is:"
+        kubectl config view
       fi
-      ;;
-    "kubectx")
-        echo::err "Note: The kubectx config is:"
-        kubectx config view --raw
-      ;;
-    *)
-        echo::err "The KUBE_X_KUBECTL value $KUBE_X_KUBECTL is unknown";
-        ;;
-  esac
+  fi
+
 
   echo::err "We got the following output from the connection"
   echo::err "$OUTPUT"
