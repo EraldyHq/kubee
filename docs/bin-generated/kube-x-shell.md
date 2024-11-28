@@ -13,7 +13,7 @@ Connect with a shell (bash by default) to a pod by app name
 Get a shell into your application pod or your cluster with busybox
 
 ```bash
-kubectl-xshell [--shell|-s shellName [--namespace|-n namespace] <app name>
+kube-x-shell [--shell|-s shellName [--namespace|-n namespace] <app name>
 ```
 
 where:

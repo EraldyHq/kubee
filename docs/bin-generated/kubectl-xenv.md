@@ -49,21 +49,11 @@ and is used to determine the [connection namespace](#namespace-order-of-preceden
 `KUBE_X_DEFAULT_NAMESPACE` defines the default [connection namespace](#namespace-order-of-precedence)
 when no [namespace has been found](#namespace-order-of-precedence)
 
-## KUBE_X_KUBECTL
-
-`KUBE_X_KUBECTL` defines the `kubectl` client used.
-
-The possible values are:
-  * `kubectl`: the default
-  * `kubectx`: to use [kubectx](kubectx.md) to get:
-    * the users and cluster data from the pass store manager.
-    * the [namespace from the environment](#namespace-order-of-precedence)
-
 
 ## KUBE_X_APP_HOME
 
 The `$KUBE_X_APP_HOME` environment variable defines a path environment variable where each path is a directory that contains 
-applications.
+namespace applications.
 
 It should be set in your `.bashrc`
 
@@ -74,7 +64,7 @@ export KUBE_X_APP_HOME=$HOME/my-kube-apps:$HOME/my-other-kube-apps
 
 ## KUBE_X_BUSYBOX_IMAGE
 
-The image used by [kubectl-xshell](kubectl-xshell.md) when asking for a shell in a busybox.
+The image used by [kubectl-xshell](kube-x-shell) when asking for a shell in a busybox.
 
 Default to [ghcr.io/gerardnico/busybox:latest](https://github.com/gerardnico/busybox/pkgs/container/busybox)
 
@@ -84,7 +74,7 @@ export KUBE_X_BUSYBOX_IMAGE=ghcr.io/gerardnico/busybox:latest
 
 ## Connection Namespace
 
-The connection namespace is a derived environment variable `KUBE_X_CONNECTION_NAMESPACE` used by [kubectx](kubectx.md).
+The connection namespace is a derived environment variable `KUBE_X_CONNECTION_NAMESPACE` used by [kubectx](kube-x-kubectl).
 
 ### Namespace Order of precedence
 

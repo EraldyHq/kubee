@@ -59,7 +59,7 @@ export KUBE_X_APP_HOME=$HOME/my-kube-apps:$HOME/my-other-kube-apps
 
 ## KUBE_X_BUSYBOX_IMAGE
 
-The image used by [kubectl-xshell](kubectl-xshell.md) when asking for a shell in a busybox.
+The image used by [kubectl-xshell](kube-x-shell) when asking for a shell in a busybox.
 
 Default to [ghcr.io/gerardnico/busybox:latest](https://github.com/gerardnico/busybox/pkgs/container/busybox)
 
