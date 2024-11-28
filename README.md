@@ -1,4 +1,4 @@
-# Kube X- A Library of Kubernetes Utilities eXtension
+# Kube X - Kube Express - A Library of Kubernetes Utilities eXtension
 
 
 ## About
