@@ -97,7 +97,9 @@ echo "KUBE_X_APP_NAME=$KUBE_X_APP_NAME"
 KUBE_X_APP_DIR=""
 if [ "$KUBE_X_APP_NAME" != "" ]; then
 
-  IFS=":"; for KUBE_X_HOME in $KUBE_X_APP_HOME; do
+  # Set the internal field separator to a colon, but only for the command
+  IFS=':' read -r -a KUBE_X_HOMES <<< "$KUBE_X_APP_HOME"
+  for KUBE_X_HOME in $KUBE_X_HOMES; do
     APP_DIR=$KUBE_X_HOME/$KUBE_X_APP_NAME
     if [ -d "$APP_DIR" ]; then
       KUBE_X_APP_DIR="$APP_DIR"
@@ -107,7 +109,7 @@ if [ "$KUBE_X_APP_NAME" != "" ]; then
 
   if [ "$KUBE_X_APP_DIR" == "" ]; then
     # App Name may be a component (example: alert manager)
-    echo::warn "No sub-directory with the name $KUBE_X_APP_NAME was found under the KUBE_X_APP_HOME paths ($KUBE_X_APP_HOME)"
+    echo::warn "No sub-directory with the name $KUBE_X_APP_NAME was found under the KUBE_X_APP_HOME paths (${KUBE_X_HOMES[@]})"
   else
     # App specific env
     # Should be first
