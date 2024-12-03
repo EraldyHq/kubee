@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+
+# shellcheck source=../..//bash-lib/lib/bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+error::set_strict_mode
+error::set_trap
+# shellcheck source=../..//bash-lib/lib/bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=../..//bash-lib/lib/bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+# shellcheck source=../..//bash-lib/lib/bashlib-command.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+# Check that a file has all variable
+check_vars() {
+
+  local ENVS=$(envsubst -v "$(cat $1)")
+  local rc=0
+  while read VARIABLE_NAME
+  do
+      if [ "${!VARIABLE_NAME:-}" == "" ]; then
+          echo::err "$VARIABLE_NAME is not defined and should be defined"
+          rc=1
+      fi
+  done <<< $ENVS
+  return "$rc"
+
+}
+
+play(){
+
+   # Inventory
+   KUBE_X_INVENTORY_FILE="${KUBE_X_INVENTORY_FILE:-"${SCRIPT_DIR}/../resources/cluster/provisioning/inventory.yml"}"
+   # Check the variables
+   if ! check_vars "$KUBE_X_INVENTORY_FILE"; then
+     # Should exit because of the strict mode
+     # but it was not working
+     echo::err "Inventory variables missing. Exiting"
+     exit 1
+   fi
+   local SHM_INVENTORY_FILE="/dev/shm/kube-x-inventory.yml"
+   envsubst < "$KUBE_X_INVENTORY_FILE" >| "$SHM_INVENTORY_FILE"
+   # cat "$SHM_INVENTORY_FILE"
+   ansible-playbook -i "$SHM_INVENTORY_FILE" ans_x.ans_x_collection.kube_x_site.yml
+
+}
+
+generate_conf(){
+  :
+
+}
+
+# @internal
+synopsis(){
+
+cat << EOT
+
+$(basename "$0") - One-Clik Self-Hosted Kubernetes on a single VPS
+
+Usage:
+\`\`\`bash
+$(basename "$0") command opts
+\`\`\`
+
+Commands:
+
+* play             Provision a cluster
+
+Global Options:
+
+* -h --help                       Show this help message
+
+
+EOT
+}
+
+
+# Assign the first argument to a string
+COMMAND="${1:-}"
+if [ "$COMMAND" = "" ]; then
+    synopsis
+    echo::err "A command is mandatory"
+    exit 1
+fi
+shift  # Remove the first argument from the argument list
+
+# Help Asked should not fail for the doc
+# We test if before the error warning
+if [[ $COMMAND =~ help|-h|--help ]]; then
+  doc::help synopsis
+  exit
+fi
+
+if [[ $COMMAND == "synopsis" ]]; then
+  synopsis
+  exit
+fi
+
+
+
+
+# Assign the rest of the arguments to an array
+declare -a ARGS=()
+ARGS=("$@")
+
+
+case $COMMAND in
+"play")
+    play "${ARGS[@]}" || error::exit $?
+    ;;
+*)
+  doc::help synopsis
+  echo::err "Command $COMMAND is unknown"
+  exit 1
+esac

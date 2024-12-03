@@ -98,7 +98,7 @@ eval "$(kube-x-env appName [namespaceName])"
 
 ## Contribute 
 
-See [Contribute/Dev](contribute.md)
+See [Contribute/Dev](contrib/contribute.md)
 
 ## Kubectl Plugins
 

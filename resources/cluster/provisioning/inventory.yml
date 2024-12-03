@@ -1,0 +1,27 @@
+# Template used to generate an inventory
+k3s_cluster:
+  children:
+    server:
+      hosts:
+        $KUBE_X_CLUSTER_API_SERVER_01_NAME:
+          ansible_host: "$KUBE_X_CLUSTER_API_SERVER_01_IP"
+          ans_x_os_hostname: "$KUBE_X_CLUSTER_API_SERVER_01_NAME.$KUBE_X_CLUSTER_APEX_DOMAIN"
+#    agent:
+#      hosts:
+#        192.16.35.12:
+#        192.16.35.13:
+  vars:
+    # Can be set via ANSIBLE_REMOTE_USER (default to the user executing Ansible)
+    # https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_REMOTE_USER
+    ansible_user: "$KUBE_X_CLUSTER_SERVER_USER"
+    # ANSIBLE_HOST_KEY_CHECKING
+    # See also https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_HOST_KEY_CHECKING
+    ans_x_k3s_version: "$KUBE_X_CLUSTER_K3S_VERSION"
+    # The token should be a random string of reasonable length. You can generate
+    # one with the following commands:
+    # - openssl rand -base64 64 | tr '\n' ''
+    # - pwgen -s 64 1
+    # You can use ansible-vault to encrypt this value / keep it secret.
+    # Or you can omit it if not using Vagrant and let the first server automatically generate one.
+    ans_x_k3s_token: "$KUBE_X_CLUSTER_K3S_TOKEN"
+

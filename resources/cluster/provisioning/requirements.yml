@@ -1,0 +1,11 @@
+# Roles
+# https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#installing-multiple-roles-from-a-file
+
+# Doc: Collections
+# https://docs.ansible.com/ansible/latest/collections_guide/collections_installing.html#install-multiple-collections-with-a-requirements-file
+collections:
+  - name: https://github.com/k3s-io/k3s-ansible.git
+    type: git
+    version: 2a5a89a  # specify branch/tag/commit
+  # With just the collection name
+  - name: ans_x.ans_x_collection
