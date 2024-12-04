@@ -1,0 +1,41 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: traefik
+  namespace: '{{ traefik_namespace }}'
+  labels:
+    app.kubernetes.io/name: traefik
+spec:
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      # With true, Prometheus takes the service label of Traefik and not of the server (ie the kubernetes service)
+      # If you don't see the traefik service but the kube service in the prometheus promql editor, there may be a cache
+      # check with the remote_write config
+      honorLabels: true
+      # Keep only the labels that makes the id
+      # https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/running-exporters.md#servicemonitors
+      # These have always the same values: job=traefik-metrics, namespace=kube-system, endpoint=metrics, container=traefik
+      # pod may change but is irrelevant
+      # not that service is the traefik service and not the kube server thanks to `honorLabels: true`
+      relabelings:
+        - action: labeldrop
+          regex: '^(pod|job|namespace|container)$'
+      metricRelabelings:
+        # We can delete this labels only after the scrape
+        # because they are the URI information of the scrape
+        # `instance` (hostname) and `endpoint` (port)
+        - action: labeldrop
+          regex: '^(instance|endpoint)$'
+        # Keep the `phpfpm_*` metrics, drop all internal exporter metrics (go, prom, ...)
+        - sourceLabels: [ __name__ ]
+          regex: "traefik_(.*)"
+          action: keep
+  #  namespaceSelector:
+  #    matchNames:
+  #      - Release.Namespace
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: traefik
+      app.kubernetes.io/component: metrics
