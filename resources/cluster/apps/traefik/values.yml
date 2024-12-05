@@ -2,8 +2,6 @@
 
 traefik:
 
-
-
   service:
     ipFamilyPolicy: SingleStack
     ipFamilies:
