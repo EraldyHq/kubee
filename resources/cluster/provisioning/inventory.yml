@@ -2,6 +2,7 @@
 k3s_cluster:
   children:
     server:
+      # number must be odd to avoid split brain issues with etcd and the recommended number is 3.
       hosts:
         $KUBE_X_CLUSTER_API_SERVER_01_NAME:
           ansible_host: "$KUBE_X_CLUSTER_API_SERVER_01_IP"
