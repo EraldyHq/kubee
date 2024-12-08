@@ -40,8 +40,8 @@ Generate a Ephemere Kubeconfig from pass with [kube-x-config](docs/lib/kube-x-co
 * [kubectl-xrestart](docs/bin/kubectl-xrestart) - execute a rollout restart
 * [kube-xtop](docs/bin/kubectl-xtop) - shows the top processes of an app
 * [kube-xcert](docs/bin-generated/kubectl-xcert.md) - print the kubeconfig cert in plain text
-* [kube-cidr](docs/bin/kubectl-xcidr) - print the cidr by pods
-* [kube-k3s](docs/bin/kubectl-xcidr) - collection of k3s utilities
+* [kube-cidr](docs/bin/kube-x-pods-cidr) - print the cidr by pods
+* [kube-k3s](docs/bin/kube-x-pods-cidr) - collection of k3s utilities
 * [kube-memory](docs/bin/kube-x-memory) - print the cpu and memory used by pods
 * [kube-ns-current](docs/bin/kubectl-xns) - set or show the current namespace
 * [kube-ns-events](docs/bin/kubectl-xevents) - show the event of a namespace

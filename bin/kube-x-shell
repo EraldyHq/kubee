@@ -117,7 +117,8 @@ eval "$KUBE_X_ENV"
 if [ "$APP_NAME" == "busybox" ]; then
 
     echo::info "Starting busybox ${KUBE_X_BUSYBOX_IMAGE} in the namespace ${KUBE_X_CONNECTION_NAMESPACE}"
-    kubectl run -it busybox-pod --image="$KUBE_X_BUSYBOX_IMAGE" --restart=Never --rm
+    # --image-pull-policy Always will check the latest sha
+    kubectl run -it busybox-pod --image="$KUBE_X_BUSYBOX_IMAGE" --restart=Never --rm --image-pull-policy Always
     exit 0
 
 fi

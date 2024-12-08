@@ -40,6 +40,10 @@ if [[ $NODE_NAME =~ -h|help ]]; then
   exit
 fi
 
+# Get env
+KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
+eval "$KUBECTX_ENV"
+
 
 # Check if the node name is provided
 if [ "$NODE_NAME" != "" ]; then
