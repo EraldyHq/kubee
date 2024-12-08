@@ -1,3 +1,4 @@
+# https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#use-prometheus-operator
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
