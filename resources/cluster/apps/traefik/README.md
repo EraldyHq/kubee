@@ -64,13 +64,6 @@ otherwise you may not be able to apply specific middleware for this version
 
 ## Update CRD 
 
-Example:
-```bash
-kubectl apply -f https://raw.githubusercontent.com/traefik/traefik/v3.0.3/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml
-# from here
-# https://github.com/traefik/traefik-helm-chart?tab=readme-ov-file#upgrading ???
-kubectl apply --server-side --force-conflicts -k https://github.com/traefik/traefik-helm-chart/traefik/crds/
-```
 
 ## Loadbalancer
 

@@ -1,0 +1,56 @@
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: {{ .Release.Name }}-no-verify-tls
+  namespace: '{{.Release.Namespace}}'
+spec:
+  insecureSkipVerify: true
+---
+# The certificate
+# (Because we use IngressRoute, it needs to be created manually)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: '{{ .Release.Name }}-{{ .Values.ingressDashboardCertSuffix }}'
+  namespace: '{{.Release.Namespace}}'
+  labels:
+    # use cloudflare Dns
+    "issuer-challenge": "dns01-cloudflare"
+spec:
+  commonName: '{{ .Values.ingressDashboardHostName }}'
+  secretName: '{{ .Release.Name }}-{{ .Values.ingressDashboardCertSecretNameSuffix }}'
+  dnsNames:
+    - '{{ .Values.ingressDashboardHostName }}'
+  issuerRef:
+    kind: ClusterIssuer
+    name: '{{ .Values.ingressClusterIssuer }}'
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: '{{ .Release.Name }}'
+  namespace: '{{.Release.Namespace}}'
+  #annotations:
+  labels:
+    app.kubernetes.io/name: kube-dashboard
+spec:
+  entryPoints:
+    - websecure
+  tls:
+    # in the IngressRoute namespace
+    secretName: '{{ .Release.Name }}-{{ .Values.ingressDashboardCertSecretNameSuffix }}'
+  routes:
+    - kind: Rule
+      match: Host(`{{ .Values.ingressDashboardHostName }}`)
+      services:
+        # Ingress in front of kong
+        # written here https://github.com/kubernetes/dashboard?tab=readme-ov-file#installation
+        # and seen in the forward: https://github.com/kubernetes/dashboard/blob/master/docs%2Fuser%2Faccessing-dashboard%2FREADME.md#kubectl-port-forward
+        - name: kubernetes-dashboard-kong-proxy
+          port: 443
+          serversTransport: '{{ .Release.Name }}-no-verify-tls'
+        #      middlewares:
+        # We can't use the basic auth  because it uses the `Authentication` header, and it conflicts with
+        # the bearer token of the dashboard
+        # - name: 'xxx'
+---

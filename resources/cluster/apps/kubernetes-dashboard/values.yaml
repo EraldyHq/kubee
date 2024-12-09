@@ -1,0 +1,54 @@
+# The name of the cluster service account with the admin role
+clusterServiceAccount: 'nico'
+# The external DNS
+ingressDashboardHostName: 'kube.i.eraldy.com'
+
+# Global Conf
+# The certificate issuer
+ingressClusterIssuer: 'letsencrypt-prod'
+
+# Conf Name used for consistency only across the manifest
+# The admin cluster role name (admin for most of the kube installation, k3s)
+adminRole: 'admin'
+# Suffix Name of the cert for the ingress
+ingressDashboardCertSuffix: 'cert'
+# The name of the secret that holds the certificate
+ingressDashboardCertSecretNameSuffix: 'cert-secret'
+
+
+# Default of
+# https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml
+kubernetes-dashboard:
+  # General configuration shared across resources
+  app:
+    settings:
+      ## Global dashboard settings
+      global:
+        # Cluster name that appears in the browser window title if it is set
+        clusterName: "Beau"
+        # Max number of items that can be displayed on each list page
+        itemsPerPage: 10
+        # Max number of labels that are displayed by default on most views.
+        labelsLimit: 3
+        # Number of seconds between every auto-refresh of logs
+        logsAutoRefreshTimeInterval: 5
+        # Number of seconds between every auto-refresh of every resource. Set 0 to disable
+        resourceAutoRefreshTimeInterval: 10
+      #  # Hide all access denied warnings in the notification panel
+      #  disableAccessDeniedNotifications: false
+      #  # Hide all namespaces option in namespace selection dropdown to avoid accidental selection in large clusters thus preventing OOM errors
+      #  hideAllNamespaces: false
+      #  # Namespace that should be selected by default after logging in.
+      #  defaultNamespace: default
+      #  # List of namespaces that should be presented to user without namespace list privileges.
+      #  namespaceFallbackList:
+      #  - default
+      ## Pinned resources that will be displayed in dashboard's menu
+      pinnedResources:
+        - kind: customresourcedefinition
+          #  Fully qualified name of a CRD
+          name: prometheus.monitoring.coreos.com
+          #  Display name
+          displayName: Prometheus
+          #  Is this CRD namespaced?
+          namespaced: true

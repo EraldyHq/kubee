@@ -1,6 +1,6 @@
 apiVersion: v2
-name: traefik-sub-chart
-description: A sub-chart of Traefik
+name: kubernetes-dashboard-sub-chart
+description: A Custom Kubernetes Dashboard chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -15,22 +15,16 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.1.0
+version: 0.1.0 # The version of the chart (doesn't matter and can stay the same)
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "v3.2.1" # Traefik Version
+appVersion: "7.10.0" # The version of the app packaged
 
-
-# https://github.com/cert-manager/cert-manager/releases
-# https://cert-manager.io/docs/installation/helm/#example-usage
+# https://artifacthub.io/packages/helm/k8s-dashboard/kubernetes-dashboard
 dependencies:
-  - name: traefik
-    # https://helm.sh/docs/chart_best_practices/dependencies/#versions
-    # equivalent to >= 33.1.0, < 33.2.0
-    version: ~33.1.0
-    repository: https://traefik.github.io/charts
-    alias: traefik
-    #condition: certManager.enabled
+  - name: kubernetes-dashboard
+    version: 7.10.0
+    repository: https://kubernetes.github.io/dashboard/
