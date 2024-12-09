@@ -1,0 +1,60 @@
+# Dev note about kube-x-cluster
+
+
+## Steps
+
+### Download requirements
+
+Install all requirements
+```bash
+ansible-galaxy install -r resources/cluster/provisioning/requirements.yml
+```
+
+### Generate Inventory
+
+#### Common
+
+```bash
+export KUBE_X_CLUSTER_API_SERVER_01_NAME=kube-xp-server-01
+export KUBE_X_CLUSTER_SERVER_USER=root
+export KUBE_X_CLUSTER_APEX_DOMAIN=example.com
+export KUBE_X_CLUSTER_NAME=kube-x
+export KUBE_X_CLUSTER_K3S_VERSION=v1.31.2+k3s1
+export KUBE_X_CLUSTER_K3S_TOKEN=jbHWvQv9261KblczY7BX+OLcnZGrMSe+0UiFS3h7Ozc= # To generate a token: `openssl rand -base64 32 | tr -d '\n'`
+```
+
+#### Docker Connection
+
+* Provision the container
+```bash
+export DOCK_X_CONTAINER=$KUBE_X_CLUSTER_API_SERVER_01_NAME
+export DOCK_X_REGISTRY=ghcr.io
+export DOCK_X_NAMESPACE=gerardnico
+export DOCK_X_NAME=kind-ansible
+export DOCK_X_TAG=bookworm
+export DOCK_X_RUN_OPTIONS="-d --privileged --network kube -p 6443:6443 -p 80:80 -p 443:443 -v /tmp/var/lib/rancher:/var/lib/rancher"
+dock-x run
+```
+
+* [Connection](https://docs.ansible.com/ansible/latest/collections/community/docker/docker_connection.html)
+
+```bash
+export KUBE_X_CLUSTER_CONNECTION=community.docker.docker
+# check inv
+kube-x-cluster inv
+```
+
+#### SSH Connection
+
+```bash
+export KUBE_X_CLUSTER_CONNECTION=ansible.builtin.ssh
+export KUBE_X_CLUSTER_API_SERVER_01_IP=78.46.190.50
+kube-x-cluster inv
+```
+
+
+### Kube-X Installation
+
+```bash
+kube-x-cluster play
+```

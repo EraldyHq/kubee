@@ -3,38 +3,7 @@
 
 
 
-## Steps
 
-### Download requirements
-
-Install all requirements
-```bash
-ansible-galaxy install -r resources/cluster/requirements.yml
-```
-
-### Create Inventory
-
-
-```bash
-export KUBE_X_CLUSTER_API_SERVER_01_IP=78.46.190.50
-export KUBE_X_CLUSTER_API_SERVER_01_NAME=kube-vp-server-01
-export KUBE_X_CLUSTER_SERVER_USER=root
-export KUBE_X_CLUSTER_APEX_DOMAIN=example.com
-export KUBE_X_CLUSTER_NAME=kube-vp
-export KUBE_X_CLUSTER_K3S_VERSION=v1.31.2+k3s1
-export KUBE_X_CLUSTER_TOKEN=jbHWvQv9261KblczY7BX+OLcnZGrMSe+0UiFS3h7Ozc= # To generate a token: `openssl rand -base64 32 | tr -d '\n'`
-
-envsubst < resources/inventory.yml >| conf/inventory.yml
-```
-
-
-### Kubernetes Installation
-
-```bash
-ansible-playbook -i conf/inventory.yml $ANSIBLE_HOME/collections/ansible_collections/k3s/orchestration/playbooks/site.yml
-ansible-playbook -i conf/inventory.yml k3s.orchestration.site.yml
-ansible-galaxy collection list
-```
 
 ### Copy KUBECONFIG and connection test
 

@@ -31,24 +31,27 @@ check_vars() {
 
 play(){
 
+   SHM_INVENTORY_FILE=$(inventory_file)
+   ansible-playbook -i "$SHM_INVENTORY_FILE" ans_x.ans_x_base.kube_x_site.yml
+
+}
+
+inventory_file(){
+
    # Inventory
    KUBE_X_INVENTORY_FILE="${KUBE_X_INVENTORY_FILE:-"${SCRIPT_DIR}/../resources/cluster/provisioning/inventory.yml"}"
+
    # Check the variables
    if ! check_vars "$KUBE_X_INVENTORY_FILE"; then
      # Should exit because of the strict mode
      # but it was not working
-     echo::err "Inventory variables missing. Exiting"
-     exit 1
+     echo::err "Inventory variables missing"
+     return 1
    fi
    local SHM_INVENTORY_FILE="/dev/shm/kube-x-inventory.yml"
+
    envsubst < "$KUBE_X_INVENTORY_FILE" >| "$SHM_INVENTORY_FILE"
-   # cat "$SHM_INVENTORY_FILE"
-   ansible-playbook -i "$SHM_INVENTORY_FILE" ans_x.ans_x_collection.kube_x_site.yml
-
-}
-
-generate_conf(){
-  :
+   echo "$SHM_INVENTORY_FILE"
 
 }
 
@@ -67,6 +70,7 @@ $(basename "$0") command opts
 Commands:
 
 * play             Provision a cluster
+* inventory        Print the Ansible inventory file
 
 Global Options:
 
@@ -109,6 +113,10 @@ ARGS=("$@")
 case $COMMAND in
 "play")
     play "${ARGS[@]}" || error::exit $?
+    ;;
+"inventory"|"inv")
+    INVENTORY_FILE=$(inventory_file) || error::exit $?
+    cat $INVENTORY_FILE
     ;;
 *)
   doc::help synopsis
