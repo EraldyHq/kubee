@@ -8,6 +8,14 @@ This chart installs the Traefik CRDs.
 This is a dedicated Helm Chart delivery method that 
 implements the [Helm CRD Method 2](https://helm.sh/docs/chart_best_practices/custom_resource_definitions/#method-2-separate-charts).
 
+## Install
+
+CRD are global. No namespace is needed
+```bash
+helm upgrade --install  traefik-crds .
+# with kube-x
+kube-x-helm upgrade --install traefik-crds .
+```
 
 ## Contrib
 
