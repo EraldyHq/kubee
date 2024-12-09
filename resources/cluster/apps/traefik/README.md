@@ -1,20 +1,12 @@
-# Traefik ConfChart
+# Kube-X Traefik 
+
 
 ## About
-A conf-chart for Traefik
+A `Traefik sub-chart` for Kube-x
 
 ## Prerequisite
 
-CRD are a prerequisites 
-The chart does not exist yet. https://github.com/traefik/traefik-helm-chart/issues/1141
-
-Therefore, we install them via the charts. 
-```bash
-helm repo add traefik https://traefik.github.io/charts
-helm install traefik traefik/traefik \
-  -f traefik-values.yaml \
-  --version 33.1.0
-```
+* [traefik-crds](../traefik-crds/README.md)
 
 ## Install SubChart
 
@@ -25,8 +17,8 @@ helm dependency build
 * Verify
 ```bash
 helm lint
-# Output 3 line above and 14 below the grepped term
-helm template . | grep -A 14 -B 3 'kindName'
+helm template -s templates/deployment.yaml .
+helm template . --values=myvalues.yaml --show-only charts/(chart alias)/templates/deployment.yaml
 ```
 * Install
 ```bash
@@ -34,7 +26,7 @@ helm template . | grep -A 14 -B 3 'kindName'
 # KUBE_X_APP_NAMESPACE=cert-manager
 helm upgrade --install -n traefik --create-namespace traefik .
 # with kube-x
-kube-x-helm upgrade --install --create-namespace traefik .
+kube-x-helm upgrade --install --create-namespace -f global-values.yaml  traefik .
 ```
 
 ## Values
@@ -44,25 +36,11 @@ kube-x-helm upgrade --install --create-namespace traefik .
 
 ## Doc
 
-### Upgrade
-
-https://github.com/traefik/traefik-helm-chart?tab=readme-ov-file#upgrading
 
 ### Letsencrypt
 
 https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#use-traefik-native-lets-encrypt-integration-without-cert-manager
 
-
-
-## CRD on K3s
-
-On k3s, the default repo is https://hub.docker.com/r/rancher/mirrored-library-traefik/tags 
-and does not have all version 3.0.3 
-
-If you change the version, you need to apply the corresponding [crd](https://doc.traefik.io/traefik/user-guides/crd-acme/#ingressroute-definition)
-otherwise you may not be able to apply specific middleware for this version
-
-## Update CRD 
 
 
 ## Loadbalancer

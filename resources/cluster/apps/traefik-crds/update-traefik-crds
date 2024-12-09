@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# This script update the version
+# and crd from the upstream traefik sub-chart
+
+source bashlib-error.sh
+error::set_strict_mode
+error::set_trap
+source bashlib-echo.sh
+
+# this works for executed script or sourced script
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+# Get the Traefik chart
+TRAEFIK_CHART_VERSION=$(yq '.dependencies[] | select(.name == "traefik") | .version' "$SCRIPT_DIR/../traefik/Chart.yaml" | tr -d '~' )
+
+if [ "$TRAEFIK_CHART_VERSION" == "" ]; then
+  echo::err "Unable to retrieve the traefik chart version (the value was empty)"
+  exit 1
+fi
+echo::info "Updating traefik-crds for the Traefik chart $TRAEFIK_CHART_VERSION"
+
+TRAEFIK_VERSION=$(curl -s https://traefik.github.io/charts/index.yaml | yq ".entries.traefik[] | select(.version == \"$TRAEFIK_CHART_VERSION\") | .appVersion")
+if [ "$TRAEFIK_VERSION" == "" ]; then
+  echo::err "Unable to retrieve the traefik version from the repo (the value was empty)"
+  exit 1
+fi
+
+echo::info "Updating traefik-crds Chart.yml with Traefik version: $TRAEFIK_VERSION. Chart: $TRAEFIK_CHART_VERSION"
+yq ".appVersion = \"$TRAEFIK_VERSION\"" -i Chart.yaml
+yq ".version = \"$TRAEFIK_CHART_VERSION\"" -i Chart.yaml
+
+echo::info "Download the CRD of Traefik $TRAEFIK_VERSION"
+curl \
+  -s \
+  -o templates/kubernetes-crd-definition-v1.yml \
+  --fail \
+  "https://raw.githubusercontent.com/traefik/traefik/$TRAEFIK_VERSION/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml"
+
+echo::success "The traefik-crds chart was updated"

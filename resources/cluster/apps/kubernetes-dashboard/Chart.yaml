@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kubernetes-dashboard-sub-chart
+name: kube-x-kubernetes-dashboard
 description: A Custom Kubernetes Dashboard chart
 
 # A chart can be either an 'application' or a 'library' chart.
