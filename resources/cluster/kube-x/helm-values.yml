@@ -1,4 +1,13 @@
-# Template used to generate an inventory
+# Common Kube-x values used in sub-charts
 kube_x:
   prometheus:
     enabled: ${KUBE_X_CLUSTER_PROMETHEUS_ENABLED}
+
+# Traefik
+# https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
+traefik:
+  additionalArguments:
+    # Debug
+    - '--log.level=DEBUG'
+    # Logs just add too much noise on what is going on
+    - '--accesslog=true'

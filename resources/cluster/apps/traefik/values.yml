@@ -36,10 +36,6 @@ traefik:
         enabled: true
 
   additionalArguments:
-    # Debug
-    - '--log.level=DEBUG'
-    # Logs just add too much noise on what is going on
-    - '--accesslog=true'
     # Don't verify cert on self-signed cert
     - '--serversTransport.insecureSkipVerify=true'
 
