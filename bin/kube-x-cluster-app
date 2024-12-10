@@ -39,10 +39,20 @@ install(){
   echo $APP_DIRECTORY
   pushd "$APP_DIRECTORY"
   APP_RELEASE_NAME="$APP_NAMESPACE"
+  local SETS=()
+  SETS+=("--set kube_x.prometheus.enabled=${KUBE_X_CLUSTER_PROMETHEUS_ENABLED:-false}")
   # --dependency-update flag to avoid the `helm dependency build` error:
   # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
   # See https://github.com/helm/helm/issues/7214
-  command::echo_eval "helm upgrade --install -n $APP_NAMESPACE --create-namespace $APP_RELEASE_NAME --dependency-update ."
+  command::echo_eval "helm upgrade \
+    --install \
+    -n $APP_NAMESPACE \
+    --create-namespace \
+    --dependency-update \
+    -f values.yml \
+    ${SETS[*]} \
+    $APP_RELEASE_NAME \
+    ."
   popd
 
 }

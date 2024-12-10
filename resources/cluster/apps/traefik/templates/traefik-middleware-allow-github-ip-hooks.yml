@@ -2,15 +2,12 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: ip-allow-github-hooks-cidr
-  namespace: '{{.Release.Namespace}}'
+  namespace: '{{ .Release.Namespace }}'
   annotations:
     description: This middleware allows only the GitHub Hooks CIDR and our private network
 spec:
   # https://doc.traefik.io/traefik/v3.0/middlewares/http/ipallowlist/
   ipAllowList:
-    # Don't quote the ansible expression
-    # noinspection KubernetesUnknownValues
-    # sourceRange: github_hooks_cidr | to_yaml
     sourceRange:
       - 192.30.252.0/22
       - 185.199.108.0/22

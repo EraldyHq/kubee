@@ -1,86 +1,98 @@
-# Traefik experimental features
-experimental:
-  # Equivalent to the cli flag (passed in additionalArguments)
-  # - `--experimental.plugins.sablier.modulename=github.com/acouvreur/sablier'
-  # - `--experimental.plugins.sablier.version=v1.7.0'
-  plugins:
-    sablier:
-      moduleName: github.com/acouvreur/sablier
-      version: v1.7.0
-
-ingressRoute:
-  # https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#access-traefik-dashboard-without-exposing-it
-  dashboard:
-    enabled: false
-
-metrics:
-  # Prometheus is enabled by default
+# The kube-x env
+kube_x:
+  # The prometheus kube-x env
+  # Mapped to KUBE_X_CLUSTER_PROMETHEUS_ENABLED
   prometheus:
-    # The metrics port is not in the traefik service
-    # This value creates a dedicated metrics service to use with ServiceMonitor
-    # Enable Prometheus Metrics https://doc.traefik.io/traefik/observability/metrics/prometheus/
-    # Metrics Info: https://doc.traefik.io/traefik/observability/metrics/overview/#global-metrics
-    service:
-      enabled: true
+    enabled: false
+  # The crd dependencies of this sub-chart
+  dependencies:
+    - prometheus
 
-additionalArguments:
-  # Debug
-  #- '--log.level=DEBUG'
-  # Logs just add too much noise on what is going on
-  #- '--accesslog=true'
-  # Don't verify cert on self-signed cert
-  - '--serversTransport.insecureSkipVerify=true'
 
-service:
-  type: NodePort # LoadBalancer
-  ipFamilyPolicy: SingleStack
-  ipFamilies:
-    - IPv4
-  spec: {
-    # Allow Origin Remote IP to be forwarded
-    externalTrafficPolicy: Local
+traefik:
+  # Traefik experimental features
+  experimental:
+    # Equivalent to the cli flag (passed in additionalArguments)
+    # - `--experimental.plugins.sablier.modulename=github.com/acouvreur/sablier'
+    # - `--experimental.plugins.sablier.version=v1.7.0'
+    plugins:
+      sablier:
+        moduleName: github.com/acouvreur/sablier
+        version: v1.7.0
+
+  ingressRoute:
+    # https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#access-traefik-dashboard-without-exposing-it
+    dashboard:
+      enabled: false
+
+  metrics:
+    # Prometheus is enabled by default
+    prometheus:
+      # The metrics port is not in the traefik service
+      # This value creates a dedicated metrics service to use with ServiceMonitor
+      # Enable Prometheus Metrics https://doc.traefik.io/traefik/observability/metrics/prometheus/
+      # Metrics Info: https://doc.traefik.io/traefik/observability/metrics/overview/#global-metrics
+      service:
+        enabled: true
+
+  additionalArguments:
+    # Debug
+    #- '--log.level=DEBUG'
+    # Logs just add too much noise on what is going on
+    #- '--accesslog=true'
+    # Don't verify cert on self-signed cert
+    - '--serversTransport.insecureSkipVerify=true'
+
+  service:
+    type: NodePort # LoadBalancer
+    ipFamilyPolicy: SingleStack
+    ipFamilies:
+      - IPv4
+    spec: {
+      # Allow Origin Remote IP to be forwarded
+      externalTrafficPolicy: Local
+    }
+
+  # -- nodeSelector is the simplest recommended form of node selection constraint.
+  nodeSelector: {
+    # Context, by default:
+    # * the deployment of Traefik is `LoadBalancer`
+    # * K3s uses `ServiceLB (Klipper)` as load balancer controller
+    # * ServiceLB (Klipper) label node "svccontroller.k3s.cattle.io/enablelb"=true to control where load balancer controller pods are installed
+    #
+    # We use the ServiceLB (Klipper) label "svccontroller.k3s.cattle.io/enablelb"=true
+    # so that Traefik and the load balancer controller pods are always collocated
+    #
+    # ie with the following label applied on `kube-server-01.eraldy.com`
+    #
+    # kubectl label nodes kube-server-01.eraldy.com svccontroller.k3s.cattle.io/enablelb=true
+    #
+    # Traefik would be installed on kube-server-01.eraldy.com
+    # "svccontroller.k3s.cattle.io/enablelb": "true"
   }
 
-# -- nodeSelector is the simplest recommended form of node selection constraint.
-nodeSelector: {
-  # Context, by default:
-  # * the deployment of Traefik is `LoadBalancer`
-  # * K3s uses `ServiceLB (Klipper)` as load balancer controller
-  # * ServiceLB (Klipper) label node "svccontroller.k3s.cattle.io/enablelb"=true to control where load balancer controller pods are installed
-  #
-  # We use the ServiceLB (Klipper) label "svccontroller.k3s.cattle.io/enablelb"=true
-  # so that Traefik and the load balancer controller pods are always collocated
-  #
-  # ie with the following label applied on `kube-server-01.eraldy.com`
-  #
-  # kubectl label nodes kube-server-01.eraldy.com svccontroller.k3s.cattle.io/enablelb=true
-  #
-  # Traefik would be installed on kube-server-01.eraldy.com
-  "svccontroller.k3s.cattle.io/enablelb": "true"
-}
 
+  providers:
+    kubernetesCRD:
+      # return 503, needed to start stopped container with sablier
+      # https://acouvreur.github.io/sablier/#/guides/code-server-traefik-kubernetes?id=_3-deploy-traefik-using-helm
+      allowEmptyServices: true
+    kubernetesIngress:
+      # return 503, needed to start stopped container with sablier
+      allowEmptyServices: true
 
-providers:
-  kubernetesCRD:
-    # return 503, needed to start stopped container with sablier
-    # https://acouvreur.github.io/sablier/#/guides/code-server-traefik-kubernetes?id=_3-deploy-traefik-using-helm
-    allowEmptyServices: true
-  kubernetesIngress:
-    # return 503, needed to start stopped container with sablier
-    allowEmptyServices: true
+  # ports
+  ports:
+    web:
+      redirectTo:
+        port: websecure
+    #websecure:
+      # Enable X-Headers from Cloudflare
+      # https://doc.traefik.io/traefik/v2.3/routing/entrypoints/#forwarded-headers
+      # forwardedHeaders:
+      #  trustedIPs: "{{ cloudflare_cidr | join(',') }}"
 
-# ports
-ports:
-  web:
-    redirectTo:
-      port: websecure
-  #websecure:
-    # Enable X-Headers from Cloudflare
-    # https://doc.traefik.io/traefik/v2.3/routing/entrypoints/#forwarded-headers
-    # forwardedHeaders:
-    #  trustedIPs: "{{ cloudflare_cidr | join(',') }}"
-
-# persistence:
-# -- Enable persistence using Persistent Volume Claims
-# ref: http://kubernetes.io/docs/user-guide/persistent-volumes/.
-# It can be used to store TLS certificates along with `certificatesResolvers.<name>.acme.storage`  option
+  # persistence:
+  # -- Enable persistence using Persistent Volume Claims
+  # ref: http://kubernetes.io/docs/user-guide/persistent-volumes/.
+  # It can be used to store TLS certificates along with `certificatesResolvers.<name>.acme.storage`  option
