@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+# shellcheck source=../..//bash-lib/lib/bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+error::set_strict_mode
+error::set_trap
+# shellcheck source=../../bash-lib/lib/bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+# shellcheck source=./kube-x-lib.sh
+source "kube-x-lib.sh"
+
+install(){
+  APP_NAME="${1:-}"
+  if [ "$APP_NAME" == "" ]; then
+    echo::err "An app name is mandatory as argument"
+    return 1
+  fi
+  read -r APP_NAMESPACE APP_NAME <<< $(kube::get_qualified_app_name "$APP_NAME")
+  echo "$APP_NAMESPACE $APP_NAME"
+
+  # Crds
+  APP_CRDS_DIRECTORY=$(kube::get_app_crds_directory "$APP_NAMESPACE")
+  echo "$APP_CRDS_DIRECTORY"
+  pushd "$APP_CRDS_DIRECTORY"
+  APP_RELEASE_CRDS_NAME="$APP_NAMESPACE-crds"
+  command::echo_eval "helm upgrade --install -n $APP_NAMESPACE --create-namespace $APP_RELEASE_CRDS_NAME ."
+  popd
+
+  # App
+  APP_DIRECTORY=$(kube::get_app_directory "$APP_NAMESPACE")
+  echo $APP_DIRECTORY
+  pushd "$APP_DIRECTORY"
+  APP_RELEASE_NAME="$APP_NAMESPACE"
+  command::echo_eval "helm upgrade --install -n $APP_NAMESPACE --create-namespace $APP_RELEASE_NAME ."
+  popd
+
+}
+
+
+# The synopsis function is required by the doc::usage
+synopsis(){
+
+  cat << 'EOF'
+```bash
+kube-x-cluster-app command options
+```
+
+where `command` can be:
+
+* 'install' - Install an app
+
+
+EOF
+
+}
+
+
+# Assign the first argument to a string
+COMMAND=${1:-}
+if [ "$COMMAND" = "" ]; then
+    doc::help
+    echo::err "A command is mandatory"
+    exit 1
+fi
+# Help
+if [[ "$COMMAND" =~ "-h"|"--help"|"help" ]]; then
+  doc::help
+  exit
+fi
+shift  # Remove the first argument from the argument list
+
+case "$COMMAND" in
+  "install")
+     install "$@" || error::exit $?
+    ;;
+  "synopsis")
+    synopsis
+    ;;
+  *)
+    doc::help synopsis
+    echo::err  "Command $COMMAND is unknown"
+    exit 1
+esac

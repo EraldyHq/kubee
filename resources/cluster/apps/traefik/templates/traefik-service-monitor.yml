@@ -29,7 +29,7 @@ spec:
         # `instance` (hostname) and `endpoint` (port)
         - action: labeldrop
           regex: '^(instance|endpoint)$'
-        # Keep the `phpfpm_*` metrics, drop all internal exporter metrics (go, prom, ...)
+        # Keep the `traefik_*` metrics, drop all internal exporter metrics (go, prom, ...)
         - sourceLabels: [ __name__ ]
           regex: "traefik_(.*)"
           action: keep

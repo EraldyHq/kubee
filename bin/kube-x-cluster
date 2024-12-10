@@ -118,6 +118,9 @@ case $COMMAND in
     INVENTORY_FILE=$(inventory_file) || error::exit $?
     cat $INVENTORY_FILE
     ;;
+"app")
+    kube-x-cluster-app "${ARGS[@]}" || error::exit $?
+    ;;
 *)
   doc::help synopsis
   echo::err "Command $COMMAND is unknown"

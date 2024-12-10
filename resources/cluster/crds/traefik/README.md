@@ -12,7 +12,7 @@ implements the [Helm CRD Method 2](https://helm.sh/docs/chart_best_practices/cus
 
 CRD are global. No namespace is needed
 ```bash
-helm upgrade --install  traefik-crds .
+helm upgrade --install -n traefik --create-namespace traefik-crds .
 # with kube-x
 kube-x-helm upgrade --install traefik-crds .
 ```

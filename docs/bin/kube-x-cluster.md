@@ -18,7 +18,7 @@ kubectl config set-cluster k3s-ansible --server=https://127.0.0.1:6443
 kubectl config set-cluster k3s-ansible --server="https://$CLUSTER_API_SERVER_IP:6443"
 kubectl cluster-info # we should connect to the API
 kubectl get nodes # we should see a node
-
+helm list -n kube-system
 # change server (IP for now because the FQDN should be set before installing kube)
 # otherwise `tls: failed to verify certificate: x509: certificate is valid for kube-test-server-01, kubernetes, kubernetes.default, kubernetes.default.svc, kubernetes.default.svc.cluster.local, localhost, not kube-test-server-01.xxx`
 kubectl config rename-context k3s-ansible $KUBE_X_CLUSTER_NAME

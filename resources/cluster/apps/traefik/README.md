@@ -6,7 +6,7 @@ A `Traefik sub-chart` for Kube-x
 
 ## Prerequisite
 
-* [traefik-crds](../traefik-crds/README.md)
+* [traefik-crds](../../crds/traefik/README.md)
 
 ## Install SubChart
 
