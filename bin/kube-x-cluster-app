@@ -8,8 +8,35 @@ error::set_trap
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-template.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
 # shellcheck source=./kube-x-lib.sh
 source "kube-x-lib.sh"
+
+
+generate_and_get_helm_values_path(){
+
+  # Default
+  # export is mandatory to go in a subshell
+  export KUBE_X_CLUSTER_PROMETHEUS_ENABLED="${KUBE_X_CLUSTER_PROMETHEUS_ENABLED:-false}"
+
+  # Template
+  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  local KUBE_X_HELM_VALUES="${SCRIPT_DIR}/../resources/cluster/kube-x/helm-values.yml"
+
+  # Check the variables
+  if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBE_X_HELM_VALUES"); then
+     # Should exit because of the strict mode
+     # but it was not working
+     echo::err "Helm Values variables missing: ${UNDEFINED_VARS[*]}"
+     return 1
+  fi
+  local SHM_HELM_VALUES="/dev/shm/kube-x-helm-values.yml"
+
+  envsubst < "$KUBE_X_HELM_VALUES" >| "$SHM_HELM_VALUES"
+  echo "$SHM_HELM_VALUES"
+
+}
 
 install(){
   APP_NAME="${1:-}"
@@ -39,8 +66,13 @@ install(){
   echo $APP_DIRECTORY
   pushd "$APP_DIRECTORY"
   APP_RELEASE_NAME="$APP_NAMESPACE"
-  local SETS=()
-  SETS+=("--set kube_x.prometheus.enabled=${KUBE_X_CLUSTER_PROMETHEUS_ENABLED:-false}")
+
+  # The kube-x values
+  if ! KUBE_X_VALUES_PATH=$(generate_and_get_helm_values_path); then
+    echo::err "Error while trying to get the kube-x-helm values"
+    return 1
+  fi
+
   # --dependency-update flag to avoid the `helm dependency build` error:
   # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
   # See https://github.com/helm/helm/issues/7214
@@ -50,7 +82,7 @@ install(){
     --create-namespace \
     --dependency-update \
     -f values.yml \
-    ${SETS[*]} \
+    -f $KUBE_X_VALUES_PATH \
     $APP_RELEASE_NAME \
     ."
   popd
@@ -96,6 +128,9 @@ case "$COMMAND" in
     ;;
   "synopsis")
     synopsis
+    ;;
+  "values")
+    cat "$(generate_and_get_helm_values_path)"
     ;;
   *)
     doc::help synopsis

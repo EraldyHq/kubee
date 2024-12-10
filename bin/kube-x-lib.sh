@@ -159,7 +159,7 @@ kube::get_resource_by_app_name(){
   RESOURCES=$(kube::get_resources_by_app_name "$@")
   RESOURCE_COUNT=$(echo "$RESOURCES" | sed '/^\s*$/d' | wc -l )
   if [ "$RESOURCE_COUNT" -gt 1 ]; then
-      echo "Error: Multiple $RESOURCE_TYPE found with the label app.kubernetes.io/name=$APP_NAME:"
+      echo "Error: Multiple resource found with the label app.kubernetes.io/name=$APP_NAME:"
       echo "$RESOURCES"
       exit 1
   fi;

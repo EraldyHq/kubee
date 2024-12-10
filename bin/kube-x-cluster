@@ -4,30 +4,18 @@
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
 error::set_strict_mode
 error::set_trap
-# shellcheck source=../..//bash-lib/lib/bashlib-echo.sh
+# shellcheck source=../../bash-lib/lib/bashlib-echo.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
-# shellcheck source=../..//bash-lib/lib/bashlib-doc.sh
+# shellcheck source=../../bash-lib/lib/bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
-# shellcheck source=../..//bash-lib/lib/bashlib-command.sh
+# shellcheck source=../../bash-lib/lib/bashlib-command.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-template.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-# Check that a file has all variable
-check_vars() {
 
-  local ENVS=$(envsubst -v "$(cat $1)")
-  local rc=0
-  while read VARIABLE_NAME
-  do
-      if [ "${!VARIABLE_NAME:-}" == "" ]; then
-          echo::err "$VARIABLE_NAME is not defined and should be defined"
-          rc=1
-      fi
-  done <<< $ENVS
-  return "$rc"
-
-}
 
 play(){
 
@@ -39,16 +27,16 @@ play(){
 inventory_file(){
 
    # Inventory
-   KUBE_X_INVENTORY_FILE="${KUBE_X_INVENTORY_FILE:-"${SCRIPT_DIR}/../resources/cluster/provisioning/inventory.yml"}"
+   local KUBE_X_INVENTORY_FILE="${KUBE_X_INVENTORY_FILE:-"${SCRIPT_DIR}/../resources/cluster/kube-x/ansible-inventory.yml"}"
 
    # Check the variables
-   if ! check_vars "$KUBE_X_INVENTORY_FILE"; then
+   if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBE_X_INVENTORY_FILE"); then
      # Should exit because of the strict mode
      # but it was not working
-     echo::err "Inventory variables missing"
+     echo::err "Inventory variables missing: ${UNDEFINED_VARS[*]}"
      return 1
    fi
-   local SHM_INVENTORY_FILE="/dev/shm/kube-x-inventory.yml"
+   local SHM_INVENTORY_FILE="/dev/shm/kube-x-ansible-inventory.yml"
 
    envsubst < "$KUBE_X_INVENTORY_FILE" >| "$SHM_INVENTORY_FILE"
    echo "$SHM_INVENTORY_FILE"

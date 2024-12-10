@@ -7,7 +7,7 @@
 
 Install all requirements
 ```bash
-ansible-galaxy install -r resources/cluster/provisioning/requirements.yml
+ansible-galaxy install -r resources/cluster/kube-x/ansible-galaxy-requirements.yml
 ```
 
 ### Generate Inventory

@@ -37,14 +37,14 @@ traefik:
 
   additionalArguments:
     # Debug
-    #- '--log.level=DEBUG'
+    - '--log.level=DEBUG'
     # Logs just add too much noise on what is going on
-    #- '--accesslog=true'
+    - '--accesslog=true'
     # Don't verify cert on self-signed cert
     - '--serversTransport.insecureSkipVerify=true'
 
   service:
-    type: NodePort # LoadBalancer
+    type: NodePort # Default LoadBalancer
     ipFamilyPolicy: SingleStack
     ipFamilies:
       - IPv4

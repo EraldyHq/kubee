@@ -1,0 +1,4 @@
+# Template used to generate an inventory
+kube_x:
+  prometheus:
+    enabled: ${KUBE_X_CLUSTER_PROMETHEUS_ENABLED}
