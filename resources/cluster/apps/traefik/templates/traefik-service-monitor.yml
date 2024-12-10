@@ -2,10 +2,10 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: traefik
-  namespace: '{{ traefik_namespace }}'
+  name: '{{ .Release.Name }}'
+  namespace: '{{ .Release.Namespace }}'
   labels:
-    app.kubernetes.io/name: traefik
+    app.kubernetes.io/name: '{{ .Release.Name }}'
 spec:
   endpoints:
     - port: metrics
@@ -38,5 +38,5 @@ spec:
   #      - Release.Namespace
   selector:
     matchLabels:
-      app.kubernetes.io/name: traefik
+      app.kubernetes.io/name: '{{ .Release.Name }}'
       app.kubernetes.io/component: metrics

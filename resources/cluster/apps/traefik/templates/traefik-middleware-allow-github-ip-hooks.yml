@@ -2,6 +2,7 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: ip-allow-github-hooks-cidr
+  namespace: '{{.Release.Namespace}}'
   annotations:
     description: This middleware allows only the GitHub Hooks CIDR and our private network
 spec:

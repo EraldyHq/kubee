@@ -21,19 +21,28 @@ install(){
   echo "$APP_NAMESPACE $APP_NAME"
 
   # Crds
-  APP_CRDS_DIRECTORY=$(kube::get_app_crds_directory "$APP_NAMESPACE")
-  echo "$APP_CRDS_DIRECTORY"
-  pushd "$APP_CRDS_DIRECTORY"
-  APP_RELEASE_CRDS_NAME="$APP_NAMESPACE-crds"
-  command::echo_eval "helm upgrade --install -n $APP_NAMESPACE --create-namespace $APP_RELEASE_CRDS_NAME ."
-  popd
+  if APP_CRDS_DIRECTORY=$(kube::get_app_crds_directory "$APP_NAMESPACE"); then
+    echo "$APP_CRDS_DIRECTORY"
+    pushd "$APP_CRDS_DIRECTORY"
+    APP_RELEASE_CRDS_NAME="$APP_NAMESPACE-crds"
+    CHART_APP_VERSION=$(yq '.appVersion' Chart.yaml)
+    if ! kube::is_helm_chart_installed $APP_RELEASE_CRDS_NAME $APP_NAMESPACE $CHART_APP_VERSION; then
+      command::echo_eval "helm upgrade --install -n $APP_NAMESPACE --create-namespace $APP_RELEASE_CRDS_NAME ."
+    else
+      echo::info "Chart $APP_RELEASE_CRDS_NAME already installed"
+    fi
+    popd
+  fi
 
   # App
   APP_DIRECTORY=$(kube::get_app_directory "$APP_NAMESPACE")
   echo $APP_DIRECTORY
   pushd "$APP_DIRECTORY"
   APP_RELEASE_NAME="$APP_NAMESPACE"
-  command::echo_eval "helm upgrade --install -n $APP_NAMESPACE --create-namespace $APP_RELEASE_NAME ."
+  # --dependency-update flag to avoid the `helm dependency build` error:
+  # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
+  # See https://github.com/helm/helm/issues/7214
+  command::echo_eval "helm upgrade --install -n $APP_NAMESPACE --create-namespace $APP_RELEASE_NAME --dependency-update ."
   popd
 
 }

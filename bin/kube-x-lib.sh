@@ -232,3 +232,43 @@ kube::get_app_crds_directory(){
 
 }
 
+# @description
+#     Return if the chart is already installed
+# @args $1 - the release name
+# @args $2 - the release namespace
+# @args $3 - the chart app version that should be installed
+# @exitcode 1 - if the chart is not installed or with another app version
+kube::is_helm_chart_installed() {
+
+  local CHART_RELEASE_NAME="$1"
+  local CHART_RELEASE_NAMESPACE="$2"
+  local CHART_APP_VERSION="$3"
+
+  # Check if the release exists
+  if ! helm status "$CHART_RELEASE_NAME" -n "$CHART_RELEASE_NAMESPACE" >/dev/null 2>&1; then
+    echo::info "Release not found: $CHART_RELEASE_NAMESPACE/$CHART_RELEASE_NAME"
+    return 1
+  fi
+
+  # Get the installed chart version
+  read CHART_RELEASE_APP_VERSION CHART_RELEASE_CHART <<< "$(helm list -n "$CHART_RELEASE_NAMESPACE" --filter "^$CHART_RELEASE_NAME\$" --output json | jq -r '.[0] | "\(.app_version) \(.chart)"')"
+  # We don't check on chart version
+  IFS="-" read -ra CHART_RELEASE_PARTS <<< "$CHART_RELEASE_CHART"
+  CHART_RELEASE_CHART_VERSION="${CHART_RELEASE_PARTS[-1]}"
+  CHART_RELEASE_CHART_NAME=$({
+   CHART_RELEASE_CHART_NAMES=(${CHART_RELEASE_PARTS[@]:0:${#CHART_RELEASE_PARTS[@]}-1});
+   IFS='-';
+   echo "${CHART_RELEASE_CHART_NAMES[*]}"
+  })
+
+  if [[ "$CHART_RELEASE_APP_VERSION" != "$CHART_APP_VERSION" ]]; then
+    echo::info "Chart app version mismatch (Release App Version: $CHART_RELEASE_APP_VERSION. Chart App Version: $CHART_APP_VERSION)"
+    return 1
+  fi
+
+  echo::info "Chart $CHART_RELEASE_CHART_NAME with version $CHART_RELEASE_CHART_VERSION and app version $CHART_APP_VERSION is already installed."
+
+
+}
+
+
