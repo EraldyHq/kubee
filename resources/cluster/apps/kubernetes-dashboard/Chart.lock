@@ -2,5 +2,8 @@ dependencies:
 - name: kubernetes-dashboard
   repository: https://kubernetes.github.io/dashboard/
   version: 7.10.0
-digest: sha256:6e59cfc987dd22c4bb9fe3d93d924319a044f74498eb842378c2d47958f22020
-generated: "2024-11-26T15:22:18.479283797+01:00"
+- name: kube-x
+  repository: file://../kube-x
+  version: 0.0.1
+digest: sha256:87de20cf8d5d81ebe1ac1d9608c22491d519da9f1db0db5ef8115155701d96d3
+generated: "2024-12-11T21:29:31.86881085+01:00"

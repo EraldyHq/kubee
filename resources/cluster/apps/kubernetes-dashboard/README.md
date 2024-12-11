@@ -8,6 +8,7 @@ A sub-chart of kubernetes-dashboard
 * Add repo and download dependency:
 ```bash
 helm dependency build
+# helm dependency update ???
 ```
 * Verify
 ```bash

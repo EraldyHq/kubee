@@ -28,3 +28,8 @@ dependencies:
   - name: kubernetes-dashboard
     version: 7.10.0
     repository: https://kubernetes.github.io/dashboard/
+    alias: kubernetes_dashboard
+  - name: kube-x
+    version: 0.0.1
+    repository: file://../kube-x
+    alias: kube_x

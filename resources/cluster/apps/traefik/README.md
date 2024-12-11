@@ -13,6 +13,7 @@ A `Traefik sub-chart` for Kube-x
 * Download dependency:
 ```bash
 helm dependency build
+# helm dependency update ???
 ```
 * Verify
 ```bash

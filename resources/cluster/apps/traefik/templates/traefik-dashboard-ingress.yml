@@ -9,7 +9,7 @@ metadata:
 spec:
   entryPoints:
     - websecure
-  {{- if ne (((.Values.kube_x).certManager).enabled) false }}
+  {{- if ne (((.Values.kube_x).cert_manager).enabled) false }}
   tls:
     # the secret name used to store the certificate
     secretName: '{{ .Release.Name }}-{{ .Values.kube_x.cluster.namePrefix }}-dashboard-cert'

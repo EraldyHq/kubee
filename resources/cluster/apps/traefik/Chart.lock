@@ -2,5 +2,8 @@ dependencies:
 - name: traefik
   repository: https://traefik.github.io/charts
   version: 33.1.0
-digest: sha256:d08eb6b5d0df340def24de603fbf35e919068ccb6cd3a88fcfbdbd99ed6fd2d1
-generated: "2024-12-10T12:08:36.367373174+01:00"
+- name: kube-x
+  repository: file://../kube-x
+  version: 0.0.1
+digest: sha256:43a4f8040b2bd226f853417a6274a0858e6950530f616d31ef33e5abc6a334c0
+generated: "2024-12-11T21:25:21.050198478+01:00"

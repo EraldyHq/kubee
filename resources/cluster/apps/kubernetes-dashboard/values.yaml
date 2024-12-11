@@ -1,15 +1,6 @@
-# The name of the cluster service account with the admin role
-clusterServiceAccount: 'nico'
-# The external DNS
-ingressDashboardHostName: 'kube.i.eraldy.com'
 
-# Global Conf
-# The certificate issuer
-ingressClusterIssuer: 'letsencrypt-prod'
 
-# Conf Name used for consistency only across the manifest
-# The admin cluster role name (admin for most of the kube installation, k3s)
-adminRole: 'admin'
+
 # Suffix Name of the cert for the ingress
 ingressDashboardCertSuffix: 'cert'
 # The name of the secret that holds the certificate
@@ -18,14 +9,14 @@ ingressDashboardCertSecretNameSuffix: 'cert-secret'
 
 # Default of
 # https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml
-kubernetes-dashboard:
+kubernetes_dashboard:
   # General configuration shared across resources
   app:
     settings:
       ## Global dashboard settings
       global:
         # Cluster name that appears in the browser window title if it is set
-        clusterName: "Beau"
+        clusterName: "Kube-X"
         # Max number of items that can be displayed on each list page
         itemsPerPage: 10
         # Max number of labels that are displayed by default on most views.

@@ -1,0 +1,22 @@
+# If not enabled=false
+{{- if ne (((.Values.kube_x).cert_manager).enabled) false -}}
+# The certificate
+# (Because we use IngressRoute, it needs to be created manually)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: '{{ .Release.Name }}-{{ .Values.ingressDashboardCertSuffix }}'
+  namespace: '{{.Release.Namespace}}'
+  labels:
+    # use cloudflare Dns
+    "issuer-challenge": "dns01-cloudflare"
+spec:
+  commonName: '{{ .Values.kube_x.kubernetes_dashboard.hostname }}'
+  secretName: '{{ .Release.Name }}-{{ .Values.ingressDashboardCertSecretNameSuffix }}'
+  dnsNames:
+    - '{{ .Values.kube_x.kubernetes_dashboard.hostname }}'
+  issuerRef:
+    kind: ClusterIssuer
+    name: '{{ .Values.kube_x.cert_manager.issuerName }}'
+
+{{- end}}

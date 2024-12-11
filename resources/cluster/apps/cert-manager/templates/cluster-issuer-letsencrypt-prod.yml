@@ -1,0 +1,45 @@
+# Create a ClusterIssuer (can issue cert for the whole cluster)
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+# `Issuer` kind is scoped to a namespace
+metadata:
+  name: '{{ .Values.letsEncryptIssuer.prod.name }}'
+  namespace: '{{ include "cert-manager.namespace" . }}'
+spec:
+  acme:
+    # The ACME server URL
+    server: '{{ .Values.letsEncryptIssuer.prod.url }}'
+    # Email address used for ACME registration
+    email: '{{ .Values.acmeEmailAccount }}'
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: '{{ .Values.letsEncryptIssuer.prod.name }}'
+    # Enable the HTTP-01 challenge provider
+    solvers:
+      # An empty 'selector' means that this solver matches all domains
+      - selector: {}
+        http01:
+          ingress:
+            serviceType: ClusterIP
+            # or class or ingressClassName
+            ingressClassName: '{{ .Values.ingressClassName }}'
+      # Selector: 'DnsName', `DnsZone`, `matchLabels` can be specified
+      # https://cert-manager.io/docs/configuration/acme/#adding-multiple-solver-types
+      - selector:
+          # The selector is a DNS Zone
+          # To allow the creation of certificate on ingress spec. This is not:
+          # * a matchLabel because it is not possible to set a label/annotation for cert-manager in an ingress spec
+          # * a DNSName because it must be exact and is obviously unknown in advance
+          # noinspection KubernetesUnknownValues
+          dnsZones:
+            {{- toYaml .Values.dnsZones | nindent 12 }}
+        # https://cert-manager.io/docs/configuration/acme/dns01/
+        dns01:
+          # Doc: https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/
+          # Spec: https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderCloudflare
+          cloudflare:
+            # Note in the doc, they use an email because they show an apiKey Auth, not an apiToken
+            # `ApiToken` is now the preferred method
+            apiTokenSecretRef:
+              name: '{{ .Release.Name }}-{{ .Values.cloudflareApiToken.secretNameSuffix }}'
+              key: '{{ .Values.cloudflareApiToken.secretKey }}'

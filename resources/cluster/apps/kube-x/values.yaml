@@ -1,0 +1,45 @@
+# All these values are used in sub-chart
+# to create template manifest
+
+# Cluster Wide variables
+cluster:
+  # The prefix added to all name created by kube-x template
+  namePrefix: "kube-x"
+  # Admin user
+  #  * created as admin user in Kubernetes and other app)
+  #  * added in basicAuth
+  adminUser:
+    username: 'admin'
+    password: ''
+  # Authentication of internal infra website such as Traefik Dashboard, ...
+  auth: basicAuth
+  # The admin cluster role name (admin for most of the kube installation, k3s)
+  # Fixed - should not change
+  adminRole: 'admin'
+
+# Kube-X Dashboard Variables
+kubernetes_dashboard:
+  # The external DNS
+  hostname: 'dash.kube-x.local'
+
+# Kube-X Traefik Variables
+traefik:
+  middleware:
+    # Enabled by default when the admin user password is not empty
+    # https://doc.traefik.io/traefik/middlewares/http/basicauth/
+    basicAuth:
+      # List of users
+      users:
+      # user1: password1
+  dashboard:
+    # The FQDN is dnsName.apexDomain
+    hostname: 'traefik.kube-x.local'
+
+# The prometheus kube-x env
+prometheus:
+  enabled: false
+
+# The cert manager kube-x env
+cert_manager:
+  enabled: false
+  issuerName:

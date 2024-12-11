@@ -1,33 +1,3 @@
-# The kube-x env
-# used by the kube-x charts template
-kube_x:
-  # Cluster Wide variables
-  cluster:
-    namePrefix: "kube-x"
-    # Authentication of internal infra website such as Traefik Dashboard, ...
-    auth: basicAuth
-    adminUser:
-      username: 'admin'
-      password: ''
-  # Kube-X Traefik Variables
-  traefik:
-    middleware:
-      # Enabled by default when the admin user password is not empty
-      # https://doc.traefik.io/traefik/middlewares/http/basicauth/
-      basicAuth:
-        # List of users
-        users:
-        # user1: password1
-    dashboard:
-      # The FQDN is dnsName.apexDomain
-      hostname: 'traefik.kube-x.local'
-  # The prometheus kube-x env
-  prometheus:
-    enabled: false
-  # The cert manager kube-x env
-  certManager:
-    enabled: false
-    issuerName:
 
 # Traefik Helm Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml

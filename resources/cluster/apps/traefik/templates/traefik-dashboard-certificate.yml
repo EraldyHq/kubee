@@ -1,5 +1,5 @@
 # If not enabled=false
-{{- if ne (((.Values.kube_x).certManager).enabled) false -}}
+{{- if ne (((.Values.kube_x).cert_manager).enabled) false -}}
 ---
 # The certificate
 # Because Traefik dashboard needs to use Traefik IngressRoute CRD
@@ -18,6 +18,6 @@ spec:
     - '{{ .Values.kube_x.traefik.dashboard.hostname }}'
   issuerRef:
     kind: ClusterIssuer
-    name: '{{ .Values.kube_x.certManager.issuerName }}'
+    name: '{{ .Values.kube_x.cert_manager.issuerName }}'
 
 {{- end -}}
