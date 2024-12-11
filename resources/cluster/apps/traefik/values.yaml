@@ -16,12 +16,8 @@ kube_x:
       # https://doc.traefik.io/traefik/middlewares/http/basicauth/
       basicAuth:
         # List of users
-        # htpasswd -nb username password
-        # example:
-        # `htpasswd -nb admin@traefik welcome`
-        # This is the default, it should be changed and the password part should be encrypted by ansible vault
-        # Passwords must be hashed using MD5, SHA1, or BCrypt.
         users:
+        # user1: password1
     dashboard:
       # The FQDN is dnsName.apexDomain
       hostname: 'traefik.kube-x.local'

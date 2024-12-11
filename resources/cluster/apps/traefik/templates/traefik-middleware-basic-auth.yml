@@ -1,4 +1,6 @@
 {{/*
+https://doc.traefik.io/traefik/middlewares/http/basicauth/
+
 Enable only when the admin password is not empty
 
 Note: Operators are functions (ne is a function with 2 args)
