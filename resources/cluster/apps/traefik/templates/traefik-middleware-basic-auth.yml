@@ -1,0 +1,32 @@
+{{/*
+Enable only when the admin password is not empty
+
+Note: Operators are functions (ne is a function with 2 args)
+https://helm.sh/docs/chart_template_guide/functions_and_pipelines/#operators-are-functions
+*/}}
+{{- if ne (((.Values.kube_x).cluster.adminUser).password) "" }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: '{{ .Release.Name }}-{{ .Values.kube_x.cluster.namePrefix }}-basic-auth'
+  namespace: '{{ .Release.Namespace }}'
+# The values for all keys in the data field have to be base64-encoded strings.
+# If the conversion to base64 string is not desirable, you can choose to specify the stringData field instead,
+# which accepts arbitrary strings as values.
+data:
+  # one user by line
+  users: |
+    {{- include "basic-auth-list-base64-encode" . }}
+---
+# Authentication
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: '{{ .Release.Name }}-{{ .Values.kube_x.cluster.namePrefix }}-basic-auth'
+  namespace: '{{ .Release.Namespace }}'
+spec:
+  basicAuth:
+    secret: '{{ .Release.Name }}-{{ .Values.kube_x.cluster.namePrefix }}-basic-auth'
+
+{{- end}}

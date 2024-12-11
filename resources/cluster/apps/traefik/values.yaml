@@ -1,20 +1,18 @@
-# The app dependencies of this sub-chart (ie crd dependencies)
-appDependencies:
-  - prometheus
-
 # The kube-x env
+# used by the kube-x charts template
 kube_x:
   # Cluster Wide variables
   cluster:
     namePrefix: "kube-x"
-    apexDomain: 'kube-x.local'
+    # Authentication of internal infra website such as Traefik Dashboard, ...
+    auth: basicAuth
     adminUser:
-      username: admin
-      password:
+      username: 'admin'
+      password: ''
   # Kube-X Traefik Variables
   traefik:
     middleware:
-      # Enabled by default with the admin user
+      # Enabled by default when the admin user password is not empty
       # https://doc.traefik.io/traefik/middlewares/http/basicauth/
       basicAuth:
         # List of users
@@ -25,17 +23,21 @@ kube_x:
         # Passwords must be hashed using MD5, SHA1, or BCrypt.
         users:
     dashboard:
-      enabled: true
-      dnsName: 'traefik'
-      auth: basicAuth
+      # The FQDN is dnsName.apexDomain
+      hostname: 'traefik.kube-x.local'
   # The prometheus kube-x env
   prometheus:
     enabled: false
+  # The cert manager kube-x env
+  certManager:
+    enabled: false
+    issuerName:
 
 # Traefik Helm Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
 traefik:
 
+  # We do it ourself
   # https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#access-traefik-dashboard-without-exposing-it
   ingressRoute:
     dashboard:
@@ -54,8 +56,6 @@ traefik:
   additionalArguments:
     # Don't verify cert on self-signed cert
     - '--serversTransport.insecureSkipVerify=true'
-
-
 
   service:
     # type: LoadBalancer
@@ -113,3 +113,10 @@ traefik:
   # -- Enable persistence using Persistent Volume Claims
   # ref: http://kubernetes.io/docs/user-guide/persistent-volumes/.
   # It can be used to store TLS certificates along with `certificatesResolvers.<name>.acme.storage`  option
+
+# The chart properties (used by kube-x)
+chart:
+  # The crd dependencies of this sub-chart (for crd installation)
+  crdDependencies:
+    - prometheus
+    - certManager

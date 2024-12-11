@@ -18,6 +18,7 @@ helm dependency build
 ```bash
 helm lint
 helm template -s templates/deployment.yaml .
+helm template -s templates/traefik-middleware-basic-auth.yml --set 'kube_x.cluster.adminUser.password=yolo' .
 helm template . --values=myvalues.yaml --show-only charts/(chart alias)/templates/deployment.yaml
 ```
 * Install

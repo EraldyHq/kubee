@@ -19,6 +19,8 @@ generate_and_get_helm_values_path(){
   # Default
   # export is mandatory to go in a subshell
   export KUBE_X_CLUSTER_PROMETHEUS_ENABLED="${KUBE_X_CLUSTER_PROMETHEUS_ENABLED:-false}"
+  export KUBE_X_CLUSTER_ADMIN_USERNAME="${KUBE_X_CLUSTER_ADMIN_USERNAME:-admin}"
+  export KUBE_X_CLUSTER_ADMIN_PASSWORD="${KUBE_X_CLUSTER_ADMIN_PASSWORD:-$(openssl rand -base64 10)}"
 
   # Template
   SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
@@ -76,12 +78,12 @@ install(){
   # --dependency-update flag to avoid the `helm dependency build` error:
   # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
   # See https://github.com/helm/helm/issues/7214
+  # values.yaml file is taken by default
   command::echo_eval "helm upgrade \
     --install \
     -n $APP_NAMESPACE \
     --create-namespace \
     --dependency-update \
-    -f values.yml \
     -f $KUBE_X_VALUES_PATH \
     $APP_RELEASE_NAME \
     ."
@@ -101,6 +103,7 @@ kube-x-cluster-app command options
 where `command` can be:
 
 * 'install' - Install an app
+* 'values'  - Shows the values
 
 
 EOF

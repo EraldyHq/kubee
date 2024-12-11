@@ -1,0 +1,23 @@
+# If not enabled=false
+{{- if ne (((.Values.kube_x).certManager).enabled) false -}}
+---
+# The certificate
+# Because Traefik dashboard needs to use Traefik IngressRoute CRD
+# It needs to be created manually
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: '{{ .Release.Name }}-{{ .Values.kube_x.cluster.namePrefix }}-dashboard-cert'
+  namespace: '{{ .Release.Namespace }}'
+  labels:
+    # use cloudflare Dns
+    "issuer-challenge": "dns01-cloudflare"
+spec:
+  secretName: '{{ .Release.Name }}-{{ .Values.kube_x.cluster.namePrefix }}-dashboard-cert-secret'
+  dnsNames:
+    - '{{ .Values.kube_x.traefik.dashboard.hostname }}'
+  issuerRef:
+    kind: ClusterIssuer
+    name: '{{ .Values.kube_x.certManager.issuerName }}'
+
+{{- end -}}
