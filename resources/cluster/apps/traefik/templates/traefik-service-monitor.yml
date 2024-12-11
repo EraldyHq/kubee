@@ -1,4 +1,6 @@
-{{- if (((.Values.kube_x).prometheus).enabled) }}
+# If not enabled=false
+{{- if ne (((.Values.kube_x).prometheus).enabled) false -}}
+
 # https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#use-prometheus-operator
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -41,4 +43,5 @@ spec:
     matchLabels:
       app.kubernetes.io/name: '{{ .Release.Name }}'
       app.kubernetes.io/component: metrics
-{{- end }}
+
+{{- end -}}

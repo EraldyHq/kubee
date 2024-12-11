@@ -1,19 +1,43 @@
+# The app dependencies of this sub-chart (ie crd dependencies)
+appDependencies:
+  - prometheus
+
 # The kube-x env
 kube_x:
+  # Cluster Wide variables
+  cluster:
+    namePrefix: "kube-x"
+    apexDomain: 'kube-x.local'
+    adminUser:
+      username: admin
+      password:
+  # Kube-X Traefik Variables
+  traefik:
+    middleware:
+      # Enabled by default with the admin user
+      # https://doc.traefik.io/traefik/middlewares/http/basicauth/
+      basicAuth:
+        # List of users
+        # htpasswd -nb username password
+        # example:
+        # `htpasswd -nb admin@traefik welcome`
+        # This is the default, it should be changed and the password part should be encrypted by ansible vault
+        # Passwords must be hashed using MD5, SHA1, or BCrypt.
+        users:
+    dashboard:
+      enabled: true
+      dnsName: 'traefik'
+      auth: basicAuth
   # The prometheus kube-x env
-  # Mapped to KUBE_X_CLUSTER_PROMETHEUS_ENABLED
   prometheus:
     enabled: false
-  # The crd dependencies of this sub-chart
-  dependencies:
-    - prometheus
 
 # Traefik Helm Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
 traefik:
 
+  # https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#access-traefik-dashboard-without-exposing-it
   ingressRoute:
-    # https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#access-traefik-dashboard-without-exposing-it
     dashboard:
       enabled: false
 
@@ -36,6 +60,8 @@ traefik:
   service:
     # type: LoadBalancer
     # You can't set up a nodePort because the port is a high-end port between 30000-32767
+    # You can install it as DaemonSet + Node port ?
+    # https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#install-as-a-daemonset
     ipFamilyPolicy: SingleStack
     ipFamilies:
       - IPv4

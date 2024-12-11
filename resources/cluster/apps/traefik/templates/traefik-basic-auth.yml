@@ -1,0 +1,27 @@
+{{/* Enable only when the admin password is set */}}
+{{- if ne (((.Values.kube_x).admin).password) "" }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: '{{ .Release.Name }}-{{ .Values.kube_x.prefix }}-basic-auth'
+  namespace: '{{ .Release.Namespace }}'
+# The values for all keys in the data field have to be base64-encoded strings.
+# If the conversion to base64 string is not desirable, you can choose to specify the stringData field instead,
+# which accepts arbitrary strings as values.
+data:
+  # one user by line
+  users: |
+    {{ include "basic-auth-list-base64-encode" }}
+---
+# Forward authentication to example.com
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: '{{ .Release.Name }}-{{ .Values.kube_x.prefix }}-basic-auth'
+  namespace: '{{ .Release.Namespace }}'
+spec:
+  basicAuth:
+    secret: '{{ .Release.Name }}-{{ .Values.kube_x.prefix }}-basic-auth'
+
+{{- end -}}

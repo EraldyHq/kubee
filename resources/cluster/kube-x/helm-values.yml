@@ -1,9 +1,20 @@
 # Common Kube-x values used in sub-charts
 kube_x:
+  # Cluster Wide Variables
+  cluster:
+    # The prefix added to all name created by kube-x template
+    namePrefix: "kube-x"
+    # The apex domain of the cluster (ie example.tld)
+    apexDomain: ${KUBE_X_CLUSTER_APEX_DOMAIN}
+    # The admin user of the cluster
+    adminUser:
+      username: ${KUBE_X_CLUSTER_ADMIN_USERNAME}
+      password: ${KUBE_X_CLUSTER_ADMIN_PASSWORD}
+  # Kube-x Prometheus
   prometheus:
     enabled: ${KUBE_X_CLUSTER_PROMETHEUS_ENABLED}
 
-# Traefik
+# Traefik Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
 traefik:
   # Traefik experimental features
