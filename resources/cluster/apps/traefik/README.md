@@ -49,3 +49,11 @@ The Traefik ingress controller:
 * deploys a `LoadBalancer Service` by default that uses ports 80 and 443, 
 * advertises the LoadBalancer Service's External IPs in the Status of Ingress resources it manages.
 
+
+## FAQ
+
+### Why not NodePort service
+
+The range of valid node ports is `30000-32767`.
+
+

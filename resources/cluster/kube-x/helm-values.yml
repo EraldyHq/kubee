@@ -6,6 +6,16 @@ kube_x:
 # Traefik
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
 traefik:
+  # Traefik experimental features
+  experimental:
+    # Equivalent to the cli flag (passed in additionalArguments)
+    # - `--experimental.plugins.sablier.modulename=github.com/acouvreur/sablier'
+    # - `--experimental.plugins.sablier.version=v1.7.0'
+    plugins:
+      sablier:
+        moduleName: github.com/acouvreur/sablier
+        version: v1.7.0
+
   additionalArguments:
     # Debug
     - '--log.level=DEBUG'

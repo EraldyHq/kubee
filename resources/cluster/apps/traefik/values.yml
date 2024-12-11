@@ -8,17 +8,9 @@ kube_x:
   dependencies:
     - prometheus
 
-
+# Traefik Helm Values
+# https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
 traefik:
-  # Traefik experimental features
-  experimental:
-    # Equivalent to the cli flag (passed in additionalArguments)
-    # - `--experimental.plugins.sablier.modulename=github.com/acouvreur/sablier'
-    # - `--experimental.plugins.sablier.version=v1.7.0'
-    plugins:
-      sablier:
-        moduleName: github.com/acouvreur/sablier
-        version: v1.7.0
 
   ingressRoute:
     # https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#access-traefik-dashboard-without-exposing-it
@@ -39,8 +31,11 @@ traefik:
     # Don't verify cert on self-signed cert
     - '--serversTransport.insecureSkipVerify=true'
 
+
+
   service:
-    type: NodePort # Default LoadBalancer
+    # type: LoadBalancer
+    # You can't set up a nodePort because the port is a high-end port between 30000-32767
     ipFamilyPolicy: SingleStack
     ipFamilies:
       - IPv4
