@@ -2,14 +2,17 @@
 k3s_cluster:
   children:
     server:
-      # number must be odd to avoid split brain issues with etcd and the recommended number is 3.
+      # Number of hosts server must be odd to avoid split brain issues
+      # with etcd and the recommended number is 3.
       hosts:
         # The ansible host name
-        $KUBE_X_CLUSTER_API_SERVER_01_NAME:
-          # The name of the host to connect to, if different from the inventory hostname.
-          # ansible_host: "$KUBE_X_CLUSTER_API_SERVER_01_IP"
+        # Used by k3s as the FQDN when creating the kubeconfig file
+        $KUBE_X_CLUSTER_SERVER_01_FQDN:
+          # The name of the host (dns or ip) to connect to,
+          # if different from the inventory hostname.
+          ansible_host: "$KUBE_X_CLUSTER_SERVER_01_ANSIBLE_HOST"
           # The FQDN
-          kube_x_os_hostname: "$KUBE_X_CLUSTER_API_SERVER_01_NAME.$KUBE_X_CLUSTER_APEX_DOMAIN"
+          kube_x_os_hostname: "$KUBE_X_CLUSTER_SERVER_01_FQDN"
 #    agent:
 #      hosts:
 #        192.16.35.12:

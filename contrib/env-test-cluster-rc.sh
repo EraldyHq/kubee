@@ -5,7 +5,7 @@ export PATH=$PWD/bin:$PATH
 export ANS_X_PROJECT_DIR=$PWD
 # KUBE_X env
 export KUBE_X_CLUSTER_API_SERVER_01_IP=78.46.190.50
-export KUBE_X_CLUSTER_API_SERVER_01_NAME=kube-test-server-01
+export KUBE_X_CLUSTER_SERVER_01_NAME=kube-test-server-01
 export KUBE_X_CLUSTER_APEX_DOMAIN=gerardnico.com
 # Connection user
 export KUBE_X_CLUSTER_SERVER_USER=root

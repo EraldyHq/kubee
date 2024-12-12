@@ -3,8 +3,6 @@
 
 # Cluster Wide variables
 cluster:
-  # The prefix added to all name created by kube-x template
-  namePrefix: "kube-x"
   # Admin user
   #  * created as admin user in Kubernetes and other app)
   #  * added in basicAuth
@@ -17,6 +15,12 @@ cluster:
   # Fixed - should not change
   adminRole: 'admin'
 
+# Templating variables
+# Template is a reserved name
+templates:
+  # The prefix added to all name created by kube-x template
+  globalPrefix: "kube-x"
+  
 # Kube-X Dashboard Variables
 kubernetes_dashboard:
   # The external DNS

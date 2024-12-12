@@ -24,3 +24,34 @@ Traefik expects the passwords to be hashed using MD5, SHA1, or BCrypt.
 {{- end }}
 {{- join "\n" $result | indent 4}}
 {{- end }}
+
+
+{{/*
+Helper to call
+*/}}
+{{- define "traefik-name-prefix" }}
+{{- include "kube-x-name-prefix" (dict "Release" .Release "Values" .Values.kube_x )}}
+{{- end }}
+
+{{/*
+Helper to print the basic auth name for consitency
+(used for middelware, ...)
+*/}}
+{{- define "traefik-name-basic-auth" }}
+{{- printf "%s-%s"
+    (include "kube-x-name-prefix" (dict "Release" .Release "Values" .Values.kube_x ))
+    "basic-auth"
+    }}
+{{- end }}
+
+
+{{/*
+Helper to print the dashboard cert name for consitency
+(used for certificatge, secret, ...)
+*/}}
+{{- define "traefik-name-dashboard-cert" }}
+{{- printf "%s-%s"
+    (include "kube-x-name-prefix" (dict "Release" .Release "Values" .Values.kube_x ))
+    "dashboard-cert"
+    }}
+{{- end }}

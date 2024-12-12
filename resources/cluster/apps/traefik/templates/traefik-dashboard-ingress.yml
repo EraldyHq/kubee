@@ -2,7 +2,7 @@
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: '{{ .Release.Name }}-{{ .Values.kube_x.cluster.namePrefix }}-dashboard-https'
+  name: '{{ include "traefik-name-prefix" . }}-dashboard'
   namespace: '{{ .Release.Namespace }}'
   labels:
     app.kubernetes.io/name: traefik
@@ -12,7 +12,7 @@ spec:
   {{- if ne (((.Values.kube_x).cert_manager).enabled) false }}
   tls:
     # the secret name used to store the certificate
-    secretName: '{{ .Release.Name }}-{{ .Values.kube_x.cluster.namePrefix }}-dashboard-cert'
+    secretName: '{{ include "traefik-name-dashboard-cert" . }}'
   {{- end }}
   routes:
     - kind: Rule
@@ -23,5 +23,5 @@ spec:
         - kind: TraefikService
           name: api@internal
       middlewares:
-        - name: '{{ .Release.Name }}-{{ .Values.kube_x.cluster.namePrefix }}-basic-auth'
+        - name: '{{ include "traefik-name-basic-auth" . }}'
 ---

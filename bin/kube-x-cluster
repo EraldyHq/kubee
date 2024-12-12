@@ -16,15 +16,30 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 
-
-play(){
-
-   SHM_INVENTORY_FILE=$(inventory_file)
-   ansible-playbook -i "$SHM_INVENTORY_FILE" ans_x.ans_x_base.kube_x_site.yml
-
-}
-
 inventory_file(){
+
+   # Connection type to the host. This can be the name of any Ansible connection plugin.
+   # The default is ssh
+   # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#connecting-to-hosts-behavioral-inventory-parameters
+   # See connection: ansible-doc -t connection -l
+   export KUBE_X_CLUSTER_CONNECTION=${KUBE_X_CLUSTER_CONNECTION:-ssh}
+
+   # FQDN
+   export KUBE_X_CLUSTER_SERVER_01_FQDN="$KUBE_X_CLUSTER_SERVER_01_NAME.$KUBE_X_CLUSTER_APEX_DOMAIN"
+
+   # The host
+   export KUBE_X_CLUSTER_SERVER_01_ANSIBLE_HOST;
+   case $KUBE_X_CLUSTER_CONNECTION in
+      "ssh"|"ansible.builtin.ssh")
+        KUBE_X_CLUSTER_SERVER_01_ANSIBLE_HOST=$KUBE_X_CLUSTER_SERVER_01_IP
+        ;;
+      "docker"|"community.docker.docker")
+        KUBE_X_CLUSTER_SERVER_01_ANSIBLE_HOST=$KUBE_X_CLUSTER_SERVER_01_NAME
+        ;;
+      *)
+        ;;
+   esac
+
 
    # Inventory
    local KUBE_X_INVENTORY_FILE="${KUBE_X_INVENTORY_FILE:-"${SCRIPT_DIR}/../resources/cluster/kube-x/ansible-inventory.yml"}"
@@ -42,6 +57,18 @@ inventory_file(){
    echo "$SHM_INVENTORY_FILE"
 
 }
+
+play(){
+
+   if ! SHM_INVENTORY_FILE=$(inventory_file); then
+     echo::err "Inventory file has errors"
+     return 1
+   fi
+   ansible-playbook -i "$SHM_INVENTORY_FILE" ans_x.ans_x_base.kube_x_site.yml
+
+}
+
+
 
 # @internal
 synopsis(){
@@ -104,7 +131,7 @@ case $COMMAND in
     ;;
 "inventory"|"inv")
     INVENTORY_FILE=$(inventory_file) || error::exit $?
-    cat $INVENTORY_FILE
+    cat "$INVENTORY_FILE"
     ;;
 "app")
     kube-x-cluster-app "${ARGS[@]}" || error::exit $?

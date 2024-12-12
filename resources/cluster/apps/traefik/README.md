@@ -12,14 +12,13 @@ A `Traefik sub-chart` for Kube-x
 
 * Download dependency:
 ```bash
-helm dependency build
-# helm dependency update ???
+# helm dependency build
+helm dependency update # update the dependencies (ie kube-x if changed version or not)
 ```
 * Verify
 ```bash
 helm lint
 helm template -s templates/deployment.yaml .
-helm template -s templates/traefik-middleware-basic-auth.yml --set 'kube_x.cluster.adminUser.password=yolo' .
 helm template . --values=myvalues.yaml --show-only charts/(chart alias)/templates/deployment.yaml
 ```
 * Install
