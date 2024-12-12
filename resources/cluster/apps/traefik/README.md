@@ -12,7 +12,6 @@ A `Traefik sub-chart` for Kube-x
 
 * Download dependency:
 ```bash
-# helm dependency build
 helm dependency update # update the dependencies (ie kube-x if changed version or not)
 ```
 * Verify

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: '{{ include "whoami-name" . }}'
+  namespace: '{{ .Release.Namespace }}'
+  labels:
+    app.kubernetes.io/name: '{{ .Release.Name }}'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: '{{ .Release.Name }}'
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: '{{ .Release.Name }}'
+    spec:
+      containers:
+        - name: whoami
+          image: traefik/whoami:v1.10.3
+          livenessProbe:
+            # https://github.com/traefik/whoami?tab=readme-ov-file#health
+            httpGet:
+              path: /health
+              port: 80
+            # 5 seconds after the startup prob
+            initialDelaySeconds: 5
+            # The probe is performed every 10 second
+            periodSeconds: 10
+            # after 3 failed prob, the container is considered unhealthy.
+            failureThreshold: 3
+            # after 1 successful prob, the container is considered healthy.
+            successThreshold: 1

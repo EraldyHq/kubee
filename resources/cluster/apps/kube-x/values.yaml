@@ -47,3 +47,6 @@ prometheus:
 cert_manager:
   enabled: false
   issuerName:
+
+whoami:
+  hostname: 'whoami.kube-x.local'

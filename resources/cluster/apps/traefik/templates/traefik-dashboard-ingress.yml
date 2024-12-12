@@ -1,3 +1,7 @@
+{{/*
+Test:
+helm template -s templates/traefik-dashboard-ingress.yml --set 'kube_x.cert_manager.enabled=true' .
+*/}}
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
