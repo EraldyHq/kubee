@@ -5,14 +5,14 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: '{{ .Release.Name }}-{{ .Values.ingressDashboardCertSuffix }}'
+  name: '{{ include "kubernetes-dashboard-name" }}'
   namespace: '{{.Release.Namespace}}'
   labels:
     # use cloudflare Dns
     "issuer-challenge": "dns01-cloudflare"
 spec:
   commonName: '{{ .Values.kube_x.kubernetes_dashboard.hostname }}'
-  secretName: '{{ .Release.Name }}-{{ .Values.ingressDashboardCertSecretNameSuffix }}'
+  secretName: '{{ include "kubernetes-dashboard-name" }}'
   dnsNames:
     - '{{ .Values.kube_x.kubernetes_dashboard.hostname }}'
   issuerRef:

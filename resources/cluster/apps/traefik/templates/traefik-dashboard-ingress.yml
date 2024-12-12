@@ -27,5 +27,5 @@ spec:
         - kind: TraefikService
           name: api@internal
       middlewares:
-        - name: '{{ include "traefik-name-basic-auth" . }}'
+        - name: '{{ include "kube-x-traefik-basic-auth-name" (dict "Values" .Values.kube_x ) }}'
 ---

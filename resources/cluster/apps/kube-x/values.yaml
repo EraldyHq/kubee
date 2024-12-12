@@ -28,6 +28,8 @@ kubernetes_dashboard:
 
 # Kube-X Traefik Variables
 traefik:
+  # Instance/Release Name
+  namespace: traefik
   middleware:
     # Enabled by default when the admin user password is not empty
     # https://doc.traefik.io/traefik/middlewares/http/basicauth/
@@ -50,3 +52,5 @@ cert_manager:
 
 whoami:
   hostname: 'whoami.kube-x.local'
+
+

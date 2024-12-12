@@ -9,7 +9,7 @@ ingressDashboardCertSecretNameSuffix: 'cert-secret'
 
 # Default of
 # https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml
-kubernetes_dashboard:
+kubernetes-dashboard:
   # General configuration shared across resources
   app:
     settings:

@@ -1,0 +1,43 @@
+{{/*
+We can't use an ingress because
+we need a no tls transport
+and it's not set as a label on the ingress but on the service
+We therefore need to use a traefik IngressRoute
+*/}}
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: '{{ include "kubernetes-dashboard-name" . }}'
+  namespace: '{{.Release.Namespace}}'
+  #annotations:
+  labels:
+    app.kubernetes.io/name: '{{ .Release.Name }}'
+spec:
+  entryPoints:
+    - websecure
+  {{- if ne (((.Values.kube_x).cert_manager).enabled) false -}}
+  tls:
+    # in the IngressRoute namespace
+    secretName: '{{ include "kubernetes-dashboard-name" . }}'
+  {{- end }}
+  routes:
+    - kind: Rule
+      match: Host(`{{ .Values.kube_x.kubernetes_dashboard.hostname }}`)
+      services:
+        # Ingress in front of kong
+        # written here https://github.com/kubernetes/dashboard?tab=readme-ov-file#installation
+        # and seen in the forward: https://github.com/kubernetes/dashboard/blob/master/docs%2Fuser%2Faccessing-dashboard%2FREADME.md#kubectl-port-forward
+        - name: kubernetes-dashboard-kong-proxy
+          port: 443
+          # serversTransport is not an ingress property
+          # but a service property
+          # https://doc.traefik.io/traefik/routing/providers/kubernetes-ingress/#on-service
+          # We can't therefore use an Ingress Object because we don't have access to the service
+          # A server transport is namespaced ! You can't use a global name
+          serversTransport: '{{ include "kubernetes-dashboard-transport-no-tls-name" .}}'
+        #      middlewares:
+        # We can't use the basic auth  because it uses the `Authentication` header, and it conflicts with
+        # the bearer token of the dashboard
+        # - name: 'xxx'
+---

@@ -33,17 +33,6 @@ Helper to call
 {{- include "kube-x-name-prefix" (dict "Release" .Release "Values" .Values.kube_x )}}
 {{- end }}
 
-{{/*
-Helper to print the basic auth name for consitency
-(used for middelware, ...)
-*/}}
-{{- define "traefik-name-basic-auth" }}
-{{- printf "%s-%s"
-    (include "kube-x-name-prefix" (dict "Release" .Release "Values" .Values.kube_x ))
-    "basic-auth"
-    }}
-{{- end }}
-
 
 {{/*
 Helper to print the dashboard cert name for consitency

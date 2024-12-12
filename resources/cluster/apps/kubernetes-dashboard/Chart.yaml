@@ -28,7 +28,12 @@ dependencies:
   - name: kubernetes-dashboard
     version: 7.10.0
     repository: https://kubernetes.github.io/dashboard/
-    alias: kubernetes_dashboard
+    # for some reason, the helm use the alias in the name
+    # As it's not a valid DNS name, due to the underscore, we get:
+    # * With helm: Invalid value: "kubernetes-dashboard-kubernetes_dashboard-api": a lowercase RFC 1123 subdomain
+    # must consist of lower case alphanumeric characters, '-' or '.'
+    # * With kong: name resolution failed
+    #alias: kubernetes_dashboard
   - name: kube-x
     version: 0.0.1
     repository: file://../kube-x
