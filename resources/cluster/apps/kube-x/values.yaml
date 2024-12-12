@@ -24,7 +24,7 @@ templates:
 # Kube-X Dashboard Variables
 kubernetes_dashboard:
   # The external DNS
-  hostname: 'dash.kube-x.local'
+  hostname: 'dash.kube-x.dev'
 
 # Kube-X Traefik Variables
 traefik:
@@ -37,9 +37,14 @@ traefik:
       # List of users
       users:
       # user1: password1
+  cert:
+    # Set the kube-x.dev certificate as default traefik cert
+    # Mandatory for kubernetes-dashboard
+    # If true, the rootCA should be added to the OS/Browser as trusted root CA
+    kubeXDevAsDefault: false
   dashboard:
     # The FQDN is dnsName.apexDomain
-    hostname: 'traefik.kube-x.local'
+    hostname: 'traefik.kube-x.dev'
 
 # The prometheus kube-x env
 prometheus:
@@ -51,6 +56,6 @@ cert_manager:
   issuerName:
 
 whoami:
-  hostname: 'whoami.kube-x.local'
+  hostname: 'whoami.kube-x.dev'
 
 

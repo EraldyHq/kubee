@@ -31,7 +31,14 @@ There is 2 admin roles:
 
 This chart creates for now only a `cluster-admin` role.
 
-### Ingress
+## Create token
+
+```bash
+kubectl -n traefik create token SERVICE_ACCOUNT --duration=8400h
+```
+
+## FAQ
+### Why not basic Auth protection
 
 The ingress cannot be protected with an authentication mechanism that uses the `Authenticate` HTTP header
 such as the `basic auth` otherwise they conflict, and you get a `401` not authorized.

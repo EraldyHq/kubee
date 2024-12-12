@@ -1,4 +1,4 @@
-% kubectl-xcert(1) Version Latest | Print kubernetes certificates in plain text
+% kube-x-cert(1) Version Latest | Print kubernetes certificates in plain text
 
 
 ## Overview
@@ -13,5 +13,5 @@ ${SYNOPSIS}
 
 ```bash
 export KUBECONFIG=~/.kube/config
-kubectl-xcert config-client
+kube-x-cert config-client
 ```

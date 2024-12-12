@@ -51,8 +51,18 @@ kube-x-cluster inv
 
 * DNS
 ```hosts
-127.0.0.1 traefik.kube-x.local
+127.0.0.1 traefik.kube-x.dev
+127.0.0.1 dash.kube-x.dev
 127.0.0.1 kube-x-local-server-01.kube-x.local kube-x-local-server-01
+```
+
+* Cert
+```bash
+export CAROOT=resources/cluster/apps/traefik/mkcert
+mkcert -install
+# Restart Chrome
+# If it does not work
+# Add resources/cluster/apps/traefik/mkcert/rootCA as Trusted CA Root Certificate
 ```
 
 #### SSH Connection
