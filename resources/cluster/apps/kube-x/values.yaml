@@ -9,11 +9,13 @@ cluster:
   adminUser:
     username: 'admin'
     password: ''
+    # Kubernetes clusterRole
+    # * `cluster-admin` has full access
+    # * `admin` does not have access to node and cluster scope related object such as ClusterRoleBinding
+    clusterRole: 'cluster-admin'
   # Authentication of internal infra website such as Traefik Dashboard, ...
   auth: basicAuth
-  # The admin cluster role name (admin for most of the kube installation, k3s)
-  # Fixed - should not change
-  adminRole: 'admin'
+
 
 # Templating variables
 # Template is a reserved name

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
+set -TCEeuo pipefail
 # shellcheck source=../..//bash-lib/lib/bashlib-error.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
-error::set_strict_mode
 error::set_trap
 # shellcheck source=../../bash-lib/lib/bashlib-echo.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
@@ -46,7 +46,7 @@ install(){
     echo::err "An app name is mandatory as argument"
     return 1
   fi
-  read -r APP_NAMESPACE APP_NAME <<< $(kube::get_qualified_app_name "$APP_NAME")
+  read -r APP_NAMESPACE APP_NAME <<< "$(kube::get_qualified_app_name "$APP_NAME")"
   echo "$APP_NAMESPACE $APP_NAME"
 
   # Crds
@@ -55,7 +55,7 @@ install(){
     pushd "$APP_CRDS_DIRECTORY"
     APP_RELEASE_CRDS_NAME="$APP_NAMESPACE-crds"
     CHART_APP_VERSION=$(yq '.appVersion' Chart.yaml)
-    if ! kube::is_helm_chart_installed $APP_RELEASE_CRDS_NAME $APP_NAMESPACE $CHART_APP_VERSION; then
+    if ! kube::is_helm_chart_installed "$APP_RELEASE_CRDS_NAME" "$APP_NAMESPACE" "$CHART_APP_VERSION"; then
       command::echo_eval "helm upgrade --install -n $APP_NAMESPACE --create-namespace $APP_RELEASE_CRDS_NAME ."
     else
       echo::info "Chart $APP_RELEASE_CRDS_NAME already installed"
@@ -65,7 +65,7 @@ install(){
 
   # App
   APP_DIRECTORY=$(kube::get_app_directory "$APP_NAMESPACE")
-  echo $APP_DIRECTORY
+  echo "$APP_DIRECTORY"
   pushd "$APP_DIRECTORY"
   APP_RELEASE_NAME="$APP_NAMESPACE"
 
@@ -74,6 +74,9 @@ install(){
     echo::err "Error while trying to get the kube-x-helm values"
     return 1
   fi
+
+  # To update the kube-x helm
+  command::echo_eval "helm dependency update"
 
   # --dependency-update flag to avoid the `helm dependency build` error:
   # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`

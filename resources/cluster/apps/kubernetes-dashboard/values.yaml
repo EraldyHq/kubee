@@ -18,7 +18,7 @@ kubernetes-dashboard:
         # Cluster name that appears in the browser window title if it is set
         clusterName: "Kube-X"
         # Max number of items that can be displayed on each list page
-        itemsPerPage: 10
+        itemsPerPage: 50
         # Max number of labels that are displayed by default on most views.
         labelsLimit: 3
         # Number of seconds between every auto-refresh of logs
