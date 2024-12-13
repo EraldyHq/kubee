@@ -53,6 +53,16 @@ generate_and_get_helm_values_path(){
 
 install(){
 
+  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  KUBE_X_CLUSTER_DIR="${SCRIPT_DIR}/../resources/cluster/$KUBE_X_CLUSTER_NAME"
+  # Envrc
+  local KUBE_X_ENV_FILE="${KUBE_X_CLUSTER_ENV_FILE:-"$KUBE_X_CLUSTER_DIR/.envrc"}"
+  if [ -f "$KUBE_X_ENV_FILE" ]; then
+     echo::debug "Sourcing env file $KUBE_X_ENV_FILE"
+     # shellcheck disable=SC1090
+     source "$KUBE_X_ENV_FILE"
+  fi
+
   APP_NAME="${1:-}"
   if [ "$APP_NAME" == "" ]; then
     echo::err "An app name is mandatory as argument"
@@ -64,22 +74,22 @@ install(){
 
   # Crds
   if APP_CRDS_DIRECTORY=$(kube::get_app_crds_directory "$APP_NAMESPACE"); then
-    echo "$APP_CRDS_DIRECTORY"
-    pushd "$APP_CRDS_DIRECTORY"
+    echo::debug "App Crd Directory: $APP_CRDS_DIRECTORY"
     APP_RELEASE_CRDS_NAME="$APP_NAMESPACE-crds"
     CHART_APP_VERSION=$(yq '.appVersion' Chart.yaml)
     if ! kube::is_helm_chart_installed "$APP_RELEASE_CRDS_NAME" "$APP_NAMESPACE" "$CHART_APP_VERSION"; then
-      command::echo_eval "helm upgrade --install -n $APP_NAMESPACE --create-namespace $APP_RELEASE_CRDS_NAME ."
+      command::echo_eval "helm upgrade --install -n $APP_NAMESPACE --create-namespace $APP_RELEASE_CRDS_NAME $APP_CRDS_DIRECTORY"
     else
       echo::info "Chart $APP_RELEASE_CRDS_NAME already installed"
     fi
-    popd
   fi
 
   # App
   APP_DIRECTORY=$(kube::get_app_directory "$APP_NAMESPACE")
-  echo::info "Going to App directory: $APP_DIRECTORY"
-  pushd "$APP_DIRECTORY"
+
+  # To update the kube-x helm
+  command::echo_eval "helm dependency update $APP_DIRECTORY"
+
   APP_RELEASE_NAME="$APP_NAMESPACE"
 
   local HELM_INSTALL_COMMAND=()
@@ -98,14 +108,19 @@ install(){
   fi
   HELM_INSTALL_COMMAND+=("-f" "${KUBE_X_VALUES_PATH}")
 
-  # To update the kube-x helm
-  command::echo_eval "helm dependency update"
+  if [ "${KUBE_X_HELM_INSTALL_OPTIONS:-}" != "" ]; then
+    HELM_INSTALL_COMMAND+=("${KUBE_X_HELM_INSTALL_OPTIONS[@]}")
+  fi
+
 
   # --dependency-update flag to avoid the `helm dependency build` error:
   # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
   # See https://github.com/helm/helm/issues/7214
   # values.yaml file is taken by default
-  HELM_INSTALL_COMMAND+=("$APP_RELEASE_NAME" ".")
+  HELM_INSTALL_COMMAND+=("$APP_RELEASE_NAME" "$APP_DIRECTORY")
+  # To be able to set path relative to the cluster dir
+  # example: "--set-file kube_x.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem"
+  pushd "$KUBE_X_CLUSTER_DIR"
   command::echo_eval "${HELM_INSTALL_COMMAND[*]}"
   popd
 

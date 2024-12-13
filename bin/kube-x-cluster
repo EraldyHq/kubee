@@ -13,18 +13,19 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-template.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 
 
 inventory_file(){
 
+   SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
    KUBE_X_CLUSTER_DIR="${SCRIPT_DIR}/../resources/cluster/$KUBE_X_CLUSTER_NAME"
    # Envrc
-    local KUBE_X_ENV_FILE="${KUBE_X_CLUSTER_ENV_FILE:-"$KUBE_X_CLUSTER_DIR/.envrc"}"
-    if [ -f "$KUBE_X_ENV_FILE" ]; then
+   local KUBE_X_ENV_FILE="${KUBE_X_CLUSTER_ENV_FILE:-"$KUBE_X_CLUSTER_DIR/.envrc"}"
+   if [ -f "$KUBE_X_ENV_FILE" ]; then
       echo::debug "Sourcing env file $KUBE_X_ENV_FILE"
       source "$KUBE_X_ENV_FILE"
-    fi
+   fi
 
    # Connection type to the host. This can be the name of any Ansible connection plugin.
    # The default is ssh

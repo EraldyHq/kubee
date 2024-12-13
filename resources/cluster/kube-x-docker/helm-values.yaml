@@ -9,7 +9,7 @@ kube_x:
   # Kube-x Prometheus
   prometheus:
     # Not a string, a boolean so no quote
-    enabled: 'false'
+    enabled: false
   # Kube-X Dashboard Variables
   kubernetes_dashboard:
     # The external DNS
@@ -17,9 +17,16 @@ kube_x:
   # Kube-X Traefik Variables
   traefik:
     defaultCertificate:
-      # Path to the cert file relatif to the working directory (ie cluster directory)
-      cert: 'cert/kube-x.dev+1.pem'
-      key: 'cert/kube-x.dev+1-key.pem'
+      # The PEM content file
+      # Not a path to the cert file relatif to the working directory (ie cluster directory)
+      # Can be set with:
+      # --set-file kube_x.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem
+      cert: ''
+      # The PEM content file
+      # Not a path to the key file relatif to the working directory (ie cluster directory)
+      # Can be set with:
+      # --set-file kube_x.traefik.defaultCertificate.key=cert/kube-x.dev+1-key.pem
+      key: ''
     dashboard:
       # The FQDN for the traefik dashboard
       hostname: 'traefik.kube-x.dev'
