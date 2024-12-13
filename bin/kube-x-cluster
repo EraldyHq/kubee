@@ -18,6 +18,14 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 inventory_file(){
 
+   KUBE_X_CLUSTER_DIR="${SCRIPT_DIR}/../resources/cluster/$KUBE_X_CLUSTER_NAME"
+   # Envrc
+    local KUBE_X_ENV_FILE="${KUBE_X_CLUSTER_ENV_FILE:-"$KUBE_X_CLUSTER_DIR/.envrc"}"
+    if [ -f "$KUBE_X_ENV_FILE" ]; then
+      echo::debug "Sourcing env file $KUBE_X_ENV_FILE"
+      source "$KUBE_X_ENV_FILE"
+    fi
+
    # Connection type to the host. This can be the name of any Ansible connection plugin.
    # The default is ssh
    # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#connecting-to-hosts-behavioral-inventory-parameters
@@ -40,9 +48,14 @@ inventory_file(){
         ;;
    esac
 
-
    # Inventory
-   local KUBE_X_INVENTORY_FILE="${KUBE_X_INVENTORY_FILE:-"${SCRIPT_DIR}/../resources/cluster/kube-x/ansible-inventory.yml"}"
+   local KUBE_X_INVENTORY_FILE="${KUBE_X_CLUSTER_INVENTORY_FILE:-"$KUBE_X_CLUSTER_DIR/ansible-inventory.yml"}"
+   if [ ! -f "$KUBE_X_INVENTORY_FILE" ]; then
+     echo::err "The ansible inventory file $KUBE_X_INVENTORY_FILE does not exist"
+     exit 1
+   fi
+
+
 
    # Check the variables
    if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBE_X_INVENTORY_FILE"); then

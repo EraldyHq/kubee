@@ -1,0 +1,41 @@
+{{/*
+Used as default cert
+https://doc.traefik.io/traefik/https/tls/#default-certificate
+
+Test:
+helm template --debug -s templates/traefik-default-certificate.yml --set 'kube-x.traefik.defaultCertificate.cert=/home/admin/code/kube-x/resources/cluster/kube-x-docker/cert/kube-x.dev+1.pem' .
+
+It is unfortunate that .Files.Get (and .Files.Glob) only import files that are stored in the Helm chart.
+https://github.com/helm/helm/issues/3276
+
+# Add include-file flag for external files
+This PR implements the --include-file and --include-dir flags for the install, upgrade and template commands.
+These flags load local files and make them available to the chart, so they can be used in templates with functions like .Files.Get or .Files.Glob.
+https://github.com/helm/helm/pull/8841
+
+*/}}
+{{/*{{- if ne (((.Values.kube_x).traefik).defaultCertificate.cert) '' -}}*/}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: '{{ include "traefik-name-prefix" . }}-default-certificate'
+  namespace: '{{ .Release.Namespace }}'
+  labels:
+    app.kubernetes.io/name: traefik
+type: kubernetes.io/tls
+stringData:
+  tls.crt: |
+    {{ .Files.Get "/home/admin/code/kube-x/resources/cluster/kube-x-docker/cert/kube-x.dev+1.pem" | quote }}
+  {{/*  {{- if .Files.Get (required "Helm Error: .Values.valuesfile is required" .Values.valuesfile) }}$*/}}
+  tls.key: |
+    {{ .Files.Get .Values.kube_x.traefik.defaultCertificate.key | quote }}
+---
+apiVersion: traefik.io/v1alpha1
+kind: TLSStore
+metadata:
+  name: default
+  namespace: '{{ .Release.Namespace }}'
+spec:
+  defaultCertificate:
+    secretName: '{{ include "traefik-name-prefix" . }}-default-certificate'
+{{/*{{- end }}*/}}

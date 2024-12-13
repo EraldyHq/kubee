@@ -22,9 +22,20 @@ generate_and_get_helm_values_path(){
   export KUBE_X_CLUSTER_ADMIN_USERNAME="${KUBE_X_CLUSTER_ADMIN_USERNAME:-admin}"
   export KUBE_X_CLUSTER_ADMIN_PASSWORD="${KUBE_X_CLUSTER_ADMIN_PASSWORD:-$(openssl rand -base64 10)}"
 
-  # Template
+  if [ "${KUBE_X_CLUSTER_NAME:-}" == "" ]; then
+    echo::err "The cluster name is mandatory"
+    return 1
+  fi
   SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  local KUBE_X_HELM_VALUES="${SCRIPT_DIR}/../resources/cluster/kube-x/helm-values.yml"
+  local KUBE_X_CLUSTER_DIR;
+  KUBE_X_CLUSTER_DIR="${SCRIPT_DIR}/../resources/cluster/$KUBE_X_CLUSTER_NAME"
+
+  # Template
+  local KUBE_X_HELM_VALUES="${KUBE_X_CLUSTER_DIR}/helm-values.yaml"
+  if [ ! -f "$KUBE_X_HELM_VALUES" ]; then
+    echo::err "No helm file found at $KUBE_X_HELM_VALUES"
+    return 1;
+  fi
 
   # Check the variables
   if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBE_X_HELM_VALUES"); then
@@ -41,11 +52,13 @@ generate_and_get_helm_values_path(){
 }
 
 install(){
+
   APP_NAME="${1:-}"
   if [ "$APP_NAME" == "" ]; then
     echo::err "An app name is mandatory as argument"
     return 1
   fi
+
   read -r APP_NAMESPACE APP_NAME <<< "$(kube::get_qualified_app_name "$APP_NAME")"
   echo "$APP_NAMESPACE $APP_NAME"
 
@@ -65,15 +78,25 @@ install(){
 
   # App
   APP_DIRECTORY=$(kube::get_app_directory "$APP_NAMESPACE")
-  echo "$APP_DIRECTORY"
+  echo::info "Going to App directory: $APP_DIRECTORY"
   pushd "$APP_DIRECTORY"
   APP_RELEASE_NAME="$APP_NAMESPACE"
 
+  local HELM_INSTALL_COMMAND=()
+  HELM_INSTALL_COMMAND+=(
+    "helm"
+    "upgrade"
+    "--install"
+    "-n" "$APP_NAMESPACE"
+    "--create-namespace"
+    "--dependency-update"
+    )
   # The kube-x values
   if ! KUBE_X_VALUES_PATH=$(generate_and_get_helm_values_path); then
     echo::err "Error while trying to get the kube-x-helm values"
     return 1
   fi
+  HELM_INSTALL_COMMAND+=("-f" "${KUBE_X_VALUES_PATH}")
 
   # To update the kube-x helm
   command::echo_eval "helm dependency update"
@@ -82,14 +105,8 @@ install(){
   # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
   # See https://github.com/helm/helm/issues/7214
   # values.yaml file is taken by default
-  command::echo_eval "helm upgrade \
-    --install \
-    -n $APP_NAMESPACE \
-    --create-namespace \
-    --dependency-update \
-    -f $KUBE_X_VALUES_PATH \
-    $APP_RELEASE_NAME \
-    ."
+  HELM_INSTALL_COMMAND+=("$APP_RELEASE_NAME" ".")
+  command::echo_eval "${HELM_INSTALL_COMMAND[*]}"
   popd
 
 }

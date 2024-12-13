@@ -2,16 +2,27 @@
 kube_x:
   # Cluster Wide Variables
   cluster:
-    # The prefix added to all name created by kube-x template
-    namePrefix: "kube-x"
     # The admin user of the cluster
     adminUser:
-      username: "${KUBE_X_CLUSTER_ADMIN_USERNAME}"
+      username: "admin"
       password: "${KUBE_X_CLUSTER_ADMIN_PASSWORD}"
   # Kube-x Prometheus
   prometheus:
     # Not a string, a boolean so no quote
-    enabled: ${KUBE_X_CLUSTER_PROMETHEUS_ENABLED}
+    enabled: 'false'
+  # Kube-X Dashboard Variables
+  kubernetes_dashboard:
+    # The external DNS
+    hostname: 'dash.kube-x.dev'
+  # Kube-X Traefik Variables
+  traefik:
+    defaultCertificate:
+      # Path to the cert file relatif to the working directory (ie cluster directory)
+      cert: 'cert/kube-x.dev+1.pem'
+      key: 'cert/kube-x.dev+1-key.pem'
+    dashboard:
+      # The FQDN for the traefik dashboard
+      hostname: 'traefik.kube-x.dev'
 
 # Traefik Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml

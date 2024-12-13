@@ -26,7 +26,9 @@ templates:
 # Kube-X Dashboard Variables
 kubernetes_dashboard:
   # The external DNS
-  hostname: 'dash.kube-x.dev'
+  # Example: hostname: 'dash.kube-x.dev'
+  # If set, an ingress will be created
+  hostname: ''
 
 # Kube-X Traefik Variables
 traefik:
@@ -39,14 +41,20 @@ traefik:
       # List of users
       users:
       # user1: password1
-  cert:
-    # Set the kube-x.dev certificate as default traefik cert
-    # Mandatory for kubernetes-dashboard
-    # If true, the rootCA should be added to the OS/Browser as trusted root CA
-    kubeXDevAsDefault: false
+  # Set the default certificate as default traefik cert
+  # Mandatory for kubernetes-dashboard on a local development
+  # The rootCA should be added to the OS/Browser as trusted root CA
+  # https://doc.traefik.io/traefik/https/tls/#default-certificate
+  defaultCertificate:
+    # Path to the cert file relatif to the working directory (ie cluster directory)
+    cert: ''
+    key: ''
+  # Traefik dashboard
   dashboard:
     # The FQDN is dnsName.apexDomain
-    hostname: 'traefik.kube-x.dev'
+    # If not empty, an ingress is created
+    # example: hostname: 'traefik.kube-x.dev'
+    hostname: ''
 
 # The prometheus kube-x env
 prometheus:

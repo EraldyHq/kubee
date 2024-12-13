@@ -189,12 +189,14 @@ kube::get_app_directory(){
   local APP_NAMESPACE="$1"
   # Check if we are under a KUBE_X_APP_HOME app home dir
   local KUBE_X_APP_HOMES=()
-  IFS=":" read -a KUBE_X_APP_HOMES <<< "${KUBE_X_APP_HOME_PATH:-}"
+  IFS=":" read -ra KUBE_X_APP_HOMES <<< "${KUBE_X_APP_HOME_PATH:-}"
   # this works for executed script or sourced script
-  local SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  local KUBE_X_RESOURCE_APP_DIR=$(realpath "$SCRIPT_DIR/../resources/cluster/apps")
+  local SCRIPT_DIR
+  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  local KUBE_X_RESOURCE_APP_DIR
+  KUBE_X_RESOURCE_APP_DIR=$(realpath "$SCRIPT_DIR/../resources/apps")
   local KUBE_X_APP_HOMES+=("$KUBE_X_RESOURCE_APP_DIR")
-  for KUBE_X_APP_HOME in $KUBE_X_APP_HOMES; do
+  for KUBE_X_APP_HOME in "${KUBE_X_APP_HOMES[@]}"; do
       if [ ! -d "$KUBE_X_APP_HOME" ]; then
         echo::warn "The HOME path ($KUBE_X_HOME) set in KUBE_X_APP_HOME_PATH does not exist or is not a directory"
         continue

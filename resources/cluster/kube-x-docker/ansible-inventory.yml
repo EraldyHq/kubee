@@ -1,0 +1,39 @@
+# Template used to generate an inventory
+k3s_cluster:
+  children:
+    server:
+      # Number of hosts server must be odd to avoid split brain issues
+      # with etcd and the recommended number is 3.
+      hosts:
+        # The ansible host name
+        # Used by k3s as the FQDN when creating the kubeconfig file
+        $KUBE_X_CLUSTER_SERVER_01_FQDN:
+          # The name of the host (dns or ip) to connect to,
+          # if different from the inventory hostname.
+          ansible_host: "$KUBE_X_CLUSTER_SERVER_01_ANSIBLE_HOST"
+          # The FQDN
+          kube_x_os_hostname: "$KUBE_X_CLUSTER_SERVER_01_FQDN"
+#    agent:
+#      hosts:
+#        192.16.35.12:
+#        192.16.35.13:
+  vars:
+    # With the host-specific parameter ansible_connection=<connector>
+    # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#non-ssh-connection-types
+    # see connection: ansible-doc -t connection -l
+    ansible_connection: "$KUBE_X_CLUSTER_CONNECTION"
+    # The default username to use for log in. Most plugins default to the ‘current user running Ansible’.
+    # Can be set via ANSIBLE_REMOTE_USER (default to the user executing Ansible)
+    # https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_REMOTE_USER
+    ansible_user: "$KUBE_X_CLUSTER_SERVER_USER"
+    # ANSIBLE_HOST_KEY_CHECKING
+    # See also https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_HOST_KEY_CHECKING
+    kube_x_k3s_version: "$KUBE_X_CLUSTER_K3S_VERSION"
+    # The token should be a random string of reasonable length. You can generate
+    # one with the following commands:
+    # - openssl rand -base64 64 | tr '\n' ''
+    # - pwgen -s 64 1
+    # You can use ansible-vault to encrypt this value / keep it secret.
+    # Or you can omit it if not using Vagrant and let the first server automatically generate one.
+    kube_x_k3s_token: "$KUBE_X_CLUSTER_K3S_TOKEN"
+
