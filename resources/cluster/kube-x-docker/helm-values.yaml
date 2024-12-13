@@ -19,12 +19,12 @@ kube_x:
     defaultCertificate:
       # The PEM content file
       # Not a path to the cert file relatif to the working directory (ie cluster directory)
-      # Can be set with:
+      # Can be set with `KUBE_X_HELM_INSTALL_OPTIONS`
       # --set-file kube_x.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem
       cert: ''
       # The PEM content file
       # Not a path to the key file relatif to the working directory (ie cluster directory)
-      # Can be set with:
+      # Can be set with `KUBE_X_HELM_INSTALL_OPTIONS`
       # --set-file kube_x.traefik.defaultCertificate.key=cert/kube-x.dev+1-key.pem
       key: ''
     dashboard:

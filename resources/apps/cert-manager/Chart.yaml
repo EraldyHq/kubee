@@ -30,5 +30,7 @@ dependencies:
   - name: cert-manager
     version: v1.16.2
     repository: https://charts.jetstack.io
-    alias: cert-manager
-    condition: certManager.enabled
+  - name: kube-x
+    version: 0.0.1
+    repository: file://../kube-x
+    alias: kube_x

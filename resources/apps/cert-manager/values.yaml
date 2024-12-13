@@ -37,8 +37,6 @@ dnsZones:
 # https://github.com/cert-manager/cert-manager/blob/release-1.16/deploy/charts/cert-manager/values.yaml
 # defined by either the name or alias of your dependency in Chart.yaml
 cert-manager:
-  # false is only use so that only our templates are printed
-  enabled: true
   # fixed so that we don't make any mistake
   namespace: 'cert-manager'
   crds:
