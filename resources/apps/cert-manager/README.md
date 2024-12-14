@@ -127,6 +127,9 @@ https://cert-manager.io/docs/devops-tips/prometheus-metrics/
     * Zone Resources :
         * Include - All Zones
 
+### Default cert
+
+https://cert-manager.io/docs/tutorials/certificate-defaults/
 
 ### Backup
 

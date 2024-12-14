@@ -1,38 +1,5 @@
 
-# The email Account
-acmeEmailAccount: 'nico@eraldy.com'
 
-letsEncryptIssuer:
-  prod:
-    name: 'letsencrypt-prod'
-    url: 'https://acme-v02.api.letsencrypt.org/directory'
-  staging:
-    name: 'letsencrypt-staging'
-    url: 'https://acme-staging-v02.api.letsencrypt.org/directory'
-
-
-ingressClassName: 'traefik'
-
-# Doc: https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/
-# Spec: https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderCloudflare
-# Note in the doc, they use an email because they show an apiKey Auth, not an apiToken
-# `ApiToken` is now the preferred method
-# See README how to get cloudflare api key
-cloudflareApiToken:
-  secretNameSuffix: 'cloudflare-dns-api-token'
-  secretKey: 'api-token'
-
-
-# The dns Zone for the DNS01 challenge
-# Why DNS zone? Because you don't need to publish DNS A record
-dnsZones:
-  - i.eraldy.com
-  - tabulify.com
-  - eraldy.com
-  - datacadamia.com
-  - combostrap.com
-  - gerardnico.com
-  - bytle.net
 
 # https://github.com/cert-manager/cert-manager/blob/release-1.16/deploy/charts/cert-manager/values.yaml
 # defined by either the name or alias of your dependency in Chart.yaml
