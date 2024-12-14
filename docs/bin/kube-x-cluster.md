@@ -26,6 +26,8 @@ kubectl config rename-context k3s-ansible $KUBE_X_CLUSTER_NAME
 kubectl cluster-info dump
 ```
 
+Other tests: https://technotim.live/posts/k3s-etcd-ansible/#testing-your-cluster
+
 ## Dependencies
 
 * `yq` to update kubeconfig
