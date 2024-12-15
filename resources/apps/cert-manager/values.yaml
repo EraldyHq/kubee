@@ -1,6 +1,6 @@
 
 
-# Set the default namespace
+# Set the default namespace to search for a resource
 # --cluster-resource-namespace=my-namespace
 # https://cert-manager.io/docs/configuration/#cluster-resource-namespace
 default_cluster_issuer_namespace:

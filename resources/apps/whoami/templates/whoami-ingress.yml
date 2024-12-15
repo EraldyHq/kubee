@@ -11,7 +11,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
     {{- if ne (((.Values.kube_x).cert_manager).enabled) false }}
-    cert-manager.io/cluster-issuer: '{{ .Values.kube_x.cert_manager.issuerName }}'
+    cert-manager.io/cluster-issuer: '{{ .Values.kube_x.cert_manager.defaultIssuerName }}'
     {{- end }}
 spec:
   rules:

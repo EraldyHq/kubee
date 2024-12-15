@@ -1,29 +1,36 @@
+{{- range .Values.kube_x.cert_manager.acmeIssuers }}
 # Create a ClusterIssuer (can issue cert for the whole cluster)
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 # `Issuer` kind is scoped to a namespace
 metadata:
-  name: '{{ .Values.letsEncryptIssuer.prod.name }}'
+  name: '{{ .name }}'
   namespace: '{{ include "cert-manager.namespace" . }}'
 spec:
   acme:
     # The ACME server URL
-    server: '{{ .Values.letsEncryptIssuer.prod.url }}'
+    server: '{{ .url }}'
     # Email address used for ACME registration
-    email: '{{ .Values.acmeEmailAccount }}'
+    email: '{{ $.Values.kube_x.cluster.adminUser.email }}'
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
-      name: '{{ .Values.letsEncryptIssuer.prod.name }}'
+      name: '{{ .name }}'
     # Enable the HTTP-01 challenge provider
     solvers:
       # An empty 'selector' means that this solver matches all domains
       - selector: {}
+        # https://cert-manager.io/docs/tutorials/acme/http-validation/
+        # It is your responsibility to point each domain name at the correct IP address for your ingress controller.
+        # Wildcard certificates are not supported with HTTP01 validation and require DNS01.
         http01:
           ingress:
-            serviceType: ClusterIP
-            # or class or ingressClassName
-            # nginx or traefik
-            ingressClassName: '{{ .Values.ingressClassName }}'
+            # Configure which Ingress controller is used to resolve the challenge
+            # If the ingressClassName field is specified,
+            # a new ingress resource with a randomly generated name
+            # will be created in order to solve the challenge.
+            # This new resource will have the field ingressClassName with the value of the ingressClassName field.
+            # Value: nginx or traefik
+            ingressClassName: '{{ $.Values.kube_x.cluster.ingressClassName }}'
       # Selector: 'DnsName', `DnsZone`, `matchLabels` can be specified
       # https://cert-manager.io/docs/configuration/acme/#adding-multiple-solver-types
       - selector:
@@ -42,5 +49,6 @@ spec:
             # Note in the doc, they use an email because they show an apiKey Auth, not an apiToken
             # `ApiToken` is now the preferred method
             apiTokenSecretRef:
-              name: '{{ .Release.Name }}-{{ .Values.cloudflareApiToken.secretNameSuffix }}'
-              key: '{{ .Values.cloudflareApiToken.secretKey }}'
+              name: '{{ include "cert-manager-cloudflare-secret-name" . }}'
+              key: '{{ include "cert-manager-cloudflare-secret-key" . }}'
+{{-end}}

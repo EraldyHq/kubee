@@ -2,5 +2,8 @@ dependencies:
 - name: cert-manager
   repository: https://charts.jetstack.io
   version: v1.16.2
-digest: sha256:466a0f9e4c03506656b07255f961d3bfd007d4fb8953a0d4b61a6afed1b40951
-generated: "2024-11-26T22:31:27.629818876+01:00"
+- name: kube-x
+  repository: file://../kube-x
+  version: 0.0.1
+digest: sha256:4a31aad4a93afe6c75d670bb401a4ebead254c4a24aa2972f184ff8c91ec6f42
+generated: "2024-12-15T23:37:58.115882358+01:00"

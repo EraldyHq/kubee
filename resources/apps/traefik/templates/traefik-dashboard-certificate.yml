@@ -26,6 +26,6 @@ spec:
     - '{{ .Values.kube_x.traefik.dashboard.hostname }}'
   issuerRef:
     kind: ClusterIssuer
-    name: '{{ .Values.kube_x.cert_manager.issuerName }}'
+    name: '{{ .Values.kube_x.cert_manager.defaultIssuerName }}'
 
 {{- end -}}

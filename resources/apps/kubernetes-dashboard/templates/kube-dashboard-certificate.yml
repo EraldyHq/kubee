@@ -7,9 +7,6 @@ kind: Certificate
 metadata:
   name: '{{ include "kubernetes-dashboard-name" }}'
   namespace: '{{.Release.Namespace}}'
-  labels:
-    # use cloudflare Dns
-    "issuer-challenge": "dns01-cloudflare"
 spec:
   commonName: '{{ .Values.kube_x.kubernetes_dashboard.hostname }}'
   secretName: '{{ include "kubernetes-dashboard-name" }}'
@@ -17,6 +14,6 @@ spec:
     - '{{ .Values.kube_x.kubernetes_dashboard.hostname }}'
   issuerRef:
     kind: ClusterIssuer
-    name: '{{ .Values.kube_x.cert_manager.issuerName }}'
+    name: '{{ .Values.kube_x.cert_manager.defaultIssuerName }}'
 
 {{- end}}

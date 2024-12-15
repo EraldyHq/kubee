@@ -129,6 +129,10 @@ https://cert-manager.io/docs/devops-tips/prometheus-metrics/
 
 ### Default cert
 
+In an Ingress, if the `secretName` is omitted, it would
+use the default wildcard certificate of the `Ingress controller`
+https://cert-manager.io/docs/devops-tips/syncing-secrets-across-namespaces/#serving-a-wildcard-to-ingress-resources-in-different-namespaces-default-ssl-certificate
+
 https://cert-manager.io/docs/tutorials/certificate-defaults/
 
 ### Backup

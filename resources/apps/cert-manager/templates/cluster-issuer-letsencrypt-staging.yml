@@ -20,7 +20,6 @@ spec:
       - selector: {}
         http01:
           ingress:
-            serviceType: ClusterIP
             # or class or ingressClassName
             ingressClassName: '{{ .Values.ingressClassName }}'
       # Selector: 'DnsName', `DnsZone`, `matchLabels` can be specified
