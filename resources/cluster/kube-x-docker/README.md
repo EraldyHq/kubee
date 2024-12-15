@@ -22,7 +22,7 @@ dock-x run
 ```
 
 > [!Important] Token needs to be unique in /tmp/var/lib/rancher
-> If the token has changed
+> If the token has changed, the data dir needs to be cleaned up
 > ```bash
 > rm -rf /tmp/var/lib/rancher
 > ```

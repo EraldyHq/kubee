@@ -11,7 +11,12 @@ k3s_cluster:
           # The name of the host (dns or ip) to connect to,
           # if different from the inventory hostname.
           ansible_host: "$KUBE_X_CLUSTER_SERVER_01_ANSIBLE_HOST"
-          # The FQDN
+          # The FQDN to avoid: # https://docs.k3s.io/networking/basic-network-options#nodes-without-a-hostname
+          # Some cloud providers, such as Linode, will create machines with "localhost" as the hostname
+          # and others may not have a hostname set at all.
+          # This can cause problems with domain name resolution.
+          # You can run K3s with the --node-name flag or K3S_NODE_NAME environment variable
+          # and this will pass the node name to resolve this issue.
           kube_x_os_hostname: "$KUBE_X_CLUSTER_SERVER_01_FQDN"
 #    agent:
 #      hosts:
@@ -29,11 +34,27 @@ k3s_cluster:
     # ANSIBLE_HOST_KEY_CHECKING
     # See also https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_HOST_KEY_CHECKING
     kube_x_k3s_version: "$KUBE_X_CLUSTER_K3S_VERSION"
+    #
+    # By default, K3s uses a single static token for both servers and agents.
+    # This token cannot be changed once the cluster has been created.
+    # It is possible to enable a second static token that can only be used to join agents,
+    # or to create temporary kubeadm style join tokens that expire automatically.
+    # The k3s doc: https://docs.k3s.io/cli/token
+    #
+    # See k8s doc: Authentication Token (auth between nodes):
+    # https://kubernetes.io/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/#token-authentication-file
+    # used in Kubelet Bootstrap initialization
+    # https://kubernetes.io/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/#bootstrap-initialization
+    #
     # The token should be a random string of reasonable length. You can generate
     # one with the following commands:
     # - openssl rand -base64 64 | tr '\n' ''
     # - pwgen -s 64 1
+    # - head -c 16 /dev/urandom | od -An -t x | tr -d ' '
+    #
     # You can use ansible-vault to encrypt this value / keep it secret.
     # Or you can omit it if not using Vagrant and let the first server automatically generate one.
+    # The value can also be given via an env: `K3S_TOKEN` - Ref: https://docs.k3s.io/cli/server#cluster-options
+    #
     kube_x_k3s_token: "$KUBE_X_CLUSTER_K3S_TOKEN"
 

@@ -51,6 +51,7 @@ traefik:
     # kubectl label nodes kube-server-01.eraldy.com svccontroller.k3s.cattle.io/enablelb=true
     #
     # Traefik would be installed on kube-server-01.eraldy.com
+    # The node should have the label: https://docs.k3s.io/advanced#node-labels-and-taints
     # "svccontroller.k3s.cattle.io/enablelb": "true"
   }
 

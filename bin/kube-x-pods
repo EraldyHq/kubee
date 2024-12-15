@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# Works
+kube-x-kubectl get pod --all-namespaces  -o custom-columns='NAME:.metadata.name,NAMESPACE:.metadata.namespace'
