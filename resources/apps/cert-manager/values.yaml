@@ -1,9 +1,14 @@
 
 
+# Set the default namespace
+# --cluster-resource-namespace=my-namespace
+# https://cert-manager.io/docs/configuration/#cluster-resource-namespace
+default_cluster_issuer_namespace:
 
 # https://github.com/cert-manager/cert-manager/blob/release-1.16/deploy/charts/cert-manager/values.yaml
 # defined by either the name or alias of your dependency in Chart.yaml
 cert-manager:
+  # Installation namespace
   # fixed so that we don't make any mistake
   namespace: 'cert-manager'
   crds:

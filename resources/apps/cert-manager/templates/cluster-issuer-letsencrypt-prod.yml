@@ -22,6 +22,7 @@ spec:
           ingress:
             serviceType: ClusterIP
             # or class or ingressClassName
+            # nginx or traefik
             ingressClassName: '{{ .Values.ingressClassName }}'
       # Selector: 'DnsName', `DnsZone`, `matchLabels` can be specified
       # https://cert-manager.io/docs/configuration/acme/#adding-multiple-solver-types
