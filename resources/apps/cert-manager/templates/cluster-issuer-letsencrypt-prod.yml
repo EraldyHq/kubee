@@ -30,7 +30,7 @@ spec:
             # will be created in order to solve the challenge.
             # This new resource will have the field ingressClassName with the value of the ingressClassName field.
             # Value: nginx or traefik
-            ingressClassName: '{{ $.Values.kube_x.cluster.ingressClassName }}'
+            ingressClassName: '{{ $.Values.kube_x.cert_manager.http01.ingressClassName }}'
       # Selector: 'DnsName', `DnsZone`, `matchLabels` can be specified
       # https://cert-manager.io/docs/configuration/acme/#adding-multiple-solver-types
       - selector:
