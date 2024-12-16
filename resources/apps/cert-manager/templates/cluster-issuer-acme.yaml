@@ -1,0 +1,89 @@
+{{/*
+
+Test:
+helm template -s templates/cluster-issuer-acme.yaml \
+  --set 'kube_x.cert_manager.dns01.cloudflare.cloudflareApiToken=xxxx' \
+  --set 'kube_x.cluster.adminUser.email=foo@bar.com' \
+  --set 'kube_x.cert_manager.dns01.cloudflare.dnsZones[0]=yolo' \
+  . | yq
+
+
+
+
+Range:
+https://helm.sh/docs/chart_template_guide/control_structures/#looping-with-the-range-actionhttps://helm.sh/docs/chart_template_guide/control_structures/#looping-with-the-range-action
+*/}}
+{{- range .Values.kube_x.cert_manager.acmeIssuers }}
+---
+{{/*# Create a ClusterIssuer (can issue cert for the whole cluster)*/}}
+apiVersion: cert-manager.io/v1
+{{- /*# `Issuer` kind is scoped to a namespace*/}}
+kind: ClusterIssuer
+metadata:
+  name: '{{ .name }}'
+  namespace: '{{ include "cert-manager.namespace" (dict "Values" (index $.Values "cert-manager") "Release" $.Release ) }}'
+spec:
+  acme:
+    {{- /* The ACME server URL*/}}
+    server: '{{ .url }}'
+    {{- /* Email address used for ACME registration*/}}
+    email: '{{ $.Values.kube_x.cluster.adminUser.email | required "kube_x.cluster.adminUser.email is required." }}'
+    {{- /* Name of a secret used to store the ACME account private key*/}}
+    privateKeySecretRef:
+      name: '{{ .name }}'
+    {{- /* Enable the HTTP-01 challenge provider*/}}
+    solvers:
+      {{- if ne $.Values.kube_x.cert_manager.http01.ingressClassName "" -}}
+      {{- /* empty 'selector' means that this solver matches all domains*/}}
+      - selector: { }
+        {{- /*
+          https://cert-manager.io/docs/tutorials/acme/http-validation/
+          It is your responsibility to point each domain name at the correct IP address for your ingress controller.
+          Wildcard certificates are not supported with HTTP01 validation and require DNS01.
+        */}}
+        http01:
+          ingress:
+          {{- /*
+            # Configure which Ingress controller is used to resolve the challenge
+            # If the ingressClassName field is specified,
+            # a new ingress resource with a randomly generated name
+            # will be created in order to solve the challenge.
+            # This new resource will have the field ingressClassName with the value of the ingressClassName field.
+            # Value: nginx or traefik
+           */}}
+            ingressClassName: '{{ $.Values.kube_x.cert_manager.http01.ingressClassName }}'
+      {{- /*
+        Selector: 'DnsName', `DnsZone`, `matchLabels` can be specified
+        https://cert-manager.io/docs/configuration/acme/#adding-multiple-solver-types
+      */}}
+      {{- end }}
+      {{- if ne $.Values.kube_x.cert_manager.dns01.cloudflare.cloudflareApiToken "" }}
+      - selector:
+          {{- /*
+          # The selector is a DNS Zone
+          # To allow the creation of certificate on ingress spec.
+          # This is not:
+          # * a matchLabel because it is not possible to set a label/annotation for cert-manager in an ingress spec
+          # * a DNSName because it must be exact and is obviously unknown in advance
+          */}}
+          {{- if not $.Values.kube_x.cert_manager.dns01.cloudflare.dnsZones }}
+            {{- fail "kube_x.cert_manager.dns01.cloudflare.dnsZones should not be empty" }}
+          {{- end }}
+          dnsZones: {{ $.Values.kube_x.cert_manager.dns01.cloudflare.dnsZones | toYaml | nindent 12 }}
+        {{- /* https://cert-manager.io/docs/configuration/acme/dns01/*/}}
+        dns01:
+          {{- /*
+          # Doc: https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/
+          # Spec: https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderCloudflare
+          */}}
+          cloudflare:
+            {{- /*
+            # Note in the doc, they use an email because they show an apiKey Auth, not an apiToken
+            # `ApiToken` is now the preferred method
+            */}}
+            apiTokenSecretRef:
+              name: '{{ include "cert-manager-cloudflare-secret-name" $ }}'
+              key: '{{ include "cert-manager-cloudflare-secret-key" $ }}'
+      {{- end -}}
+
+{{- end -}}

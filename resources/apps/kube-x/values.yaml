@@ -4,7 +4,7 @@
 # Cluster Wide variables
 cluster:
   # Admin user
-  #  * created as admin user in Kubernetes and other app)
+  #  * created as admin user in Kubernetes and other app
   #  * added in basicAuth
   adminUser:
     username: 'admin'
@@ -16,7 +16,7 @@ cluster:
     # The email
     # Used by default for instance for letsencrypt
     email: ''
-  # Authentication of internal infra website such as Traefik Dashboard, ...
+  # Authentication of internal infra ingress (ie internal website such as Traefik Dashboard, ...)
   auth: basicAuth
 
 
@@ -65,8 +65,15 @@ prometheus:
 
 # The cert manager kube-x env
 cert_manager:
+  # Not enabled by default
+  # This is the kube-x template condition used to create certificate for ingress route
+  # when disabled, the default traefik certificate is used
   enabled: false
 
+  # The issuer used in all certificate request
+  # of kube-x.
+  # Should be changed to 'letsencrypt-prod'
+  # when validated
   defaultIssuerName: 'letsencrypt-staging'
 
   acmeIssuers:
@@ -92,23 +99,18 @@ cert_manager:
   # You don't need to publish a DNS A record
   # Doc: https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/
   # Spec: https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderCloudflare
+  # Notes: in the doc, they use an email because they show an apiKey Auth, not an apiToken
+  # `ApiToken` is now the preferred method
   dns01:
     cloudflare:
-      # Note in the doc, they use an email because they show an apiKey Auth, not an apiToken
-      # `ApiToken` is now the preferred method
-      # See README how to get cloudflare api key
+      # See cert-manager/README.md on how to get cloudflare api key
       cloudflareApiToken: ''
-      # The dns Zone that are managed by cloudflare
-      dnsZones:
-        - tabulify.com
-        - eraldy.com
-        - datacadamia.com
-        - combostrap.com
-        - gerardnico.com
-        - bytle.net
-
+      # The dns Zones that are managed by cloudflare, mandatory
+      dnsZones: []
 
 whoami:
-  hostname: 'whoami.kube-x.dev'
+  # A non-empty Hostname will create an ingress
+  # example: hostname: 'whoami.kube-x.dev'
+  hostname: ''
 
 

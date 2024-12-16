@@ -1,6 +1,6 @@
 apiVersion: v2
-name: cert-manager-sub-chart
-description: A sub-chart of cert manager
+name: kube-x-cert-manager
+description: A kube-x sub-chart of cert manager
 
 # A chart can be either an 'application' or a 'library' chart.
 #
