@@ -1,5 +1,5 @@
 {{/*
-Library of templates createe with the define keyword
+Library of templates created with the define keyword
 https://helm.sh/docs/chart_template_guide/named_templates/#declaring-and-using-templates-with-define-and-template
 */}}
 
@@ -27,7 +27,7 @@ Traefik expects the passwords to be hashed using MD5, SHA1, or BCrypt.
 
 
 {{/*
-Helper to call
+Name Helper
 */}}
 {{- define "traefik-name-prefix" }}
 {{- include "kube-x-name-prefix" (dict "Release" .Release "Values" .Values.kube_x )}}
@@ -35,8 +35,8 @@ Helper to call
 
 
 {{/*
-Helper to print the dashboard cert name for consitency
-(used for certificatge, secret, ...)
+Name Helper to print the dashboard cert name for consistency
+(used for certificate, secret, ...)
 */}}
 {{- define "traefik-name-dashboard-cert" }}
 {{- printf "%s-%s"

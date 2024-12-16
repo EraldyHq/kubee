@@ -81,6 +81,7 @@ cert_manager:
   # https://cert-manager.io/docs/tutorials/acme/http-validation/
   # It is your responsibility to point each domain name at the correct IP address for your ingress controller.
   # Wildcard certificates are not supported with HTTP01 validation and require DNS01.
+  # Disabled if ingressClassName is empty
   http01:
     # Default IngressClassName
     # Used by cert manager to create ingress resource to resolve the http01 challenge

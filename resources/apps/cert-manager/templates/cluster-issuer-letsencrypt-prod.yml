@@ -17,8 +17,9 @@ spec:
       name: '{{ .name }}'
     # Enable the HTTP-01 challenge provider
     solvers:
+    {{- if ne $.Values.kube_x.cert_manager.http01.ingressClassName '' -}}
       # An empty 'selector' means that this solver matches all domains
-      - selector: {}
+      - selector: { }
         # https://cert-manager.io/docs/tutorials/acme/http-validation/
         # It is your responsibility to point each domain name at the correct IP address for your ingress controller.
         # Wildcard certificates are not supported with HTTP01 validation and require DNS01.
@@ -33,12 +34,14 @@ spec:
             ingressClassName: '{{ $.Values.kube_x.cert_manager.http01.ingressClassName }}'
       # Selector: 'DnsName', `DnsZone`, `matchLabels` can be specified
       # https://cert-manager.io/docs/configuration/acme/#adding-multiple-solver-types
+    {{-end-}}
+    {{- if ne $.Values.kube_x.cert_manager.dns01.cloudflare.cloudflareApiToken '' -}}
       - selector:
           # The selector is a DNS Zone
-          # To allow the creation of certificate on ingress spec. This is not:
+          # To allow the creation of certificate on ingress spec.
+          # This is not:
           # * a matchLabel because it is not possible to set a label/annotation for cert-manager in an ingress spec
           # * a DNSName because it must be exact and is obviously unknown in advance
-          # noinspection KubernetesUnknownValues
           dnsZones:
             {{- toYaml .Values.dnsZones | nindent 12 }}
         # https://cert-manager.io/docs/configuration/acme/dns01/
@@ -51,4 +54,5 @@ spec:
             apiTokenSecretRef:
               name: '{{ include "cert-manager-cloudflare-secret-name" . }}'
               key: '{{ include "cert-manager-cloudflare-secret-key" . }}'
+    {{-end-}}
 {{-end}}
