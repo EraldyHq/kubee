@@ -1,0 +1,11 @@
+
+
+You can install the [cert manager command line (cmctl)](https://cert-manager.io/docs/reference/cmctl/#installation)
+```bash
+brew install cmctl
+```
+
+You can check the api via:
+```bash
+cmctl check api
+```
