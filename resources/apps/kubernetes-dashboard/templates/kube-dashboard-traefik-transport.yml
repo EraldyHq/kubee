@@ -1,3 +1,8 @@
+{{/*
+  In the traefik controller, we set this as default to true
+  with the argument --serverstransport.insecureskipverify=true
+  We don't need it anymore but if the value change, it will not break.
+*/}}
 apiVersion: traefik.io/v1alpha1
 kind: ServersTransport
 metadata:

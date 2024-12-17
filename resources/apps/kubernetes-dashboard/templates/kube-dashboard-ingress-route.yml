@@ -1,8 +1,12 @@
 {{/*
-We can't use an ingress because
-we need a no tls transport
+We couldn't use an ingress because
+we needed a `no tls transport`
 and it's not set as a label on the ingress but on the service
-We therefore need to use a traefik IngressRoute
+We therefore needed to use a traefik IngressRoute
+
+Note that we set this value to true
+with the argument --serverstransport.insecureskipverify=true
+We don't need it anymore but if the value change, it will not break.
 */}}
 ---
 apiVersion: traefik.io/v1alpha1
@@ -34,7 +38,7 @@ spec:
           # but a service property
           # https://doc.traefik.io/traefik/routing/providers/kubernetes-ingress/#on-service
           # We can't therefore use an Ingress Object because we don't have access to the service
-          # A server transport is namespaced ! You can't use a global name
+          # A server transport is namespaced scoped.
           serversTransport: '{{ include "kubernetes-dashboard-transport-no-tls-name" .}}'
         #      middlewares:
         # We can't use the basic auth  because it uses the `Authentication` header, and it conflicts with

@@ -126,6 +126,19 @@ https://dashbord.example.com/#/customresourcedefinition/clusterissuers.cert-mana
     
 ## How to
 
+### How to use it with Traefik
+
+Guide:
+* [Traefik and Cert manager](https://doc.traefik.io/traefik/user-guides/cert-manager/)
+
+Routing (Annotation):
+* [Ingress](https://doc.traefik.io/traefik/routing/providers/kubernetes-ingress/)
+* [Ingress Route](https://doc.traefik.io/traefik/routing/providers/kubernetes-crd/)
+
+Providers (Configuration Discovery):
+* [Ingress](https://doc.traefik.io/traefik/providers/kubernetes-ingress/)
+* [Ingress Route](https://doc.traefik.io/traefik/providers/kubernetes-crd/)
+
 
 ### How to debug
 

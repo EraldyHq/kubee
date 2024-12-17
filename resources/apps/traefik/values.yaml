@@ -20,7 +20,10 @@ traefik:
         enabled: true
 
   additionalArguments:
-    # Don't verify cert on self-signed cert
+    # Don't verify cert on pods
+    # [serversTransport.insecureSkipVerify](https://doc.traefik.io/traefik/routing/services/#insecureskipverify) is set to
+    # true by default on server, otherwise there will be an error
+    # if a pod loads a self-signed certificate with a CA that Traefik does not know.
     - '--serversTransport.insecureSkipVerify=true'
 
   service:
