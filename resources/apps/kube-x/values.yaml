@@ -110,8 +110,8 @@ cert_manager:
       secret:
         # A Kubernetes secret will be created if not empty
         cloudflareApiToken: ''
-        # An external secret remote ref to the cloudflare api token will be created
-        # if the key not empty
+        # An external secret will be created
+        # if remote ref key is not empty
         externalSecretRemoteRef:
           key: ''
           property: ''
