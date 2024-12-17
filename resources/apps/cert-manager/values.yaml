@@ -1,9 +1,5 @@
 
 
-# Set the default namespace to search for a resource
-# --cluster-resource-namespace=my-namespace
-# https://cert-manager.io/docs/configuration/#cluster-resource-namespace
-default_cluster_issuer_namespace:
 
 # https://github.com/cert-manager/cert-manager/blob/release-1.16/deploy/charts/cert-manager/values.yaml
 # defined by either the name or alias of your dependency in Chart.yaml
@@ -21,3 +17,12 @@ cert-manager:
     enabled: true
     servicemonitor:
       enabled: true
+  # cluster resource namespace
+  # The namespace used to store cluster wide data (such as DNS provider credentials, certificate, ...)
+  # Set the default namespace to search for a resource on the cert-manager controller
+  # --cluster-resource-namespace=my-namespace
+  # https://cert-manager.io/docs/configuration/#cluster-resource-namespace
+  # The Cluster Resource Namespace is defaulted as being the `cert-manager` namespace,
+  # A ClusterIssuer CA will create the certificate in this namespace
+  # https://cert-manager.io/docs/configuration/ca/#deployment
+  clusterResourceNamespace: ""

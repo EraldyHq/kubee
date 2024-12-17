@@ -11,16 +11,13 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 source "kube-x-lib.sh"
 
 
-
 synopsis(){
   cat <<EOF
 \`\`\`bash
-$(basename "$0") [-n|--namespace namespaceName] [kubectl args]
+$(basename "$0") [-n|--namespace namespaceName] [cmctl args]
 \`\`\`
 
-where:
-
-* \`-n|--namespace\` specifies the \`namespace\` default to \`KUBE_X_APP_NAMESPACE\` or \`KUBE_X_DEFAULT_NAMESPACE\` and ultimately to \`default\`.
+A kube-x wrapper around [cmctl](https://cert-manager.io/docs/reference/cmctl/)
 
 EOF
 }
@@ -79,4 +76,4 @@ if [ "$BASHLIB_ECHO_LEVEL" == "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
 fi
 
 
-kubectl "${args[@]}"
+cmctl "${args[@]}"

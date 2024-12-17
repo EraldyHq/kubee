@@ -253,12 +253,12 @@ kube::is_helm_chart_installed() {
   fi
 
   # Get the installed chart version
-  read CHART_RELEASE_APP_VERSION CHART_RELEASE_CHART <<< "$(helm list -n "$CHART_RELEASE_NAMESPACE" --filter "^$CHART_RELEASE_NAME\$" --output json | jq -r '.[0] | "\(.app_version) \(.chart)"')"
+  read -r CHART_RELEASE_APP_VERSION CHART_RELEASE_CHART <<< "$(helm list -n "$CHART_RELEASE_NAMESPACE" --filter "^$CHART_RELEASE_NAME\$" --output json | jq -r '.[0] | "\(.app_version) \(.chart)"')"
   # We don't check on chart version
   IFS="-" read -ra CHART_RELEASE_PARTS <<< "$CHART_RELEASE_CHART"
   CHART_RELEASE_CHART_VERSION="${CHART_RELEASE_PARTS[-1]}"
   CHART_RELEASE_CHART_NAME=$({
-   CHART_RELEASE_CHART_NAMES=(${CHART_RELEASE_PARTS[@]:0:${#CHART_RELEASE_PARTS[@]}-1});
+   CHART_RELEASE_CHART_NAMES=("${CHART_RELEASE_PARTS[@]:0:${#CHART_RELEASE_PARTS[@]}-1}");
    IFS='-';
    echo "${CHART_RELEASE_CHART_NAMES[*]}"
   })
@@ -273,4 +273,34 @@ kube::is_helm_chart_installed() {
 
 }
 
+# @description
+#     test the connection to the cluster
+# @exitcode 1 - if the connection did not succeed
+kube::test_connection(){
+
+  if OUTPUT=$(kubectl cluster-info); then
+    echo::info "Test Connection succeeded"
+    return 0;
+  fi
+  echo::err "No connection could be made with the cluster"
+
+
+  if [ "${KUBECONFIG:-}" == "" ]; then
+        echo::err "Note: No KUBECONFIG env found"
+  else
+      if [ ! -f "$KUBECONFIG" ]; then
+        echo::err "The KUBECONFIG env file ($KUBECONFIG) does not exist"
+      else
+        echo::info "The file ($KUBECONFIG) may have bad cluster info"
+        echo::err "Note: The config is:"
+        kubectl config view
+      fi
+  fi
+
+
+  echo::err "We got the following output from the connection"
+  echo::err "$OUTPUT"
+  return 1
+
+}
 

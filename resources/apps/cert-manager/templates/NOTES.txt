@@ -9,3 +9,6 @@ You can check the api via:
 ```bash
 cmctl check api
 ```
+```
+The cert-manager API is ready
+```
