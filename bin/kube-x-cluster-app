@@ -72,13 +72,26 @@ install(){
   read -r APP_NAMESPACE APP_NAME <<< "$(kube::get_qualified_app_name "$APP_NAME")"
   echo "$APP_NAMESPACE $APP_NAME"
 
-  # Crds
+  # Crds first
+  # CRD first installation is becoming a standard
+  # Example with Prometheus: https://github.com/prometheus-operator/kube-prometheus#quickstart
+  # They create the namespace and CustomResourceDefinitions first
+  # to avoid race conditions when deploying the components.
   if APP_CRDS_DIRECTORY=$(kube::get_app_crds_directory "$APP_NAMESPACE"); then
     echo::debug "App Crd Directory: $APP_CRDS_DIRECTORY"
     APP_RELEASE_CRDS_NAME="$APP_NAMESPACE-crds"
     CHART_APP_VERSION=$(yq '.appVersion' Chart.yaml)
     if ! kube::is_helm_chart_installed "$APP_RELEASE_CRDS_NAME" "$APP_NAMESPACE" "$CHART_APP_VERSION"; then
+
       command::echo_eval "helm upgrade --install -n $APP_NAMESPACE --create-namespace $APP_RELEASE_CRDS_NAME $APP_CRDS_DIRECTORY"
+
+      # Wait
+      echo::info "Waiting until all CRD are established in the namespace $APP_NAMESPACE"
+      kubectl wait \
+      	--for condition=Established \
+      	--all CustomResourceDefinition \
+      	--namespace="$APP_NAMESPACE"
+
     else
       echo::info "Chart $APP_RELEASE_CRDS_NAME already installed"
     fi
