@@ -2,6 +2,12 @@
 
 
 
+## Installation Graph
+
+* Secret (used everywhere)
+* Ingress
+* apps
+
 
 ## FAQ: Why not multiple sub-chart by umbrella chart?
 

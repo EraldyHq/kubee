@@ -18,6 +18,8 @@ cluster:
     email: ''
   # Authentication of internal infra ingress (ie internal website such as Traefik Dashboard, ...)
   auth: basicAuth
+  # Secret kind created
+  secret: 'Secret'
 
 
 # Templating variables
@@ -104,7 +106,15 @@ cert_manager:
   dns01:
     cloudflare:
       # See cert-manager/README.md on how to get cloudflare api key
-      cloudflareApiToken: ''
+      # A secret or external secret can be created
+      secret:
+        # A Kubernetes secret will be created if not empty
+        cloudflareApiToken: ''
+        # An external secret remote ref to the cloudflare api token will be created
+        # if the key not empty
+        externalSecretRemoteRef:
+          key: ''
+          property: ''
       # The dns Zones that are managed by cloudflare, mandatory
       dnsZones: []
 
@@ -113,4 +123,8 @@ whoami:
   # example: hostname: 'whoami.kube-x.dev'
   hostname: ''
 
-
+# External Secret conf
+external_secret:
+  secretStoreRef:
+    # kind should be ClusterSecretStore
+    name: ''
