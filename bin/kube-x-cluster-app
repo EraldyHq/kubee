@@ -137,6 +137,9 @@ install(){
   command::echo_eval "${HELM_INSTALL_COMMAND[*]}"
   popd
 
+  # Wait?
+  # kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator
+
 }
 
 

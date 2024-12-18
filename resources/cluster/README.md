@@ -12,3 +12,6 @@ ansible-galaxy install -r resources/ansible/requirements.yml
 ```
 
 
+## Customizing
+
+https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing
