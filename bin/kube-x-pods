@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
 
-# Works
-kube-x-kubectl get pod --all-namespaces  -o custom-columns='NAME:.metadata.name,NAMESPACE:.metadata.namespace'
+if [[ "${1:-}" =~ "synopsis"|"-h"|"--help" ]]; then
+  basename "$0"
+  echo "Return all pods on the cluster"
+  exit 0
+fi
+
+KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
+eval "$KUBECTX_ENV"
+
+# Do the work
+kubectl get pod --all-namespaces  -o custom-columns='NAME:.metadata.name,NAMESPACE:.metadata.namespace'

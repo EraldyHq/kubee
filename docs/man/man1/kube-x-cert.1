@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "kubectl-xcert" "1" "" "Version Latest" "Print kubernetes certificates in plain text"
+.TH "kube-x-cert" "1" "" "Version Latest" "Print kubernetes certificates in plain text"
 .hy
 .SS Overview
 .PP
@@ -23,20 +23,20 @@ Return the kubeconfig cert in plain text
 .IP
 .nf
 \f[C]
- Usage of kubectl-xcert
+ Usage of kube-x-cert
  Usage:
  
  Return kubernetes certs in plain text
  
  
-     kubectl-xcert command
+     kube-x-cert command
  
  where: command may be:
       * \[ga]config-client\[ga] : Print the client certificate chain found in the kubeconfig file
       * \[ga]config-cluster\[ga] : Print the cluster certificate authority in the kubeconfig file
       * \[ga]secret\[ga] : Print the client certificate in a secret
  
- For more info, see kubectl-xcert(1)
+ For more info, see kube-x-cert(1)
  
 \f[R]
 .fi
@@ -45,6 +45,6 @@ Return the kubeconfig cert in plain text
 .nf
 \f[C]
 export KUBECONFIG=\[ti]/.kube/config
-kubectl-xcert config-client
+kube-x-cert config-client
 \f[R]
 .fi

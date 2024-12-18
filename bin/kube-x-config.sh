@@ -1,5 +1,5 @@
 # @name kube-x-config.sh documentation
-# @brief Return a generated `KUBECONFIG` file from pass
+# @brief Return a `KUBECONFIG` file
 # @description
 #
 # If the `KUBECONFIG` env is not set, `kube-x` will generate it dynamically.

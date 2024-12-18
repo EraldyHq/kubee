@@ -18,39 +18,8 @@
 .hy
 .SH NAME
 .PP
-\f[V]kubectx\f[R] is a \f[V]kubectl\f[R] wrapper that gets the
-\f[V]kubeconfig\f[R] information from the \f[V]pass\f[R] secret manager.
-.SS ENV
-.IP \[bu] 2
-\f[V]KUBE_X_CLUSTER\f[R]: The cluster to connect (default to
-\f[V]default\f[R])
-.IP \[bu] 2
-\f[V]KUBE_X_USER\f[R]: The user to connect with (default to
-\f[V]default\f[R])
-.IP \[bu] 2
-\f[V]KUBE_X_PASS_HOME\f[R]: The directory where to store
-\f[V]kube-x\f[R] pass information (default to \f[V]kube-x\f[R])
-.SS How to create the secret in path
-.IP
-.nf
-\f[C]
-# Set the config where to extract the information
-export KUBECONFIG=\[dq]$HOME/.kube/config\[dq]
-# The pass home directory (default to kube-x)
-export KUBE_X_PASS_HOME=\[dq]kube-x\[dq]
-
-# Get the cluster and user name from the KUBECONFIG
-# or set your own  
-KUBE_X_CLUSTER=$(kubectl config view --minify --raw --output \[aq]jsonpath={$.clusters[0].name}\[aq])
-KUBE_X_USER=$(kubectl config view --minify --raw --output \[aq]jsonpath={$.users[0].name}\[aq])
-
-# Store the user and cluster properties in path
-kubectl config view --minify --raw --output \[aq]jsonpath={$.users[0].client-certificate-data}\[aq] | pass insert -m \[dq]$KUBE_X_PASS_HOME/users/$KUBE_X_USER/client-certificate-data\[dq]
-kubectl config view --minify --raw --output \[aq]jsonpath={$.users[0].client-key-data}\[aq] | pass insert -m \[dq]$KUBE_X_PASS_HOME/users/$KUBE_X_USER/client-key-data\[dq]
-kubectl config view --minify --raw --output \[aq]jsonpath={$.clusters[0].certificate-authority-data}\[aq] | pass insert -m \[dq]$KUBE_X_PASS_HOME/clusters/$KUBE_X_CLUSTER/certificate-authority-data\[dq]
-kubectl config view --minify --raw --output \[aq]jsonpath={$.clusters[0].server}\[aq] | pass insert -m \[dq]$KUBE_X_PASS_HOME/clusters/$KUBE_X_CLUSTER/server\[dq]
-\f[R]
-.fi
+\f[V]kubectx\f[R] is a \f[V]kubectl\f[R] wrapper that that runs with the
+kube-x kubeconfig env
 .SS Other kubectl replacement project
 .IP \[bu] 2
 fubectl: fuzzy kubectl (https://github.com/kubermatic/fubectl)

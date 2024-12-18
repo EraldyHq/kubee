@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Ref: https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/customizing.md#generating
+
+# This script uses arg $1 (name of *.jsonnet file to use) to generate the manifests/*.yaml files.
+
+set -e
+set -x
+# only exit with zero if all commands of the pipeline exit successfully
+set -o pipefail
+
+# @internal
+synopsis(){
+
+cat << EOT
+
+$(basename "$0") - Jsonnet Generate the k8s manifest from jsonnet files.
+
+Usage:
+\`\`\`bash
+$(basename "$0") file.jsonnet
+\`\`\`
+
+
+Global Options:
+
+* -h --help                       Show this help message
+
+
+EOT
+}
+
+# Assign the first argument to a string
+FILE="${1:-}"
+if [ "$FILE" = "" ]; then
+    synopsis
+    echo::err "A file is mandatory"
+    exit 1
+fi
+
+if [ "$FILE" = "synopsis" ]; then
+    synopsis
+    exit 0
+fi
+
+
+# Make sure to use project tooling
+PATH="$(pwd)/tmp/bin:${PATH}"
+
+# Make sure to start with a clean 'manifests' dir
+rm -rf manifests
+mkdir -p manifests/setup
+
+# Calling gojsontoyaml is optional, but we would like to generate yaml, not json
+jsonnet -J vendor -m manifests "${FILE}" | xargs -I{} sh -c 'cat {} | gojsontoyaml > {}.yaml' -- {}
+
+# Make sure to remove json files
+find manifests -type f ! -name '*.yaml' -delete
+rm -f kustomizations

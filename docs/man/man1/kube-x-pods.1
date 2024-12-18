@@ -16,26 +16,18 @@
 .\}
 .TH "" "" "" "" ""
 .hy
-.SH kube-app-logs
+.SH kube-pods
 .PP
-Return the log of pods of an app (workload)
+Returns the pods on all namespace
 .SS Overview
 .PP
-Return the log of pods of an app (workload)
-.PP
-See also stern (https://github.com/stern/stern) to tail multiple pods
-and container
+Return the CIDR of pods in the cluster
 .SS Help
 .PP
 Usage:
-.PP
-Return the logs of pods via an app name
 .IP
 .nf
 \f[C]
-kube-app-logs <app name>
+kube-cidr
 \f[R]
 .fi
-.PP
-where \f[V]app name\f[R] is used in the label
-\f[V]app.kubernetes.io/name=<app name>\f[R]
