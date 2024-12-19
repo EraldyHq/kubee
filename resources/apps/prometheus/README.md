@@ -2,12 +2,19 @@
 
 monitoring-mixins: https://github.com/monitoring-mixins/docs/blob/master/design.pdf
 
+```jsonnet
+local prometheusOperator = import 'github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator/prometheus-operator.libsonnet';
+# https://github.com/prometheus-operator/prometheus-operator/blob/main/jsonnet/prometheus-operator/prometheus-operator.libsonnet
+```
+
 ## Init
 https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/customizing.md
 
 ```bash
 jb init 
 jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
+# Install this file: 
+# https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/refs/heads/main/jsonnet/kube-prometheus/main.libsonnet
 ```
 ```
 GET https://github.com/prometheus-operator/kube-prometheus/archive/f41e7f3a7cd2bb8b53d5bcc293cffa9910995eca.tar.gz 200
