@@ -58,7 +58,7 @@ spec:
         https://cert-manager.io/docs/configuration/acme/#adding-multiple-solver-types
       */}}
       {{- end }}
-      {{- if ne $.Values.kube_x.cert_manager.dns01.cloudflare.cloudflareApiToken "" }}
+      {{- if ne $.Values.kube_x.cert_manager.dns01.cloudflare.secret.cloudflareApiToken "" }}
       - selector:
           {{- /*
           # The selector is a DNS Zone

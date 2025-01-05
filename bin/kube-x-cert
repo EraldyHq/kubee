@@ -63,7 +63,8 @@ function print_cert_secret(){
   SECRET_NAME=""
   SECRET_NAMESPACE=${KUBE_X_APP_NAMESPACE:-}
   # The get secret command
-  GET_SECRET_COMMAND=("kubectl" "get" "secret" "-o" "jsonpath='{.data.tls\.crt}'")
+  # no quote in jsonpath, not jsonpath='{.data.tls\.crt}' otherwise we get the quotes '' in the output
+  GET_SECRET_COMMAND=("kubectl" "get" "secret" "-o" "jsonpath={.data.tls\.crt}")
   args=$(getopt -l "namespace:" -o "n:" -- "$@")
   # eval set to set the positional arguments back to $args
   eval set -- "$args"
@@ -95,7 +96,9 @@ function print_cert_secret(){
   GET_SECRET_COMMAND+=("$SECRET_NAME")
 
   # <() is a https://en.wikipedia.org/wiki/Process_substitution to give a file (ie URI)
-  openssl storeutl -noout -text <("${GET_SECRET_COMMAND[@]}" | base64 -d)
+  local CERT
+  CERT=$("${GET_SECRET_COMMAND[@]}" | base64 -d)
+  openssl storeutl -noout -text <(echo "$CERT")
 
 }
 
@@ -119,6 +122,9 @@ if [ "$COMMAND" == "" ]; then
 fi
 shift
 
+# Get env
+KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
+eval "$KUBECTX_ENV"
 
 case "$COMMAND" in
   "config-client")
@@ -129,6 +135,8 @@ case "$COMMAND" in
     ;;
   "secret")
     print_cert_secret "$@" || error::exit $?
+    # see also
+    # kubectl describe certificate xxxx
     ;;
   *)
     doc::help synopsis

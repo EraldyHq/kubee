@@ -4,9 +4,9 @@ kube_x:
   cluster:
     # The admin user of the cluster
     adminUser:
-      username: "admin"
+      username: "nico"
       password: "${KUBE_X_CLUSTER_ADMIN_PASSWORD}"
-      email: "foo@bar.com"
+      email: "nico@eraldy.com"
   # Kube-x Prometheus
   prometheus:
     # Not a string, a boolean so no quote
@@ -14,10 +14,10 @@ kube_x:
   # Kube-X Dashboard Variables
   kubernetes_dashboard:
     # The external DNS
-    hostname: 'dash.kube-x.dev'
+    hostname: 'kube.i.eraldy.com'
   # Whoami
   whoami:
-    hostname: 'whoami.kube-x.dev'
+    hostname: 'whoami.eraldy.com'
   # Kube-X Traefik Variables
   traefik:
     defaultCertificate:
@@ -33,23 +33,38 @@ kube_x:
       key: ''
     dashboard:
       # The FQDN for the traefik dashboard
-      hostname: 'traefik.kube-x.dev'
+      hostname: 'traefik.i.eraldy.com'
+  cert_manager:
+    # Not enabled by default
+    # This is the kube-x template condition used to create certificate for ingress route
+    # when disabled, the default traefik certificate is used
+    enabled: true
+
+    # The issuer used in all certificate request of kube-x.
+    defaultIssuerName: 'letsencrypt-prod'
+
+    # Dns01 challenge
+    dns01:
+      cloudflare:
+        # See cert-manager/README.md on how to get cloudflare api key
+        # A secret or external secret can be created
+        secret:
+          # A Kubernetes secret will be created if not empty
+          cloudflareApiToken: '${KUBE_X_CERT_MANAGER_API_TOKEN}'
+        # The dns Zones that are managed by cloudflare, mandatory
+        dnsZones:
+          - tabulify.com
+          - eraldy.com
+          - datacadamia.com
+          - combostrap.com
+          - gerardnico.com
+          - bytle.net
 
 # Traefik Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
 traefik:
-  # Traefik experimental features
-  experimental:
-    # Equivalent to the cli flag (passed in additionalArguments)
-    # - `--experimental.plugins.sablier.modulename=github.com/acouvreur/sablier'
-    # - `--experimental.plugins.sablier.version=v1.7.0'
-    plugins:
-      sablier:
-        moduleName: github.com/acouvreur/sablier
-        version: v1.7.0
-
   additionalArguments:
     # Debug
-    - '--log.level=DEBUG'
+    # - '--log.level=DEBUG'
     # Logs just add too much noise on what is going on
-    - '--accesslog=true'
+    # - '--accesslog=false'

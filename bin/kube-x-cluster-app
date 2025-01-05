@@ -22,13 +22,13 @@ generate_and_get_helm_values_path(){
   export KUBE_X_CLUSTER_ADMIN_USERNAME="${KUBE_X_CLUSTER_ADMIN_USERNAME:-admin}"
   export KUBE_X_CLUSTER_ADMIN_PASSWORD="${KUBE_X_CLUSTER_ADMIN_PASSWORD:-$(openssl rand -base64 10)}"
 
-  if [ "${KUBE_X_CLUSTER_NAME:-}" == "" ]; then
-    echo::err "The cluster name is mandatory"
-    return 1
-  fi
-  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
   local KUBE_X_CLUSTER_DIR;
-  KUBE_X_CLUSTER_DIR="${SCRIPT_DIR}/../resources/cluster/$KUBE_X_CLUSTER_NAME"
+  if [ "${KUBE_X_CLUSTER_NAME:-}" != "" ]; then
+    SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+    KUBE_X_CLUSTER_DIR="${SCRIPT_DIR}/../resources/cluster/$KUBE_X_CLUSTER_NAME"
+  else
+    KUBE_X_CLUSTER_DIR=$PWD
+  fi
 
   # Template
   local KUBE_X_HELM_VALUES="${KUBE_X_CLUSTER_DIR}/helm-values.yaml"
@@ -54,7 +54,11 @@ generate_and_get_helm_values_path(){
 install(){
 
   SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  KUBE_X_CLUSTER_DIR="${SCRIPT_DIR}/../resources/cluster/$KUBE_X_CLUSTER_NAME"
+  if [ "${KUBE_X_CLUSTER_NAME:-}" != "" ]; then
+    KUBE_X_CLUSTER_DIR="${SCRIPT_DIR}/../resources/cluster/$KUBE_X_CLUSTER_NAME"
+  else
+    KUBE_X_CLUSTER_DIR=$PWD
+  fi
   # Envrc
   local KUBE_X_ENV_FILE="${KUBE_X_CLUSTER_ENV_FILE:-"$KUBE_X_CLUSTER_DIR/.envrc"}"
   if [ -f "$KUBE_X_ENV_FILE" ]; then
@@ -125,6 +129,9 @@ install(){
     HELM_INSTALL_COMMAND+=("${KUBE_X_HELM_INSTALL_OPTIONS[@]}")
   fi
 
+  # Get env (KubeConfig)
+  KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
+  eval "$KUBECTX_ENV"
 
   # --dependency-update flag to avoid the `helm dependency build` error:
   # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
