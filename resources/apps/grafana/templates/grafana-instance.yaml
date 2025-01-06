@@ -1,0 +1,52 @@
+{{/*
+  Grafana Instance
+
+  Test:
+  helm template -s templates/grafana-instance.yaml \
+    --set 'kube_x.grafana.type=cloud'  \
+    --set 'kube_x.grafana.cloud.apiToken=xxxx'  \
+    --set 'kube_x.grafana.cloud.stackName=xxxx'  \
+    . | yq
+
+*/}}
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+{{/*
+Create a cloud instance
+https://grafana.com/docs/grafana-cloud/developer-resources/infrastructure-as-code/grafana-operator/manage-dashboards-argocd/
+*/}}
+{{- if eq ( ((.Values.kube_x).grafana).type) "cloud" -}}
+metadata:
+  name: {{ .Values.kube_x.grafana.cloud.stackName }}
+  namespace: '{{.Release.Namespace}}'
+  labels:
+    dashboards: {{ required "kube_x.grafana.cloud.stackName is required" .Values.kube_x.grafana.cloud.stackName }}
+spec:
+  external:
+    url: https://{{ .Values.kube_x.grafana.cloud.stackName }}.grafana.net/
+    apiKey:
+      name: '{{ template "grafana-cloud-secret-name" . }}'
+      key: '{{ template "grafana-cloud-secret-key" . }}'
+{{- else -}}
+{{/*
+  Create a cluster local instance
+  https://grafana.github.io/grafana-operator/docs/quick-start/#creating-a-grafana-instance
+
+  Test:
+  helm template -s templates/grafana-instance.yaml \
+    --set 'kube_x.grafana.type=local'  \
+    --set 'kube_x.cluster.adminUser.username=xxxx'  \
+    --set 'kube_x.cluster.adminUser.password=xxxx'  \
+    . | yq
+*/}}
+metadata:
+  namespace: '{{.Release.Namespace}}'
+  name: grafana
+  labels:
+    dashboards: "grafana"
+spec:
+  config:
+    security:
+      admin_user: {{ required "kube_x.cluster.adminUser.username is required for a local grafana instance" .Values.kube_x.cluster.adminUser.username }}
+      admin_password: {{ required "kube_x.cluster.adminUser.password is required for a local grafana instance" .Values.kube_x.cluster.adminUser.password }}
+{{- end -}}

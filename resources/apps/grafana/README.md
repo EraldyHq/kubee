@@ -2,7 +2,7 @@
 
 ## About
 
-[Grafana Operator](https://grafana.com/docs/grafana-cloud/developer-resources/infrastructure-as-code/grafana-operator/) is a Kubernetes operator built to help you manage your Grafana instances and its resources from within Kubernetes. 
+`Grafana Operator` is a Kubernetes operator built to help you manage your Grafana instances and its resources from within Kubernetes. 
 
 The Operator can install and manage:
 * local Grafana instances, 
@@ -12,7 +12,10 @@ through Kubernetes/OpenShift Custom resources.
 
 The Grafana Operator automatically syncs the Kubernetes Custom resources and the actual resources in the Grafana Instance.
 
+## Doc
 
+* [Grafana Operator Documentation](https://grafana.github.io/grafana-operator/)
+* [Grafana Cloud Usage Documentation](https://grafana.com/docs/grafana-cloud/developer-resources/infrastructure-as-code/grafana-operator/)
 
 ## Install
 

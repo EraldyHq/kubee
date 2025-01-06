@@ -128,3 +128,19 @@ external_secret:
   secretStoreRef:
     # kind should be ClusterSecretStore
     name: ''
+
+# Grafana Operator
+grafana:
+  # The type of instance: local or cloud
+  # * local: installation in the cluster
+  # * cloud: grafana cloud instance
+  type: local
+  # The hostname
+  # A non-empty Hostname for a local instance will create an ingress
+  # The hostname may be used in Prometheus alert to reference dashboard
+  # For a Grafana cloud instance, you need to enter: <Grafana-cloud-stack-name>.grafana.net
+  hostname: ''
+  # Grafana Cloud
+  cloud:
+    stackName: ''
+    apiToken: ''
