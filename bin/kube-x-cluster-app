@@ -90,6 +90,11 @@ apply(){
   # Example with Prometheus: https://github.com/prometheus-operator/kube-prometheus#quickstart
   # They create the namespace and CustomResourceDefinitions first
   # to avoid race conditions when deploying the components.
+  #
+  # We could also do
+  #```bash
+  # kubectl apply --server-side --force-conflicts -f https://github.com/grafana/grafana-operator/releases/download/v5.15.1/crds.yaml
+  #```
   if APP_CRDS_DIRECTORY=$(kube::get_app_crds_directory "$APP_NAMESPACE"); then
     echo::debug "App Crd Directory: $APP_CRDS_DIRECTORY"
     APP_RELEASE_CRDS_NAME="$APP_NAMESPACE-crds"

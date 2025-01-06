@@ -1,0 +1,9 @@
+dependencies:
+- name: grafana-operator
+  repository: oci://ghcr.io/grafana/helm-charts
+  version: v5.15.1
+- name: kube-x
+  repository: file://../kube-x
+  version: 0.0.1
+digest: sha256:19d0ebd899a1d0428e4ffda17631f014bb6f36008ce90a42640e35c8f5f05738
+generated: "2025-01-06T19:50:05.267670464+01:00"
