@@ -58,6 +58,12 @@ apply(){
     echo::err "Internal error: A mode is mandatory (install or template)"
   fi
 
+  APP_NAME="${2:-}"
+  if [ "$APP_NAME" == "" ]; then
+    echo::err "An app name is mandatory as argument"
+    return 1
+  fi
+
   SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
   if [ "${KUBE_X_CLUSTER_NAME:-}" != "" ]; then
     KUBE_X_CLUSTER_DIR="${SCRIPT_DIR}/../resources/cluster/$KUBE_X_CLUSTER_NAME"
@@ -72,11 +78,7 @@ apply(){
      source "$KUBE_X_ENV_FILE"
   fi
 
-  APP_NAME="${1:-}"
-  if [ "$APP_NAME" == "" ]; then
-    echo::err "An app name is mandatory as argument"
-    return 1
-  fi
+
 
   read -r APP_NAMESPACE APP_NAME <<< "$(kube::get_qualified_app_name "$APP_NAME")"
   echo "$APP_NAMESPACE $APP_NAME"
@@ -152,17 +154,23 @@ apply(){
   eval "$KUBECTX_ENV"
 
   # Post renderer
-  HELM_INSTALL_COMMAND+=("--post-renderer" "kube-x-helm-post-renderer")
+  HELM_INSTALL_COMMAND+=(
+    "--post-renderer" "kube-x-helm-post-renderer"
+    "--post-renderer-args" "$APP_DIRECTORY"
+    )
 
   # --dependency-update flag to avoid the `helm dependency build` error:
   # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
   # See https://github.com/helm/helm/issues/7214
   # values.yaml file is taken by default
   HELM_INSTALL_COMMAND+=("$APP_RELEASE_NAME" "$APP_DIRECTORY")
-  # To be able to set path relative to the cluster dir
+
+  # Working directory is the cluster directory
+  # Why? To be able to set relative path to the cluster object such as certificate
   # example: "--set-file kube_x.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem"
   pushd "$KUBE_X_CLUSTER_DIR"
   command::echo_eval "${HELM_INSTALL_COMMAND[*]}"
+  echo::info "${HELM_INSTALL_COMMAND[*]}"
   popd
 
   # Wait?
@@ -176,13 +184,13 @@ synopsis(){
 
   cat << 'EOF'
 ```bash
-kube-x-cluster-app command options
+kube-x-cluster-app [-c|--cluster clusterName] command options
 ```
 
 where `command` can be:
 
 * 'install'  - Install an app
-* 'template' - Output the template
+* 'template' - Output the manifest for an app
 * 'values'  - Shows the values
 
 
@@ -190,6 +198,28 @@ EOF
 
 }
 
+##########################
+## Collect the options
+##########################
+args=$(getopt -l "cluster:" -o "c:" -- "$@")
+# eval set to set the positional arguments back to $args
+eval set -- "$args"
+KUBE_X_CLUSTER_NAME=${KUBE_X_CLUSTER_NAME:-}
+while [[ $# -gt 0 ]]
+do
+   case "$1" in
+      "--cluster"|"-c")
+        shift
+        KUBE_X_CLUSTER_NAME=${1}
+        shift
+      ;;
+      "--")
+        shift
+        break;
+        # from now on, $@ contains only the arguments
+        ;;
+   esac
+done
 
 # Assign the first argument to a string
 COMMAND=${1:-}

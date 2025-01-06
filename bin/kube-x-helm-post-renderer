@@ -1,20 +1,62 @@
 #!/bin/bash
 # A post renderer to integrate kustomize and jsonnet
+set -TCEeuo pipefail
+# shellcheck source=../..//bash-lib/lib/bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+error::set_trap
+# shellcheck source=../../bash-lib/lib/bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 
-cat <&0
-exit 0
+APP_DIRECTORY="$1"
 
-# Example:
-# https://github.com/thomastaylor312/advanced-helm-demos/tree/master/post-render
-KUSTOMIZATION_FILE='kustomization.yaml'
-if [ -f "$KUSTOMIZATION_FILE" ]; then
-  cat <&0 > all.yaml
-  # kustomize should be installed in the PATH
-  # a kustomization.yaml file with the resource `all.yaml`
-  kustomize build . && rm all.yaml
+if [[ "$APP_DIRECTORY" =~ "synopsis"|"help" ]]; then
+  echo "A post renderer to integrate kustomize and jsonnet"
+  echo ""
+  echo "$(basename "$0") appDirectory"
+  echo ""
+  echo "where:"
+  echo "  appDirectory: is the directory of the app to install"
+  echo ""
+  echo "Note: the Helm templates are passed in stdin"
+  echo "See https://helm.sh/docs/topics/advanced/#post-rendering"
+  exit 0
 fi
 
-# JsonNet
-cat <&0
-echo '---'
-jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/prometheusRule.jsonnet"))'
+if [ ! -d "$APP_DIRECTORY" ]; then
+  echo::err "Internal Error: the first argument app directory ($APP_DIRECTORY) is not a valid directory"
+  exit 1
+fi
+
+# Grab the manifests passed by Helm
+HELM_MANIFEST=$(cat)
+
+# Add JsonNet template if any
+PROMETHEUS_RULE_FILE="jsonnet/prometheusRule.jsonnet"
+PROMETHEUS_RULE_FILE_QUALIFIED="$APP_DIRECTORY/$PROMETHEUS_RULE_FILE"
+if [ -f "$PROMETHEUS_RULE_FILE_QUALIFIED" ]; then
+  MIXIN_MANIFEST=$(
+    pushd "$APP_DIRECTORY" > /dev/null
+    jsonnet -J vendor -S -e "std.manifestYamlDoc((import \"$PROMETHEUS_RULE_FILE\"))"
+    popd > /dev/null
+  )
+  HELM_MANIFEST="$HELM_MANIFEST"$'\n'"---"$'\n'"$MIXIN_MANIFEST"
+fi
+
+# Kustomize
+# Example:
+# https://github.com/thomastaylor312/advanced-helm-demos/tree/master/post-render
+KUSTOMIZATION_FILE="kustomization.yaml"
+if [ -f "$KUSTOMIZATION_FILE" ]; then
+  pushd "$APP_DIRECTORY" > /dev/null
+  echo "$HELM_MANIFEST" > all.yaml
+  # kustomize should be installed in the PATH
+  # a kustomization.yaml file should be present that adds the resource `all.yaml`
+  kustomize build . && rm all.yaml
+  popd > /dev/null
+  exit 0
+fi
+
+# No Kustomize, output the manifest without kustomization
+echo "$HELM_MANIFEST"

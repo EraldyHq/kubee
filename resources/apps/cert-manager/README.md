@@ -189,9 +189,20 @@ kube-x-helm upgrade --install --create-namespace cert-manager .
 ```
 
 
-### JsonNet
+### JsonNet Prometheus Mixin
 
+Local:
 ```bash
+cd cert-manager
 jb update
 jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/prometheusRule.jsonnet"))'
+```
+
+End-to-end Test:
+```bash
+kube-x-cluster-app \
+  --cluster kube-x-ssh \ 
+  template \
+  cert-manager \
+  | grep "cert-manager-mixin-alert-rules" -B 3 -A 30
 ```

@@ -98,7 +98,7 @@ if [ "${1:-}" == "synopsis" ]; then
   exit
 fi
 
-args=$(getopt -l "--url:help" -o "u:h" -- "$@")
+args=$(getopt -l "url:help" -o "u:h" -- "$@")
 # eval set to set the positional arguments back to $args
 eval set -- "$args"
 
