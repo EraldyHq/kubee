@@ -187,3 +187,11 @@ helm upgrade --install -n $KUBE_X_APP_NAMESPACE --create-namespace cert-manager 
 # with kube-x
 kube-x-helm upgrade --install --create-namespace cert-manager .
 ```
+
+
+### JsonNet
+
+```bash
+jb update
+jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/prometheusRule.jsonnet"))'
+```

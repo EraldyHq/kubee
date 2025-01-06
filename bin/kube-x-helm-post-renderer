@@ -1,0 +1,20 @@
+#!/bin/bash
+# A post renderer to integrate kustomize and jsonnet
+
+cat <&0
+exit 0
+
+# Example:
+# https://github.com/thomastaylor312/advanced-helm-demos/tree/master/post-render
+KUSTOMIZATION_FILE='kustomization.yaml'
+if [ -f "$KUSTOMIZATION_FILE" ]; then
+  cat <&0 > all.yaml
+  # kustomize should be installed in the PATH
+  # a kustomization.yaml file with the resource `all.yaml`
+  kustomize build . && rm all.yaml
+fi
+
+# JsonNet
+cat <&0
+echo '---'
+jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/prometheusRule.jsonnet"))'

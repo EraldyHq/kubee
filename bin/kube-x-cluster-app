@@ -51,7 +51,12 @@ generate_and_get_helm_values_path(){
 
 }
 
-install(){
+apply(){
+
+  MODE=${1:-}
+  if [ "$MODE" == "" ]; then
+    echo::err "Internal error: A mode is mandatory (install or template)"
+  fi
 
   SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
   if [ "${KUBE_X_CLUSTER_NAME:-}" != "" ]; then
@@ -109,15 +114,28 @@ install(){
 
   APP_RELEASE_NAME="$APP_NAMESPACE"
 
-  local HELM_INSTALL_COMMAND=()
+  local HELM_INSTALL_COMMAND=("helm")
+
+  case "$MODE" in
+      "install")
+        HELM_INSTALL_COMMAND+=( "upgrade" "--install" )
+        ;;
+      "template")
+        HELM_INSTALL_COMMAND+=( "template" )
+        ;;
+      *)
+        echo::err "The mode $MODE is unknown"
+        return 1
+        ;;
+  esac
+
+
   HELM_INSTALL_COMMAND+=(
-    "helm"
-    "upgrade"
-    "--install"
     "-n" "$APP_NAMESPACE"
     "--create-namespace"
     "--dependency-update"
     )
+
   # The kube-x values
   if ! KUBE_X_VALUES_PATH=$(generate_and_get_helm_values_path); then
     echo::err "Error while trying to get the kube-x-helm values"
@@ -132,6 +150,9 @@ install(){
   # Get env (KubeConfig)
   KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
   eval "$KUBECTX_ENV"
+
+  # Post renderer
+  HELM_INSTALL_COMMAND+=("--post-renderer" "kube-x-helm-post-renderer")
 
   # --dependency-update flag to avoid the `helm dependency build` error:
   # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
@@ -160,7 +181,8 @@ kube-x-cluster-app command options
 
 where `command` can be:
 
-* 'install' - Install an app
+* 'install'  - Install an app
+* 'template' - Output the template
 * 'values'  - Shows the values
 
 
@@ -185,7 +207,10 @@ shift  # Remove the first argument from the argument list
 
 case "$COMMAND" in
   "install")
-     install "$@" || error::exit $?
+     apply "$COMMAND" "$@" || error::exit $?
+    ;;
+  "template")
+     apply "$COMMAND" "$@" || error::exit $?
     ;;
   "synopsis")
     synopsis
