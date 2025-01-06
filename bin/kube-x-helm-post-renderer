@@ -36,12 +36,20 @@ HELM_MANIFEST=$(cat)
 PROMETHEUS_RULE_FILE="jsonnet/prometheusRule.jsonnet"
 PROMETHEUS_RULE_FILE_QUALIFIED="$APP_DIRECTORY/$PROMETHEUS_RULE_FILE"
 if [ -f "$PROMETHEUS_RULE_FILE_QUALIFIED" ]; then
+
+  # Update the dependencies (vendor directory)
+  jb update
+
+  # Run
   MIXIN_MANIFEST=$(
     pushd "$APP_DIRECTORY" > /dev/null
     jsonnet -J vendor -S -e "std.manifestYamlDoc((import \"$PROMETHEUS_RULE_FILE\"))"
     popd > /dev/null
   )
+
+  # Add the jsonnet manifest
   HELM_MANIFEST="$HELM_MANIFEST"$'\n'"---"$'\n'"$MIXIN_MANIFEST"
+
 fi
 
 # Kustomize

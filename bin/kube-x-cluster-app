@@ -55,12 +55,13 @@ apply(){
 
   MODE=${1:-}
   if [ "$MODE" == "" ]; then
-    echo::err "Internal error: A mode is mandatory (install or template)"
+    echo::err "Internal error: A mode is mandatory as first argument (install or template)"
+    return 1
   fi
 
   APP_NAME="${2:-}"
   if [ "$APP_NAME" == "" ]; then
-    echo::err "An app name is mandatory as argument"
+    echo::err "An app name is mandatory as second argument"
     return 1
   fi
 
@@ -70,6 +71,7 @@ apply(){
   else
     KUBE_X_CLUSTER_DIR=$PWD
   fi
+
   # Envrc
   local KUBE_X_ENV_FILE="${KUBE_X_CLUSTER_ENV_FILE:-"$KUBE_X_CLUSTER_DIR/.envrc"}"
   if [ -f "$KUBE_X_ENV_FILE" ]; then
@@ -189,8 +191,8 @@ kube-x-cluster-app [-c|--cluster clusterName] command options
 
 where `command` can be:
 
-* 'install'  - Install an app
-* 'template' - Output the manifest for an app
+* 'install'  - Install an app managed by helm (with optional Jsonnet Manifests and kustomization)
+* 'template' - Output the manifests for an app (used for ArgoCd Integration and debugging)
 * 'values'  - Shows the values
 
 
