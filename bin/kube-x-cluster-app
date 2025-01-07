@@ -16,20 +16,6 @@ source "kube-x-lib.sh"
 
 generate_and_get_values_path(){
 
-  # Default
-  # export is mandatory to go in a subshell
-  export KUBE_X_CLUSTER_PROMETHEUS_ENABLED="${KUBE_X_CLUSTER_PROMETHEUS_ENABLED:-false}"
-  export KUBE_X_CLUSTER_ADMIN_USERNAME="${KUBE_X_CLUSTER_ADMIN_USERNAME:-admin}"
-  export KUBE_X_CLUSTER_ADMIN_PASSWORD="${KUBE_X_CLUSTER_ADMIN_PASSWORD:-$(openssl rand -base64 10)}"
-
-  local KUBE_X_CLUSTER_DIR;
-  if [ "${KUBE_X_CLUSTER_NAME:-}" != "" ]; then
-    SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-    KUBE_X_CLUSTER_DIR="${SCRIPT_DIR}/../resources/cluster/$KUBE_X_CLUSTER_NAME"
-  else
-    KUBE_X_CLUSTER_DIR=$PWD
-  fi
-
   # Template
   local KUBE_X_HELM_VALUES;
   KUBE_X_HELM_VALUES=$(realpath "${KUBE_X_CLUSTER_DIR}/values.yaml")
@@ -66,23 +52,6 @@ apply(){
     return 1
   fi
 
-  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  if [ "${KUBE_X_CLUSTER_NAME:-}" != "" ]; then
-    KUBE_X_CLUSTER_DIR="${SCRIPT_DIR}/../resources/cluster/$KUBE_X_CLUSTER_NAME"
-  else
-    KUBE_X_CLUSTER_DIR=$PWD
-  fi
-
-  # Envrc
-  local KUBE_X_ENV_FILE="${KUBE_X_CLUSTER_ENV_FILE:-"$KUBE_X_CLUSTER_DIR/.envrc"}"
-  if [ -f "$KUBE_X_ENV_FILE" ]; then
-     echo::debug "Sourcing env file $KUBE_X_ENV_FILE"
-     # shellcheck disable=SC1090
-     if ! source "$KUBE_X_ENV_FILE"; then
-       echo::err "Error while importing the envrc file $KUBE_X_ENV_FILE"
-       return 1
-     fi
-  fi
 
   read -r APP_NAMESPACE APP_NAME <<< "$(kube::get_qualified_app_name "$APP_NAME")"
   echo "$APP_NAMESPACE $APP_NAME"
@@ -230,6 +199,26 @@ do
    esac
 done
 
+# Cluster Directory
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  if [ "${KUBE_X_CLUSTER_NAME:-}" != "" ]; then
+    KUBE_X_CLUSTER_DIR="${SCRIPT_DIR}/../resources/cluster/$KUBE_X_CLUSTER_NAME"
+  else
+    KUBE_X_CLUSTER_DIR=$PWD
+  fi
+
+# Envrc
+# Used in all function
+KUBE_X_ENV_FILE="${KUBE_X_CLUSTER_ENV_FILE:-"$KUBE_X_CLUSTER_DIR/.envrc"}"
+if [ -f "$KUBE_X_ENV_FILE" ]; then
+   echo::debug "Sourcing env file $KUBE_X_ENV_FILE"
+   # shellcheck disable=SC1090
+   if ! source "$KUBE_X_ENV_FILE"; then
+     echo::err "Error while importing the envrc file $KUBE_X_ENV_FILE"
+     return 1
+   fi
+fi
+
 # Assign the first argument to a string
 COMMAND=${1:-}
 if [ "$COMMAND" = "" ]; then
@@ -255,7 +244,7 @@ case "$COMMAND" in
     synopsis
     ;;
   "values")
-    cat "$(generate_and_get_values_path)"
+    yq "$(generate_and_get_values_path)"
     ;;
   *)
     doc::help synopsis

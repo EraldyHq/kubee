@@ -2,6 +2,21 @@
 
 monitoring-mixins: https://github.com/monitoring-mixins/docs/blob/master/design.pdf
 
+## Installation
+
+https://github.com/prometheus-operator/kube-prometheus
+
+### Helm
+
+https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/README.md
+
+By default, this chart installs additional, dependent charts:
+* prometheus-community/kube-state-metrics
+* prometheus-community/prometheus-node-exporter
+* grafana/grafana
+
+### Jsonnet
+
 ```jsonnet
 local prometheusOperator = import 'github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator/prometheus-operator.libsonnet';
 # https://github.com/prometheus-operator/prometheus-operator/blob/main/jsonnet/prometheus-operator/prometheus-operator.libsonnet
