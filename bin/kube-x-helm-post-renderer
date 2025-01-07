@@ -9,12 +9,12 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 
-APP_DIRECTORY="$1"
+APP_DIRECTORY="${1:-}"
 
 if [[ "$APP_DIRECTORY" =~ "synopsis"|"help" ]]; then
   echo "A post renderer to integrate kustomize and jsonnet"
   echo ""
-  echo "$(basename "$0") appDirectory"
+  echo "$(basename "$0") appDirectory clusterDirectory"
   echo ""
   echo "where:"
   echo "  appDirectory: is the directory of the app to install"
@@ -29,6 +29,13 @@ if [ ! -d "$APP_DIRECTORY" ]; then
   exit 1
 fi
 
+CLUSTER_DIRECTORY=$PWD
+VALUES_PATH="$CLUSTER_DIRECTORY/values.yaml"
+if [ ! -f "$VALUES_PATH" ]; then
+  echo::err "The values file ($VALUES_PATH) does not exist"
+  exit 1
+fi
+
 # Grab the manifests passed by Helm
 HELM_MANIFEST=$(cat)
 
@@ -37,18 +44,30 @@ PROMETHEUS_RULE_FILE="jsonnet/prometheusRule.jsonnet"
 PROMETHEUS_RULE_FILE_QUALIFIED="$APP_DIRECTORY/$PROMETHEUS_RULE_FILE"
 if [ -f "$PROMETHEUS_RULE_FILE_QUALIFIED" ]; then
 
-  # Update the dependencies (vendor directory)
-  jb update
-
   # Run
   MIXIN_MANIFEST=$(
     pushd "$APP_DIRECTORY" > /dev/null
-    jsonnet -J vendor -S -e "std.manifestYamlDoc((import \"$PROMETHEUS_RULE_FILE\"))"
+    # Update the dependencies (vendor directory)
+    JPATH="vendor"
+    if [ ! -d "$APP_DIRECTORY/$JPATH" ]; then
+      jb update
+    fi
+    # --string: string as output
+    jsonnet \
+      --jpath "$JPATH" \
+      --string \
+      --ext-code "values=std.parseYaml(importstr \"$VALUES_PATH\")" \
+      --exec "std.manifestYamlDoc((import \"$PROMETHEUS_RULE_FILE\"))"
     popd > /dev/null
   )
 
   # Add the jsonnet manifest
-  HELM_MANIFEST="$HELM_MANIFEST"$'\n'"---"$'\n'"$MIXIN_MANIFEST"
+  HELM_MANIFEST=$(cat <<EOF
+$HELM_MANIFEST
+---
+$MIXIN_MANIFEST
+EOF
+)
 
 fi
 

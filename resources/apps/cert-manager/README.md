@@ -201,7 +201,7 @@ jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/prometheusRule.jso
 End-to-end Test:
 ```bash
 kube-x-cluster-app \
-  --cluster kube-x-ssh \ 
+  --cluster kube-x-ssh \
   template \
   cert-manager \
   | grep "cert-manager-mixin-alert-rules" -B 3 -A 30

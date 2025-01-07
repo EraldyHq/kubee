@@ -59,6 +59,13 @@ kube_x:
           - combostrap.com
           - gerardnico.com
           - bytle.net
+  grafana:
+    instance:
+      target: cloud
+      hostname: bytle.grafana.net
+      cloud:
+        stackName: bytle
+        apiToken: '${KUBE_X_GRAFANA_CLOUD_API_TOKEN}'
 
 # Traefik Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml

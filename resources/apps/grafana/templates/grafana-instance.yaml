@@ -1,11 +1,11 @@
 {{/*
-  Grafana Instance
+  Grafana Instance (Cloud or Cluster)
 
   Test:
   helm template -s templates/grafana-instance.yaml \
-    --set 'kube_x.grafana.type=cloud'  \
-    --set 'kube_x.grafana.cloud.apiToken=xxxx'  \
-    --set 'kube_x.grafana.cloud.stackName=xxxx'  \
+    --set 'kube_x.grafana.instance.target=cloud'  \
+    --set 'kube_x.grafana.instance.cloud.apiToken=xxxx'  \
+    --set 'kube_x.grafana.instance.cloud.stackName=xxxx'  \
     . | yq
 
 */}}
@@ -15,30 +15,31 @@ kind: Grafana
 Create a cloud instance
 https://grafana.com/docs/grafana-cloud/developer-resources/infrastructure-as-code/grafana-operator/manage-dashboards-argocd/
 */}}
-{{- if eq ( ((.Values.kube_x).grafana).type) "cloud" -}}
+{{- if eq ( ((.Values.kube_x).grafana).instance.target) "cloud" -}}
 metadata:
-  name: {{ .Values.kube_x.grafana.cloud.stackName }}
+  name: {{ .Values.kube_x.grafana.instance.cloud.stackName }}
   namespace: '{{.Release.Namespace}}'
   labels:
-    dashboards: {{ required "kube_x.grafana.cloud.stackName is required" .Values.kube_x.grafana.cloud.stackName }}
+    dashboards: {{ required "kube_x.grafana.cloud.stackName is required" .Values.kube_x.grafana.instance.cloud.stackName }}
 spec:
   external:
-    url: https://{{ .Values.kube_x.grafana.cloud.stackName }}.grafana.net/
+    url: https://{{ .Values.kube_x.grafana.instance.cloud.stackName }}.grafana.net/
     apiKey:
       name: '{{ template "grafana-cloud-secret-name" . }}'
       key: '{{ template "grafana-cloud-secret-key" . }}'
-{{- else -}}
+{{- end -}}
 {{/*
   Create a cluster local instance
   https://grafana.github.io/grafana-operator/docs/quick-start/#creating-a-grafana-instance
 
   Test:
   helm template -s templates/grafana-instance.yaml \
-    --set 'kube_x.grafana.type=local'  \
+    --set 'kube_x.grafana.instance.target=cluster'  \
     --set 'kube_x.cluster.adminUser.username=xxxx'  \
     --set 'kube_x.cluster.adminUser.password=xxxx'  \
     . | yq
 */}}
+{{- if eq ( ((.Values.kube_x).grafana).instance.target) "cluster" -}}
 metadata:
   namespace: '{{.Release.Namespace}}'
   name: grafana

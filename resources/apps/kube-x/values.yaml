@@ -131,16 +131,19 @@ external_secret:
 
 # Grafana Operator
 grafana:
-  # The type of instance: local or cloud
-  # * local: installation in the cluster
-  # * cloud: grafana cloud instance
-  type: local
-  # The hostname
-  # A non-empty Hostname for a local instance will create an ingress
-  # The hostname may be used in Prometheus alert to reference dashboard
-  # For a Grafana cloud instance, you need to enter: <Grafana-cloud-stack-name>.grafana.net
-  hostname: ''
-  # Grafana Cloud
-  cloud:
-    stackName: ''
-    apiToken: ''
+  # Properties of the grafana instance
+  instance:
+    # The type of instance
+    # * cluster: installation in the cluster
+    # * cloud: grafana cloud instance
+    # An empty target does not install any instance
+    target: ''
+    # The hostname
+    # A non-empty Hostname for a cluster instance will create an ingress
+    # The hostname may be used in Prometheus alert to reference dashboard
+    # For a Grafana cloud instance, you need to enter: <Grafana-cloud-stack-name>.grafana.net
+    hostname: ''
+    # Grafana Cloud Instance property
+    cloud:
+      stackName: ''
+      apiToken: ''
