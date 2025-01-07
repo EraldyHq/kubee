@@ -196,6 +196,7 @@ Local:
 cd cert-manager
 jb update
 jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/prometheusRule.jsonnet"))'
+jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/grafanaDashboard.jsonnet"))'
 ```
 
 End-to-end Test:

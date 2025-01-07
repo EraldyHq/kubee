@@ -143,7 +143,12 @@ grafana:
     # The hostname may be used in Prometheus alert to reference dashboard
     # For a Grafana cloud instance, you need to enter: <Grafana-cloud-stack-name>.grafana.net
     hostname: ''
+    # The label
+    # It's used :
+    # * as selector to apply CRD objects such as Dashboard, .... to this instance. https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
+    # * as the instance name
+    # Note: for grafana Cloud (target: cloud), this is the stack name
+    label: 'grafana'
     # Grafana Cloud Instance property
     cloud:
-      stackName: ''
       apiToken: ''

@@ -8,6 +8,11 @@ error::set_trap
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-bash.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-command.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
+
 
 APP_DIRECTORY="${1:-}"
 
@@ -29,59 +34,81 @@ if [ ! -d "$APP_DIRECTORY" ]; then
   exit 1
 fi
 
+# Values files
 CLUSTER_DIRECTORY=$PWD
-VALUES_PATH="$CLUSTER_DIRECTORY/values.yaml"
-if [ ! -f "$VALUES_PATH" ]; then
-  echo::err "The values file ($VALUES_PATH) does not exist"
-  exit 1
-fi
+
+# The whole script run in the app directory
+pushd "$APP_DIRECTORY" > /dev/null
+bash::trap 'popd >/dev/null' EXIT # EXIT execute also on error
 
 # Grab the manifests passed by Helm
 HELM_MANIFEST=$(cat)
 
-# Add JsonNet template if any
-PROMETHEUS_RULE_FILE="jsonnet/prometheusRule.jsonnet"
-PROMETHEUS_RULE_FILE_QUALIFIED="$APP_DIRECTORY/$PROMETHEUS_RULE_FILE"
-if [ -f "$PROMETHEUS_RULE_FILE_QUALIFIED" ]; then
+##################
+# JsonNet
+##################
+# Processing any JsonNet template if any
+
+# Update the dependencies (vendor directory)
+JPATH="vendor"
+if [ ! -d "$JPATH" ]; then
+  jb update
+fi
+
+# Determine the values
+CLUSTER_VALUES_PATH="$CLUSTER_DIRECTORY/values.yaml"
+if [ ! -f "$CLUSTER_VALUES_PATH" ]; then
+  echo::err "The values file ($CLUSTER_VALUES_PATH) does not exist"
+  exit 1
+fi
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+DEFAULT_VALUES_PATH=$(realpath "$SCRIPT_DIR/../resources/apps/kube-x/values.yaml")
+if [ ! -f "$DEFAULT_VALUES_PATH" ]; then
+  echo::err "Internal Error: The default values file ($DEFAULT_VALUES_PATH) was not found"
+  exit 1
+fi
+# Before merge, values should be below the kube_x property
+DEFAULT_VALUES_PATH_KUBE_X_PROPERTY="/dev/shm/kube-x-helm-post-renderer-default-values.yml"
+yq e ".kube_x = load(\"$DEFAULT_VALUES_PATH\")" >| $DEFAULT_VALUES_PATH_KUBE_X_PROPERTY
+
+FINAL_VALUES_PATH="/dev/shm/kube-x-helm-post-renderer-values.yml"
+# shellcheck disable=SC2016
+yq eval-all '. as $item ireduce ({}; . * $item )' "$DEFAULT_VALUES_PATH_KUBE_X_PROPERTY" "$CLUSTER_VALUES_PATH" >| "$FINAL_VALUES_PATH"
+
+for JSONNET_FILE in jsonnet/*.jsonnet; do
+
+  echo::info "Processing $JSONNET_FILE"
 
   # Run
   MIXIN_MANIFEST=$(
-    pushd "$APP_DIRECTORY" > /dev/null
-    # Update the dependencies (vendor directory)
-    JPATH="vendor"
-    if [ ! -d "$APP_DIRECTORY/$JPATH" ]; then
-      jb update
-    fi
     # --string: string as output
     jsonnet \
       --jpath "$JPATH" \
       --string \
-      --ext-code "values=std.parseYaml(importstr \"$VALUES_PATH\")" \
-      --exec "std.manifestYamlDoc((import \"$PROMETHEUS_RULE_FILE\"))"
-    popd > /dev/null
+      --ext-code "values=std.parseYaml(importstr \"$FINAL_VALUES_PATH\")" \
+      --exec "std.manifestYamlDoc((import \"$JSONNET_FILE\"))"
   )
 
   # Add the jsonnet manifest
   HELM_MANIFEST=$(cat <<EOF
 $HELM_MANIFEST
 ---
+# Source: $JSONNET_FILE
 $MIXIN_MANIFEST
 EOF
 )
 
-fi
+done
 
 # Kustomize
 # Example:
 # https://github.com/thomastaylor312/advanced-helm-demos/tree/master/post-render
 KUSTOMIZATION_FILE="kustomization.yaml"
 if [ -f "$KUSTOMIZATION_FILE" ]; then
-  pushd "$APP_DIRECTORY" > /dev/null
   echo "$HELM_MANIFEST" > all.yaml
   # kustomize should be installed in the PATH
   # a kustomization.yaml file should be present that adds the resource `all.yaml`
   kustomize build . && rm all.yaml
-  popd > /dev/null
   exit 0
 fi
 
