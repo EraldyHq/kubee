@@ -11,6 +11,8 @@ kube_x:
   prometheus:
     # Not a string, a boolean so no quote
     enabled: false
+    # Installation namespace
+    namespace: 'kube-prometheus'
   # Kube-X Dashboard Variables
   kubernetes_dashboard:
     # The external DNS

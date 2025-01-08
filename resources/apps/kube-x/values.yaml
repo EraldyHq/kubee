@@ -63,7 +63,10 @@ traefik:
 
 # The prometheus kube-x env
 prometheus:
+  # Enable or disable prometheus
   enabled: false
+  # The installation namespace (used by Grafana to create the data source)
+  namespace: 'prometheus'
 
 # The cert manager kube-x env
 cert_manager:
@@ -150,3 +153,4 @@ grafana:
     label: 'grafana'
     # The auth credential (used for an external instance)
     apiToken: ''
+
