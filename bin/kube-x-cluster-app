@@ -113,6 +113,7 @@ apply(){
   HELM_INSTALL_COMMAND+=(
     "--post-renderer" "kube-x-helm-post-renderer"
     "--post-renderer-args" "$APP_DIRECTORY"
+    "--post-renderer-args" "$FINAL_VALUES_PATH"
     )
 
   # --dependency-update flag to avoid the `helm dependency build` error:

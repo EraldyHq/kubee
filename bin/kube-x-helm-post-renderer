@@ -20,12 +20,13 @@ APP_DIRECTORY="${1:-}"
 if [[ "$APP_DIRECTORY" =~ "synopsis"|"help" ]]; then
   echo "A post renderer to integrate kustomize and jsonnet"
   echo ""
-  echo "$(basename "$0") appDirectory clusterDirectory"
+  echo "$(basename "$0") appDirectory valuesPath"
   echo ""
   echo "where:"
   echo "  appDirectory: is the directory of the app to install"
+  echo "  valuesPath: is the path to the values file"
   echo ""
-  echo "Note: the Helm templates are passed in stdin"
+  echo "Note: the Helm templates are passed via stdin"
   echo "See https://helm.sh/docs/topics/advanced/#post-rendering"
   exit 0
 fi
@@ -35,8 +36,14 @@ if [ ! -d "$APP_DIRECTORY" ]; then
   exit 1
 fi
 
-# Values files
-KUBE_X_CLUSTER_DIR=$PWD
+# Values path is already generated at this point
+# that's why we pass it and not regenerate it
+VALUES_PATH="${2:-}"
+if [ ! -f "$VALUES_PATH" ]; then
+  echo::err "Internal Error: the second argument values path ($VALUES_PATH) is not a valid file"
+  exit 1
+fi
+
 
 # The whole script run in the app directory
 pushd "$APP_DIRECTORY" > /dev/null
@@ -59,9 +66,6 @@ if [ -d "$JSONNET_DIR" ]; then
     jb update
   fi
 
-  FINAL_VALUES_PATH="/dev/shm/kube-x-helm-post-renderer-values.yml"
-  kube_x::print_values >| $FINAL_VALUES_PATH
-  bash::trap "rm $FINAL_VALUES_PATH" EXIT # EXIT executes also on error
 
   for JSONNET_FILE in jsonnet/*.jsonnet; do
 
@@ -73,7 +77,7 @@ if [ -d "$JSONNET_DIR" ]; then
       jsonnet \
         --jpath "$JPATH" \
         --string \
-        --ext-code "values=std.parseYaml(importstr \"$FINAL_VALUES_PATH\")" \
+        --ext-code "values=std.parseYaml(importstr \"$VALUES_PATH\")" \
         --exec "std.manifestYamlDoc((import \"$JSONNET_FILE\"))"
     )
 
