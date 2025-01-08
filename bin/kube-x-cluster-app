@@ -10,33 +10,12 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-template.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-bash.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
 # shellcheck source=./kube-x-lib.sh
 source "kube-x-lib.sh"
 
 
-generate_and_get_values_path(){
-
-  # Template
-  local KUBE_X_HELM_VALUES;
-  KUBE_X_HELM_VALUES=$(realpath "${KUBE_X_CLUSTER_DIR}/values.yaml")
-  if [ ! -f "$KUBE_X_HELM_VALUES" ]; then
-    echo::err "No helm file found at $KUBE_X_HELM_VALUES"
-    return 1;
-  fi
-
-  # Check the variables
-  if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBE_X_HELM_VALUES"); then
-     # Should exit because of the strict mode
-     # but it was not working
-     echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBE_X_HELM_VALUES"
-     return 1
-  fi
-  local SHM_HELM_VALUES="/dev/shm/kube-x-helm-values.yml"
-
-  envsubst < "$KUBE_X_HELM_VALUES" >| "$SHM_HELM_VALUES"
-  echo "$SHM_HELM_VALUES"
-
-}
 
 apply(){
 
@@ -117,11 +96,10 @@ apply(){
     )
 
   # The kube-x values
-  if ! KUBE_X_VALUES_PATH=$(generate_and_get_values_path); then
-    echo::err "Error while trying to get the kube-x-helm values"
-    return 1
-  fi
-  HELM_INSTALL_COMMAND+=("-f" "${KUBE_X_VALUES_PATH}")
+  FINAL_VALUES_PATH="/dev/shm/kube-x-values.yml"
+  kube_x::print_values >| $FINAL_VALUES_PATH
+  bash::trap "rm $FINAL_VALUES_PATH" EXIT # EXIT execute also on error
+  HELM_INSTALL_COMMAND+=("-f" "${FINAL_VALUES_PATH}")
 
   if [ "${KUBE_X_HELM_INSTALL_OPTIONS:-}" != "" ]; then
     HELM_INSTALL_COMMAND+=("${KUBE_X_HELM_INSTALL_OPTIONS[@]}")
@@ -244,7 +222,9 @@ case "$COMMAND" in
     synopsis
     ;;
   "values")
-    yq "$(generate_and_get_values_path)"
+    kube_x::print_values
+#    VALUES=$(kube_x::print_values)
+#    cat "$VALUES" | yq
     ;;
   *)
     doc::help synopsis

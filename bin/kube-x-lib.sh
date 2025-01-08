@@ -13,6 +13,8 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
 # shellcheck source=./bashlib-path.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-path.sh"
+# shellcheck source=./bashlib-template.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
 
 
 # @description
@@ -304,3 +306,53 @@ kube::test_connection(){
 
 }
 
+# @description
+#     Print the kube-x values files used for Helm Installation and Jsonnet Configuration
+# @stdout - the values
+kube_x::print_values(){
+
+  # Template
+  local KUBE_X_HELM_VALUES;
+  KUBE_X_HELM_VALUES=$(realpath "${KUBE_X_CLUSTER_DIR}/values.yaml")
+  if [ ! -f "$KUBE_X_HELM_VALUES" ]; then
+    echo::err "No cluster values file found at $KUBE_X_HELM_VALUES"
+    return 1;
+  fi
+
+  ############################
+  # Variable Substitution
+  # Check the variables
+  if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBE_X_HELM_VALUES"); then
+     # Should exit because of the strict mode
+     # but it was not working
+     echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBE_X_HELM_VALUES"
+     return 1
+  fi
+  local SHM_VALUES="/dev/shm/kube-x-values.yml"
+  envsubst < "$KUBE_X_HELM_VALUES" >| "$SHM_VALUES"
+  bash::trap "rm $SHM_VALUES" EXIT # EXIT executes also on error
+
+  ##########################
+  # Append Default values
+  #
+  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  DEFAULT_VALUES_PATH=$(realpath "$SCRIPT_DIR/../resources/apps/kube-x/values.yaml")
+  if [ ! -f "$DEFAULT_VALUES_PATH" ]; then
+    echo::err "Internal Error: The default values file ($DEFAULT_VALUES_PATH) was not found"
+    return 1
+  fi
+  # Before merge, values should be below the kube_x property
+  SHM_DEFAULT_VALUES="/dev/shm/kube-x-default-values.yml"
+  # --null-input: does not have any input as we create a new file
+  yq eval --null-input ".kube_x = load(\"$DEFAULT_VALUES_PATH\")" >| "$SHM_DEFAULT_VALUES"
+  bash::trap "rm $SHM_DEFAULT_VALUES" EXIT # EXIT executes also on error
+
+
+  ###########################
+  # Merge
+  # shellcheck disable=SC2016
+  # https://mikefarah.gitbook.io/yq/commands/evaluate-all
+  yq eval-all '. as $item ireduce ({}; . * $item )' "$SHM_DEFAULT_VALUES" "$SHM_VALUES"
+
+
+}

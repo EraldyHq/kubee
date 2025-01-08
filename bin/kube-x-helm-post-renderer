@@ -12,7 +12,8 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-command.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
-
+# shellcheck source=kube-x-lib.sh
+source kube-x-lib.sh
 
 APP_DIRECTORY="${1:-}"
 
@@ -35,7 +36,7 @@ if [ ! -d "$APP_DIRECTORY" ]; then
 fi
 
 # Values files
-CLUSTER_DIRECTORY=$PWD
+KUBE_X_CLUSTER_DIR=$PWD
 
 # The whole script run in the app directory
 pushd "$APP_DIRECTORY" > /dev/null
@@ -58,26 +59,9 @@ if [ -d "$JSONNET_DIR" ]; then
     jb update
   fi
 
-  # Determine the values
-  CLUSTER_VALUES_PATH="$CLUSTER_DIRECTORY/values.yaml"
-  if [ ! -f "$CLUSTER_VALUES_PATH" ]; then
-    echo::err "The values file ($CLUSTER_VALUES_PATH) does not exist"
-    exit 1
-  fi
-  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  DEFAULT_VALUES_PATH=$(realpath "$SCRIPT_DIR/../resources/apps/kube-x/values.yaml")
-  if [ ! -f "$DEFAULT_VALUES_PATH" ]; then
-    echo::err "Internal Error: The default values file ($DEFAULT_VALUES_PATH) was not found"
-    exit 1
-  fi
-
-  # Before merge, values should be below the kube_x property
-  DEFAULT_VALUES_PATH_KUBE_X_PROPERTY="/dev/shm/kube-x-helm-post-renderer-default-values.yml"
-  yq e ".kube_x = load(\"$DEFAULT_VALUES_PATH\")" >| $DEFAULT_VALUES_PATH_KUBE_X_PROPERTY
-
   FINAL_VALUES_PATH="/dev/shm/kube-x-helm-post-renderer-values.yml"
-  # shellcheck disable=SC2016
-  yq eval-all '. as $item ireduce ({}; . * $item )' "$DEFAULT_VALUES_PATH_KUBE_X_PROPERTY" "$CLUSTER_VALUES_PATH" >| "$FINAL_VALUES_PATH"
+  kube_x::print_values >| $FINAL_VALUES_PATH
+  bash::trap "rm $FINAL_VALUES_PATH" EXIT # EXIT executes also on error
 
   for JSONNET_FILE in jsonnet/*.jsonnet; do
 
