@@ -48,49 +48,53 @@ HELM_MANIFEST=$(cat)
 # JsonNet
 ##################
 # Processing any JsonNet template if any
+JSONNET_DIR="jsonnet"
+if [ -d "$JSONNET_DIR" ]; then
 
-# Update the dependencies (vendor directory)
-JPATH="vendor"
-if [ ! -d "$JPATH" ]; then
-  jb update
-fi
+  # Update the dependencies (vendor directory)
+  JPATH="vendor"
+  JSONNET_FILE="jsonnetfile.json"
+  if [ ! -d "$JPATH" ] && [ -f "$JSONNET_FILE" ]; then
+    jb update
+  fi
 
-# Determine the values
-CLUSTER_VALUES_PATH="$CLUSTER_DIRECTORY/values.yaml"
-if [ ! -f "$CLUSTER_VALUES_PATH" ]; then
-  echo::err "The values file ($CLUSTER_VALUES_PATH) does not exist"
-  exit 1
-fi
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-DEFAULT_VALUES_PATH=$(realpath "$SCRIPT_DIR/../resources/apps/kube-x/values.yaml")
-if [ ! -f "$DEFAULT_VALUES_PATH" ]; then
-  echo::err "Internal Error: The default values file ($DEFAULT_VALUES_PATH) was not found"
-  exit 1
-fi
-# Before merge, values should be below the kube_x property
-DEFAULT_VALUES_PATH_KUBE_X_PROPERTY="/dev/shm/kube-x-helm-post-renderer-default-values.yml"
-yq e ".kube_x = load(\"$DEFAULT_VALUES_PATH\")" >| $DEFAULT_VALUES_PATH_KUBE_X_PROPERTY
+  # Determine the values
+  CLUSTER_VALUES_PATH="$CLUSTER_DIRECTORY/values.yaml"
+  if [ ! -f "$CLUSTER_VALUES_PATH" ]; then
+    echo::err "The values file ($CLUSTER_VALUES_PATH) does not exist"
+    exit 1
+  fi
+  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  DEFAULT_VALUES_PATH=$(realpath "$SCRIPT_DIR/../resources/apps/kube-x/values.yaml")
+  if [ ! -f "$DEFAULT_VALUES_PATH" ]; then
+    echo::err "Internal Error: The default values file ($DEFAULT_VALUES_PATH) was not found"
+    exit 1
+  fi
 
-FINAL_VALUES_PATH="/dev/shm/kube-x-helm-post-renderer-values.yml"
-# shellcheck disable=SC2016
-yq eval-all '. as $item ireduce ({}; . * $item )' "$DEFAULT_VALUES_PATH_KUBE_X_PROPERTY" "$CLUSTER_VALUES_PATH" >| "$FINAL_VALUES_PATH"
+  # Before merge, values should be below the kube_x property
+  DEFAULT_VALUES_PATH_KUBE_X_PROPERTY="/dev/shm/kube-x-helm-post-renderer-default-values.yml"
+  yq e ".kube_x = load(\"$DEFAULT_VALUES_PATH\")" >| $DEFAULT_VALUES_PATH_KUBE_X_PROPERTY
 
-for JSONNET_FILE in jsonnet/*.jsonnet; do
+  FINAL_VALUES_PATH="/dev/shm/kube-x-helm-post-renderer-values.yml"
+  # shellcheck disable=SC2016
+  yq eval-all '. as $item ireduce ({}; . * $item )' "$DEFAULT_VALUES_PATH_KUBE_X_PROPERTY" "$CLUSTER_VALUES_PATH" >| "$FINAL_VALUES_PATH"
 
-  echo::info "Processing $JSONNET_FILE"
+  for JSONNET_FILE in jsonnet/*.jsonnet; do
 
-  # Run
-  MIXIN_MANIFEST=$(
-    # --string: string as output
-    jsonnet \
-      --jpath "$JPATH" \
-      --string \
-      --ext-code "values=std.parseYaml(importstr \"$FINAL_VALUES_PATH\")" \
-      --exec "std.manifestYamlDoc((import \"$JSONNET_FILE\"))"
-  )
+    echo::info "Processing $JSONNET_FILE"
 
-  # Add the jsonnet manifest
-  HELM_MANIFEST=$(cat <<EOF
+    # Run
+    MIXIN_MANIFEST=$(
+      # --string: string as output
+      jsonnet \
+        --jpath "$JPATH" \
+        --string \
+        --ext-code "values=std.parseYaml(importstr \"$FINAL_VALUES_PATH\")" \
+        --exec "std.manifestYamlDoc((import \"$JSONNET_FILE\"))"
+    )
+
+    # Add the jsonnet manifest
+    HELM_MANIFEST=$(cat <<EOF
 $HELM_MANIFEST
 ---
 # Source: $JSONNET_FILE
@@ -98,7 +102,8 @@ $MIXIN_MANIFEST
 EOF
 )
 
-done
+  done
+fi
 
 # Kustomize
 # Example:

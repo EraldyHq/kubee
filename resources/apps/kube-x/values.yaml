@@ -133,11 +133,11 @@ external_secret:
 grafana:
   # Properties of the grafana instance
   instance:
-    # The type of instance
-    # * cluster: installation in the cluster
-    # * cloud: grafana cloud instance
-    # An empty target does not install any instance
-    target: ''
+    # The type of instance:
+    # * internal: installation of grafana in the cluster
+    # * external: grafana api (for instance: grafana cloud instance)
+    # An empty type does not install any instance
+    type: 'internal'
     # The hostname
     # A non-empty Hostname for a cluster instance will create an ingress
     # The hostname may be used in Prometheus alert to reference dashboard
@@ -147,8 +147,6 @@ grafana:
     # It's used :
     # * as selector to apply CRD objects such as Dashboard, .... to this instance. https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
     # * as the instance name
-    # Note: for grafana Cloud (target: cloud), this is the stack name
     label: 'grafana'
-    # Grafana Cloud Instance property
-    cloud:
-      apiToken: ''
+    # The auth credential (used for an external instance)
+    apiToken: ''

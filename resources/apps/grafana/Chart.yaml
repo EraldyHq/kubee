@@ -18,17 +18,16 @@ version: 0.0.1
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-# https://github.com/grafana/grafana-operator/releases
-appVersion: "v5.15.1" # Grafana version
+appVersion: "v10.4.3" # Grafana version (click on the icon help in the Grafana UI)
 
 
 dependencies:
   # ie https://github.com/grafana/grafana-operator/pkgs/container/helm-charts%2Fgrafana-operator
+  # https://github.com/grafana/grafana-operator/releases
   - name: grafana-operator
     version: v5.15.1
     repository: "oci://ghcr.io/grafana/helm-charts"
-    alias: grafana
-    #condition: certManager.enabled
+    #condition: xxx.enabled
   - name: kube-x
     version: 0.0.1
     repository: file://../kube-x

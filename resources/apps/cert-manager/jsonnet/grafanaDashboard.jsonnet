@@ -21,8 +21,13 @@ local values = std.extVar('values');
     {
       // Allow import from grafana instance in another namespace
       // https://github.com/grafana/grafana-operator/tree/master/examples/crossnamespace
+      // https://grafana.github.io/grafana-operator/docs/examples/crossnamespace/readme/
       allowCrossNamespaceImport: true,
-      resyncPeriod: '30s',
+      // https://grafana.github.io/grafana-operator/docs/overview/#resyncperiod
+      // 10m by default
+      // 0m: never poll for changes in the dashboards
+      resyncPeriod: '0m',
+      // https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
       instanceSelector: {
         matchLabels: {
           dashboards: values.kube_x.grafana.instance.label,

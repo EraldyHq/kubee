@@ -1,14 +1,6 @@
 {{/*
-  Grafana Instance (Cloud or Cluster)
+  Grafana Instance (Cloud (External) or Cluster (Internal)
   See CRD doc:   https://grafana.github.io/grafana-operator/docs/grafana/
-
-  Test:
-  helm template -s templates/grafana-instance.yaml \
-    --set 'kube_x.grafana.instance.target=cloud'  \
-    --set 'kube_x.grafana.instance.cloud.apiToken=xxxx'  \
-    --set 'kube_x.grafana.instance.cloud.stackName=xxxx'  \
-    . | yq
-
 */}}
 apiVersion: grafana.integreatly.org/v1beta1
 kind: Grafana
@@ -23,37 +15,46 @@ metadata:
     dashboards: {{ required "kube_x.grafana.instance.label is required" .Values.kube_x.grafana.instance.label }}
 spec:
 {{/*
-Create a cloud instance (external)
-https://grafana.github.io/grafana-operator/docs/grafana/#external-grafana-instances
-https://grafana.com/docs/grafana-cloud/developer-resources/infrastructure-as-code/grafana-operator/manage-dashboards-argocd/
+Create a external instance (cloud)
+Doc: https://grafana.github.io/grafana-operator/docs/grafana/#external-grafana-instances
+Example: https://grafana.github.io/grafana-operator/docs/examples/external_grafana/readme/
+Grafana Cloud: https://grafana.com/docs/grafana-cloud/developer-resources/infrastructure-as-code/grafana-operator/manage-dashboards-argocd/
+
+Test:
+  helm template -s templates/grafana-instance.yaml \
+    --set 'kube_x.grafana.instance.type=external'  \
+    --set 'kube_x.grafana.instance.apiToken=xxxx'  \
+    --set 'kube_x.grafana.instance.hostname=stackName.grafana.net'  \
+    . | yq
+
 */}}
-{{- if eq ( ((.Values.kube_x).grafana).instance.target) "cloud" -}}
+{{- if eq ( required ".Values.kube_x.grafana.instance.type is required" .Values.kube_x.grafana.instance.type) "external" -}}
   external:
-    url: https://{{ .Values.kube_x.grafana.instance.label }}.grafana.net/
+    url: https://{{ .Values.kube_x.grafana.instance.hostname }}/
     apiKey:
-      name: '{{ template "grafana-cloud-secret-name" . }}'
-      key: '{{ template "grafana-cloud-secret-key" . }}'
-{{- end -}}
+      name: '{{ template "grafana-instance-api-token-secret-name" . }}'
+      key: '{{ template "grafana-instance-api-token-secret-key" . }}'
 {{/*
   Create a cluster local instance
   https://grafana.github.io/grafana-operator/docs/quick-start/#creating-a-grafana-instance
 
   Test:
   helm template -s templates/grafana-instance.yaml \
-    --set 'kube_x.grafana.instance.target=cluster'  \
+    --set 'kube_x.grafana.instance.type=internal'  \
     --set 'kube_x.grafana.instance.hostname=grafana.bar.com'  \
     --set 'kube_x.cluster.adminUser.username=xxxx'  \
     --set 'kube_x.cluster.adminUser.password=xxxx'  \
+    --set 'kube_x.cluster.adminUser.email=xxxx'  \
     . | yq
 */}}
-{{- if eq ( ((.Values.kube_x).grafana).instance.target) "cluster" -}}
+{{- else -}}
   {{/*
     Ingress is defined as Yaml values.
     https://grafana.github.io/grafana-operator/docs/examples/ingress_https/readme/
     Nonte: it seems that they use the Helm Chart ???
     https://github.com/grafana/helm-charts/blob/main/charts/grafana/templates/ingress.yaml
    */}}
-  {{- if ne ( ((.Values.kube_x).grafana).instance.hostname) "" -}}
+  {{- if ne ( ((.Values.kube_x).grafana).instance.hostname) "" }}
   ingress:
     metadata:
       annotations:

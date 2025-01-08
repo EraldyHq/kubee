@@ -1,14 +1,14 @@
 {{/*
 Return the name of the grafana secret
 */}}
-{{- define "grafana-cloud-secret-name" }}
-{{- printf "%s-grafana-cloud-api-token" (include "kube-x-name-prefix" (dict "Release" $.Release "Values" $.Values.kube_x ))}}
+{{- define "grafana-instance-api-token-secret-name" }}
+{{- printf "%s-grafana-api-token" (include "kube-x-name-prefix" (dict "Release" $.Release "Values" $.Values.kube_x ))}}
 {{- end }}
 
 {{/*
 Return the key of the api token in the secret
 */}}
-{{- define "grafana-cloud-secret-key" }}
+{{- define "grafana-instance-api-token-secret-key" }}
 {{- printf "api-token" -}}
 {{- end }}
 
