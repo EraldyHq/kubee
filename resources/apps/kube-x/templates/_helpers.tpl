@@ -4,12 +4,20 @@ https://helm.sh/docs/chart_template_guide/named_templates/#declaring-and-using-t
 */}}
 
 {{/*
+    Prefix used to see who has created an object,
+    We may also use a label by the way
+    (Variables are scoped to a template, that's why we use a function)
+*/}}
+{{- define "kube-x-prefix" }}
+{{- printf "kube-x" }}
+{{- end }}
+{{/*
 Return a name prefix
 Usage in a sub-chart
 include "kube-x-name-prefix" (dict "Release" .Release "Values" .Values.kube_x )
 */}}
 {{- define "kube-x-name-prefix" }}
-{{- printf "%s-%s" .Release.Name .Values.templates.globalPrefix | replace "_" "-" | trunc 63 -}}
+{{- printf "%s-%s" .Release.Name (include "kube-x-prefix" .)  | replace "_" "-" | trunc 63 -}}
 {{- end }}
 
 
@@ -17,7 +25,7 @@ include "kube-x-name-prefix" (dict "Release" .Release "Values" .Values.kube_x )
 Return the name of the traefik basic auth
 */}}
 {{- define "kube-x-traefik-basic-auth-name" }}
-{{- printf "%s-middelware-basic-auth" .Values.templates.globalPrefix -}}
+{{- printf "%s-middelware-basic-auth" (include "kube-x-prefix" .) -}}
 {{- end }}
 
 {{/*
@@ -27,5 +35,16 @@ Return the name of the traefik transport that can be used as label
 {{- printf "%s-%s@kubernetescrd"
     .Values.traefik.namespace
     (include "kube-x-traefik-basic-auth-name" .)
+-}}
+{{- end }}
+
+
+{{/*
+Return the name of the github allow list middelware (used on ingress)
+*/}}
+{{- define "kube-x-traefik-github-hooks-allow-list-name" }}
+{{- printf "%s-%s"
+    (include "kube-x-prefix" .)
+    "ip-allow-github-hooks-cidr"
 -}}
 {{- end }}

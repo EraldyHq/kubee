@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: argocd-alert-rule
+spec:
+  groups:
+    - name: ArgoCd
+      rules:
+        - alert: ArgoCdNonHealthyApp
+          expr: |
+            avg_over_time(argocd_app_info{health_status!="Healthy"}[5m])==1
+            or absent(argocd_app_info)
+          labels:
+            severity: critical
+          annotations:
+            summary: "ArgoCd {{ print "{{" }}$labels.name{{ print "}}" }} status is {{ print "{{" }}$labels.health_status{{ print "}}" }}"
+            description: "An app should be not be in a non-healthy state for more than 5 minutes"

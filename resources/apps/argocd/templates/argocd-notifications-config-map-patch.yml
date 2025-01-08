@@ -1,0 +1,58 @@
+# Config Notification service, trigger and template
+# Example config
+# https://github.com/argoproj/argoproj-deployments/blob/master/argocd/overlays/production/argocd-notifications-cm.yaml
+# Actual Config
+# https://kube.i.eraldy.com/#/configmap/argocd/argocd-notifications-cm?namespace=argocd
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+data:
+  ##############################
+  # Services section
+  ##############################
+  #  Email
+  # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/email/
+  service.email: |
+    host: smtp.gmail.com
+    port: 587
+    from: nico@eraldy.com
+    username: $email-username
+    password: $email-password
+    html: true
+  ##############################
+  # Trigger
+  ##############################
+  # Optional 'oncePer' property ensure that notification is sent only once per specified field value
+  # E.g. following is triggered once per sync revision
+  # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/triggers/#avoid-sending-same-notification-too-often
+  # See also this discussion
+  # https://github.com/argoproj/argo-cd/issues/12169
+  trigger.on-deployed: |
+    - when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy' and time.Now().Sub(time.Parse(app.status.operationState.startedAt)).Minutes() < 2
+      oncePer: app.status.operationState.syncResult.revision
+      send: [on-deployed-template]
+  ##############################
+  # Template
+  ##############################
+  template.on-deployed-template: |
+    email:
+      subject: Application {{.app.metadata.name}} has been successfully deployed.
+    message: |
+      {{if eq .serviceType "slack"}}:white_check_mark:{{end}} Application {{.app.metadata.name}} has been successfully synced at {{.app.status.operationState.finishedAt}}.
+      Sync operation details are available at: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}?operation=true .
+  ##############################
+  # Context (ie Variables)
+  ##############################
+  # Context holds list of variables that can be referenced in templates
+  context: |
+    argocdUrl: https://argocd.i.eraldy.com
+  ##############################
+  # Global Subscriptions
+  ##############################
+  subscriptions: |
+    # Global Subscription for on-deployed trigger notifications
+    - recipients:
+        - "email:{{ required ".Values.kube_x.cluster.adminUser.email is requried" .Values.kube_x.cluster.adminUser.email }}"
+      triggers:
+        - on-deployed

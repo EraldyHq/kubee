@@ -7,6 +7,8 @@ kube_x:
       username: "nico"
       password: "${KUBE_X_CLUSTER_ADMIN_PASSWORD}"
       email: "nico@eraldy.com"
+    private_networks:
+      - 143.176.206.82/32
   # Kube-x Prometheus
   prometheus:
     # Not a string, a boolean so no quote
@@ -22,6 +24,7 @@ kube_x:
     hostname: 'whoami.eraldy.com'
   # Kube-X Traefik Variables
   traefik:
+    namespace: 'kube-system'
     defaultCertificate:
       # The PEM content file
       # Not a path to the cert file relatif to the working directory (ie cluster directory)
@@ -71,11 +74,11 @@ kube_x:
     vault:
       apiToken: '${KUBE_X_EXTERNAL_SECRETS_VAULT_API_TOKEN}'
 
-# Traefik Values
+# Helm Traefik Chart Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
 traefik:
   additionalArguments:
-    # Debug
-    # - '--log.level=DEBUG'
-    # Logs just add too much noise on what is going on
-    # - '--accesslog=false'
+  # Debug
+  # - '--log.level=DEBUG'
+  # Logs just add too much noise on what is going on
+  # - '--accesslog=false'

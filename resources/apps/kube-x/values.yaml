@@ -20,13 +20,11 @@ cluster:
   auth: basicAuth
   # Secret kind created
   secret: 'Secret'
+  # Private Network ranges
+  # used for Ingress Ip restrictions (Traefik IpAllowList)
+  # example for a home ip: 143.176.206.80/32
+  private_networks: []
 
-
-# Templating variables
-# Template is a reserved name
-templates:
-  # The prefix added to all name created by kube-x template
-  globalPrefix: "kube-x"
   
 # Kube-X Dashboard Variables
 kubernetes_dashboard:
@@ -164,7 +162,17 @@ vault:
 
 # External Secrets
 external_secrets:
-  # Vault Store
-  vault:
-    # If the api token is not empty and vault is enabled, a vault secret store is created
-    apiToken: ''
+  # Cluster Secret Store
+  # We support only vault for now
+  # If the api token is not empty and vault is enabled, a vault secret store is created
+  store:
+    name: 'kube-x-external-secret-store'
+    vault:
+      apiToken: ''
+
+# Argocd
+argocd:
+  namespace: argocd
+  # The argocd hostname
+  # if not empty, an ingress is created
+  hostname: ''
