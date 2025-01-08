@@ -226,8 +226,10 @@ kube::get_app_crds_directory(){
 
   local APP_NAMESPACE="$1"
   # this works for executed script or sourced script
-  local SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  local KUBE_X_RESOURCE_APP_DIR=$(realpath "$SCRIPT_DIR/../resources/cluster/crds")
+  local SCRIPT_DIR
+  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  local KUBE_X_RESOURCE_APP_DIR
+  KUBE_X_RESOURCE_APP_DIR=$(realpath "$SCRIPT_DIR/../resources/crds")
   local APP_CRDS_DIR="$KUBE_X_RESOURCE_APP_DIR/${APP_NAMESPACE}"
   if [ ! -d "$APP_CRDS_DIR" ]; then
     return 1
@@ -328,7 +330,7 @@ kube_x::print_values(){
      echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBE_X_HELM_VALUES"
      return 1
   fi
-  local SHM_VALUES="/dev/shm/kube-x-values.yml"
+  local SHM_VALUES="/dev/shm/kube-x-lib-values.yml"
   envsubst < "$KUBE_X_HELM_VALUES" >| "$SHM_VALUES"
   bash::trap "rm $SHM_VALUES" EXIT # EXIT executes also on error
 
@@ -342,7 +344,7 @@ kube_x::print_values(){
     return 1
   fi
   # Before merge, values should be below the kube_x property
-  SHM_DEFAULT_VALUES="/dev/shm/kube-x-default-values.yml"
+  SHM_DEFAULT_VALUES="/dev/shm/kube-x-lib-default-values.yml"
   # --null-input: does not have any input as we create a new file
   yq eval --null-input ".kube_x = load(\"$DEFAULT_VALUES_PATH\")" >| "$SHM_DEFAULT_VALUES"
   bash::trap "rm $SHM_DEFAULT_VALUES" EXIT # EXIT executes also on error

@@ -126,11 +126,6 @@ whoami:
   # example: hostname: 'whoami.kube-x.dev'
   hostname: ''
 
-# External Secret conf
-external_secret:
-  secretStoreRef:
-    # kind should be ClusterSecretStore
-    name: ''
 
 # Grafana Operator
 grafana:
@@ -154,3 +149,22 @@ grafana:
     # The auth credential (used for an external instance)
     apiToken: ''
 
+# Hashicorp Vault
+vault:
+  enabled: false
+  # The installation namespace
+  namespace: vault
+  # A KV secret store
+  kvSecretStore:
+    # The Vault KV secret engine version.
+    # This can be either "v1" or "v2", defaults to "v2"
+    version: 2
+    # the mount Path
+    mountPath: 'secret'
+
+# External Secrets
+external_secrets:
+  # Vault Store
+  vault:
+    # If the api token is not empty and vault is enabled, a vault secret store is created
+    apiToken: ''

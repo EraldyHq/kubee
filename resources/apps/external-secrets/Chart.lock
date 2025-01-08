@@ -1,0 +1,9 @@
+dependencies:
+- name: external-secrets
+  repository: https://charts.external-secrets.io
+  version: 0.10.7
+- name: kube-x
+  repository: file://../kube-x
+  version: 0.0.1
+digest: sha256:60b79f125b2ecc51c9689bb83bf50b58947f4316ae7a888db812e4b4ad522c46
+generated: "2025-01-08T14:46:59.883940723+01:00"

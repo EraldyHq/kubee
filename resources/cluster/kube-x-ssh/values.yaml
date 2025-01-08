@@ -65,6 +65,11 @@ kube_x:
     instance:
       target: cluster
       hostname: grafana.eraldy.com
+  vault:
+    enabled: true
+  external_secrets:
+    vault:
+      apiToken: '${KUBE_X_EXTERNAL_SECRETS_VAULT_API_TOKEN}'
 
 # Traefik Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml

@@ -33,7 +33,11 @@ apply(){
 
 
   read -r APP_NAMESPACE APP_NAME <<< "$(kube::get_qualified_app_name "$APP_NAME")"
-  echo "$APP_NAMESPACE $APP_NAME"
+  echo::Info "Install app $APP_NAME in namespace $APP_NAMESPACE"
+
+  # Get env (KubeConfig) used by helm for CRD Chart and app Chart
+  KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
+  eval "$KUBECTX_ENV"
 
   # Crds first
   # CRD first installation is becoming a standard
@@ -63,6 +67,8 @@ apply(){
     else
       echo::info "Chart $APP_RELEASE_CRDS_NAME already installed"
     fi
+  else
+    echo::info "No CRD Chart for $APP_NAMESPACE found"
   fi
 
   # App
@@ -104,10 +110,6 @@ apply(){
   if [ "${KUBE_X_HELM_INSTALL_OPTIONS:-}" != "" ]; then
     HELM_INSTALL_COMMAND+=("${KUBE_X_HELM_INSTALL_OPTIONS[@]}")
   fi
-
-  # Get env (KubeConfig)
-  KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
-  eval "$KUBECTX_ENV"
 
   # Post renderer
   HELM_INSTALL_COMMAND+=(

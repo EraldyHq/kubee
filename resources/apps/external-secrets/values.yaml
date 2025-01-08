@@ -1,0 +1,5 @@
+
+
+external-secrets:
+  # Installed with our chart
+  installCRDs: false
