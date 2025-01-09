@@ -1,0 +1,378 @@
+#!/usr/bin/env bash
+
+set -TCEeuo pipefail
+# shellcheck source=../..//bash-lib/lib/bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+error::set_trap
+# shellcheck source=../../bash-lib/lib/bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-template.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-bash.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
+# shellcheck source=./kube-x-lib.sh
+source "kube-x-lib.sh"
+
+# @description
+#     Return the directory of a package
+# @arg $1 string The package name
+get_chart_directory(){
+  local PACKAGE_NAME="$1"
+  # All packages directories in an array
+  local KUBE_X_CHARTS_DIRS=()
+  IFS=":" read -ra KUBE_X_CHARTS_DIRS <<< "${KUBE_X_CHARTS_PATH:-}"
+  # this works for executed script or sourced script
+  local SCRIPT_DIR
+  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  local KUBE_X_RESOURCE_CHARTS_DIR
+  KUBE_X_RESOURCE_CHARTS_DIR=$(realpath "$SCRIPT_DIR/../resources/charts")
+  local KUBE_X_CHARTS_DIRS+=("$KUBE_X_RESOURCE_CHARTS_DIR")
+  for KUBE_X_PACKAGES_DIR in "${KUBE_X_CHARTS_DIRS[@]}"; do
+      if [ ! -d "$KUBE_X_PACKAGES_DIR" ]; then
+        echo::warn "The path ($KUBE_X_PACKAGES_DIR) set in KUBE_X_CHARTS_PATH does not exist or is not a directory"
+        continue
+      fi
+      local APP_DIR="$KUBE_X_PACKAGES_DIR/${PACKAGE_NAME}"
+      if [ -d "$APP_DIR" ]; then
+        echo "$APP_DIR"
+        return
+      fi
+  done
+  echo::err "No chart directory found with the name ($PACKAGE_NAME) in"
+  echo::err "  * the cluster app resources directory (${KUBE_X_RESOURCE_CHARTS_DIR}) "
+  echo::err "  * or the paths of the KUBE_X_CHARTS_PATH variable (${KUBE_X_CHARTS_PATH:-'not set'})"
+  return 1
+
+}
+
+
+
+# @description
+#     Return if the chart is already installed
+# @args $1 - the release name
+# @args $2 - the release namespace
+# @args $3 - the chart app version that should be installed
+# @exitcode 1 - if the chart is not installed or with another app version
+is_helm_chart_installed() {
+
+  local CHART_RELEASE_NAME="$1"
+  local CHART_RELEASE_NAMESPACE="$2"
+  local CHART_APP_VERSION="$3"
+
+  # Check if the release exists
+  if ! helm status "$CHART_RELEASE_NAME" -n "$CHART_RELEASE_NAMESPACE" >/dev/null 2>&1; then
+    echo::info "Release not found: $CHART_RELEASE_NAMESPACE/$CHART_RELEASE_NAME"
+    return 1
+  fi
+
+  # Get the installed chart version
+  read -r CHART_RELEASE_APP_VERSION CHART_RELEASE_CHART <<< "$(helm list -n "$CHART_RELEASE_NAMESPACE" --filter "^$CHART_RELEASE_NAME\$" --output json | jq -r '.[0] | "\(.app_version) \(.chart)"')"
+  # We don't check on chart version
+  IFS="-" read -ra CHART_RELEASE_PARTS <<< "$CHART_RELEASE_CHART"
+  CHART_RELEASE_CHART_VERSION="${CHART_RELEASE_PARTS[-1]}"
+  CHART_RELEASE_CHART_NAME=$({
+   CHART_RELEASE_CHART_NAMES=("${CHART_RELEASE_PARTS[@]:0:${#CHART_RELEASE_PARTS[@]}-1}");
+   IFS='-';
+   echo "${CHART_RELEASE_CHART_NAMES[*]}"
+  })
+
+  if [[ "$CHART_RELEASE_APP_VERSION" != "$CHART_APP_VERSION" ]]; then
+    echo::info "Chart app version mismatch (Release App Version: $CHART_RELEASE_APP_VERSION. Chart App Version: $CHART_APP_VERSION)"
+    return 1
+  fi
+
+  echo::info "Chart $CHART_RELEASE_CHART_NAME with version $CHART_RELEASE_CHART_VERSION and app version $CHART_APP_VERSION is already installed."
+
+
+}
+
+# @description
+#     Print the kube-x values files used for Helm Installation and Jsonnet Configuration
+# @stdout - the values
+print_values(){
+
+  # Template
+  local KUBE_X_HELM_VALUES;
+  KUBE_X_HELM_VALUES=$(realpath "${KUBE_X_CLUSTER_DIR}/values.yaml")
+  if [ ! -f "$KUBE_X_HELM_VALUES" ]; then
+    echo::err "No cluster values file found at $KUBE_X_HELM_VALUES"
+    return 1;
+  fi
+
+  ############################
+  # Variable Substitution
+  # Check the variables
+  if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBE_X_HELM_VALUES"); then
+     # Should exit because of the strict mode
+     # but it was not working
+     echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBE_X_HELM_VALUES"
+     return 1
+  fi
+  local SHM_VALUES="/dev/shm/kube-x-lib-values.yml"
+  envsubst < "$KUBE_X_HELM_VALUES" >| "$SHM_VALUES"
+  bash::trap "rm $SHM_VALUES" EXIT # EXIT executes also on error
+
+  ##########################
+  # Append Default values
+  #
+  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  DEFAULT_VALUES_PATH=$(realpath "$SCRIPT_DIR/../resources/apps/kube-x/values.yaml")
+  if [ ! -f "$DEFAULT_VALUES_PATH" ]; then
+    echo::err "Internal Error: The default values file ($DEFAULT_VALUES_PATH) was not found"
+    return 1
+  fi
+  # Before merge, values should be below the kube_x property
+  SHM_DEFAULT_VALUES="/dev/shm/kube-x-lib-default-values.yml"
+  # --null-input: does not have any input as we create a new file
+  yq eval --null-input ".kube_x = load(\"$DEFAULT_VALUES_PATH\")" >| "$SHM_DEFAULT_VALUES"
+  bash::trap "rm $SHM_DEFAULT_VALUES" EXIT # EXIT executes also on error
+
+
+  ###########################
+  # Merge
+  # shellcheck disable=SC2016
+  # https://mikefarah.gitbook.io/yq/commands/evaluate-all
+  yq eval-all '. as $item ireduce ({}; . * $item )' "$SHM_DEFAULT_VALUES" "$SHM_VALUES"
+
+}
+
+apply(){
+
+  # The final helm command (installation, or template)
+  local HELM_COMMAND=("helm")
+
+  # Package Name
+  # Come first because we use it in the log
+  PACKAGE_NAME="${2:-}"
+  if [ "$PACKAGE_NAME" == "" ]; then
+    echo::err "A package name is mandatory as second argument"
+    return 1
+  fi
+
+  # Mode
+  COMMAND=${1:-}
+  if [ "$COMMAND" == "" ]; then
+    echo::err "Internal error: A command is mandatory as first argument (install or template)"
+    return 1
+  fi
+  case "$COMMAND" in
+      "install")
+        HELM_COMMAND+=( "upgrade" "--install" )
+        echo::info "Installing package $PACKAGE_NAME "
+        ;;
+      "template")
+        HELM_COMMAND+=( "template" )
+        echo::info "Templating package $PACKAGE_NAME "
+        ;;
+      *)
+        echo::err "The command $COMMAND is unknown"
+        return 1
+        ;;
+  esac
+
+
+  # Get env (KubeConfig) used by helm for CRD Chart and app Chart
+  KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
+  eval "$KUBECTX_ENV"
+
+  # The kube-x values
+  # We need them to determine the namespace
+  KUBE_X_VALUES_PATH="/dev/shm/kube-x-values.yml"
+  print_values >| $KUBE_X_VALUES_PATH
+  bash::trap "rm $KUBE_X_VALUES_PATH" EXIT # EXIT execute also on error
+  HELM_COMMAND+=("-f" "${KUBE_X_VALUES_PATH}")
+
+  # Package
+  PACKAGE_DIRECTORY=$(get_chart_directory "$PACKAGE_NAME")
+  PACKAGE_YAML_KEY=$(echo $$PACKAGE_NAME | tr "-" "_") # Go templating does not support `-`
+  PACKAGE_NAMESPACE=$(yq ".kube_x.$PACKAGE_YAML_KEY.namespace" "$KUBE_X_VALUES_PATH")
+  if [ "$PACKAGE_NAMESPACE" == "" ]; then
+    PACKAGE_NAMESPACE="$PACKAGE_NAME"
+    echo::info "Installing into the default namespace $PACKAGE_NAMESPACE"
+  else
+    echo::info "Installing into the namespace $PACKAGE_NAMESPACE found in values"
+  fi
+  HELM_COMMAND+=(
+    "-n" "$PACKAGE_NAMESPACE"
+    "--create-namespace"
+  )
+
+
+  # Crds first
+  # CRD first installation is becoming a standard
+  # Example with Prometheus: https://github.com/prometheus-operator/kube-prometheus#quickstart
+  # They create the namespace and CustomResourceDefinitions first
+  # to avoid race conditions when deploying the components.
+  #
+  # We could also do
+  #```bash
+  # kubectl apply --server-side --force-conflicts -f https://github.com/grafana/grafana-operator/releases/download/v5.15.1/crds.yaml
+  #```
+  PACKAGE_CRDS_NAME="$PACKAGE_NAME-crds"
+  if PACKAGE_CRDS_DIRECTORY=$(get_chart_directory "$PACKAGE_CRDS_NAME"); then
+    echo::debug "Package Crds Directory: $PACKAGE_CRDS_DIRECTORY"
+
+    CHART_APP_VERSION=$(yq '.appVersion' "$PACKAGE_DIRECTORY/Chart.yaml")
+    if ! is_helm_chart_installed "$PACKAGE_CRDS_NAME" "$PACKAGE_NAMESPACE" "$CHART_APP_VERSION"; then
+
+      command::echo_eval "helm upgrade --install -n $PACKAGE_NAMESPACE --create-namespace $PACKAGE_CRDS_NAME $PACKAGE_CRDS_DIRECTORY"
+
+      # Wait
+      echo::info "Waiting until all CRD are established in the namespace $PACKAGE_NAMESPACE"
+      kubectl wait \
+      	--for condition=Established \
+      	--all CustomResourceDefinition \
+      	--namespace="$PACKAGE_NAMESPACE"
+
+    else
+      echo::info "CRD Chart $PACKAGE_CRDS_NAME already installed"
+    fi
+  else
+    echo::info "No CRD Chart for package $PACKAGE_NAME found"
+  fi
+
+
+  # To update the kube-x helm
+  command::echo_eval "helm dependency update $PACKAGE_DIRECTORY"
+  HELM_COMMAND+=( "--dependency-update" )
+
+  # Options ???
+  if [ "${KUBE_X_HELM_INSTALL_OPTIONS:-}" != "" ]; then
+    HELM_COMMAND+=("${KUBE_X_HELM_INSTALL_OPTIONS[@]}")
+  fi
+
+  # Post renderer
+  HELM_COMMAND+=(
+    "--post-renderer" "kube-x-helm-post-renderer"
+    "--post-renderer-args" "$PACKAGE_DIRECTORY"
+    "--post-renderer-args" "$KUBE_X_VALUES_PATH"
+    )
+
+  # --dependency-update flag to avoid the `helm dependency build` error:
+  # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
+  # See https://github.com/helm/helm/issues/7214
+  # values.yaml file is taken by default
+  PACKAGE_RELEASE_NAME="$PACKAGE_NAME"
+  HELM_COMMAND+=("$PACKAGE_RELEASE_NAME" "$PACKAGE_DIRECTORY")
+
+  # Working directory is the cluster directory
+  # Why? To be able to set relative path to the cluster object such as certificate
+  # example: "--set-file kube_x.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem"
+  pushd "$KUBE_X_CLUSTER_DIR"
+  command::echo_eval "${HELM_COMMAND[*]}"
+  popd
+
+  # Wait?
+  # kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator
+
+}
+
+
+# The synopsis function is required by the doc::usage
+synopsis(){
+
+  cat << EOF
+\`\`\`bash
+kube-x-helx [-c|--cluster clusterName] command options
+\`\`\`
+
+where \`command\` can be:
+
+* \`install packageName\`  - Install a Helx package (with optional Jsonnet Manifests and kustomization)
+* \`template packageName\` - Output the manifests for an package (used for ArgoCd Integration and debugging)
+* \`values\` - Shows the values
+
+The cluster is determined in order of precedence by:
+
+* the \`-c|--cluster clusterName\` option
+* the current directory
+
+EOF
+
+}
+
+##########################
+## Collect the options
+##########################
+args=$(getopt -l "cluster:" -o "c:" -- "$@")
+# eval set to set the positional arguments back to $args
+eval set -- "$args"
+KUBE_X_CLUSTER_NAME=${KUBE_X_CLUSTER_NAME:-}
+while [[ $# -gt 0 ]]
+do
+   case "$1" in
+      "--cluster"|"-c")
+        shift
+        KUBE_X_CLUSTER_NAME=${1}
+        shift
+      ;;
+      "--")
+        shift
+        break;
+        # from now on, $@ contains only the arguments
+        ;;
+   esac
+done
+
+# Clusters PATH
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+KUBE_X_CLUSTERS_PATH=${SCRIPT_DIR}/../resources/clusters
+
+# Cluster Directory
+if [ "${KUBE_X_CLUSTER_NAME:-}" != "" ]; then
+  KUBE_X_CLUSTER_DIR="$KUBE_X_CLUSTERS_PATH/$KUBE_X_CLUSTER_NAME"
+  if [ ! -d "$KUBE_X_CLUSTER_DIR" ]; then
+    echo::err "The cluster directory ($KUBE_X_CLUSTER_DIR) does not exists. Did you type correctly the cluster name ($KUBE_X_CLUSTER_NAME)?"
+    exit 1
+  fi
+else
+  KUBE_X_CLUSTER_DIR=$PWD
+fi
+
+# Envrc
+# Used in all function
+KUBE_X_ENV_FILE="${KUBE_X_CLUSTER_ENV_FILE:-"$KUBE_X_CLUSTER_DIR/.envrc"}"
+if [ -f "$KUBE_X_ENV_FILE" ]; then
+   echo::debug "Sourcing env file $KUBE_X_ENV_FILE"
+   # shellcheck disable=SC1090
+   if ! source "$KUBE_X_ENV_FILE"; then
+     echo::err "Error while importing the envrc file $KUBE_X_ENV_FILE"
+     return 1
+   fi
+fi
+
+# Assign the first argument to a string
+COMMAND=${1:-}
+if [ "$COMMAND" = "" ]; then
+    doc::help
+    echo::err "A command is mandatory"
+    exit 1
+fi
+# Help
+if [[ "$COMMAND" =~ "-h"|"--help"|"help" ]]; then
+  doc::help
+  exit
+fi
+shift  # Remove the first argument from the argument list
+
+case "$COMMAND" in
+  "install")
+     apply "$COMMAND" "$@" || error::exit $?
+    ;;
+  "template")
+     apply "$COMMAND" "$@" || error::exit $?
+    ;;
+  "synopsis")
+    synopsis
+    ;;
+  "values")
+    # Don't know how yq does it but the output is already colored
+    kube_x::print_values
+    ;;
+  *)
+    doc::help synopsis
+    echo::err  "Command $COMMAND is unknown"
+    exit 1
+esac

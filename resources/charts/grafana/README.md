@@ -31,7 +31,7 @@ External Grafana:
 ### CRD
 
 CRD are packaged in their own chart.
-[CRD Chart](../../crds/grafana/README.md)
+[CRD Chart](../grafana-crds/README.md)
 
 ### Contrib/Dev
 

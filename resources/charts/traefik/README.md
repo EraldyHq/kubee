@@ -6,7 +6,7 @@ The `Kube-x Traefik sub-chart` will install Traefik.
 
 ## Prerequisite
 
-* [traefik-crds](../../crds/traefik/README.md)
+* [traefik-crds](../traefik-crds/README.md)
 
 ## Traefik Values
 
