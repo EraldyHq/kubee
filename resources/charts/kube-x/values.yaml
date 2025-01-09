@@ -24,6 +24,22 @@ cluster:
   # used for Ingress Ip restrictions (Traefik IpAllowList)
   # example for a home ip: 143.176.206.80/32
   private_networks: []
+  # email
+  email:
+    # Default smtp server parameters
+    smtp:
+      # The smtp host
+      # if the host is not empty, smtp configuration are added
+      # for example for argocd email notifications
+      host: ''
+      # the smtp port
+      port: ''
+      # the default from
+      from: ''
+      # the auth connection username
+      username: ''
+      # the auth connection password
+      password: ''
 
   
 # Kube-X Dashboard Variables

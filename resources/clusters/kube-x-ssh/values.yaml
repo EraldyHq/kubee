@@ -8,7 +8,15 @@ kube_x:
       password: "${KUBE_X_CLUSTER_ADMIN_PASSWORD}"
       email: "nico@eraldy.com"
     private_networks:
-      - 143.176.206.82/32
+      - '143.176.206.82/32'
+    # Default email
+    email:
+      smtp:
+        host: 'smtp.gmail.com'
+        port: '587'
+        from: 'nico@eraldy.com'
+        username: 'nico@eraldy.com'
+        password: "${KUBE_X_CLUSTER_EMAIL_SMTP_PASSWORD}"
   # Kube-x Prometheus
   prometheus:
     # Not a string, a boolean so no quote

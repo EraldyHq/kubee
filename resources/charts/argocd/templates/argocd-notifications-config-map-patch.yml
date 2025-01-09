@@ -1,8 +1,20 @@
-# Config Notification service, trigger and template
-# Example config
-# https://github.com/argoproj/argoproj-deployments/blob/master/argocd/overlays/production/argocd-notifications-cm.yaml
-# Actual Config
-# https://kube.i.eraldy.com/#/configmap/argocd/argocd-notifications-cm?namespace=argocd
+{{/*
+ Config Notification service, trigger and template
+ Example config
+ https://github.com/argoproj/argoproj-deployments/blob/master/argocd/overlays/production/argocd-notifications-cm.yaml
+ Actual Config
+ https://kube.i.eraldy.com/#/configmap/argocd/argocd-notifications-cm?namespace=argocd
+
+Test:
+helm template -s templates/argocd-notifications-config-map-patch.yml \
+  --set 'kube_x.cluster.email.smtp.host=smtp.gmail.com'  \
+  --set 'kube_x.cluster.email.smtp.port=587'  \
+  --set 'kube_x.cluster.email.smtp.username=nico'  \
+  --set 'kube_x.cluster.email.smtp.password=welcome'  \
+  --set 'kube_x.cluster.adminUser.email=foo@gmail.com' \
+  . | yq
+
+*/}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -13,13 +25,15 @@ data:
   ##############################
   #  Email
   # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/email/
+  {{- if ne .Values.kube_x.cluster.email.smtp.host ""}}
   service.email: |
-    host: smtp.gmail.com
-    port: 587
-    from: nico@eraldy.com
-    username: $email-username
-    password: $email-password
+    host: {{ .Values.kube_x.cluster.email.smtp.host }}
+    port: {{ required ".Values.kube_x.cluster.email.smtp.port is required" .Values.kube_x.cluster.email.smtp.port }}
+    from: {{ required "kube_x.cluster.adminUser.email or kube_x.cluster.email.smtp.from is requried" (default .Values.kube_x.cluster.adminUser.email .Values.kube_x.cluster.email.smtp.from) }}
+    username: ${{ template "kube-x-argocd-email-username-variable-name" }}
+    password: ${{ template "kube-x-argocd-email-password-variable-name" }}
     html: true
+  {{- end }}
   ##############################
   # Trigger
   ##############################
@@ -35,24 +49,22 @@ data:
   ##############################
   # Template
   ##############################
-  template.on-deployed-template: |
-    email:
-      subject: Application {{.app.metadata.name}} has been successfully deployed.
-    message: |
-      {{if eq .serviceType "slack"}}:white_check_mark:{{end}} Application {{.app.metadata.name}} has been successfully synced at {{.app.status.operationState.finishedAt}}.
-      Sync operation details are available at: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}?operation=true .
+  template.on-deployed-template: {{ .Files.Get "argocd-templates/on-deployed-template.yml" | quote }}
+
   ##############################
   # Context (ie Variables)
   ##############################
   # Context holds list of variables that can be referenced in templates
   context: |
-    argocdUrl: https://argocd.i.eraldy.com
+    {{- if ne .Values.kube_x.argocd.hostname "" }}
+    argocdUrl: https://{{ .Values.kube_x.argocd.hostname }}
+    {{- end }}
   ##############################
   # Global Subscriptions
   ##############################
   subscriptions: |
     # Global Subscription for on-deployed trigger notifications
     - recipients:
-        - "email:{{ required ".Values.kube_x.cluster.adminUser.email is requried" .Values.kube_x.cluster.adminUser.email }}"
+        - "email:{{ required ".Values.kube_x.cluster.adminUser.email is required" .Values.kube_x.cluster.adminUser.email }}"
       triggers:
         - on-deployed
