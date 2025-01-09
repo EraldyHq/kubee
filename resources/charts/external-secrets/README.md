@@ -10,16 +10,16 @@ and optionally configure [vault](../vault/README.md) as secret store if
 ## Install
 
 ```bash
-kube-x-cluster-app --cluster clusterName install external-secrets
+kube-x-helx --cluster clusterName install external-secrets
 # example with a cluster name of kube-x-ssh
-kube-x-cluster-app --cluster kube-x-ssh install external-secrets
+kube-x-helx --cluster kube-x-ssh install external-secrets
 ```
 
 ## Test/Check values before installation
 
 To check the [vault cluster store creation](templates/cluster-secret-store-vault.yaml)
 ```bash
-kube-x-cluster-app -c kube-x-ssh template external-secrets | grep 'cluster-secret-store-vault.yaml' -A 30
+kube-x-helx -c kube-x-ssh template external-secrets | grep 'cluster-secret-store-vault.yaml' -A 30
 ```
 
 ## Test/Check after installation

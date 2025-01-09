@@ -83,6 +83,16 @@ kube_x:
       name: 'vault-external-secret-store'
       vault:
         apiToken: '${KUBE_X_EXTERNAL_SECRETS_VAULT_API_TOKEN}'
+  argocd:
+    hostname: 'argocd.i.eraldy.com'
+    git:
+      repo:
+        url: 'https://github.com/gerardnico/kube-argocd.git'
+        username: 'whatever'
+        password: '${KUBE_X_ARGOCD_GITHUB_TOKEN}'
+      webhook:
+        service: 'github'
+        secret: '${KUBE_X_ARGOCD_WEBHOOK_SECRET}'
 
 # Helm Traefik Chart Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml

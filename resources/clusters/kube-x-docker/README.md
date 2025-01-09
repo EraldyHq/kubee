@@ -65,7 +65,7 @@ kube-x-cluster play
 ### Kube-X App Installation
 
 ```bash
-kube-x-cluster-app install traefik
+kube-x-helx install traefik
 ```
 
 

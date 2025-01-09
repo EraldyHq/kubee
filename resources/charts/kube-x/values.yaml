@@ -192,3 +192,24 @@ argocd:
   # The argocd hostname
   # if not empty, an ingress is created
   hostname: ''
+  # Git
+  git:
+    # Repo
+    # https://argo-cd.readthedocs.io/en/stable/operator-manual/argocd-repositories-yaml/
+    repo:
+      # The repo URL
+      # !!! The extension `.git` is mandatory in the URL
+      # Not https://github.com/user/argocd but https://github.com/user/argocd.git
+      url: ''
+      # Basic Auth
+      username: ''
+      password: ''
+    # WebHook auth
+    # https://argo-cd.readthedocs.io/en/latest/operator-manual/webhook/
+    webhook:
+      # The service (github, gitlab, gogs, bitbucket, azuredevops)
+      service: 'github'
+      secret: ''
+      username: ''
+      password: ''
+      uuid: ''

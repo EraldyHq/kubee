@@ -118,7 +118,8 @@ print_values(){
   # Append Default values
   #
   SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  DEFAULT_VALUES_PATH=$(realpath "$SCRIPT_DIR/../resources/apps/kube-x/values.yaml")
+  KUBE_X_CHART_DIR=$(get_chart_directory "kube-x")
+  DEFAULT_VALUES_PATH="$KUBE_X_CHART_DIR/values.yaml"
   if [ ! -f "$DEFAULT_VALUES_PATH" ]; then
     echo::err "Internal Error: The default values file ($DEFAULT_VALUES_PATH) was not found"
     return 1
@@ -180,19 +181,24 @@ apply(){
   # The kube-x values
   # We need them to determine the namespace
   KUBE_X_VALUES_PATH="/dev/shm/kube-x-values.yml"
-  print_values >| $KUBE_X_VALUES_PATH
+  if ! print_values >| $KUBE_X_VALUES_PATH; then
+    echo::err "An error has happened while generating the values file"
+    return 1
+  fi
   bash::trap "rm $KUBE_X_VALUES_PATH" EXIT # EXIT execute also on error
   HELM_COMMAND+=("-f" "${KUBE_X_VALUES_PATH}")
 
   # Package
   PACKAGE_DIRECTORY=$(get_chart_directory "$PACKAGE_NAME")
-  PACKAGE_YAML_KEY=$(echo $$PACKAGE_NAME | tr "-" "_") # Go templating does not support `-`
-  PACKAGE_NAMESPACE=$(yq ".kube_x.$PACKAGE_YAML_KEY.namespace" "$KUBE_X_VALUES_PATH")
-  if [ "$PACKAGE_NAMESPACE" == "" ]; then
+  PACKAGE_YAML_KEY=$(echo "$PACKAGE_NAME" | tr "-" "_") # Go templating does not support `-`
+  VALUES_NAMESPACE_PATH=".kube_x.$PACKAGE_YAML_KEY.namespace"
+  PACKAGE_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$KUBE_X_VALUES_PATH")
+  if [ "$PACKAGE_NAMESPACE" == "null" ]; then
+    echo::info "No namespace found at $VALUES_NAMESPACE_PATH"
     PACKAGE_NAMESPACE="$PACKAGE_NAME"
     echo::info "Installing into the default namespace $PACKAGE_NAMESPACE"
   else
-    echo::info "Installing into the namespace $PACKAGE_NAMESPACE found in values"
+    echo::info "Installing into the namespace ($PACKAGE_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
   fi
   HELM_COMMAND+=(
     "-n" "$PACKAGE_NAMESPACE"

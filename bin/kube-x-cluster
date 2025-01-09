@@ -148,7 +148,7 @@ case $COMMAND in
     cat "$INVENTORY_FILE"
     ;;
 "app")
-    kube-x-cluster-app "${ARGS[@]}" || error::exit $?
+    kube-x-helx "${ARGS[@]}" || error::exit $?
     ;;
 *)
   doc::help synopsis

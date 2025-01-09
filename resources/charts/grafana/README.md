@@ -10,7 +10,7 @@ This app:
 ## Install
 
 ```bash
-kube-x-cluster-app --cluster clusterName install grafana
+kube-x-helx --cluster clusterName install grafana
 ```
 
 ## Values

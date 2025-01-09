@@ -18,6 +18,6 @@ kube-x-cluster inv
 ### Kube-X App Installation
 
 ```bash
-kube-x-cluster-app install traefik
-kube-x-cluster-app install cert-manager
+kube-x-helx install traefik
+kube-x-helx install cert-manager
 ```

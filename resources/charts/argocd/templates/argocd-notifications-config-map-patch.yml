@@ -63,8 +63,10 @@ data:
   # Global Subscriptions
   ##############################
   subscriptions: |
+    {{- if ne .Values.kube_x.cluster.adminUser.email "" }}
     # Global Subscription for on-deployed trigger notifications
     - recipients:
-        - "email:{{ required ".Values.kube_x.cluster.adminUser.email is required" .Values.kube_x.cluster.adminUser.email }}"
+        - "email:{{ .Values.kube_x.cluster.adminUser.email }}"
       triggers:
         - on-deployed
+    {{- end }}

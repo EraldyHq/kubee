@@ -12,6 +12,13 @@ This role:
 
 It depends on Vault and External Secrets.
 
+## Test/Check values before installation
+
+To check the [repo creation](templates/argocd-secret-repo.yml)
+```bash
+kube-x-helx -c kube-x-ssh template argocd | grep 'argocd-secret-repo.yml' -A 30
+```
+
 ## How to
 
 ### Develop
