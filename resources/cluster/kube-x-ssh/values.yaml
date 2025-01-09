@@ -71,8 +71,10 @@ kube_x:
   vault:
     enabled: true
   external_secrets:
-    vault:
-      apiToken: '${KUBE_X_EXTERNAL_SECRETS_VAULT_API_TOKEN}'
+    store:
+      name: 'vault-external-secret-store'
+      vault:
+        apiToken: '${KUBE_X_EXTERNAL_SECRETS_VAULT_API_TOKEN}'
 
 # Helm Traefik Chart Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml

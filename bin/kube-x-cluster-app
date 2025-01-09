@@ -33,11 +33,14 @@ apply(){
 
 
   read -r APP_NAMESPACE APP_NAME <<< "$(kube::get_qualified_app_name "$APP_NAME")"
-  echo::Info "Install app $APP_NAME in namespace $APP_NAMESPACE"
+  echo::info "Install app $APP_NAME in namespace $APP_NAMESPACE"
 
   # Get env (KubeConfig) used by helm for CRD Chart and app Chart
   KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
   eval "$KUBECTX_ENV"
+
+  # App
+  APP_DIRECTORY=$(kube::get_app_directory "$APP_NAMESPACE")
 
   # Crds first
   # CRD first installation is becoming a standard
@@ -52,7 +55,7 @@ apply(){
   if APP_CRDS_DIRECTORY=$(kube::get_app_crds_directory "$APP_NAMESPACE"); then
     echo::debug "App Crd Directory: $APP_CRDS_DIRECTORY"
     APP_RELEASE_CRDS_NAME="$APP_NAMESPACE-crds"
-    CHART_APP_VERSION=$(yq '.appVersion' Chart.yaml)
+    CHART_APP_VERSION=$(yq '.appVersion' "$APP_DIRECTORY/Chart.yaml")
     if ! kube::is_helm_chart_installed "$APP_RELEASE_CRDS_NAME" "$APP_NAMESPACE" "$CHART_APP_VERSION"; then
 
       command::echo_eval "helm upgrade --install -n $APP_NAMESPACE --create-namespace $APP_RELEASE_CRDS_NAME $APP_CRDS_DIRECTORY"
@@ -71,8 +74,6 @@ apply(){
     echo::info "No CRD Chart for $APP_NAMESPACE found"
   fi
 
-  # App
-  APP_DIRECTORY=$(kube::get_app_directory "$APP_NAMESPACE")
 
   # To update the kube-x helm
   command::echo_eval "helm dependency update $APP_DIRECTORY"
