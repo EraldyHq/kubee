@@ -16,7 +16,7 @@ It depends on Vault and External Secrets.
 
 To check the [repo creation](templates/argocd-secret-repo.yml)
 ```bash
-kube-x-helx -c kube-x-ssh template argocd | grep 'argocd-secret-repo.yml' -A 30
+kube-x-helx -c kube-x-ssh template argocd | grep 'name: argocd-secret-repo' -A 2 -B 11
 ```
 
 ## How to
@@ -35,6 +35,18 @@ cd argocd
 kubectl config set-context --current --namespace=argocd
 kubectl apply -k .
 ```
+
+### Namespace is mandatory
+
+Every manifest should have a namespace.
+
+Otherwise, you get:
+```
+error: accumulating resources: accumulation err='merging resources from 'helx.yml': 
+may not add resource with an already registered id: ConfigMap.v1.[noGrp]/argocd-cmd-params-cm.[noNs]': 
+must build at directory: '/home/admin/code/kube-x/resources/charts/argocd/helx.yml': file is not directory
+```
+
 
 ### Debug Notifications
 

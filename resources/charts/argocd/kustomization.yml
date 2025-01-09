@@ -6,13 +6,11 @@ kind: Kustomization
 patches:
   # patch needed to apply the server transport via annotation to disable tls validation from Traefik
   - path: patches/argocd-svc-no-tls-patch.yml
-  # Notification Configuration
-  - path: templates/argocd-notifications-config-map-patch.yml
-  # Command line argument
-  - path: templates/argocd-cmd-params-cm.yml
+
 
 resources:
   - https://raw.githubusercontent.com/argoproj/argo-cd/v2.11.7/manifests/install.yaml
+  - helx.yml
 #  # Namespace
 #  - templates/argocd-namespace.yml
 #  # Ingress taken by Traefik

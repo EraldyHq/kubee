@@ -1,9 +1,9 @@
 #!/bin/bash
 # A post renderer to integrate kustomize and jsonnet
-set -TCEeuo pipefail
 # shellcheck source=../..//bash-lib/lib/bashlib-error.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
 error::set_trap
+set -TCEeuo pipefail
 # shellcheck source=../../bash-lib/lib/bashlib-echo.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-doc.sh
@@ -59,6 +59,8 @@ HELM_MANIFEST=$(cat)
 JSONNET_DIR="jsonnet"
 if [ -d "$JSONNET_DIR" ]; then
 
+  echo::info "Jsonnet processing"
+
   # Update the dependencies (vendor directory)
   JPATH="vendor"
   JSONNET_FILE="jsonnetfile.json"
@@ -91,19 +93,37 @@ EOF
 )
 
   done
+
+else
+  echo::info "No Jsonnet directory found"
 fi
 
 # Kustomize
 # Example:
 # https://github.com/thomastaylor312/advanced-helm-demos/tree/master/post-render
-KUSTOMIZATION_FILE="kustomization.yaml"
+KUSTOMIZATION_FILE=$(realpath "kustomization.yml")
 if [ -f "$KUSTOMIZATION_FILE" ]; then
-  echo "$HELM_MANIFEST" > all.yaml
-  # kustomize should be installed in the PATH
-  # a kustomization.yaml file should be present that adds the resource `all.yaml`
-  kustomize build . && rm all.yaml
-  exit 0
+  echo::info "Kustomization processing (File: $KUSTOMIZATION_FILE)"
+  HELM_FILE="helx.yml"
+  CONTAINS_HELM_FILE=$(yq ".resources | contains([\"$HELM_FILE\"])" "$KUSTOMIZATION_FILE")
+  if [ "$CONTAINS_HELM_FILE" == "false" ]; then
+    echo::err "The kustomization file should contain the generated file ($HELM_FILE) in the resources list"
+    exit 1
+  fi
+  echo "$HELM_MANIFEST" >| "$HELM_FILE"
+  # kubectl should be installed in the PATH
+  # kustomize build .
+  if HELM_MANIFEST=$(kubectl kustomize .); then
+    # most errors comes from the generation, we don't delete the file then on error
+    rm "$APP_DIRECTORY/$HELM_FILE"
+  else
+    echo::err "An error occurred during the kustomization"
+    echo::err "The command 'kubectl kustomize .' failed"
+    exit 1
+  fi
+else
+  # No Kustomize, output the manifest without kustomization
+  echo::info "No kustomization file ($KUSTOMIZATION_FILE)"
 fi
 
-# No Kustomize, output the manifest without kustomization
 echo "$HELM_MANIFEST"

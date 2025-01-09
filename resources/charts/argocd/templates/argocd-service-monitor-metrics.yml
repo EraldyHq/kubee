@@ -1,9 +1,12 @@
-# The controller metrics to get health status
-# https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/#application-controller-metrics
+{{- /*
+  The controller metrics to get health status
+  https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/#application-controller-metrics
+*/}}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: argocd-metrics
+  namespace: {{ .Values.kube_x.argocd.namespace }}
   labels:
     release: prometheus-operator
     app.kubernetes.io/name: argocd-metrics
