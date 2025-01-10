@@ -3,25 +3,20 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-patches:
-  # patch needed to apply the server transport via annotation to disable tls validation from Traefik
-  - path: patches/argocd-svc-no-tls-patch.yml
+# Custom Namespace
+# https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#installing-argo-cd-in-a-custom-namespace
+namespace: argocd
 
+patches:
+  # Patch needed to apply the server transport via annotation to disable tls validation from Traefik
+  - path: patches/argocd-svc-no-tls-patch.yml
+  # CustomNamespace patch: https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#installing-argo-cd-in-a-custom-namespace
+  - patch: |-
+      - op: replace
+        path: /subjects/0/namespace
+        value: argocd
+    target:
+      kind: ClusterRoleBinding
 
 resources:
   - https://raw.githubusercontent.com/argoproj/argo-cd/v2.11.7/manifests/install.yaml
-  - helx.yml
-#  # Namespace
-#  - templates/argocd-namespace.yml
-#  # Ingress taken by Traefik
-#  - templates/argocd-ingress.yml
-#  # Secrets
-#  - templates/argocd-secret-repo.yml
-#  - templates/argocd-secret.yml
-#  - templates/argocd-notifications-secret.yml
-#  # Traefik Server transport to disable tls verify
-#  - templates/argocd-svc-no-tls-transport.yml
-#  # Metrics
-#  - templates/argocd-service-monitor-metrics.yml
-#  - templates/argocd-prometheus-alert-rule.yml
-

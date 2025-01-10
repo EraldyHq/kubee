@@ -15,38 +15,48 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
 # shellcheck source=kube-x-lib.sh
 source kube-x-lib.sh
 
-APP_DIRECTORY="${1:-}"
+KUBE_X_CHART_DIRECTORY="${1:-}"
 
-if [[ "$APP_DIRECTORY" =~ "synopsis"|"help" ]]; then
-  echo "A post renderer to integrate kustomize and jsonnet"
-  echo ""
-  echo "$(basename "$0") appDirectory valuesPath"
-  echo ""
-  echo "where:"
-  echo "  appDirectory: is the directory of the app to install"
-  echo "  valuesPath: is the path to the values file"
-  echo ""
-  echo "Note: the Helm templates are passed via stdin"
-  echo "See https://helm.sh/docs/topics/advanced/#post-rendering"
+if [[ "$KUBE_X_CHART_DIRECTORY" =~ "synopsis"|"help" ]]; then
+  cat <<EOF
+A post renderer to integrate \`kustomize\` and \`jsonnet\`
+\`\`\`bash
+$(basename "$0") appDirectory valuesPath KUBE_X_NAMESPACE
+\`\`\`
+
+where:
+
+* \`KUBE_X_CHART_DIRECTORY\` is the directory of the app to install
+* \`KUBE_X_VALUES_FILE\` is the path to the values file
+* \`KUBE_X_NAMESPACE\` is the installation namespace
+
+Note: the Helm templates should be passed via stdin
+EOF
   exit 0
 fi
 
-if [ ! -d "$APP_DIRECTORY" ]; then
-  echo::err "Internal Error: the first argument app directory ($APP_DIRECTORY) is not a valid directory"
+if [ ! -d "$KUBE_X_CHART_DIRECTORY" ]; then
+  echo::err "Internal Error: the first argument KUBE_X_CHART_DIRECTORY ($KUBE_X_CHART_DIRECTORY) is not a valid directory"
   exit 1
 fi
 
 # Values path is already generated at this point
 # that's why we pass it and not regenerate it
-VALUES_PATH="${2:-}"
-if [ ! -f "$VALUES_PATH" ]; then
-  echo::err "Internal Error: the second argument values path ($VALUES_PATH) is not a valid file"
+KUBE_X_VALUES_FILE="${2:-}"
+if [ ! -f "$KUBE_X_VALUES_FILE" ]; then
+  echo::err "Internal Error: the second argument values path ($KUBE_X_VALUES_FILE) is not a valid file"
+  exit 1
+fi
+
+KUBE_X_NAMESPACE="${3:-}"
+if [ "$KUBE_X_NAMESPACE" == "" ]; then
+  echo::err "Internal Error: the third argument namespace should not be empty"
   exit 1
 fi
 
 
 # The whole script run in the app directory
-pushd "$APP_DIRECTORY" > /dev/null
+pushd "$KUBE_X_CHART_DIRECTORY" > /dev/null
 bash::trap 'popd >/dev/null' EXIT # EXIT execute also on error
 
 # Grab the manifests passed by Helm
@@ -79,7 +89,7 @@ if [ -d "$JSONNET_DIR" ]; then
       jsonnet \
         --jpath "$JPATH" \
         --string \
-        --ext-code "values=std.parseYaml(importstr \"$VALUES_PATH\")" \
+        --ext-code "values=std.parseYaml(importstr \"$KUBE_X_VALUES_FILE\")" \
         --exec "std.manifestYamlDoc((import \"$JSONNET_FILE\"))"
     )
 
@@ -101,24 +111,70 @@ fi
 # Kustomize
 # Example:
 # https://github.com/thomastaylor312/advanced-helm-demos/tree/master/post-render
-KUSTOMIZATION_FILE=$(realpath "kustomization.yml")
+KUSTOMIZATION_RELATIF_RUN_DIR="."
+KUSTOMIZATION_FILE=$(realpath "$KUSTOMIZATION_RELATIF_RUN_DIR/kustomization.yml")
 if [ -f "$KUSTOMIZATION_FILE" ]; then
-  echo::info "Kustomization processing (File: $KUSTOMIZATION_FILE)"
-  HELM_FILE="helx.yml"
-  CONTAINS_HELM_FILE=$(yq ".resources | contains([\"$HELM_FILE\"])" "$KUSTOMIZATION_FILE")
-  if [ "$CONTAINS_HELM_FILE" == "false" ]; then
-    echo::err "The kustomization file should contain the generated file ($HELM_FILE) in the resources list"
-    exit 1
+  echo::info "Base Kustomization processing (File: $KUSTOMIZATION_FILE)"
+  HELM_TEMPLATES_FILE="kube-x-helm-x-templates.yml"
+  if [ -f "kustomize/overlay/kustomization.yml" ]; then
+    KUSTOMIZATION_RELATIF_RUN_DIR="kustomize/overlay"
+    KUSTOMIZATION_FILE=$(realpath "$KUSTOMIZATION_RELATIF_RUN_DIR/kustomization.yml")
+    echo::info "Overlay Kustomization processing (File: $KUSTOMIZATION_FILE)"
   fi
-  echo "$HELM_MANIFEST" >| "$HELM_FILE"
-  # kubectl should be installed in the PATH
-  # kustomize build .
-  if HELM_MANIFEST=$(kubectl kustomize .); then
-    # most errors comes from the generation, we don't delete the file then on error
-    rm "$APP_DIRECTORY/$HELM_FILE"
+#  CONTAINS_HELM_FILE=$(yq ".resources | contains([\"$HELM_TEMPLATES_FILE\"])" "$KUSTOMIZATION_FILE")
+#  if [ "$CONTAINS_HELM_FILE" == "false" ]; then
+#    echo::err "The kustomization file should contain the generated file ($HELM_TEMPLATES_FILE) in the resources list"
+#    exit 1
+#  fi
+  # The run dir is fix so that the content is deleted at every run
+  # To be able to debug, the content is not deleted on error
+  KUSTOMIZE_TEMP_DIR="$(dirname "$(mktemp -u)")/kube-x-helm-post-renderer"
+  rm -rf "$KUSTOMIZE_TEMP_DIR"
+  mkdir -p "$KUSTOMIZE_TEMP_DIR"
+  # Copy the files excluding gitignore
+  rsync -av \
+    --progress \
+    --exclude-from=<(git -C "$KUBE_X_CHART_DIRECTORY" ls-files --exclude-standard -oi --directory) \
+    "$KUBE_X_CHART_DIRECTORY/" \
+    "$KUSTOMIZE_TEMP_DIR" 1>/dev/null
+  echo "$HELM_MANIFEST" >| "${KUSTOMIZE_TEMP_DIR}/$KUSTOMIZATION_RELATIF_RUN_DIR/$HELM_TEMPLATES_FILE"
+  # Var
+  # running kustomize the values file should be in or below
+  # See error: error: security; file '/dev/shm/kube-x-values.yml' is not in or below '/tmp/kube-x-helm-post-renderer/kustomize/base'
+  KUBE_X_KUSTOMIZE_VALUES_FILE="${KUSTOMIZE_TEMP_DIR}/$KUSTOMIZATION_RELATIF_RUN_DIR/values.yaml"
+  cp "$KUBE_X_VALUES_FILE" "$KUBE_X_KUSTOMIZE_VALUES_FILE"
+  export KUBE_X_VALUES_FILE=$KUBE_X_KUSTOMIZE_VALUES_FILE
+  export KUBE_X_NAMESPACE
+  export KUBE_X_CHART_HOME
+  KUBE_X_CHART_HOME=$(realpath "$KUBE_X_CHART_DIRECTORY/..")
+  # Variable Substitution: Check the variables
+  if ! UNDEFINED_VARS=$(template::check_vars -f "$KUSTOMIZATION_FILE"); then
+       # Should exit because of the strict mode
+       # but it was not working
+       echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUSTOMIZATION_FILE"
+       exit 1
+  fi
+  envsubst < "$KUSTOMIZATION_FILE" >| "${KUSTOMIZE_TEMP_DIR}/${KUSTOMIZATION_RELATIF_RUN_DIR}/kustomization.yml"
+
+  # The argument must be:
+  # * a file system path
+  # * or git repository path (git URL with path)
+  # containing 'kustomization.yaml'
+  # equivalent to: kustomize build .
+  # https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/helmcharts/
+  # https://github.com/mgoltzsche/khelm
+  # Flag --reorder has been deprecated, use the new 'sortOptions' field in kustomization.yaml instead.
+  if HELM_MANIFEST=$(cd "$KUSTOMIZE_TEMP_DIR" && kubectl kustomize --reorder=none --enable-helm "${KUSTOMIZATION_RELATIF_RUN_DIR}"); then
+    # most errors comes from the generation,
+    # we delete the directory only on success
+    if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
+      rm -rf "$KUSTOMIZE_TEMP_DIR"
+    else
+      echo::err "The command 'kubectl kustomize ${KUSTOMIZATION_RELATIF_RUN_DIR}' was executed with the $KUSTOMIZE_TEMP_DIR working directory"
+    fi
   else
     echo::err "An error occurred during the kustomization"
-    echo::err "The command 'kubectl kustomize .' failed"
+    echo::err "The command 'kubectl kustomize ${KUSTOMIZATION_RELATIF_RUN_DIR}' failed with the $KUSTOMIZE_TEMP_DIR working directory"
     exit 1
   fi
 else

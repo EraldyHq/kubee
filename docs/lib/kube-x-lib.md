@@ -14,9 +14,6 @@ A library of kubernetes functions
 * [kube::get_resources_by_app_name](#kubeget_resources_by_app_name)
 * [kube::get_resource_by_app_name](#kubeget_resource_by_app_name)
 * [kube::get_json_path](#kubeget_json_path)
-* [kube::get_app_directory](#kubeget_app_directory)
-* [kube::get_app_crds_directory](#kubeget_app_crds_directory)
-* [kube::is_helm_chart_installed](#kubeis_helm_chart_installed)
 * [kube::test_connection](#kubetest_connection)
 
 ### kube::get_qualified_app_name
@@ -117,39 +114,6 @@ Return a json path to be used in a `-o jsonpath=x` kubectl option
 #### Arguments
 
 * **$1** (string): The Json expressions (Default to: `.metadata.name .metadata.namespace`)
-
-### kube::get_app_directory
-
-Return the directory of an app
-
-#### Arguments
-
-* **$1** (string): The app namespace
-
-### kube::get_app_crds_directory
-
-Return the crds directory of an app
-
-#### Arguments
-
-* **$1** (string): The app namespace
-
-#### Exit codes
-
-* **1**: if there is no crds directory
-* **0**: if there is a crds directory
-
-#### Output on stdout
-
-* the crds directory
-
-### kube::is_helm_chart_installed
-
-Return if the chart is already installed
-
-#### Exit codes
-
-* **1**: - if the chart is not installed or with another app version
 
 ### kube::test_connection
 

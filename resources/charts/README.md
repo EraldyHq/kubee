@@ -3,7 +3,7 @@
 
 ## About
 This directory contains the charts that can be installed
-with the [helx package manager](../../bin/kube-x-helx)
+with the [helx package manager](../../bin/kube-x-helm-x)
 
 ## Type
 

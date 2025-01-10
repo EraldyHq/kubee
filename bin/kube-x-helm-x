@@ -241,7 +241,7 @@ apply(){
 
 
   # To update the kube-x helm
-  command::echo_eval "helm dependency update $PACKAGE_DIRECTORY"
+  command::echo_eval "helm dependency update $PACKAGE_DIRECTORY 1>&2"
   HELM_COMMAND+=( "--dependency-update" )
 
   # Options ???
@@ -254,6 +254,7 @@ apply(){
     "--post-renderer" "kube-x-helm-post-renderer"
     "--post-renderer-args" "$PACKAGE_DIRECTORY"
     "--post-renderer-args" "$KUBE_X_VALUES_PATH"
+    "--post-renderer-args" "$PACKAGE_NAMESPACE"
     )
 
   # --dependency-update flag to avoid the `helm dependency build` error:
@@ -266,9 +267,9 @@ apply(){
   # Working directory is the cluster directory
   # Why? To be able to set relative path to the cluster object such as certificate
   # example: "--set-file kube_x.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem"
-  pushd "$KUBE_X_CLUSTER_DIR"
+  pushd "$KUBE_X_CLUSTER_DIR" 1>&2
   command::echo_eval "${HELM_COMMAND[*]}"
-  popd
+  popd 1>&2
 
   # Wait?
   # kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator

@@ -20,7 +20,7 @@ This tool adds also this command for the \`PrometheusRule\` CRD file of \`Promet
 * \`promtool test prometheusRules\` to execute unit test with \`PrometheusRule\` as source of rules.
 
 EOF
-    docker run "${DOCKER_OPTIONS[@]}" prom/prometheus:latest --help
+  command::echo_debug_eval "docker run ${DOCKER_OPTIONS[*]} prom/prometheus:latest --help"
 }
 
 check_prometheus_rule(){

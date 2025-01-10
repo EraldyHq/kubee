@@ -40,6 +40,9 @@ kubectl apply -k .
 
 Every manifest should have a namespace.
 
+Because Argocd uses a fixed value of `argocd`
+https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#installing-argo-cd-in-a-custom-namespace
+
 Otherwise, you get:
 ```
 error: accumulating resources: accumulation err='merging resources from 'helx.yml': 

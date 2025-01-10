@@ -21,6 +21,12 @@ kind: ConfigMap
 metadata:
   name: argocd-notifications-cm
   namespace: {{ .Values.kube_x.argocd.namespace }}
+  annotations:
+    {{/*
+      The behavior annotation will influence how conflicts are handled for resources emitted by the plugin.
+      Valid values include “create”, “merge”, and “replace” with “create” being the default.
+    */}}
+    kustomize.config.k8s.io/behavior: merge
 data:
   ##############################
   # Services section

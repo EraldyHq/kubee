@@ -54,9 +54,7 @@ Generate a Ephemere Kubeconfig from pass with [kube-x-config](docs/lib/kube-x-co
 
 * Mac / Linux / Windows WSL with HomeBrew
 ```bash
-brew install --HEAD gerardnico/tap/kube
-# Add the libraries directory into your path in your `.bashrc` file
-export PATH=$(brew --prefix bashlib)/lib:$PATH
+brew install --HEAD gerardnico/tap/kube-x
 ```
 
 ## What is an app name?

@@ -188,6 +188,8 @@ external_secrets:
 
 # Argocd
 argocd:
+  # This namespace should not change
+  # https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#installing-argo-cd-in-a-custom-namespace
   namespace: argocd
   # The argocd hostname
   # if not empty, an ingress is created
