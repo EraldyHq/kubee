@@ -59,8 +59,25 @@ fi
 pushd "$KUBE_X_CHART_DIRECTORY" > /dev/null
 bash::trap 'popd >/dev/null' EXIT # EXIT execute also on error
 
+# Kustomize
+# Example:
+# https://github.com/thomastaylor312/advanced-helm-demos/tree/master/post-render
+KUSTOMIZATION_FILE=$(realpath "$KUBE_X_CHART_DIRECTORY/kustomization.yml")
+KUSTOMIZATION_MODE=0
+if [ -f "$KUSTOMIZATION_FILE" ]; then
+  KUSTOMIZATION_MODE=1
+else
+  echo::info "No kustomization file ($KUSTOMIZATION_FILE)"
+fi
+
 # Grab the manifests passed by Helm
 HELM_MANIFEST=$(cat)
+# In kustomization mode, the templates are re-created individually
+# because we don't known which one is a resource and which one is a patch
+# The kustomization file is the driver
+if [ "$KUSTOMIZATION_MODE" -eq 1 ]; then
+  HELM_MANIFEST=""
+fi
 
 ##################
 # JsonNet
@@ -111,42 +128,24 @@ fi
 # Kustomize
 # Example:
 # https://github.com/thomastaylor312/advanced-helm-demos/tree/master/post-render
-KUSTOMIZATION_RELATIF_RUN_DIR="."
-KUSTOMIZATION_FILE=$(realpath "$KUSTOMIZATION_RELATIF_RUN_DIR/kustomization.yml")
-if [ -f "$KUSTOMIZATION_FILE" ]; then
-  echo::info "Base Kustomization processing (File: $KUSTOMIZATION_FILE)"
-  HELM_TEMPLATES_FILE="kube-x-helm-x-templates.yml"
-  if [ -f "kustomize/overlay/kustomization.yml" ]; then
-    KUSTOMIZATION_RELATIF_RUN_DIR="kustomize/overlay"
-    KUSTOMIZATION_FILE=$(realpath "$KUSTOMIZATION_RELATIF_RUN_DIR/kustomization.yml")
-    echo::info "Overlay Kustomization processing (File: $KUSTOMIZATION_FILE)"
-  fi
-#  CONTAINS_HELM_FILE=$(yq ".resources | contains([\"$HELM_TEMPLATES_FILE\"])" "$KUSTOMIZATION_FILE")
-#  if [ "$CONTAINS_HELM_FILE" == "false" ]; then
-#    echo::err "The kustomization file should contain the generated file ($HELM_TEMPLATES_FILE) in the resources list"
-#    exit 1
-#  fi
-  # The run dir is fix so that the content is deleted at every run
+if [ "$KUSTOMIZATION_MODE" -eq 1 ]; then
+  echo::info "Kustomization processing (File: $KUSTOMIZATION_FILE)"
+
+  # The root run dir is fix so that the content is deleted at every run
   # To be able to debug, the content is not deleted on error
-  KUSTOMIZE_TEMP_DIR="$(dirname "$(mktemp -u)")/kube-x-helm-post-renderer"
-  rm -rf "$KUSTOMIZE_TEMP_DIR"
-  mkdir -p "$KUSTOMIZE_TEMP_DIR"
-  # Copy the files excluding gitignore
-  rsync -av \
-    --progress \
-    --exclude-from=<(git -C "$KUBE_X_CHART_DIRECTORY" ls-files --exclude-standard -oi --directory) \
-    "$KUBE_X_CHART_DIRECTORY/" \
-    "$KUSTOMIZE_TEMP_DIR" 1>/dev/null
-  echo "$HELM_MANIFEST" >| "${KUSTOMIZE_TEMP_DIR}/$KUSTOMIZATION_RELATIF_RUN_DIR/$HELM_TEMPLATES_FILE"
-  # Var
-  # running kustomize the values file should be in or below
-  # See error: error: security; file '/dev/shm/kube-x-values.yml' is not in or below '/tmp/kube-x-helm-post-renderer/kustomize/base'
-  KUBE_X_KUSTOMIZE_VALUES_FILE="${KUSTOMIZE_TEMP_DIR}/$KUSTOMIZATION_RELATIF_RUN_DIR/values.yaml"
-  cp "$KUBE_X_VALUES_FILE" "$KUBE_X_KUSTOMIZE_VALUES_FILE"
-  export KUBE_X_VALUES_FILE=$KUBE_X_KUSTOMIZE_VALUES_FILE
+  KUSTOMIZE_ROOT_TEMP_DIR="$(dirname "$(mktemp -u)")/kube-x"
+  rm -rf "$KUSTOMIZE_ROOT_TEMP_DIR"
+
+  # Package Run/Temp Dir
+  # The name of the directory is not random
+  # It follows the usage of the output command `helm template --output-dir=$KUSTOMIZE_ROOT_TEMP_DIR`
+  # The templates are then stored at $KUSTOMIZE_ROOT_TEMP_DIR/CHART_NAME/templates/...yml
+  CHART_NAME=$(yq '.name' "$KUBE_X_CHART_DIRECTORY/Chart.yaml")
+  KUSTOMIZE_PACKAGE_TEMP_DIR="$KUSTOMIZE_ROOT_TEMP_DIR/$CHART_NAME"
+  mkdir -p "$KUSTOMIZE_PACKAGE_TEMP_DIR"
+
+  # Output of Kustomization
   export KUBE_X_NAMESPACE
-  export KUBE_X_CHART_HOME
-  KUBE_X_CHART_HOME=$(realpath "$KUBE_X_CHART_DIRECTORY/..")
   # Variable Substitution: Check the variables
   if ! UNDEFINED_VARS=$(template::check_vars -f "$KUSTOMIZATION_FILE"); then
        # Should exit because of the strict mode
@@ -154,7 +153,12 @@ if [ -f "$KUSTOMIZATION_FILE" ]; then
        echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUSTOMIZATION_FILE"
        exit 1
   fi
-  envsubst < "$KUSTOMIZATION_FILE" >| "${KUSTOMIZE_TEMP_DIR}/${KUSTOMIZATION_RELATIF_RUN_DIR}/kustomization.yml"
+  envsubst < "$KUSTOMIZATION_FILE" >| "${KUSTOMIZE_PACKAGE_TEMP_DIR}/kustomization.yml"
+
+  # Output templates
+  # helm template --output-dir /tmp
+  # will output all templates one by one at: $KUSTOMIZE_ROOT_TEMP_DIR/chart-name/templates/argocd-service-monitor-metrics.yml
+  command::echo_eval "helm template --output-dir $KUSTOMIZE_ROOT_TEMP_DIR -f $KUBE_X_VALUES_FILE $KUBE_X_CHART_DIRECTORY"
 
   # The argument must be:
   # * a file system path
@@ -164,22 +168,27 @@ if [ -f "$KUSTOMIZATION_FILE" ]; then
   # https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/helmcharts/
   # https://github.com/mgoltzsche/khelm
   # Flag --reorder has been deprecated, use the new 'sortOptions' field in kustomization.yaml instead.
-  if HELM_MANIFEST=$(cd "$KUSTOMIZE_TEMP_DIR" && kubectl kustomize --reorder=none --enable-helm "${KUSTOMIZATION_RELATIF_RUN_DIR}"); then
-    # most errors comes from the generation,
+  if KUSTOMIZE_MANIFEST=$(cd "$KUSTOMIZE_PACKAGE_TEMP_DIR" && kubectl kustomize --reorder=none .); then
     # we delete the directory only on success
+    # most errors comes from the generation,
     if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
-      rm -rf "$KUSTOMIZE_TEMP_DIR"
+      rm -rf "$KUSTOMIZE_PACKAGE_TEMP_DIR"
     else
-      echo::err "The command 'kubectl kustomize ${KUSTOMIZATION_RELATIF_RUN_DIR}' was executed with the $KUSTOMIZE_TEMP_DIR working directory"
+      echo::err "The command 'kubectl kustomize .' was executed with the $KUSTOMIZE_PACKAGE_TEMP_DIR working directory"
     fi
+    # Add the kustomize manifest to the Jsonnet manifest if any
+    HELM_MANIFEST=$(cat <<EOF
+$HELM_MANIFEST
+---
+$KUSTOMIZE_MANIFEST
+EOF
+)
   else
     echo::err "An error occurred during the kustomization"
-    echo::err "The command 'kubectl kustomize ${KUSTOMIZATION_RELATIF_RUN_DIR}' failed with the $KUSTOMIZE_TEMP_DIR working directory"
+    echo::err "The command 'kubectl kustomize .' failed with the $KUSTOMIZE_PACKAGE_TEMP_DIR working directory"
     exit 1
   fi
-else
-  # No Kustomize, output the manifest without kustomization
-  echo::info "No kustomization file ($KUSTOMIZATION_FILE)"
 fi
 
+# Output
 echo "$HELM_MANIFEST"

@@ -7,14 +7,14 @@ The apps are in another directory.
 
 This role:
 * install and configure argocd via [kustomize](kustomization.yml)
-* add the [git repo](templates/argocd-secret-repo.yml)
-* add the [github webhook](templates/argocd-secret.yml)
+* add the [git repo](templates/resources/argocd-secret-repo.yml)
+* add the [github webhook](templates/resources/argocd-secret-external.yml)
 
 It depends on Vault and External Secrets.
 
 ## Test/Check values before installation
 
-To check the [repo creation](templates/argocd-secret-repo.yml)
+To check the [repo creation](templates/resources/argocd-secret-repo.yml)
 ```bash
 kube-x-helx -c kube-x-ssh template argocd | grep 'name: argocd-secret-repo' -A 2 -B 11
 ```

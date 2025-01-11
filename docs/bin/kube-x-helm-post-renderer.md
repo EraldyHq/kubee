@@ -17,20 +17,21 @@ $SYNOPSIS
   - the `jsonnet` files present in the `jsonnet` directory are executed 
   - the output are added to the Helm templates
 - if a `kustomization.yml` is present at the root of the chart directory
-  - the environment variables present in `kustomization.yml` are substituted 
-  - `kustomize` is applied on the whole set of templates (Helm + Jsonnet templates)
+  - the environment variables present in `kustomization.yml` are substituted
+  - the templates are rendered
+  - `kustomize` is applied
+  - the output is added to the Jsonnet templates if present
 
 # JSONNET
 
 * The files with the extension `jsonnet` stored in the `jsonnet` directory are executed.
-* The output is added as new manifest.
+* The output is added as new manifest (ie new resources)
 
 # KUSTOMIZATION
 
-* Your chart should have a `kustomization.yml` file at the root with a resources called `kube-x-helm-x-templates.yml`
-* The kustomization file can include the `${KUBE_X_NAMESPACE}` environment variable.
+* Your chart can reference Helm templates directly. They will be rendered before passing them to `kustomize`
+* The kustomization file can include the `${KUBE_X_NAMESPACE}` environment variable. Why? To support [this case](https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#installing-argo-cd-in-a-custom-namespace)
 
-Kustomize won't let you have multiple resources with the same GVK, name, and namespace because it expects each resource to be unique.
 
 Example:
 ```yaml
@@ -38,6 +39,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: ${KUBE_X_NAMESPACE}
 patches:
+  - path: templates/patches/secret-patch.yml
   - patch: |-
       - op: replace
         path: /subjects/0/namespace
@@ -46,7 +48,10 @@ patches:
       kind: ClusterRoleBinding
 resources:
   - https://raw.githubusercontent.com/orga/project/vx.x.x/manifests/install.yaml
-  - kube-x-helm-x-templates.yml
+  - templates/resources/ingress.yml
 ```
 
-Why? To support [this case](https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#installing-argo-cd-in-a-custom-namespace)
+
+Kustomize won't let you have multiple resources with the same GVK, name, and namespace
+because it expects each resource to be unique.
+If a resource template report an error, setting it as a patch template, may resolve the problem. 
