@@ -1,4 +1,15 @@
 #!/bin/bash
+
+# To avoid weird error on output
+# Helm takes /dev/stdout and validate it
+# ie unbelievable error such as:
+# Error: unable to build kubernetes objects from release manifest: error validating "": error validating data: invalid object to validate
+# We redirect stdout to stderr and restore it just before the end
+# First save the original stdout
+exec 3>&1
+# Redirect all stdout to stderr
+exec 1>&2
+
 # A post renderer to integrate kustomize and jsonnet
 # shellcheck source=../..//bash-lib/lib/bashlib-error.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
@@ -15,6 +26,50 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
 # shellcheck source=kube-x-lib.sh
 source kube-x-lib.sh
 
+
+# Check that a target directory has the same files than a source directory (in name not size)
+# Create an empty file in the target directory if a source file was not found
+#
+# Why?
+# Kustomize expects to have a file for all resources and patches
+# but template Files may return an empty string and the files are not created
+# if we use comments to not get an empty file
+# The validation fails with
+# Error: unable to build kubernetes objects from release manifest: error validating "": error validating data: invalid object to validate
+# Disabling with --skip-schema-validation would not work
+# Without any solution, we have written this function
+create_empty_templates_with_empty_files(){
+
+  # Source and target templates directories
+  SOURCE_DIR="${1:-}"
+  TARGET_DIR="${2:-}"
+
+  # Check if both directories are provided
+  if [[ "$SOURCE_DIR" == "" || "$TARGET_DIR" == "" ]]; then
+    echo::err "Usage: $0 <source_directory> <target_directory>"
+    return 1
+  fi
+
+  # Traverse the source directory
+  find "$SOURCE_DIR" -type f -name "*.yaml" -o -name "*.yml" | while read -r source_file; do
+    # Get the relative path of the file
+    relative_path="${source_file#"$SOURCE_DIR"/}"
+    target_file="$TARGET_DIR/$relative_path"
+
+    # Check if the file exists in the target directory
+    if [[ ! -f "$target_file" ]]; then
+      # Create an empty file in the target directory
+      mkdir -p "$(dirname "$target_file")"
+      touch "$target_file"
+      echo::info "Template File $target_file Status: Created"
+    else
+      echo::debug "Template File $target_file Status: Exists"
+    fi
+  done
+
+}
+
+
 KUBE_X_CHART_DIRECTORY="${1:-}"
 
 if [[ "$KUBE_X_CHART_DIRECTORY" =~ "synopsis"|"help" ]]; then
@@ -30,7 +85,9 @@ where:
 * \`KUBE_X_VALUES_FILE\` is the path to the values file
 * \`KUBE_X_NAMESPACE\` is the installation namespace
 
-Note: the Helm templates should be passed via stdin
+Note: Helm:
+* pass the templates output via stdin
+* will not print any output if no error occurs (even with the --debug flag)
 EOF
   exit 0
 fi
@@ -72,6 +129,7 @@ fi
 
 # Grab the manifests passed by Helm
 HELM_MANIFEST=$(cat)
+
 # In kustomization mode, the templates are re-created individually
 # because we don't known which one is a resource and which one is a patch
 # The kustomization file is the driver
@@ -160,6 +218,10 @@ if [ "$KUSTOMIZATION_MODE" -eq 1 ]; then
   # will output all templates one by one at: $KUSTOMIZE_ROOT_TEMP_DIR/chart-name/templates/argocd-service-monitor-metrics.yml
   command::echo_eval "helm template --output-dir $KUSTOMIZE_ROOT_TEMP_DIR -f $KUBE_X_VALUES_FILE $KUBE_X_CHART_DIRECTORY"
 
+  # Sync
+  echo::info "Create empty template files"
+  create_empty_templates_with_empty_files "$KUBE_X_CHART_DIRECTORY/templates" "$KUSTOMIZE_PACKAGE_TEMP_DIR/templates"
+
   # The argument must be:
   # * a file system path
   # * or git repository path (git URL with path)
@@ -174,15 +236,16 @@ if [ "$KUSTOMIZATION_MODE" -eq 1 ]; then
     if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
       rm -rf "$KUSTOMIZE_PACKAGE_TEMP_DIR"
     else
-      echo::err "The command 'kubectl kustomize .' was executed with the $KUSTOMIZE_PACKAGE_TEMP_DIR working directory"
+      echo::info "The command 'kubectl kustomize .' was executed with the $KUSTOMIZE_PACKAGE_TEMP_DIR working directory"
     fi
     # Add the kustomize manifest to the Jsonnet manifest if any
-    HELM_MANIFEST=$(cat <<EOF
-$HELM_MANIFEST
----
-$KUSTOMIZE_MANIFEST
-EOF
-)
+    HELM_MANIFEST="$KUSTOMIZE_MANIFEST"
+#    HELM_MANIFEST=$(cat <<EOF
+#$HELM_MANIFEST
+#---
+#$KUSTOMIZE_MANIFEST
+#EOF
+#)
   else
     echo::err "An error occurred during the kustomization"
     echo::err "The command 'kubectl kustomize .' failed with the $KUSTOMIZE_PACKAGE_TEMP_DIR working directory"
@@ -191,4 +254,10 @@ EOF
 fi
 
 # Output
+
+# Later, restore stdout from saved descriptor
+exec 1>&3
+# Close the saved descriptor
+exec 3>&-
+
 echo "$HELM_MANIFEST"

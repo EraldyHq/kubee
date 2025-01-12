@@ -88,6 +88,179 @@ is_helm_chart_installed() {
 
 }
 
+
+
+apply(){
+
+  # The final helm command (installation, or template)
+  local HELM_COMMAND=("helm")
+
+  # Package Name
+  # Come first because we use it in the log
+  PACKAGE_NAME="${2:-}"
+  if [ "$PACKAGE_NAME" == "" ]; then
+    echo::err "A package name is mandatory as second argument"
+    return 1
+  fi
+
+  # Mode
+  COMMAND=${1:-}
+  if [ "$COMMAND" == "" ]; then
+    echo::err "Internal error: A command is mandatory as first argument (install or template)"
+    return 1
+  fi
+  case "$COMMAND" in
+      "install")
+        HELM_COMMAND+=( "upgrade" "--install" )
+        echo::info "Installing package $PACKAGE_NAME "
+        ;;
+      "template")
+        HELM_COMMAND+=( "template" )
+        echo::info "Templating package $PACKAGE_NAME "
+        ;;
+      *)
+        echo::err "The command $COMMAND is unknown"
+        return 1
+        ;;
+  esac
+
+
+  # Get env (KubeConfig) used by helm for CRD Chart and app Chart
+  KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
+  eval "$KUBECTX_ENV"
+
+  # The kube-x values
+  # We need them to determine the namespace
+  KUBE_X_VALUES_PATH="/dev/shm/kube-x-values.yml"
+  if ! print_values >| $KUBE_X_VALUES_PATH; then
+    echo::err "An error has happened while generating the values file"
+    return 1
+  fi
+  # In debug mode, we don't delete it to be able to run the
+  # command again
+  if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
+    bash::trap "rm $KUBE_X_VALUES_PATH" EXIT # EXIT execute also on error
+  fi
+  HELM_COMMAND+=("-f" "${KUBE_X_VALUES_PATH}")
+
+  # Package
+  PACKAGE_DIRECTORY=$(get_chart_directory "$PACKAGE_NAME")
+  PACKAGE_YAML_KEY=$(echo "$PACKAGE_NAME" | tr "-" "_") # Go templating does not support `-`
+  VALUES_NAMESPACE_PATH=".kube_x.$PACKAGE_YAML_KEY.namespace"
+  PACKAGE_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$KUBE_X_VALUES_PATH")
+  if [ "$PACKAGE_NAMESPACE" == "null" ]; then
+    echo::info "No namespace found at $VALUES_NAMESPACE_PATH"
+    PACKAGE_NAMESPACE="$PACKAGE_NAME"
+    echo::info "Installing into the default namespace $PACKAGE_NAMESPACE"
+  else
+    echo::info "Installing into the namespace ($PACKAGE_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
+  fi
+  HELM_COMMAND+=(
+    "-n" "$PACKAGE_NAMESPACE"
+    "--create-namespace"
+  )
+
+
+  # Crds first
+  # CRD first installation is becoming a standard
+  # Example with Prometheus: https://github.com/prometheus-operator/kube-prometheus#quickstart
+  # They create the namespace and CustomResourceDefinitions first
+  # to avoid race conditions when deploying the components.
+  #
+  # We could also do
+  #```bash
+  # kubectl apply --server-side --force-conflicts -f https://github.com/grafana/grafana-operator/releases/download/v5.15.1/crds.yaml
+  #```
+  PACKAGE_CRDS_NAME="$PACKAGE_NAME-crds"
+  if PACKAGE_CRDS_DIRECTORY=$(get_chart_directory "$PACKAGE_CRDS_NAME"); then
+    echo::debug "Package Crds Directory: $PACKAGE_CRDS_DIRECTORY"
+
+    CHART_APP_VERSION=$(yq '.appVersion' "$PACKAGE_DIRECTORY/Chart.yaml")
+    if ! is_helm_chart_installed "$PACKAGE_CRDS_NAME" "$PACKAGE_NAMESPACE" "$CHART_APP_VERSION"; then
+
+      command::echo_eval "helm upgrade --install -n $PACKAGE_NAMESPACE ${HELM_EXTRA_FLAGS[*]} --create-namespace $PACKAGE_CRDS_NAME $PACKAGE_CRDS_DIRECTORY"
+
+      # Wait
+      echo::info "Waiting until all CRD are established in the namespace $PACKAGE_NAMESPACE"
+      kubectl wait \
+      	--for condition=Established \
+      	--all CustomResourceDefinition \
+      	--namespace="$PACKAGE_NAMESPACE"
+
+    else
+      echo::info "CRD Chart $PACKAGE_CRDS_NAME already installed"
+    fi
+  else
+    echo::info "No CRD Chart for package $PACKAGE_NAME found"
+  fi
+
+
+  # To update the kube-x helm
+  command::echo_eval "helm dependency update ${HELM_EXTRA_FLAGS[*]} $PACKAGE_DIRECTORY 1>&2"
+  HELM_COMMAND+=( "--dependency-update" )
+
+  # Options ???
+  if [ "${KUBE_X_HELM_INSTALL_OPTIONS:-}" != "" ]; then
+    HELM_COMMAND+=("${KUBE_X_HELM_INSTALL_OPTIONS[@]}")
+  fi
+
+  # Post renderer
+  HELM_COMMAND+=(
+    "--post-renderer" "kube-x-helm-post-renderer"
+    "--post-renderer-args" "$PACKAGE_DIRECTORY"
+    "--post-renderer-args" "$KUBE_X_VALUES_PATH"
+    "--post-renderer-args" "$PACKAGE_NAMESPACE"
+    )
+
+  # Debug
+  if [ "${#HELM_EXTRA_FLAGS[*]}" != "0" ]; then
+    HELM_COMMAND+=("${HELM_EXTRA_FLAGS[@]}")
+  fi
+
+  # --dependency-update flag to avoid the `helm dependency build` error:
+  # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
+  # See https://github.com/helm/helm/issues/7214
+  # values.yaml file is taken by default
+  PACKAGE_RELEASE_NAME="$PACKAGE_NAME"
+  HELM_COMMAND+=("$PACKAGE_RELEASE_NAME" "$PACKAGE_DIRECTORY")
+
+
+  # Working directory is the cluster directory
+  # Why? To be able to set relative path to the cluster object such as certificate
+  # example: "--set-file kube_x.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem"
+  pushd "$KUBE_X_CLUSTER_DIR" 1>&2
+  command::echo_eval "${HELM_COMMAND[*]}"
+  popd 1>&2
+
+  # Wait?
+  # kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator
+
+}
+
+
+# The synopsis function is required by the doc::usage
+synopsis(){
+
+  cat << EOF
+\`\`\`bash
+kube-x-helx [-c|--cluster clusterName] [--debug] command options
+\`\`\`
+
+where \`command\` can be:
+
+* \`install packageName\`  - Install a Helx package (with optional Jsonnet Manifests and kustomization)
+* \`template packageName\` - Output the manifests for an package (used for ArgoCd Integration and debugging)
+* \`values\` - Shows the values
+
+The cluster is determined in order of precedence by:
+
+* the \`-c|--cluster clusterName\` option
+* the current directory
+
+EOF
+
+}
+
 # @description
 #     Print the kube-x values files used for Helm Installation and Jsonnet Configuration
 # @stdout - the values
@@ -139,180 +312,30 @@ print_values(){
 
 }
 
-apply(){
-
-  # The final helm command (installation, or template)
-  local HELM_COMMAND=("helm")
-
-  # Package Name
-  # Come first because we use it in the log
-  PACKAGE_NAME="${2:-}"
-  if [ "$PACKAGE_NAME" == "" ]; then
-    echo::err "A package name is mandatory as second argument"
-    return 1
-  fi
-
-  # Mode
-  COMMAND=${1:-}
-  if [ "$COMMAND" == "" ]; then
-    echo::err "Internal error: A command is mandatory as first argument (install or template)"
-    return 1
-  fi
-  case "$COMMAND" in
-      "install")
-        HELM_COMMAND+=( "upgrade" "--install" )
-        echo::info "Installing package $PACKAGE_NAME "
-        ;;
-      "template")
-        HELM_COMMAND+=( "template" )
-        echo::info "Templating package $PACKAGE_NAME "
-        ;;
-      *)
-        echo::err "The command $COMMAND is unknown"
-        return 1
-        ;;
-  esac
-
-
-  # Get env (KubeConfig) used by helm for CRD Chart and app Chart
-  KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
-  eval "$KUBECTX_ENV"
-
-  # The kube-x values
-  # We need them to determine the namespace
-  KUBE_X_VALUES_PATH="/dev/shm/kube-x-values.yml"
-  if ! print_values >| $KUBE_X_VALUES_PATH; then
-    echo::err "An error has happened while generating the values file"
-    return 1
-  fi
-  bash::trap "rm $KUBE_X_VALUES_PATH" EXIT # EXIT execute also on error
-  HELM_COMMAND+=("-f" "${KUBE_X_VALUES_PATH}")
-
-  # Package
-  PACKAGE_DIRECTORY=$(get_chart_directory "$PACKAGE_NAME")
-  PACKAGE_YAML_KEY=$(echo "$PACKAGE_NAME" | tr "-" "_") # Go templating does not support `-`
-  VALUES_NAMESPACE_PATH=".kube_x.$PACKAGE_YAML_KEY.namespace"
-  PACKAGE_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$KUBE_X_VALUES_PATH")
-  if [ "$PACKAGE_NAMESPACE" == "null" ]; then
-    echo::info "No namespace found at $VALUES_NAMESPACE_PATH"
-    PACKAGE_NAMESPACE="$PACKAGE_NAME"
-    echo::info "Installing into the default namespace $PACKAGE_NAMESPACE"
-  else
-    echo::info "Installing into the namespace ($PACKAGE_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
-  fi
-  HELM_COMMAND+=(
-    "-n" "$PACKAGE_NAMESPACE"
-    "--create-namespace"
-  )
-
-
-  # Crds first
-  # CRD first installation is becoming a standard
-  # Example with Prometheus: https://github.com/prometheus-operator/kube-prometheus#quickstart
-  # They create the namespace and CustomResourceDefinitions first
-  # to avoid race conditions when deploying the components.
-  #
-  # We could also do
-  #```bash
-  # kubectl apply --server-side --force-conflicts -f https://github.com/grafana/grafana-operator/releases/download/v5.15.1/crds.yaml
-  #```
-  PACKAGE_CRDS_NAME="$PACKAGE_NAME-crds"
-  if PACKAGE_CRDS_DIRECTORY=$(get_chart_directory "$PACKAGE_CRDS_NAME"); then
-    echo::debug "Package Crds Directory: $PACKAGE_CRDS_DIRECTORY"
-
-    CHART_APP_VERSION=$(yq '.appVersion' "$PACKAGE_DIRECTORY/Chart.yaml")
-    if ! is_helm_chart_installed "$PACKAGE_CRDS_NAME" "$PACKAGE_NAMESPACE" "$CHART_APP_VERSION"; then
-
-      command::echo_eval "helm upgrade --install -n $PACKAGE_NAMESPACE --create-namespace $PACKAGE_CRDS_NAME $PACKAGE_CRDS_DIRECTORY"
-
-      # Wait
-      echo::info "Waiting until all CRD are established in the namespace $PACKAGE_NAMESPACE"
-      kubectl wait \
-      	--for condition=Established \
-      	--all CustomResourceDefinition \
-      	--namespace="$PACKAGE_NAMESPACE"
-
-    else
-      echo::info "CRD Chart $PACKAGE_CRDS_NAME already installed"
-    fi
-  else
-    echo::info "No CRD Chart for package $PACKAGE_NAME found"
-  fi
-
-
-  # To update the kube-x helm
-  command::echo_eval "helm dependency update $PACKAGE_DIRECTORY 1>&2"
-  HELM_COMMAND+=( "--dependency-update" )
-
-  # Options ???
-  if [ "${KUBE_X_HELM_INSTALL_OPTIONS:-}" != "" ]; then
-    HELM_COMMAND+=("${KUBE_X_HELM_INSTALL_OPTIONS[@]}")
-  fi
-
-  # Post renderer
-  HELM_COMMAND+=(
-    "--post-renderer" "kube-x-helm-post-renderer"
-    "--post-renderer-args" "$PACKAGE_DIRECTORY"
-    "--post-renderer-args" "$KUBE_X_VALUES_PATH"
-    "--post-renderer-args" "$PACKAGE_NAMESPACE"
-    )
-
-  # --dependency-update flag to avoid the `helm dependency build` error:
-  # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
-  # See https://github.com/helm/helm/issues/7214
-  # values.yaml file is taken by default
-  PACKAGE_RELEASE_NAME="$PACKAGE_NAME"
-  HELM_COMMAND+=("$PACKAGE_RELEASE_NAME" "$PACKAGE_DIRECTORY")
-
-  # Working directory is the cluster directory
-  # Why? To be able to set relative path to the cluster object such as certificate
-  # example: "--set-file kube_x.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem"
-  pushd "$KUBE_X_CLUSTER_DIR" 1>&2
-  command::echo_eval "${HELM_COMMAND[*]}"
-  popd 1>&2
-
-  # Wait?
-  # kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator
-
-}
-
-
-# The synopsis function is required by the doc::usage
-synopsis(){
-
-  cat << EOF
-\`\`\`bash
-kube-x-helx [-c|--cluster clusterName] command options
-\`\`\`
-
-where \`command\` can be:
-
-* \`install packageName\`  - Install a Helx package (with optional Jsonnet Manifests and kustomization)
-* \`template packageName\` - Output the manifests for an package (used for ArgoCd Integration and debugging)
-* \`values\` - Shows the values
-
-The cluster is determined in order of precedence by:
-
-* the \`-c|--cluster clusterName\` option
-* the current directory
-
-EOF
-
-}
 
 ##########################
 ## Collect the options
 ##########################
-args=$(getopt -l "cluster:" -o "c:" -- "$@")
+args=$(getopt -l "cluster:,debug,skip-schema-validation" -o "c:" -- "$@")
 # eval set to set the positional arguments back to $args
 eval set -- "$args"
 KUBE_X_CLUSTER_NAME=${KUBE_X_CLUSTER_NAME:-}
+HELM_EXTRA_FLAGS=()
 while [[ $# -gt 0 ]]
 do
    case "$1" in
       "--cluster"|"-c")
         shift
         KUBE_X_CLUSTER_NAME=${1}
+        shift
+      ;;
+      "--skip-schema-validation")
+        shift
+        HELM_EXTRA_FLAGS+=("--skip-schema-validation")
+        ;;
+      "--debug")
+        export BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_DEBUG_LEVEL"
+        HELM_EXTRA_FLAGS+=("--debug")
         shift
       ;;
       "--")

@@ -54,4 +54,8 @@ resources:
 
 Kustomize won't let you have multiple resources with the same GVK, name, and namespace
 because it expects each resource to be unique.
-If a resource template report an error, setting it as a patch template, may resolve the problem. 
+If a resource template report an error, setting it as a patch template, may resolve the problem.
+
+# EXAMPLE
+
+Check the `kube-x-argocd` chart for an example.

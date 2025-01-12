@@ -6,7 +6,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: argocd-metrics
-{{/*  namespace: {{ .Values.kube_x.argocd.namespace }}*/}}
+  {{- /*  namespace: {{ .Values.kube_x.argocd.namespace }}*/}}
   labels:
     release: prometheus-operator
     app.kubernetes.io/name: argocd-metrics

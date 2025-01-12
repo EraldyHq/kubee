@@ -38,5 +38,3 @@ spec:
       secretName: 'argocd-cert'
   {{- end }}
 {{- end -}}
-
-

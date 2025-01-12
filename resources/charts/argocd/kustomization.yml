@@ -9,11 +9,11 @@ namespace: ${KUBE_X_NAMESPACE}
 
 patches:
   # Patch needed to apply the server transport via annotation to disable tls validation from Traefik
-  - path: templates/patches/argocd-cmd-params-cm.yml
-  - path: templates/patches/argocd-notifications-cm.yml
-  - path: templates/patches/argocd-notifications-secret-patch.yml
-  - path: templates/patches/argocd-secret-patch.yml
-  - path: templates/patches/argocd-svc-no-tls-patch.yml
+  - path: templates/patches/argocd-cmd-params-cm.yaml
+  - path: templates/patches/argocd-notifications-cm.yaml
+  - path: templates/patches/argocd-notifications-secret-patch.yaml
+  - path: templates/patches/argocd-secret-patch.yaml
+  - path: templates/patches/argocd-svc-no-tls-patch.yaml
   # CustomNamespace patch: https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#installing-argo-cd-in-a-custom-namespace
   - patch: |-
       - op: replace
@@ -26,10 +26,10 @@ patches:
 resources:
   - https://raw.githubusercontent.com/argoproj/argo-cd/v2.11.7/manifests/install.yaml
   - templates/resources/argocd-ingress.yaml
-  - templates/resources/argocd-namespace.yml
-  - templates/resources/argocd-notifications-secret-external.yml
-  - templates/resources/argocd-prometheus-alert-rule.yml
-  - templates/resources/argocd-secret-external.yml
-  - templates/resources/argocd-secret-repo.yml
-  - templates/resources/argocd-service-monitor-metrics.yml
-  - templates/resources/argocd-svc-no-tls-transport.yml
+  - templates/resources/argocd-namespace.yaml
+  - templates/resources/argocd-notifications-secret-external.yaml
+  - templates/resources/argocd-prometheus-alert-rule.yaml
+  - templates/resources/argocd-secret-external.yaml
+  - templates/resources/argocd-secret-repo.yaml
+  - templates/resources/argocd-service-monitor-metrics.yaml
+  - templates/resources/argocd-svc-no-tls-transport.yaml

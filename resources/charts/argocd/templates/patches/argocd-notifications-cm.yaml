@@ -28,11 +28,13 @@ metadata:
     */}}
     kustomize.config.k8s.io/behavior: merge
 data:
+{{/*
   ##############################
   # Services section
   ##############################
-  #  Email
+  # Email
   # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/email/
+*/}}
   {{- if ne .Values.kube_x.cluster.email.smtp.host ""}}
   service.email: |
     host: {{ .Values.kube_x.cluster.email.smtp.host }}
@@ -42,34 +44,45 @@ data:
     password: ${{ template "kube-x-argocd-email-password-variable-name" }}
     html: true
   {{- end }}
+{{- /*
   ##############################
-  # Trigger
+    # Trigger
   ##############################
   # Optional 'oncePer' property ensure that notification is sent only once per specified field value
   # E.g. following is triggered once per sync revision
   # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/triggers/#avoid-sending-same-notification-too-often
   # See also this discussion
   # https://github.com/argoproj/argo-cd/issues/12169
+
+*/}}
   trigger.on-deployed: |
     - when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy' and time.Now().Sub(time.Parse(app.status.operationState.startedAt)).Minutes() < 2
       oncePer: app.status.operationState.syncResult.revision
       send: [on-deployed-template]
+{{- /*
   ##############################
   # Template
   ##############################
+*/}}
   template.on-deployed-template: {{ .Files.Get "argocd-templates/on-deployed-template.yml" | quote }}
-
-  ##############################
+  {{- /*
+   ##############################
   # Context (ie Variables)
   ##############################
   # Context holds list of variables that can be referenced in templates
+  */}}
+  {{- if ne .Values.kube_x.argocd.hostname "" }}
   context: |
     {{- if ne .Values.kube_x.argocd.hostname "" }}
     argocdUrl: https://{{ .Values.kube_x.argocd.hostname }}
     {{- end }}
-  ##############################
-  # Global Subscriptions
-  ##############################
+  {{- end }}
+  {{- /*
+    ##############################
+    # Global Subscriptions
+    ##############################
+  */}}
+  {{- if ne .Values.kube_x.cluster.adminUser.email "" }}
   subscriptions: |
     {{- if ne .Values.kube_x.cluster.adminUser.email "" }}
     # Global Subscription for on-deployed trigger notifications
@@ -78,3 +91,4 @@ data:
       triggers:
         - on-deployed
     {{- end }}
+  {{- end }}
