@@ -41,10 +41,8 @@ Return the name of the traefik transport that can be used as label
 
 {{/*
 Return the name of the github allow list middelware (used on ingress)
+Kube-x prefix later
 */}}
 {{- define "kube-x-traefik-github-hooks-allow-list-name" }}
-{{- printf "%s-%s"
-    (include "kube-x-prefix" .)
-    "ip-allow-github-hooks-cidr"
--}}
+{{- printf "ip-allow-github-hooks-cidr" }}
 {{- end }}
