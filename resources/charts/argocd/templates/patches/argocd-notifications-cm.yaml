@@ -1,5 +1,6 @@
 {{/*
  Notification Configuration
+ See dodc: With [Notification](https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/)
  Config Notification service, trigger and template
  Example config
  https://github.com/argoproj/argoproj-deployments/blob/master/argocd/overlays/production/argocd-notifications-cm.yaml

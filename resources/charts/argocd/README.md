@@ -2,49 +2,38 @@
 
 
 ## About
-This directory represents the deployment of ArgoCd.
-
-This chart is a [Helm-x Chart](../../../docs/bin-generated/kube-x-helm-x.md):
+This chart is a [Helm-x Chart](../../../docs/bin/kube-x-helm-x.md) that:
 * install argocd
 * and configure optionally
   * an [Ingress](templates/resources/argocd-ingress.yaml)
   * a [git repo](templates/resources/argocd-secret-repo.yaml)
   * a [github webhook](templates/resources/argocd-secret-external.yaml)
-  * mailing and a `on-deployed` notification
+  * [mailing and a on-deployed notifications](templates/patches/argocd-notifications-cm.yaml)
   * the [ArgoCd Monitoring mixin](https://monitoring.mixins.dev/argo-cd-2/) (Prometheus Rules and Dashboards)
+* [avoid CPU and memory spike on Sync by default](docs/argocd-cpu-memory-spikes.md)
 
 
-## Test/Check values before installation
+## How to
 
-To check the [repo creation](templates/resources/argocd-secret-repo.yaml)
+### Test/Check values before installation
+
+* With Helm-x For instance, to check the [repo creation](templates/resources/argocd-secret-repo.yaml)
 ```bash
 kube-x-helx -c kube-x-ssh template argocd | grep 'name: argocd-secret-repo' -A 2 -B 11
 ```
 
-## How to
 
-### Develop
+## Dev / Contrib
 
-```bash
-kube-x-kubectl apply -k .
-```
-* with kubectl
-```bash
-# once
-kubectl create namespace argocd
-# then
-cd argocd
-kubectl config set-context --current --namespace=argocd
-kubectl apply -k .
-```
+
+### Test/Check template at dev
+
 * With helm
 ```bash
 helm template -s templates/patches/argocd-secret-patch.yaml \
   --set 'kube_x.cluster.adminUser.password=welcome'  \
   . | yq
 ```
-
-
 
 
 ### Debug Notifications
@@ -59,64 +48,6 @@ kubectl config set-context --current --namespace=argocd
 argocd admin notifications template get
 ```
 
-## Features
-### Version
-
-The version is in the [URL path of the kustomization file](kustomization.yml)
-
-### With GitHub WebHook
-
-With [GitHub WebHook](https://argo-cd.readthedocs.io/en/stable/operator-manual/webhook/)
-
-
-### End Users Notifications
-
-With [Notification](https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/)
-To allow end-users to configure notifications
-
-### Change Admin user password
-
-Argo CD does not have its own user management system and has only one built-in user admin.
-The initial password is available from a secret named `argocd-initial-admin-secret`.
-https://argo-cd.readthedocs.io/en/stable/faq/#i-forgot-the-admin-password-how-do-i-reset-it
-
-Get it via argocd:
-```bash
-argocd admin initial-password -n argocd
-# You should delete the argocd-initial-admin-secret from the Argo CD namespace once you changed the password.
-# The secret serves no other purpose than to store the initially generated password in clear and can safely be deleted at any time. It will be re-created on demand by Argo CD if a new admin password must be re-generated.
-```
-
-### Create User
-
-To do:
-https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/
-
-
-https://argo-cd.readthedocs.io/en/stable/operator-manual/rbac/
-
-
-#### Manage ArgoCD with ArgoCd
-
-https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#manage-argo-cd-using-argo-cd
-
-https://github.com/argoproj/argoproj-deployments/tree/master/argocd
-
-
-## Notes on Argo cd project and policies
-
-A project is used to apply policy on deployment
-The `default` project created at installation and allows all
-https://argo-cd.readthedocs.io/en/stable/user-guide/projects/
-
-## Support
-
-### CPU and memory spike on Sync
-
-See [](docs/argocd-cpu-memory-spikes.md)
-
-## Dev / Contrib
-
 ### JsonNet Prometheus Mixin
 
 Local:
@@ -124,7 +55,8 @@ Local:
 cd argocd
 jb update
 jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/prometheusRule.jsonnet"))'
-jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/grafanaDashboard.jsonnet"))'
+jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/grafanaApplicationDashboard.jsonnet"))' --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }"
+# xxx
 ```
 
 End-to-end Test:
@@ -132,6 +64,12 @@ End-to-end Test:
 kube-x-helx \
   --cluster kube-x-ssh \
   template \
-  cert-manager \
+  argocd \
   | grep "argocd-mixin-alert-rules" -B 3 -A 30
 ```
+
+### ArgoCd Version
+
+The ArgoCd version is:
+* in the [URL path of the kustomization file](kustomization.yml)
+* in the [appVersion of the Chart manifest](Chart.yaml)
