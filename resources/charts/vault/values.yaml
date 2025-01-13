@@ -1,0 +1,51 @@
+# Vault
+# A copy of https://raw.githubusercontent.com/hashicorp/vault-helm/main/values.yaml
+vault:
+  server:
+    # allow deployment to single node services such as Minikube
+    affinity: ""
+    # No storage, in-memory storage
+    # https://developer.hashicorp.com/vault/docs/concepts/dev-server
+    # dev:
+    #  enabled: true
+    # requires a PVC for data storage to use the "file" backend.
+    # only 1 replica
+    standalone:
+      enabled: true
+      config: |
+        ui = true
+
+        # https://developer.hashicorp.com/vault/docs/configuration/listener/tcp#tls_cert_file
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+          # Enable unauthenticated metrics access (necessary for Prometheus Operator)
+          #telemetry {
+          #  unauthenticated_metrics_access = "true"
+          #}
+        }
+        storage "file" {
+          path = "/vault/data"
+        }
+
+        # Example configuration for enabling Prometheus metrics in your config.
+        #telemetry {
+        #  prometheus_retention_time = "30s"
+        #  disable_hostname = true
+        #}
+    ingress:
+      # We create it in this chart
+      # https://github.com/hashicorp/vault-helm/blob/main/templates/server-ingress.yaml
+      enabled: false
+    dataStorage:
+      # not the used size depends on the volume???
+      # 220Mb for 1G, 47.6 Mi for 500Mb
+      size: 200Mi
+      # https://docs.k3s.io/storage#setting-up-the-local-storage-provider
+      storageClass: local-path
+  # Create a Kubernetes Service entry for the Vault UI
+  # The ui is in the server, enabled in the config of the server in standalone mode
+  # injector can inject/mount secret into pod
+  injector:
+    enabled: false

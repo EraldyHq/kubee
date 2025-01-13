@@ -3,8 +3,8 @@
 
 ## About
 This chart is a [Helm-x Chart](../../../docs/bin/kube-x-helm-x.md) that:
-* install argocd
-* and configure optionally
+* executes [a standard installation with cluster-admin access](https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#non-high-availability)
+* and configure optionally:
   * an [Ingress](templates/resources/argocd-ingress.yaml)
   * a [git repo](templates/resources/argocd-secret-repo.yaml)
   * a [github webhook](templates/resources/argocd-secret-external.yaml)

@@ -1,0 +1,9 @@
+dependencies:
+- name: vault
+  repository: https://helm.releases.hashicorp.com
+  version: 0.28.0
+- name: kube-x
+  repository: file://../kube-x
+  version: 0.0.1
+digest: sha256:b239bb3e2cfe7966bc92f74324387bac5320d75049f912216de44a60cf51bb75
+generated: "2025-01-13T15:21:20.733783698+01:00"

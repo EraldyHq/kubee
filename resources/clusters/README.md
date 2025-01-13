@@ -4,14 +4,26 @@
 
 One directory, one cluster
 
-## Prerequisites
+## Steps
 
-Install all requirements
+### Cluster Provisioning
+
+In your `.envrc`
 ```bash
-ansible-galaxy install -r resources/ansible/requirements.yml
+export KUBE_X_CLUSTER_NAME=xxx
+export KUBE_X_CLUSTER_CONNECTION=ansible.builtin.ssh
+export KUBE_X_CLUSTER_API_SERVER_01_IP=x.x.x.x
+```
+
+* Install Kubernetes
+```bash
+kube-x-cluster play
+```
+
+### App/Chart Installation
+
+```bash
+kube-x-helm-x -c cluster-name install chart-name
 ```
 
 
-## Customizing
-
-https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing

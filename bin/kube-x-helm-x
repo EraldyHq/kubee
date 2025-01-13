@@ -266,13 +266,36 @@ EOF
 # @stdout - the values
 print_values(){
 
+  ##########################
+  # Default values
+  #
+  KUBE_X_CHART_DIR=$(get_chart_directory "kube-x")
+  DEFAULT_VALUES_PATH="$KUBE_X_CHART_DIR/values.yaml"
+  if [ ! -f "$DEFAULT_VALUES_PATH" ]; then
+    echo::err "Internal Error: The default values file ($DEFAULT_VALUES_PATH) was not found"
+    return 1
+  fi
+  # Before merge, values should be below the kube_x property
+  SHM_DEFAULT_VALUES="/dev/shm/kube-x-lib-default-values.yml"
+  # --null-input: does not have any input as we create a new file
+  yq eval --null-input ".kube_x = load(\"$DEFAULT_VALUES_PATH\")" >| "$SHM_DEFAULT_VALUES"
+  bash::trap "rm $SHM_DEFAULT_VALUES" EXIT # EXIT executes also on error
+
   # Template
   local KUBE_X_HELM_VALUES;
   KUBE_X_HELM_VALUES=$(realpath "${KUBE_X_CLUSTER_DIR}/values.yaml")
   if [ ! -f "$KUBE_X_HELM_VALUES" ]; then
-    echo::err "No cluster values file found at $KUBE_X_HELM_VALUES"
-    return 1;
+
+    cat "$SHM_DEFAULT_VALUES"
+
+    echo::warn "No cluster values file found at $KUBE_X_HELM_VALUES"
+    echo::warn "Cluster directory: $KUBE_X_CLUSTER_DIR"
+    echo::warn "Default values returned"
+
+    return 0
+
   fi
+
 
   ############################
   # Variable Substitution
@@ -287,21 +310,6 @@ print_values(){
   envsubst < "$KUBE_X_HELM_VALUES" >| "$SHM_VALUES"
   bash::trap "rm $SHM_VALUES" EXIT # EXIT executes also on error
 
-  ##########################
-  # Append Default values
-  #
-  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  KUBE_X_CHART_DIR=$(get_chart_directory "kube-x")
-  DEFAULT_VALUES_PATH="$KUBE_X_CHART_DIR/values.yaml"
-  if [ ! -f "$DEFAULT_VALUES_PATH" ]; then
-    echo::err "Internal Error: The default values file ($DEFAULT_VALUES_PATH) was not found"
-    return 1
-  fi
-  # Before merge, values should be below the kube_x property
-  SHM_DEFAULT_VALUES="/dev/shm/kube-x-lib-default-values.yml"
-  # --null-input: does not have any input as we create a new file
-  yq eval --null-input ".kube_x = load(\"$DEFAULT_VALUES_PATH\")" >| "$SHM_DEFAULT_VALUES"
-  bash::trap "rm $SHM_DEFAULT_VALUES" EXIT # EXIT executes also on error
 
 
   ###########################
@@ -399,7 +407,7 @@ case "$COMMAND" in
     ;;
   "values")
     # Don't know how yq does it but the output is already colored
-    kube_x::print_values
+    print_values
     ;;
   *)
     doc::help synopsis
