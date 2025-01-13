@@ -327,7 +327,8 @@ print_values(){
 args=$(getopt -l "cluster:,debug,skip-schema-validation" -o "c:" -- "$@")
 # eval set to set the positional arguments back to $args
 eval set -- "$args"
-KUBE_X_CLUSTER_NAME=${KUBE_X_CLUSTER_NAME:-}
+KUBE_X_DEFAULT_CLUSTER_NAME=${KUBE_X_DEFAULT_CLUSTER_NAME:-}
+KUBE_X_CLUSTER_NAME=${KUBE_X_CLUSTER_NAME:-$KUBE_X_DEFAULT_CLUSTER_NAME}
 HELM_EXTRA_FLAGS=()
 while [[ $# -gt 0 ]]
 do
@@ -354,26 +355,15 @@ do
    esac
 done
 
-# Clusters PATH
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-KUBE_X_CLUSTERS_PATH=${SCRIPT_DIR}/../resources/clusters
 
 # Cluster Directory
-if [ "${KUBE_X_CLUSTER_NAME:-}" != "" ]; then
-  KUBE_X_CLUSTER_DIR="$KUBE_X_CLUSTERS_PATH/$KUBE_X_CLUSTER_NAME"
-  if [ ! -d "$KUBE_X_CLUSTER_DIR" ]; then
-    echo::err "The cluster directory ($KUBE_X_CLUSTER_DIR) does not exists. Did you type correctly the cluster name ($KUBE_X_CLUSTER_NAME)?"
-    exit 1
-  fi
-else
-  KUBE_X_CLUSTER_DIR=$PWD
-fi
+KUBE_X_CLUSTER_DIR=$(kube_x::get_cluster_directory "$KUBE_X_CLUSTER_NAME")
 
 # Envrc
 # Used in all function
 KUBE_X_ENV_FILE="${KUBE_X_CLUSTER_ENV_FILE:-"$KUBE_X_CLUSTER_DIR/.envrc"}"
 if [ -f "$KUBE_X_ENV_FILE" ]; then
-   echo::debug "Sourcing env file $KUBE_X_ENV_FILE"
+   echo::debug "Sourcing cluster env file $KUBE_X_ENV_FILE"
    # shellcheck disable=SC1090
    if ! source "$KUBE_X_ENV_FILE"; then
      echo::err "Error while importing the envrc file $KUBE_X_ENV_FILE"

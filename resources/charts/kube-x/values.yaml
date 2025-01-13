@@ -166,6 +166,8 @@ grafana:
 # Hashicorp Vault
 vault:
   enabled: false
+  # The hostname (create an ingress if not empty)
+  hostname: ''
   # The installation namespace
   namespace: vault
   # A KV secret store

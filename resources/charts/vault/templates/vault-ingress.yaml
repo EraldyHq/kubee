@@ -1,4 +1,4 @@
-{{- if ne ( ((.Values.kube_x).vault).hostname) "" -}}
+{{- if ne .Values.kube_x.vault.hostname "" -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

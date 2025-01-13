@@ -225,27 +225,27 @@ kube_x::get_cluster_directory(){
     local CLUSTER_NAME="$1"
     # All packages directories in an array
     local KUBE_X_CLUSTER_DIRS=()
-    IFS=":" read -ra KUBE_X_CLUSTER_DIRS <<< "${KUBE_X_CLUSTER_PATH:-}"
+    IFS=":" read -ra KUBE_X_CLUSTER_DIRS <<< "${KUBE_X_CLUSTERS_PATH:-}"
     # this works for executed script or sourced script
     local SCRIPT_DIR
     SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-    local KUBE_X_RESOURCE_CHARTS_DIR
-    KUBE_X_RESOURCE_CHARTS_DIR=$(realpath "$SCRIPT_DIR/../resources/charts")
-    local KUBE_X_CLUSTER_DIRS+=("$KUBE_X_RESOURCE_CHARTS_DIR")
-    for KUBE_X_PACKAGES_DIR in "${KUBE_X_CLUSTER_DIRS[@]}"; do
-        if [ ! -d "$KUBE_X_PACKAGES_DIR" ]; then
-          echo::warn "The path ($KUBE_X_PACKAGES_DIR) set in KUBE_X_CLUSTER_PATH does not exist or is not a directory"
+    local KUBE_X_RESOURCE_CLUSTERS_DIR
+    KUBE_X_RESOURCE_CLUSTERS_DIR=$(realpath "$SCRIPT_DIR/../resources/clusters")
+    local KUBE_X_CLUSTER_DIRS+=("$KUBE_X_RESOURCE_CLUSTERS_DIR")
+    for KUBE_X_CLUSTER_DIR in "${KUBE_X_CLUSTER_DIRS[@]}"; do
+        if [ ! -d "$KUBE_X_CLUSTER_DIR" ]; then
+          echo::warn "The path ($KUBE_X_CLUSTER_DIR) set in KUBE_X_CLUSTERS_PATH does not exist or is not a directory"
           continue
         fi
-        local APP_DIR="$KUBE_X_PACKAGES_DIR/${CLUSTER_NAME}"
-        if [ -d "$APP_DIR" ]; then
-          echo "$APP_DIR"
+        local CLUSTER_DIR="$KUBE_X_CLUSTER_DIR/${CLUSTER_NAME}"
+        if [ -d "$CLUSTER_DIR" ]; then
+          echo "$CLUSTER_DIR"
           return
         fi
     done
-    echo::err "No chart directory found with the name ($CLUSTER_NAME) in"
-    echo::err "  * the cluster app resources directory (${KUBE_X_RESOURCE_CHARTS_DIR}) "
-    echo::err "  * or the paths of the KUBE_X_CLUSTER_PATH variable (${KUBE_X_CLUSTER_PATH:-'not set'})"
+    echo::err "No cluster directory found with the name ($CLUSTER_NAME) in"
+    echo::err "  * the cluster built-in directory (${KUBE_X_RESOURCE_CLUSTERS_DIR}) "
+    echo::err "  * or the paths of the KUBE_X_CLUSTERS_PATH variable (${KUBE_X_CLUSTERS_PATH:-'not set'})"
     return 1
 
 

@@ -28,10 +28,10 @@ synopsis(){
 cat <<EOF
 Print the kubernetes and kube-x environment variables in a export format
 \`\`\`bash
-$(basename "$0") [<app name>]
+$(basename "$0") [<chart name>]
 \`\`\`
 
-where \`app name\` is optional if the current directory is below the \`KUBE_X_APP_HOME\`.
+where \`chart name\` is optional if the current directory is below a \`KUBE_X_CHARTS_PATH\`.
 
 EOF
 
@@ -57,90 +57,81 @@ if [[ "$KUBE_X_APP_NAME" =~ -h|--help|help ]]; then
   exit 0
 fi
 
-###########################
-# Kube App home
-###########################
-if [ "${KUBE_X_APP_HOME:-}" == "" ]; then
-  echo::err "The KUBE_X_APP_HOME environment variable is mandatory and was not found"
-  echo::err "Add it in your bashrc or OS environment variables"
-  exit 1
-fi
-
 
 ###########################
 # App Name
 ###########################
-if [ "$KUBE_X_APP_NAME" == "" ]; then
-  # Check if we are under a KUBE_X_APP_HOME app home dir
-  IFS=":"; for KUBE_X_HOME in $KUBE_X_APP_HOME; do
-      if [ ! -d "$KUBE_X_HOME" ]; then
-        echo::warn "The HOME path ($KUBE_X_HOME) set in KUBE_X_APP_HOME does not exist or is not a directory"
-        continue
-      fi
-      KUBE_X_APP_NAME=$(path::relative_to "$PWD" "$KUBE_X_HOME") || continue
-      break
-  done
-#  if [ "$KUBE_X_APP_NAME" == "" ]; then
-#      echo::err "App name could not be determined."
-#      echo::err "* No app name was passed as parameter"
-#      echo::err "* The working directory ($PWD) is not under a KUBE_X_APP_HOME path ($KUBE_X_APP_HOME)"
-#  fi
-fi
-echo ""
-echo "# The name of the app"
-echo "KUBE_X_APP_NAME=$KUBE_X_APP_NAME"
+#if [ "$KUBE_X_APP_NAME" == "" ]; then
+#  # Check if we are under a $KUBE_X_CHARTS_PATH
+#  IFS=":"; for KUBE_X_HOME in $KUBE_X_CHARTS_PATH; do
+#      if [ ! -d "$KUBE_X_HOME" ]; then
+#        echo::warn "The HOME path ($KUBE_X_HOME) set in KUBE_X_APP_HOME does not exist or is not a directory"
+#        continue
+#      fi
+#      KUBE_X_APP_NAME=$(path::relative_to "$PWD" "$KUBE_X_HOME") || continue
+#      break
+#  done
+##  if [ "$KUBE_X_APP_NAME" == "" ]; then
+##      echo::err "App name could not be determined."
+##      echo::err "* No app name was passed as parameter"
+##      echo::err "* The working directory ($PWD) is not under a KUBE_X_APP_HOME path ($KUBE_X_APP_HOME)"
+##  fi
+#fi
+#echo ""
+#echo "# The name of the app"
+#echo "KUBE_X_APP_NAME=$KUBE_X_APP_NAME"
 
 
 ###########################
 # App dir and envrc: Load the user env
 ###########################
-KUBE_X_APP_DIR=""
-if [ "$KUBE_X_APP_NAME" != "" ]; then
-
-  # Set the internal field separator to a colon, but only for the command
-  IFS=':' read -r -a KUBE_X_HOMES <<< "$KUBE_X_APP_HOME"
-  for KUBE_X_HOME in "${KUBE_X_HOMES[@]}"; do
-    APP_DIR=$KUBE_X_HOME/$KUBE_X_APP_NAME
-    if [ -d "$APP_DIR" ]; then
-      KUBE_X_APP_DIR="$APP_DIR"
-      break
-    fi
-  done
-
-  if [ "$KUBE_X_APP_DIR" == "" ]; then
-    # App Name may be a component (example: alert manager)
-    echo::warn "No sub-directory with the name $KUBE_X_APP_NAME was found under the KUBE_X_APP_HOME paths (${KUBE_X_HOMES[@]})"
-  else
-    # App specific env
-    # Should be first
-    # Go to the app dir and pop at err and exit
-    pushd "$KUBE_X_APP_DIR" >/dev/null || return 1
-    bash::trap 'popd >/dev/null' EXIT # EXIT execute also on error
-
-    # Load the env
-    if command::exists "direnv"; then
-        # Direnv should be explicitly called in non-interactive mode
-        # https://github.com/direnv/direnv/issues/262
-        if ! bash::is_interactive; then
-          eval "$(direnv export bash)"
-        fi
-    else
-      echo::warn "Direnv not found on path"
-      ENVRC_FILE="$KUBE_X_APP_DIR/.envrc"
-      if [ -f "$ENVRC_FILE" ]; then
-        # shellcheck disable=SC1090
-        source "$ENVRC_FILE"
-      else
-        echo::warn "File $ENVRC_FILE not found"
-      fi
-    fi
-
-  fi
-
-fi
-echo ""
-echo "# The directory of the app"
-echo "KUBE_X_APP_DIR=$KUBE_X_APP_DIR"
+#KUBE_X_APP_DIR=""
+#if [ "$KUBE_X_APP_NAME" != "" ]; then
+#
+#  # Set the internal field separator to a colon, but only for the command
+#  IFS=':' read -r -a KUBE_X_HOMES <<< "$KUBE_X_APP_HOME"
+#  for KUBE_X_HOME in "${KUBE_X_HOMES[@]}"; do
+#    APP_DIR=$KUBE_X_HOME/$KUBE_X_APP_NAME
+#    if [ -d "$APP_DIR" ]; then
+#      KUBE_X_APP_DIR="$APP_DIR"
+#      break
+#    fi
+#  done
+#
+#  if [ "$KUBE_X_APP_DIR" == "" ]; then
+#    # App Name may be a component (example: alert manager)
+#    echo::warn "No sub-directory with the name $KUBE_X_APP_NAME was found under the KUBE_X_APP_HOME paths (${KUBE_X_HOMES[@]})"
+#  else
+#    # App specific env
+#    # Should be first
+#    # Go to the app dir and pop at err and exit
+#    pushd "$KUBE_X_APP_DIR" >/dev/null || return 1
+#    bash::trap 'popd >/dev/null' EXIT # EXIT execute also on error
+#
+#    # Load the env
+#    if command::exists "direnv"; then
+#        # Direnv should be explicitly called in non-interactive mode
+#        # https://github.com/direnv/direnv/issues/262
+#        if ! bash::is_interactive; then
+#          eval "$(direnv export bash)"
+#        fi
+#    else
+#      echo::warn "Direnv not found on path"
+#      ENVRC_FILE="$KUBE_X_APP_DIR/.envrc"
+#      if [ -f "$ENVRC_FILE" ]; then
+#        # shellcheck disable=SC1090
+#        source "$ENVRC_FILE"
+#      else
+#        echo::warn "File $ENVRC_FILE not found"
+#      fi
+#    fi
+#
+#  fi
+#
+#fi
+#echo ""
+#echo "# The directory of the app"
+#echo "KUBE_X_APP_DIR=$KUBE_X_APP_DIR"
 
 
 
