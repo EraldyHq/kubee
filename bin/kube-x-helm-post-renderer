@@ -239,13 +239,12 @@ if [ "$KUSTOMIZATION_MODE" -eq 1 ]; then
       echo::info "The command 'kubectl kustomize .' was executed with the $KUSTOMIZE_PACKAGE_TEMP_DIR working directory"
     fi
     # Add the kustomize manifest to the Jsonnet manifest if any
-    HELM_MANIFEST="$KUSTOMIZE_MANIFEST"
-#    HELM_MANIFEST=$(cat <<EOF
-#$HELM_MANIFEST
-#---
-#$KUSTOMIZE_MANIFEST
-#EOF
-#)
+    HELM_MANIFEST=$(cat <<EOF
+$HELM_MANIFEST
+---
+$KUSTOMIZE_MANIFEST
+EOF
+)
   else
     echo::err "An error occurred during the kustomization"
     echo::err "The command 'kubectl kustomize .' failed with the $KUSTOMIZE_PACKAGE_TEMP_DIR working directory"

@@ -3,14 +3,16 @@
 
 ## About
 This directory represents the deployment of ArgoCd.
-The apps are in another directory.
 
-This role:
-* install and configure argocd via [kustomize](kustomization.yml)
-* add the [git repo](templates/resources/argocd-secret-repo.yaml)
-* add the [github webhook](templates/resources/argocd-secret-external.yaml)
+This chart is a [Helm-x Chart](../../../docs/bin-generated/kube-x-helm-x.md):
+* install argocd
+* and configure optionally
+  * an [Ingress](templates/resources/argocd-ingress.yaml)
+  * a [git repo](templates/resources/argocd-secret-repo.yaml)
+  * a [github webhook](templates/resources/argocd-secret-external.yaml)
+  * mailing and a `on-deployed` notification
+  * the [ArgoCd Monitoring mixin](https://monitoring.mixins.dev/argo-cd-2/) (Prometheus Rules and Dashboards)
 
-It depends on Vault and External Secrets.
 
 ## Test/Check values before installation
 
@@ -41,19 +43,8 @@ helm template -s templates/patches/argocd-secret-patch.yaml \
   --set 'kube_x.cluster.adminUser.password=welcome'  \
   . | yq
 ```
-### Namespace is mandatory
 
-Every manifest should have a namespace.
 
-Because Argocd uses a fixed value of `argocd`
-https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#installing-argo-cd-in-a-custom-namespace
-
-Otherwise, you get:
-```
-error: accumulating resources: accumulation err='merging resources from 'helx.yml': 
-may not add resource with an already registered id: ConfigMap.v1.[noGrp]/argocd-cmd-params-cm.[noNs]': 
-must build at directory: '/home/admin/code/kube-x/resources/charts/argocd/helx.yml': file is not directory
-```
 
 
 ### Debug Notifications
@@ -112,9 +103,6 @@ https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#mana
 https://github.com/argoproj/argoproj-deployments/tree/master/argocd
 
 
-
-
-
 ## Notes on Argo cd project and policies
 
 A project is used to apply policy on deployment
@@ -124,13 +112,26 @@ https://argo-cd.readthedocs.io/en/stable/user-guide/projects/
 ## Support
 
 ### CPU and memory spike on Sync
-App syncing causes big memory spike (and probably CPU spike as well) in application controller.
 
-https://github.com/argoproj/argo-cd/discussions/6964#discussioncomment-1164100
-https://github.com/argoproj/argo-cd/discussions/10262
+See [](docs/argocd-cpu-memory-spikes.md)
 
-* `--kubectl-parallelism-limit` may be used to limit the number of concurrent resource application processes
-* For reposerver there is `--parallelismlimit` to limit the number of concurrent manifest tool invocations
-* We are using the `argocd.argoproj.io/manifest-generate-paths` annotation aggressively to avoid that, so that it doesn't generate every single manifest on every commit.
+## Dev / Contrib
 
-All perf conf are explained [here](https://argo-cd.readthedocs.io/en/stable/operator-manual/high_availability/)
+### JsonNet Prometheus Mixin
+
+Local:
+```bash
+cd argocd
+jb update
+jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/prometheusRule.jsonnet"))'
+jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/grafanaDashboard.jsonnet"))'
+```
+
+End-to-end Test:
+```bash
+kube-x-helx \
+  --cluster kube-x-ssh \
+  template \
+  cert-manager \
+  | grep "argocd-mixin-alert-rules" -B 3 -A 30
+```

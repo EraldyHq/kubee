@@ -1,21 +1,21 @@
-local certManager = import 'cert-manager-mixin/mixin.libsonnet';
+local certManager = import 'argo-cd-mixin/mixin.libsonnet';
 local values = std.extVar('values');
 
 // Generate a GrafanaDashboard
 // https://grafana.github.io/grafana-operator/docs/dashboards/
 //
 // To see the mixin dashboards
-// jsonnet -J vendor -e '(import "cert-manager-mixin/mixin.libsonnet").grafanaDashboards' -m jsonnet
+// jsonnet -J vendor -e '(import "argo-cd-mixin/mixin.libsonnet").grafanaDashboards' -m jsonnet
 //
 // To execute
-// jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/grafanaDashboard.jsonnet"))' --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }"
+// jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/grafanaApplicationDashboard.jsonnet"))' --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }"
 //
 // By default, the folder is the namespace name
 {
   apiVersion: 'grafana.integreatly.org/v1beta1',
   kind: 'GrafanaDashboard',
   metadata: {
-    name: 'cert-manager-mixin-dashboard'
+    name: 'argocd-mixin-application-dashboard'
   },
   spec:
     {
@@ -37,8 +37,11 @@ local values = std.extVar('values');
       json: std.manifestJson(
             certManager {
                // https://github.com/imusmanmalik/cert-manager-mixin/blob/main/config.libsonnet
-               _config+:: {},
-             }.grafanaDashboards["overview.json"]
+               _config+:: {
+                   grafanaUrl: 'https://' + values.kube_x.grafana.instance.hostname,
+                   argoCdUrl: 'https://' + values.kube_x.argocd.hostname,
+               },
+             }.grafanaDashboards["argo-cd-application-overview.json"]
              ),
     },
 }

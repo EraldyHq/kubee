@@ -10,3 +10,8 @@ Support:
   * with environment variables processing
   * with configurable namespace
 * `Jsonnet` and `kustomize` processing with the [kube-x post-renderer](kube-x-helm-post-renderer.md)
+
+
+# Synopsis
+
+${SYNOPSIS}
