@@ -1,7 +1,8 @@
 # Kube-x Vault Chart
 
 ## About
-A [kube-x chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-kube-x-chart) that [installs Vault](https://developer.hashicorp.com/vault/docs/platform/k8s) in a standalone mode
+A [kube-x chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-kube-x-chart) that [installs Vault](https://developer.hashicorp.com/vault/docs/platform/k8s) 
+in a standalone mode.
 
 ## Installation
 
