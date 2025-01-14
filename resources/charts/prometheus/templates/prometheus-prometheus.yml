@@ -1,9 +1,9 @@
+{{- if eq .Values.kube_x.prometheus.enabled true }}
 # launch a HA Prometheus deployment into your Kubernetes Cluster using a Prometheus resource defined by Prometheus Operator.
 # definition is here:
 # https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.Prometheus
 # or here in Github: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#prometheus
 # example: https://github.com/prometheus-operator/prometheus-operator/blob/main/example/user-guides/alerting/prometheus-example.yaml
-{{- if ne .Values.kube_x.prometheus.enabled true }}
 apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
 metadata:
@@ -33,7 +33,7 @@ spec:
   # The external URL under which the Prometheus service is externally available.
   # Implements the --web.external-url flag: https://prometheus.io/docs/prometheus/latest/command-line/prometheus/
   {{- if ne .Values.kube_x.prometheus.hostname "" }}
-  externalUrl: {{ .Values.kube_x.prometheus.hostname }}
+  externalUrl: 'https://{{ .Values.kube_x.prometheus.hostname }}'
   {{- end }}
   # Alerting
   alerting:
@@ -66,7 +66,7 @@ spec:
   # Remote Write to Grafana Cloud
   # Spec: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#monitoring.coreos.com/v1.RemoteWriteSpec
   remoteWrite:
-    {{- if .Values.kube_x.prometheus.grafana_cloud.enabled true }}
+    {{- if eq .Values.kube_x.prometheus.grafana_cloud.enabled true }}
     - url: "https://prometheus-blocks-prod-us-central1.grafana.net/api/prom/push"
       {{- /*
       writeRelabelConfigs:
@@ -85,7 +85,7 @@ spec:
           name: {{ include "kube-x-prometheus-grafana-cloud-secret-name" . }}
           key: prometheus-password
     {{- end }}
-    {{- if .Values.kube_x.prometheus.new_relic.enabled true }}
+    {{- if eq .Values.kube_x.prometheus.new_relic.enabled true }}
     # Doc: https://docs.newrelic.com/docs/infrastructure/prometheus-integrations/install-configure-remote-write/set-your-prometheus-remote-write-integration/#optional-prometheus-operator-configuration
     # Make sure the API key is of the type `Ingest - License`
     - url: "https://metric-api.newrelic.com/prometheus/v1/write?prometheus_server={{ .Values.kube_x.cluster.name }}"
