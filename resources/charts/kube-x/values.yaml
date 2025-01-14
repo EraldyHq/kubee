@@ -51,13 +51,18 @@ kubernetes_dashboard:
 
 # Kube-X Traefik Variables
 traefik:
+  # Not a string, a boolean so no quote
+  enabled: true
   # Instance/Release Name
   namespace: traefik
+  # Middleware
+  # https://doc.traefik.io/traefik/middlewares
   middleware:
-    # Enabled by default when the admin user password is not empty
+    # Create a basic Auth Middleware
     # https://doc.traefik.io/traefik/middlewares/http/basicauth/
+    # Enabled by default when the admin user password is not empty
     basicAuth:
-      # List of users
+      # List of extra users
       users:
       # user1: password1
   # Set the default certificate as default traefik cert
@@ -72,12 +77,13 @@ traefik:
   dashboard:
     # The FQDN is dnsName.apexDomain
     # If not empty, an ingress is created
-    # example: hostname: 'traefik.kube-x.dev'
+    # example: hostname: 'traefik-haship.'
     hostname: ''
 
 # The prometheus kube-x env
 prometheus:
   # Enable or disable prometheus
+  # Not a string, a boolean so no quote
   enabled: false
   # The installation namespace (used by Grafana to create the data source)
   namespace: 'prometheus'
@@ -87,6 +93,7 @@ cert_manager:
   # Not enabled by default
   # This is the kube-x template condition used to create certificate for ingress route
   # when disabled, the default traefik certificate is used
+  # Not a string, a boolean so no quote
   enabled: false
 
   # The issuer used in all certificate request
@@ -231,4 +238,3 @@ argocd:
     # Control the `--metrics-cache-expiration duration` parameter (disabled  by default. e.g. 24h0m0s) of [argocd-application-controller](https://argo-cd.readthedocs.io/en/stable/operator-manual/server-commands/argocd-application-controller/)
     # As recommended here: https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/#application-controller-metrics
     controller_metrics_cache_expiration: '24h0m0s'
-

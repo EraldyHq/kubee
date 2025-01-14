@@ -1,0 +1,54 @@
+---
+# https://github.com/dexidp/dex/blob/master/examples/k8s/dex.yaml
+apiVersion: apps/v1
+# If also using it for Kubernetes authentication,
+# you may want to use a DaemonSet instead for maximum redundancy.
+kind: Deployment
+metadata:
+  name: dex
+  labels:
+    app.kubernetes.io/name: dex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dex
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dex
+    spec:
+      # Give it Kubernetes API access for session data storage.
+      serviceAccountName: dex
+      containers:
+        - name: dex
+          # https://dexidp.io/docs/getting-started/#container-image
+          # https://hub.docker.com/r/dexidp/dex/tags
+          image: dexidp/dex:v2.41.1-alpine
+          command: ["/usr/local/bin/dex", "serve", "/etc/dex/cfg/config.yaml"]
+          ports:
+            - name: https
+              containerPort: 5556
+          envFrom:
+            - secretRef:
+                name: github-credentials
+          volumeMounts:
+            - name: config
+              mountPath: /etc/dex/cfg
+            - name: tls
+              mountPath: /etc/dex/tls
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 5556
+              scheme: https
+      volumes:
+        - name: config
+          configMap:
+            name: dex
+            items:
+              - key: config.yaml
+                path: config.yaml
+        - name: tls
+          secret:
+            secretName: dex-tls

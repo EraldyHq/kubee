@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dex
+
+configMapGenerator:
+  - name: dex-env
+    files:
+      - .env
+
+# https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/replacements/
+replacements:
+  - path: resources/dex-replacements.yml
+
+resources:
+  - resources/dex-namespace.yml
+  - resources/dex-configmap.yml
+  - resources/dex-service-account-rbac.yml
+  - resources/dex-deployment.yml
+  - resources/dex-service.yml
+  - resources/dex-ingress.yml
+
+
+generatorOptions:
+  # disable appending a content hash suffix to the names of generated resources
+  disableNameSuffixHash: true
+  # adding labels to generated resources
+  labels:
+    generator: infra

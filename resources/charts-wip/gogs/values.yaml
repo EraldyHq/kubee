@@ -1,0 +1,6 @@
+# Temporary
+kube_x:
+  gogs:
+    enabled: false
+    namespace: gogs
+    hostname: ''

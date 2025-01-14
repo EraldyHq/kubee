@@ -1,0 +1,12 @@
+# A service for both internal use and for the Ingress.
+apiVersion: v1
+kind: Service
+metadata:
+  name: dex
+  labels:
+    app.kubernetes.io/name: dex
+spec:
+  ports:
+    - port: 5556
+  selector:
+    app.kubernetes.io/name: dex

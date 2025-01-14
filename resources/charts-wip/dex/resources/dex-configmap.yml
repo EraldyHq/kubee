@@ -1,0 +1,93 @@
+# Dex configuration file.
+# Dex exclusively pulls configuration options from a config file.
+# Getting Started: https://dexidp.io/docs/getting-started/#configuration
+# Ref: https://dexidp.io/docs/configuration/
+# Example:
+#  K8s: https://github.com/dexidp/dex/blob/master/examples/k8s/dex.yaml#L68
+#  General: https://github.com/dexidp/dex/blob/master/examples/config-dev.yaml
+# Templating:
+#   * Doc: https://dexidp.io/docs/getting-started/#templated-configuration
+#   * uses: https://github.com/hairyhenderson/gomplate
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: dex
+  labels:
+    app.kubernetes.io/name: dex
+data:
+  config.yaml: |
+    # Public issuer URL
+    # (Must match the one configured in traefik-forward-auth)
+    # The base path of dex and the external name of the OpenID Connect service.
+    # This is the canonical URL that all clients MUST use to refer to dex. If a
+    # path is provided, dex's HTTP service will listen at a non-root URL.
+    issuer: "{{ .Env.ISSUER }}"
+
+    # Store session data in Kubernetes CRD objects
+    # Storage: https://dexidp.io/docs/configuration/storage/
+    # Kub Storage Ref: https://dexidp.io/docs/configuration/storage/#kubernetes-custom-resource-definitions-crds
+    storage:
+      type: kubernetes
+      config:
+        inCluster: true
+    
+    # https://github.com/dexidp/dex/blob/master/examples/config-dev.yaml#L48C1-L48C40
+    web:
+      https: 0.0.0.0:5556
+      # Path of the cert in the container
+      # Mounted via volume
+      tlsCert: /etc/dex/tls/tls.crt
+      tlsKey: /etc/dex/tls/tls.key
+      headers:
+        X-Frame-Options: "DENY"
+        X-Content-Type-Options: "nosniff"
+        X-XSS-Protection: "1; mode=block"
+        Content-Security-Policy: "default-src 'self'"
+        Strict-Transport-Security: "max-age=31536000; includeSubDomains"
+      clientRemoteIP:
+        header: X-Forwarded-For
+        trustedProxies:
+          - "{{ .Env.TRUSTED_PROXY }}"
+    
+    # Ref: https://dexidp.io/docs/guides/templates/
+    # Configuration for dex appearance
+    # frontend:
+    #   issuer: dex
+    #   logoURL: theme/logo.png
+    #   dir: web/
+    #   theme: light
+    
+    # Here is where you would configure your authentication backend.
+    # See https://github.com/dexidp/dex#connectors for a list of supported connectors.
+    # https://dexidp.io/docs/connectors/github/
+    connectors:
+      - type: github
+        id: github
+        name: GitHub
+        config:
+          clientID: "{{ .Env.GITHUB_CLIENT_ID }}"
+          clientSecret: "{{ .Env.GITHUB_CLIENT_SECRET }}"
+          redirectURI: "{{ .Env.ISSUER }}/callback"
+          # List of orgs that may connect
+          orgs:
+            - name: my-organization
+    # OAuth2 flow customization options
+    # https://dexidp.io/docs/configuration/oauth2/
+    oauth2:
+      # Automate some clicking
+      skipApprovalScreen: true
+
+    # Client registration 
+    staticClients:
+      # This is internal client config for traefik-forward-auth.
+      - name: Traefik Forward Auth
+        id: forward-auth
+        # An arbitrary secret value, make sure you change this if using this example
+        # for real, and then put the matching value in forward-auth.yml too.
+        secret: 6bbc3f2a6d55a3917e068dff5b07a476
+        redirectURIs:
+          - https://auth.eraldy.com/_oauth
+    
+    # builtin connector (password stored in dex)
+    # https://dexidp.io/docs/connectors/local/
+    enablePasswordDB: false

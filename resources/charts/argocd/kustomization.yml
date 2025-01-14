@@ -30,5 +30,5 @@ resources:
   - templates/resources/argocd-notifications-secret-external.yaml
   - templates/resources/argocd-secret-external.yaml
   - templates/resources/argocd-secret-repo.yaml
-  - templates/resources/argocd-service-monitor-metrics.yaml
+  - templates/resources/argocd-service-monitors.yaml
   - templates/resources/argocd-svc-no-tls-transport.yaml

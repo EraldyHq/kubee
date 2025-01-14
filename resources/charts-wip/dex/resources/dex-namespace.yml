@@ -1,0 +1,5 @@
+# A namespace for Dex to live in.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dex
