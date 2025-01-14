@@ -6,7 +6,6 @@ metadata:
   labels:
     app.kubernetes.io/name: node-exporter
 spec:
-  jobLabel: node-exporter
   endpoints:
     - honorLabels: true
       interval: 30s # scrape interval to 30s
@@ -23,7 +22,7 @@ spec:
         # Drop the discovery service label
         # We keep service to be able to get the kb by service
         - action: labeldrop
-          regex: '(container|endpoint|job|namespace|pod)'
+          regex: '(container|endpoint|namespace|pod|job)'
       metricRelabelings:
         # Keep only what we need based on newrelic (summary graph, ...)
         # CPU: node_cpu_seconds_total
