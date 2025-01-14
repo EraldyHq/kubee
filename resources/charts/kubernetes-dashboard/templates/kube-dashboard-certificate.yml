@@ -5,15 +5,14 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: '{{ include "kubernetes-dashboard-name" }}'
+  name: '{{ include "kubernetes-dashboard-name" . }}'
   namespace: '{{.Release.Namespace}}'
 spec:
   commonName: '{{ .Values.kube_x.kubernetes_dashboard.hostname }}'
-  secretName: '{{ include "kubernetes-dashboard-name" }}'
+  secretName: '{{ include "kubernetes-dashboard-name" .}}'
   dnsNames:
     - '{{ .Values.kube_x.kubernetes_dashboard.hostname }}'
   issuerRef:
     kind: ClusterIssuer
     name: '{{ .Values.kube_x.cert_manager.defaultIssuerName }}'
-
 {{- end}}
