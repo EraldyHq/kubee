@@ -1,3 +1,4 @@
+{{- if eq .Values.kube_x.prometheus.enabled true }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -13,3 +14,4 @@ spec:
     app.kubernetes.io/name: prometheus
   # to ensure that connections from a particular client get forwarded to the same Pod
   sessionAffinity: ClientIP
+{{- end }}

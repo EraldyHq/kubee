@@ -1,9 +1,10 @@
+{{- if eq .Values.kube_x.prometheus.node_exporter.enabled true }}
 apiVersion: v1
 kind: Service
 metadata:
+  name: node-exporter
   labels:
     app.kubernetes.io/name: node-exporter
-  name: node-exporter
 spec:
   ports:
     - name: node-exporter
@@ -14,3 +15,4 @@ spec:
     app.kubernetes.io/name: node-exporter
   sessionAffinity: None
   type: ClusterIP
+{{- end }}

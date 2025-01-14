@@ -1,4 +1,4 @@
----
+{{- if eq .Values.kube_x.prometheus.node_exporter.enabled true }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -49,3 +49,4 @@ spec:
     matchLabels:
       # scrape services with the following label
       app.kubernetes.io/name: node-exporter
+{{- end }}

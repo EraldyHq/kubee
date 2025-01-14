@@ -1,4 +1,4 @@
----
+{{- if eq .Values.kube_x.prometheus.pushgateway.enabled true }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -30,3 +30,4 @@ spec:
         - sourceLabels: [ __name__ ]
           regex: "(go|process|pushgateway).*"
           action: drop
+{{- end}}

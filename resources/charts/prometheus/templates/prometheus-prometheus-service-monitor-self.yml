@@ -1,9 +1,10 @@
+{{- if eq .Values.kube_x.prometheus.enabled true }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: prometheus-self
   labels:
-    app: prometheus
+    app.kubernetes.io/name: prometheus
 spec:
   endpoints:
     - interval: 30s # scrape interval to 30s
@@ -11,4 +12,5 @@ spec:
   selector:
     matchLabels:
       # scrape services with the following label
-      app: prometheus
+      app.kubernetes.io/name: prometheus
+{{- end }}

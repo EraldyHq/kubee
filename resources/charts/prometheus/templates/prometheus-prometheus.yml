@@ -3,6 +3,7 @@
 # https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.Prometheus
 # or here in Github: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#prometheus
 # example: https://github.com/prometheus-operator/prometheus-operator/blob/main/example/user-guides/alerting/prometheus-example.yaml
+{{- if ne .Values.kube_x.prometheus.enabled true }}
 apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
 metadata:
@@ -31,7 +32,9 @@ spec:
   retention: 24h # the default
   # The external URL under which the Prometheus service is externally available.
   # Implements the --web.external-url flag: https://prometheus.io/docs/prometheus/latest/command-line/prometheus/
-  externalUrl: https://prometheus.eraldy.com
+  {{- if ne .Values.kube_x.prometheus.hostname "" }}
+  externalUrl: {{ .Values.kube_x.prometheus.hostname }}
+  {{- end }}
   # Alerting
   alerting:
     alertmanagers:
@@ -63,7 +66,9 @@ spec:
   # Remote Write to Grafana Cloud
   # Spec: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#monitoring.coreos.com/v1.RemoteWriteSpec
   remoteWrite:
+    {{- if .Values.kube_x.prometheus.grafana_cloud.enabled true }}
     - url: "https://prometheus-blocks-prod-us-central1.grafana.net/api/prom/push"
+      {{- /*
       writeRelabelConfigs:
         # Send only the phpfpm_* metrics
         # Doc: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
@@ -71,17 +76,21 @@ spec:
         - sourceLabels: [ __name__ ]
           regex: "phpfpm_(.*)"
           action: keep
+      */}}
       basicAuth:
         username:
-          name: prometheus-grafana-cloud-secret
+          name: {{ include "kube-x-prometheus-grafana-cloud-secret-name" . }}
           key: prometheus-username
         password:
-          name: prometheus-grafana-cloud-secret
+          name: {{ include "kube-x-prometheus-grafana-cloud-secret-name" . }}
           key: prometheus-password
+    {{- end }}
+    {{- if .Values.kube_x.prometheus.new_relic.enabled true }}
     # Doc: https://docs.newrelic.com/docs/infrastructure/prometheus-integrations/install-configure-remote-write/set-your-prometheus-remote-write-integration/#optional-prometheus-operator-configuration
     # Make sure the API key is of the type `Ingest - License`
-    - url: "https://metric-api.newrelic.com/prometheus/v1/write?prometheus_server=kube-beau"
-      # spec: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#authorization
+    - url: "https://metric-api.newrelic.com/prometheus/v1/write?prometheus_server={{ .Values.kube_x.cluster.name }}"
+      {{- /*
+        # spec: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#authorization
       writeRelabelConfigs:
         # Send only the phpfpm_* metrics
         # Doc: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
@@ -94,15 +103,17 @@ spec:
           targetLabel: newrelic_metric_type
           replacement: "counter"
           action: replace
+       */}}
       authorization:
         credentials:
           # The key of the secret to select from
-          name: prometheus-new-relic-secret
+          name: {{ include "kube-x-prometheus-new-relic-secret-name" . }}
           # The secret key to select
           key: prometheus-bearer
-
+    {{- end }}
 
   # The labels added to any time series or alerts
   # when communicating with external systems (federation, remote storage, Alertmanager)
   externalLabels:
-    cluster: "beau"
+    cluster: "{{ .Values.kube_x.cluster.name }}"
+{{- end }}

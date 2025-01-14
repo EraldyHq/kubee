@@ -1,17 +1,21 @@
----
+{{- if and (eq .Values.kube_x.prometheus.enabled true) (ne .Values.kube_x.prometheus.hostname "") }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: prometheus
+  labels:
+    app.kubernetes.io/name: prometheus
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
     # Because Middleware is not namespace, we use the kube-system-traefik-dashboard-auth@kubernetescrd
     traefik.ingress.kubernetes.io/router.middlewares: kube-system-traefik-dashboard-auth@kubernetescrd
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    {{- if ne (((.Values).kube_x).cert_manager).enabled false }}
+    cert-manager.io/cluster-issuer: '{{ .Values.kube_x.cert_manager.defaultIssuerName }}'
+    {{- end }}
 spec:
   rules:
-    - host: prometheus.eraldy.com
+    - host: {{ required "kube_x.prometheus.hostname is required" .Values.kube_x.prometheus.hostname }}
       http:
         paths:
           - backend:
@@ -23,5 +27,6 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - prometheus.eraldy.com
+        - {{ .Values.kube_x.prometheus.hostname }}
       secretName: prometheus-cert
+{{- end}}

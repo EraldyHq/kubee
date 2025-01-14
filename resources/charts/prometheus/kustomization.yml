@@ -7,7 +7,7 @@ namespace: ${KUBE_X_NAMESPACE}
 resources:
 # `bundle.yaml` installs CRDs for Prometheus objects as well as a Prometheus Operator controller and service.
 - https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.76.2/bundle.yaml
-- templates/prometheus-rbac-service-account.yml # https://prometheus-operator.dev/docs/platform/rbac/
+- templates/prometheus-prometheus-rbac-service-account.yml # https://prometheus-operator.dev/docs/platform/rbac/
 - templates/prometheus-prometheus.yml
 - templates/prometheus-prometheus-service.yml
 - templates/prometheus-prometheus-service-monitor-self.yml

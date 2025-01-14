@@ -1,4 +1,4 @@
----
+{{- if and (eq .Values.kube_x.prometheus.pushgateway.enabled true) (ne .Values.kube_x.prometheus.pushgateway.hostname "") }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -8,10 +8,12 @@ metadata:
     traefik.ingress.kubernetes.io/router.tls: "true"
     # Because Middleware is not namespace, we use the kube-system-traefik-dashboard-auth@kubernetescrd
     traefik.ingress.kubernetes.io/router.middlewares: kube-system-traefik-dashboard-auth@kubernetescrd
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    {{- if ne (((.Values).kube_x).cert_manager).enabled false }}
+    cert-manager.io/cluster-issuer: '{{ .Values.kube_x.cert_manager.defaultIssuerName }}'
+    {{- end }}
 spec:
   rules:
-    - host: pushgateway.eraldy.com
+    - host: {{ required "kube_x.prometheus.pushgateway.hostname is required" .Values.kube_x.prometheus.pushgateway.hostname }}
       http:
         paths:
           - backend:
@@ -23,5 +25,6 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - pushgateway.eraldy.com
+        - {{ .Values.kube_x.prometheus.pushgateway.hostname }}
       secretName: pushgateway-cert
+{{- end}}

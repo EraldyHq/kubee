@@ -1,3 +1,4 @@
+{{- if eq .Values.kube_x.prometheus.pushgateway.enabled true }}
 # Install the PushGateway
 # https://hub.docker.com/r/prom/pushgateway
 apiVersion: apps/v1
@@ -21,3 +22,4 @@ spec:
           image: prom/pushgateway:v1.10.0
           ports:
             - containerPort: 9091
+{{- end}}

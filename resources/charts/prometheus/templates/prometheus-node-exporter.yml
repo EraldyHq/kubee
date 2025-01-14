@@ -1,8 +1,10 @@
-# Install Node Exporter
-# There is also a helm but yeah
-# DaemonSet install one Node Exporter on each node
-# and `hostNetwork: true` will install it on the host network
----
+{{/*
+  # Install Node Exporter
+  # There is also a helm but yeah
+  # DaemonSet install one Node Exporter on each node
+  # and `hostNetwork: true` will install it on the host network
+*/}}
+{{- if eq .Values.kube_x.prometheus.node_exporter.enabled true }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -64,3 +66,4 @@ spec:
             path: /sys
             type: ""
           name: sys
+{{- end }}

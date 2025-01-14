@@ -3,6 +3,8 @@
 
 # Cluster Wide variables
 cluster:
+  # The cluster name (used when prometheus metrics are send to remote-write for instance)
+  name: 'kube-x'
   # Admin user
   #  * created as admin user in Kubernetes and other app
   #  * added in basicAuth
@@ -87,9 +89,31 @@ prometheus:
   enabled: false
   # The installation namespace (used by Grafana to create the data source)
   namespace: 'prometheus'
+  # prometheus
+  hostname: ''
   # alert manager
   alertmanager:
     enabled: true
+    hostname: ''
+  # grafana cloud
+  grafana_cloud:
+    enabled: false
+    # For remote write
+    prometheus:
+      username: ''
+      password: ''
+  # new relic
+  new_relic:
+    enabled: false
+    prometheus:
+      # for remote write
+      bearer: ''
+  # node_exporter
+  node_exporter:
+    enabled: true
+  # Pushgateway
+  pushgateway:
+    enabled: false
     hostname: ''
 
 # The cert manager kube-x env
