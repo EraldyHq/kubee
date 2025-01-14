@@ -1,0 +1,66 @@
+# Install Node Exporter
+# There is also a helm but yeah
+# DaemonSet install one Node Exporter on each node
+# and `hostNetwork: true` will install it on the host network
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  labels:
+    app.kubernetes.io/name: node-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: node-exporter
+  template:
+    metadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+      labels:
+        app.kubernetes.io/name: node-exporter
+    spec:
+      containers:
+        - args:
+            - --web.listen-address=0.0.0.0:9100
+            - --path.procfs=/host/proc
+            - --path.sysfs=/host/sys
+          image: prom/node-exporter:v1.8.2
+          imagePullPolicy: IfNotPresent
+          name: node-exporter
+          ports:
+            - containerPort: 9100
+              hostPort: 9100
+              name: metrics
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 200m
+              memory: 50Mi
+            requests:
+              cpu: 100m
+              memory: 30Mi
+          volumeMounts:
+            - mountPath: /host/proc
+              name: proc
+              readOnly: true
+            - mountPath: /host/sys
+              name: sys
+              readOnly: true
+      hostNetwork: true
+      hostPID: true
+      restartPolicy: Always
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
+      volumes:
+        - hostPath:
+            path: /proc
+            type: ""
+          name: proc
+        - hostPath:
+            path: /sys
+            type: ""
+          name: sys

@@ -1,0 +1,18 @@
+# Ref: https://prometheus-operator.dev/docs/developer/alerting/#deploying-prometheus-rules
+# For demonstration purposes, the PrometheusRule object always fires the ExampleAlert alert.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: prometheus-example-rules
+  labels:
+    app.kubernetes.io/name: prometheus
+spec:
+  groups:
+    - name: ./example.rules
+      rules:
+        - alert: ExampleAlert
+          expr: vector(1)
+          labels:
+            severity: 'warning'
+          annotations:
+            description: 'This is an example alert.'

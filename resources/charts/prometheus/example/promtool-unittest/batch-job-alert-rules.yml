@@ -1,0 +1,12 @@
+groups:
+  - name: example
+    rules:
+    - alert: BatchDown
+      # 60*60*24*7
+      expr: push_time_seconds{job="git_hosting_backup"} > time() - 60*60*24*7
+      #for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Git hosting backup batch has failed to run"
+        description: "Git hosting backup should push metrics at least once every week"

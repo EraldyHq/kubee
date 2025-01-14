@@ -1,0 +1,32 @@
+{{- if and (eq .Values.kube_x.prometheus.alertmanager.enabled true ) (ne .Values.kube_x.prometheus.alertmanager.hostname "") }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alertmanager
+  labels:
+    app.kubernetes.io/name: alertmanager
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    # Because Middleware is not namespace, we use the kube-system-traefik-dashboard-auth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: kube-system-traefik-dashboard-auth@kubernetescrd
+    {{- if ne (((.Values).kube_x).cert_manager).enabled false }}
+    cert-manager.io/cluster-issuer: '{{ .Values.kube_x.cert_manager.defaultIssuerName }}'
+    {{- end }}
+spec:
+  rules:
+    - host: {{ .Values.kube_x.prometheus.alertmanager.hostname }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: alertmanager
+                port:
+                  number: 9093
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - {{ .Values.kube_x.prometheus.alertmanager.hostname }}
+      secretName: alertmanager-cert
+{{- end -}}

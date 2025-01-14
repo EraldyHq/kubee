@@ -1,0 +1,23 @@
+# Install the PushGateway
+# https://hub.docker.com/r/prom/pushgateway
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pushgateway
+  labels:
+    app.kubernetes.io/name: pushgateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pushgateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pushgateway
+    spec:
+      containers:
+        - name: pushgateway
+          image: prom/pushgateway:v1.10.0
+          ports:
+            - containerPort: 9091

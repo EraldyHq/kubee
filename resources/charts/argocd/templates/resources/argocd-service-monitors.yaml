@@ -10,11 +10,11 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: argocd-metrics
+  name: argocd
   {{- /*  namespace: {{ .Values.kube_x.argocd.namespace }}*/}}
   labels:
     release: prometheus-operator
-    app.kubernetes.io/name: argocd-metrics
+    app.kubernetes.io/name: argocd
 spec:
   selector:
     matchLabels:
@@ -40,9 +40,10 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: argocd-server-metrics
+  name: argocd-server
   labels:
     release: prometheus-operator
+    app.kubernetes.io/name: argocd-server
 spec:
   selector:
     matchLabels:
@@ -55,5 +56,62 @@ spec:
         - action: labeldrop
           regex: '(container|endpoint|job|namespace|pod)'
 ---
-
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd-repo-server
+  labels:
+    release: prometheus-operator
+    app.kubernetes.io/name: argocd-repo-server
+spec:
+  selector:
+    matchLabels:
+      # No metrics service
+      app.kubernetes.io/name: argocd-repo-server
+  endpoints:
+    - port: metrics
+      relabelings:
+        # Drop the discovery service label
+        # We keep service to be able to get the kb by service
+        - action: labeldrop
+          regex: '(container|endpoint|job|namespace|pod)'
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd-applicationset-controller
+  labels:
+    release: prometheus-operator
+    app.kubernetes.io/name: argocd-applicationset-controller
+spec:
+  selector:
+    matchLabels:
+      # No metrics suffix (normal)
+      app.kubernetes.io/name: argocd-applicationset-controller
+  endpoints:
+    - port: metrics
+      relabelings:
+        # Drop the discovery service label
+        # We keep service to be able to get the kb by service
+        - action: labeldrop
+          regex: '(container|endpoint|job|namespace|pod)'
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd-notifications-controller
+  labels:
+    release: prometheus-operator
+    app.kubernetes.io/name: argocd-applicationset-controller
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-notifications-controller-metrics
+  endpoints:
+    - port: metrics
+      relabelings:
+      # Drop the discovery service label
+      # We keep service to be able to get the kb by service
+        - action: labeldrop
+          regex: '(container|endpoint|job|namespace|pod)'
 {{- end -}}

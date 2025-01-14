@@ -19,6 +19,6 @@ Usage:
 Shows the service monitor of an app
 
 ```bash
-kube-app-service-monitor-check <app name>
+kube-x-service-monitor-check <app name>
 ```
 Note: the service monitor should have the label `app.kubernetes.io/name=<app name>`

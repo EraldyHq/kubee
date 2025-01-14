@@ -1,0 +1,27 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pushgateway
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    # Because Middleware is not namespace, we use the kube-system-traefik-dashboard-auth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: kube-system-traefik-dashboard-auth@kubernetescrd
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+    - host: pushgateway.eraldy.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: pushgateway
+                port:
+                  number: 9091
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - pushgateway.eraldy.com
+      secretName: pushgateway-cert

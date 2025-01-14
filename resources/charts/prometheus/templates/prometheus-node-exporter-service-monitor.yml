@@ -1,0 +1,51 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: node-exporter
+  labels:
+    app.kubernetes.io/name: node-exporter
+spec:
+  jobLabel: node-exporter
+  endpoints:
+    - honorLabels: true
+      interval: 30s # scrape interval to 30s
+      # ie http://188.245.43.250:9100/metrics
+      path: /metrics
+      targetPort: 9100
+      # Target label relabeling
+      relabelings:
+        # New Relic takes the instance as node name
+        # We replace `IP:PORT` by `hostname`
+        # see https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config
+        - sourceLabels: [ __meta_kubernetes_endpoint_node_name ]
+          targetLabel: instance
+        # Drop the discovery service label
+        # We keep service to be able to get the kb by service
+        - action: labeldrop
+          regex: '(container|endpoint|job|namespace|pod)'
+      metricRelabelings:
+        # Keep only what we need based on newrelic (summary graph, ...)
+        # CPU: node_cpu_seconds_total
+        # Memory: node_memory_MemAvailable_bytes, node_memory_MemTotal_bytes
+        # Storage and Disk Usage: node_filesystem_avail_bytes, node_filesystem_size_bytes (device label is needed)
+        # Network Traffic: node_network_transmit_bytes_total, node_network_receive_bytes_total
+        # Load average: node_load1, node_load5, node_load15
+        - sourceLabels: [ __name__ ]
+          regex: "node_cpu_seconds_total|node_memory_MemAvailable_bytes|node_memory_MemTotal_bytes|node_filesystem_avail_bytes|node_filesystem_size_bytes|node_network_transmit_bytes_total|node_network_receive_bytes_total|node_load.*"
+          action: keep
+        # High Cardinality
+        # Drop the high cardinality vethxxxx label device (High Cardinality label: cni, eth0, vethxxx, lo, flannel, ...)
+        # We rename because newrelic rely on it in query
+        # Example: File System Available query: `device != 'tmpfs'`
+        - sourceLabels: [ device ]
+          regex: "veth.*"
+          targetLabel: device
+          replacement: "vethxxxxxx"
+#  namespaceSelector:
+#    matchNames:
+#      - prometheus
+  selector:
+    matchLabels:
+      # scrape services with the following label
+      app.kubernetes.io/name: node-exporter

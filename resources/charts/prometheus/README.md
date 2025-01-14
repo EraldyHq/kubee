@@ -1,57 +1,110 @@
+# Prometheus Operator
+
+## About
+
+This app install and configure:
+* the prometheus operator (with a prometheus and alertmanager instance)
+* the node exporter
+* the push gateway
 
 
-monitoring-mixins: https://github.com/monitoring-mixins/docs/blob/master/design.pdf
+The Prometheus Operator provides Kubernetes native deployment and management of Prometheus and related monitoring components.
 
-## Installation
+https://prometheus-operator.dev/
 
-https://github.com/prometheus-operator/kube-prometheus
 
-### Helm
+## How to
 
-https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/README.md
+### Develop the Manifest Ops
 
-By default, this chart installs additional, dependent charts:
-* prometheus-community/kube-state-metrics
-* prometheus-community/prometheus-node-exporter
-* grafana/grafana
-
-### Jsonnet
-
-```jsonnet
-local prometheusOperator = import 'github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator/prometheus-operator.libsonnet';
-# https://github.com/prometheus-operator/prometheus-operator/blob/main/jsonnet/prometheus-operator/prometheus-operator.libsonnet
+Once, create the namespace
+```bash
+kubectl create namespace kube-prometheus
 ```
 
-## Init
-https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/customizing.md
+Then:
+* with `kube-x-kubectl`
+```bash
+kube-x-kubectl apply --server-side -k .
+# why `--server-side` because https://github.com/prometheus-operator/kube-prometheus/issues/1511
+```
+
+* with `kubectl`
+```bash
+kubectl config set-context --current --namespace=kube-prometheus
+kubectl apply --server-side -k .
+# why `--server-side` because https://github.com/prometheus-operator/kube-prometheus/issues/1511
+```
+
+### Check that the operator is up and running
 
 ```bash
-jb init 
-jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
-# Install this file: 
-# https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/refs/heads/main/jsonnet/kube-prometheus/main.libsonnet
+kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator -n kube-prometheus
+```
+
+### Verify that the prometheus instance is up and running
+
+```bash
+kubectl get prometheus -n kube-prometheus
+# continuously
+kubectl get prometheus -n kube-prometheus -w  
 ```
 ```
-GET https://github.com/prometheus-operator/kube-prometheus/archive/f41e7f3a7cd2bb8b53d5bcc293cffa9910995eca.tar.gz 200
-GET https://github.com/brancz/kubernetes-grafana/archive/5698c8940b6dadca3f42107b7839557bc041761f.tar.gz 200
-GET https://github.com/grafana/grafana/archive/1120f9e255760a3c104b57871fcb91801e934382.tar.gz 200
-GET https://github.com/etcd-io/etcd/archive/b4450d510ddf0f011c874c28e95175b4bac7f6c8.tar.gz 200
-GET https://github.com/prometheus-operator/prometheus-operator/archive/25e59cb0b8b0563cabfbd7e0f1464d0e0dd10672.tar.gz 200
-GET https://github.com/prometheus-operator/prometheus-operator/archive/25e59cb0b8b0563cabfbd7e0f1464d0e0dd10672.tar.gz 200
-GET https://github.com/kubernetes-monitoring/kubernetes-mixin/archive/13a06e4adff639de16a21142a0ec61f09f036eed.tar.gz 200
-GET https://github.com/kubernetes/kube-state-metrics/archive/d3f0c1853f11b387d7dc2c89bd5e52760f65079c.tar.gz 200
-GET https://github.com/kubernetes/kube-state-metrics/archive/d3f0c1853f11b387d7dc2c89bd5e52760f65079c.tar.gz 200
-GET https://github.com/prometheus/node_exporter/archive/a38a5d7b489c72d77ef7f144d00f004473d977b6.tar.gz 200
-GET https://github.com/prometheus/prometheus/archive/dd95a7e231d6fb12490911bd5579206c47299824.tar.gz 200
-GET https://github.com/prometheus/alertmanager/archive/0d28327dd2492fc318afec42a425e8bb6f996e22.tar.gz 200
-GET https://github.com/pyrra-dev/pyrra/archive/d723f4d1a066dd657e9d09c46a158519dda0faa8.tar.gz 200
-GET https://github.com/thanos-io/thanos/archive/683cf171e9a8245c3639fb3d96827f9fae306180.tar.gz 200
-GET https://github.com/grafana/grafonnet-lib/archive/a1d61cce1da59c71409b99b5c7568511fec661ea.tar.gz 200
-GET https://github.com/grafana/grafonnet/archive/d20e609202733790caf5b554c9945d049f243ae3.tar.gz 200
-GET https://github.com/jsonnet-libs/docsonnet/archive/6ac6c69685b8c29c54515448eaca583da2d88150.tar.gz 200
-GET https://github.com/jsonnet-libs/xtd/archive/1199b50e9d2ff53d4bb5fb2304ad1fb69d38e609.tar.gz 200
-GET https://github.com/grafana/grafonnet/archive/d20e609202733790caf5b554c9945d049f243ae3.tar.gz 200
-GET https://github.com/grafana/grafonnet/archive/d20e609202733790caf5b554c9945d049f243ae3.tar.gz 200
-GET https://github.com/grafana/grafonnet-lib/archive/a1d61cce1da59c71409b99b5c7568511fec661ea.tar.gz 200
-GET https://github.com/grafana/jsonnet-libs/archive/c77ee91400cdfa8617c6167ced5c08791e7d5d3d.tar.gz 200
+NAME         VERSION   DESIRED   READY   RECONCILED   AVAILABLE   AGE
+prometheus                       1       True         True        39s
 ```
+
+### Get Access
+
+* Pushgateway:
+  * Port Forwarding: `kubectl port-forward svc/pushgateway 9091`. 
+    * http://localhost:9091
+    * http://localhost:9091/metrics
+  * Kubectl Proxy `kubectl proxy`: 
+    * Metrics: http://localhost:8001/api/v1/namespaces/kube-prometheus/services/http:pushgateway:9091/proxy/metrics
+    * Status: status page does not work (`display=none` on the node) when there is a path.
+* Prometheus: 
+  * Kubectl Proxy: http://localhost:8001/api/v1/namespaces/kube-prometheus/services/http:prometheus:9090/proxy/
+  * Direct: https://prometheus.eraldy.com
+
+### Delete all
+
+See for more info: [Doc](https://github.com/prometheus-operator/prometheus-operator?tab=readme-ov-file#removal)
+```bash
+for n in $(kubectl get namespaces -o jsonpath={..metadata.name}); do
+  kubectl delete --all --namespace=$n prometheus,servicemonitor,podmonitor,alertmanager
+done
+
+# After a couple of minutes 
+# Delete the  operator itself
+kubectl delete -f bundle.yaml
+
+for n in $(kubectl get namespaces -o jsonpath={..metadata.name}); do
+  kubectl delete --ignore-not-found --namespace=$n service prometheus-operated alertmanager-operated
+done
+
+kubectl delete --ignore-not-found customresourcedefinitions \
+  prometheuses.monitoring.coreos.com \
+  servicemonitors.monitoring.coreos.com \
+  podmonitors.monitoring.coreos.com \
+  alertmanagers.monitoring.coreos.com \
+  prometheusrules.monitoring.coreos.com
+```
+
+
+
+## Node Exporter
+
+Node exporter was added as a `DaemonSet` with `hostNetwork` capability.
+
+See:
+  * [prometheus-node-exporter](templates/prometheus-node-exporter.yml)
+  * [prometheus-node-exporter service monitor](templates/prometheus-node-exporter-service-monitor.yml)
+
+[Ref](https://www.civo.com/learn/kubernetes-node-monitoring-with-prometheus-and-grafana)
+
+
+
+## CRD
+
+https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-operator-crds

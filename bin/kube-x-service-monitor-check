@@ -52,6 +52,9 @@ if [ "$APP_NAME" == "" ]; then
     exit 1
 fi
 
+# Get env
+KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
+eval "$KUBECTX_ENV"
 
 ################################################################################
 # Check if the Service Monitor selects a service

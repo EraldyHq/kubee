@@ -1,0 +1,32 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pushgateway
+  labels:
+    app.kubernetes.io/name: pushgateway
+spec:
+  jobLabel: pushgateway
+  selector:
+    matchLabels:
+      # scrape services with the following label
+      app.kubernetes.io/name: pushgateway
+  endpoints:
+    - honorLabels: true
+      # honorLabels should always been true
+      # See https://github.com/prometheus/pushgateway/blob/master/README.md#configure-the-pushgateway-as-a-target-to-scrape
+      # interval: 1h
+      interval: 10s
+      path: /metrics
+      targetPort: 9091
+      # Target label relabeling
+      relabelings:
+        # Drop the discovery service label
+        # We keep service to be able to get the kb by service
+        - action: labeldrop
+          regex: '(container|endpoint|job|namespace|pod)'
+      metricRelabelings:
+        # Delete the default internal metrics
+        - sourceLabels: [ __name__ ]
+          regex: "(go|process|pushgateway).*"
+          action: drop

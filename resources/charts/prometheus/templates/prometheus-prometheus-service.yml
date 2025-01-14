@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  labels:
+    app.kubernetes.io/name: prometheus
+spec:
+  ports:
+    - name: web
+      port: 9090
+      targetPort: web
+  selector:
+    app.kubernetes.io/name: prometheus
+  # to ensure that connections from a particular client get forwarded to the same Pod
+  sessionAffinity: ClientIP
