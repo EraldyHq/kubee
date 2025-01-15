@@ -1,6 +1,6 @@
 apiVersion: v2
-name: kube-x-kube-prometheus
-description: Kube-X Kube Prometheus Chart
+name: kube-x-prometheus
+description: Kube-X Prometheus Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -21,7 +21,7 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "v0.14.0" # The version of kube-prometheus operator
+appVersion: "0.76.2" # The version of prometheus operator
 
 dependencies:
   - name: kube-x

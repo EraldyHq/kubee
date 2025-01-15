@@ -4,11 +4,11 @@
     {
       "source": {
         "git": {
-          "remote": "https://github.com/prometheus/node_exporter.git",
-          "subdir": "docs/node-mixin"
+          "remote": "https://github.com/prometheus-operator/kube-prometheus.git",
+          "subdir": "jsonnet/kube-prometheus"
         }
       },
-      "version": "505363a"
+      "version": "v0.14.0"
     }
   ],
   "legacyImports": true
