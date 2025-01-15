@@ -1,5 +1,3 @@
-local values = std.extVar('values');
-
 // To execute
 // jsonnet -J vendor --string -e 'std.manifestYamlDoc((import "jsonnet/kube-prometheus.jsonnet"))' --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }"
 //
@@ -15,6 +13,27 @@ local values = std.extVar('values');
 // for file in manifests/*.json; do \
 //  yq eval -P "$file" > "${file%.json}.yaml"; \
 // done && rm -rf manifests/*.json
+
+local values =  {
+    kube_x: {
+        prometheus: {
+            // The error is triggered as access time, not build time
+            namespace: error 'must provide namespace',
+            alertmanager: {
+                enabled: error 'must provide alert manager enabled',
+                hostname: ''
+            },
+            blackbox_exporter: {
+                enabled: error 'must provide blackbox exporter enabled',
+            },
+            node_exporter:{
+                enabled: error 'must provide node exporter enabled',
+            }
+        }
+    }
+} + (std.extVar('values'));
+
+
 local kp =
   (import '../../vendor/github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus/main.libsonnet') +
   // Uncomment the following imports to enable its patches
@@ -26,17 +45,26 @@ local kp =
   // (import 'kube-prometheus/addons/external-metrics.libsonnet') +
   // (import 'kube-prometheus/addons/pyrra.libsonnet') +
   {
+    // kube-prometheus use `values` as this is similar to helm
     values+:: {
       common+: {
         namespace: values.kube_x.prometheus.namespace,
       },
+      alertmanager+: {
+        name: 'alertmanager', # main by default
+        replicas: 1,
+        resources: {
+            limits: { cpu: '10m', memory: '50Mi' },
+            requests: { cpu: '4m', memory: '50Mi' },
+        },
+      }
     },
   };
 
 // Setup Namespace and CRD
-{ 'setup/0namespace-namespace.json': kp.kubePrometheus.namespace } +
+{ 'setup/0namespace-namespace': kp.kubePrometheus.namespace } +
 {
-  ['setup/prometheus-operator-' + name + '.json']: kp.prometheusOperator[name]
+  ['setup/prometheus-operator-' + name ]: kp.prometheusOperator[name]
   for name in std.filter((function(name) name != 'serviceMonitor' && name != 'prometheusRule'), std.objectFields(kp.prometheusOperator))
 } +
 // { 'setup/pyrra-slo-CustomResourceDefinition': kp.pyrra.crd } +
@@ -44,12 +72,48 @@ local kp =
 { 'prometheus-operator-serviceMonitor': kp.prometheusOperator.serviceMonitor } +
 { 'prometheus-operator-prometheusRule': kp.prometheusOperator.prometheusRule } +
 { 'kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule } +
-{ ['alertmanager-' + name]: kp.alertmanager[name] for name in std.objectFields(kp.alertmanager) } +
-{ ['blackbox-exporter-' + name]: kp.blackboxExporter[name] for name in std.objectFields(kp.blackboxExporter) } +
-{ ['grafana-' + name]: kp.grafana[name] for name in std.objectFields(kp.grafana) } +
-//// { ['pyrra-' + name]: kp.pyrra[name] for name in std.objectFields(kp.pyrra) if name != 'crd' } +
+(if values.kube_x.prometheus.alertmanager.enabled then {
+    ['alertmanager-' + name]: (if name== 'alertmanager' then
+        (
+            kp.alertmanager[name] +
+                ( if values.kube_x.prometheus.alertmanager.hostname != '' then
+                    {
+                        spec+: {
+                            externalUrl: 'https://'+ values.kube_x.prometheus.alertmanager.hostname
+                        }
+                    }
+                    else
+                    {}
+                ) + {
+                    spec+: {
+                        // Select all config Objects
+                        alertmanagerConfigSelector: {},
+                        // Select all namespace
+                        alertmanagerConfigNamespaceSelector: {},
+                        // By default, the alert manager had a matcher on the namespace
+                        // We disable this match ie
+                        // For a alertmanagerConfig in the namespace kube-prometheus, it would add to the route
+                        // matchers:
+                        //  - namespace="kube-prometheus"
+                        // See: https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.AlertmanagerConfigMatcherStrategy
+                        alertmanagerConfigMatcherStrategy: {
+                            type: 'None'
+                        }
+                    }
+                }
+        )
+        else kp.alertmanager[name]
+    )
+    for name in std.objectFields(kp.alertmanager)
+} else {}) +
+(if values.kube_x.prometheus.blackbox_exporter.enabled then {
+    ['blackbox-exporter-' + name]: kp.blackboxExporter[name]
+    for name in std.objectFields(kp.blackboxExporter)
+} else {}) +
+//{ ['grafana-' + name]: kp.grafana[name] for name in std.objectFields(kp.grafana) } +
+// { ['pyrra-' + name]: kp.pyrra[name] for name in std.objectFields(kp.pyrra) if name != 'crd' } +
 { ['kube-state-metrics-' + name]: kp.kubeStateMetrics[name] for name in std.objectFields(kp.kubeStateMetrics) } +
-{ ['kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) }
-{ ['node-exporter-' + name]: kp.nodeExporter[name] for name in std.objectFields(kp.nodeExporter) } +
+{ ['kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) } +
+(if values.kube_x.prometheus.blackbox_exporter.enabled then { ['node-exporter-' + name]: kp.nodeExporter[name] for name in std.objectFields(kp.nodeExporter) } else {}) +
 { ['prometheus-' + name]: kp.prometheus[name] for name in std.objectFields(kp.prometheus) } +
 { ['prometheus-adapter-' + name]: kp.prometheusAdapter[name] for name in std.objectFields(kp.prometheusAdapter) }

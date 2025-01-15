@@ -102,6 +102,9 @@ prometheus:
     prometheus:
       username: ''
       password: ''
+  # Opsgenie
+  opsgenie:
+    enabled: false
   # new relic
   new_relic:
     enabled: false
@@ -115,7 +118,9 @@ prometheus:
   pushgateway:
     enabled: false
     hostname: ''
-
+  # Blackbox exporter
+  blackbox_exporter:
+    enabled: false
 # The cert manager kube-x env
 cert_manager:
   # Not enabled by default

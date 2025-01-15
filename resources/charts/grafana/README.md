@@ -4,7 +4,8 @@
 
 This app:
 * installs the [Grafana Operator](#grafana-operator)
-* and instantiate a [Grafana Instance](templates/grafana-instance.yaml)
+* instantiate a [Grafana Instance](templates/grafana-instance.yaml)
+* add the [grafana-mixin](https://github.com/grafana/grafana/tree/main/grafana-mixin)
 
 
 ## Install

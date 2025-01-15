@@ -26,6 +26,30 @@ $SYNOPSIS
 
 * The files with the extension `jsonnet` stored in the `jsonnet` directory are executed.
 * The output is added as new manifest (ie new resources)
+* If the jsonnet script is in the directory:
+  * `jsonnet/multi`, a multi-execution is executed (ie with the `--multi` flag of Jsonnet where each key of the Json object is a manifest path)
+  * otherwise, a normal execution occurs and the expected output should be a single json manifest
+
+The Jsonnet script got the `values` via the values external variable. 
+
+Minimal Example:
+```jsonnet
+local values =  {
+    kube_x: {
+        prometheus: {
+            // The error is triggered as access time, not build time
+            namespace: error 'must provide namespace',
+        }
+    }
+} + (std.extVar('values'));
+{
+    metatdata: {
+        namespace: values.kube_x.prometheus.namespace
+    }
+}
+```
+Note: the name `values` is a standard because this is similar to helm (used for instance by [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus/blob/8e16c980bf74e26709484677181e6f94808a45a3/jsonnet/kube-prometheus/main.libsonnet#L17))
+
 
 # KUSTOMIZATION
 

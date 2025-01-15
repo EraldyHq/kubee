@@ -26,5 +26,5 @@ appVersion: "0.76.2" # The version of prometheus operator
 dependencies:
   - name: kube-x
     version: 0.0.1
-    repository: file://../kube-x
+    repository: file://../../charts/kube-x
     alias: kube_x
