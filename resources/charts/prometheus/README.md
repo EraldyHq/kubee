@@ -26,3 +26,8 @@ Base on kube-prometheus that bundles:
 jb init
 jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@v0.14.0
 ```
+
+## Grafana Mixin
+
+Example:
+https://github.com/brancz/kubernetes-grafana?tab=readme-ov-file#dashboards-mixins

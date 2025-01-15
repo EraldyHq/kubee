@@ -69,6 +69,83 @@ create_empty_templates_with_empty_files(){
 
 }
 
+jsonnet_processing(){
+
+  JSONNET_DIR="jsonnet"
+  if [ ! -d "$JSONNET_DIR" ]; then
+    echo::info "No Jsonnet directory found"
+  fi
+
+  echo::info "Jsonnet processing"
+
+  # Update the dependencies (vendor directory)
+  JPATH="vendor"
+  JSONNET_FILE="jsonnetfile.json"
+  if [ ! -d "$JPATH" ] && [ -f "$JSONNET_FILE" ]; then
+    jb update
+  fi
+
+  # Multi processing
+  JSONNET_MULTI_DIR="$JSONNET_DIR/multi"
+  JSONNET_MULTI_OUTPUT_DIR="$JSONNET_MULTI_DIR/manifests"
+  # sub-setup directory is needed by kube-prometheus
+  # it's to store the CRD and namespace manifest
+  JSONNET_MULTI_OUTPUT_DIR_SETUP="$JSONNET_MULTI_DIR/manifests/setup"
+  if [ ! -d "$JSONNET_MULTI_OUTPUT_DIR_SETUP" ]; then
+    mkdir -p "$JSONNET_MULTI_OUTPUT_DIR_SETUP"
+  fi
+  # In debug mode, we don't delete it to be able to check each file
+  if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
+    # cleaning because we may have secret in their
+    # full qualified path is needed as it may have change at the end
+    bash::trap "rm -rf $KUBE_X_CHART_DIRECTORY/$JSONNET_MULTI_OUTPUT_DIR" EXIT
+  fi
+
+  # Processing
+  find "$JSONNET_DIR" -type f -name "*.jsonnet" | while read -r JSONNET_FILE; do
+
+      echo "Processing: $JSONNET_FILE"
+
+      JSONNET_PARENT_DIR_BASENAME=$(basename "$(dirname "$JSONNET_FILE")")
+
+      case "$JSONNET_PARENT_DIR_BASENAME" in
+        "multi")
+          echo::info "Processing in multi mode the jsonnet file: $JSONNET_FILE"
+          echo::info "jsonnet -J $JPATH \
+            --multi $JSONNET_MULTI_OUTPUT_DIR \
+            --ext-code 'values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }' \
+            $JSONNET_FILE \
+            | xargs -I{} sh -c 'cat {} | gojsontoyaml > {}.yaml && rm {}' -- {}"
+          JSONNET_MANIFEST=""
+          ;;
+        *)
+          echo::info "Processing in mono mode the jsonnet file: $JSONNET_FILE"
+          # Run
+          JSONNET_MANIFEST=$(
+            # --string: string as output
+            command::echo_eval "jsonnet \
+              --jpath $JPATH \
+              --string \
+              --ext-code 'values=std.parseYaml(importstr \"$KUBE_X_VALUES_FILE\")' \
+              --exec 'std.manifestYamlDoc((import \"$JSONNET_FILE\"))' "
+          )
+      esac
+
+      # Add the jsonnet manifest
+      HELM_MANIFEST=$(cat <<EOF
+$HELM_MANIFEST
+---
+# Source: $JSONNET_FILE
+$JSONNET_MANIFEST
+EOF
+  )
+
+    done
+
+
+
+}
+
 
 KUBE_X_CHART_DIRECTORY="${1:-}"
 
@@ -141,47 +218,7 @@ fi
 # JsonNet
 ##################
 # Processing any JsonNet template if any
-JSONNET_DIR="jsonnet"
-if [ -d "$JSONNET_DIR" ]; then
-
-  echo::info "Jsonnet processing"
-
-  # Update the dependencies (vendor directory)
-  JPATH="vendor"
-  JSONNET_FILE="jsonnetfile.json"
-  if [ ! -d "$JPATH" ] && [ -f "$JSONNET_FILE" ]; then
-    jb update
-  fi
-
-
-  for JSONNET_FILE in jsonnet/*.jsonnet; do
-
-    echo::info "Processing $JSONNET_FILE"
-
-    # Run
-    MIXIN_MANIFEST=$(
-      # --string: string as output
-      jsonnet \
-        --jpath "$JPATH" \
-        --string \
-        --ext-code "values=std.parseYaml(importstr \"$KUBE_X_VALUES_FILE\")" \
-        --exec "std.manifestYamlDoc((import \"$JSONNET_FILE\"))"
-    )
-
-    # Add the jsonnet manifest
-    HELM_MANIFEST=$(cat <<EOF
-$HELM_MANIFEST
----
-# Source: $JSONNET_FILE
-$MIXIN_MANIFEST
-EOF
-)
-
-  done
-
-else
-  echo::info "No Jsonnet directory found"
-fi
+jsonnet_processing
 
 # Kustomize
 # Example:
