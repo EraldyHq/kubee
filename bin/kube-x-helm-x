@@ -110,9 +110,17 @@ apply(){
     return 1
   fi
   case "$COMMAND" in
-      "install")
+      "play")
         HELM_COMMAND+=( "upgrade" "--install" )
-        echo::info "Installing package $PACKAGE_NAME "
+        echo::info "Playing package $PACKAGE_NAME  (ie upgrade --install)"
+        ;;
+      "upgrade")
+        HELM_COMMAND+=( "upgrade" "--install" )
+        echo::info "Upgrade package $PACKAGE_NAME"
+        ;;
+      "install")
+        HELM_COMMAND+=( "install" )
+        echo::info "Install package $PACKAGE_NAME"
         ;;
       "template")
         HELM_COMMAND+=( "template" )
@@ -254,7 +262,9 @@ kube-x-helx [-c|--cluster clusterName] [--debug] command options
 
 where \`command\` can be:
 
-* \`install packageName\`  - Install a Helx package (with optional Jsonnet Manifests and kustomization)
+* \`play packageName\`     - Upgrade or install if it does not exists (equivalent to upgrade --install)
+* \`upgrade packageName\`  - Upgrade a Helx package
+* \`install packageName\`  - install a Helx package
 * \`template packageName\` - Output the manifests for an package (used for ArgoCd Integration and debugging)
 * \`values\` - Shows the values
 
@@ -398,10 +408,7 @@ fi
 shift  # Remove the first argument from the argument list
 
 case "$COMMAND" in
-  "install")
-     apply "$COMMAND" "$@" || error::exit $?
-    ;;
-  "template")
+  "install"|"template"|"upgrade")
      apply "$COMMAND" "$@" || error::exit $?
     ;;
   "synopsis")
