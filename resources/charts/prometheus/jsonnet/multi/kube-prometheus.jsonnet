@@ -61,16 +61,12 @@ local kp =
     },
   };
 
-// Setup Namespace and CRD
-{ 'setup/0namespace-namespace': kp.kubePrometheus.namespace } +
+
 {
-  ['setup/prometheus-operator-' + name ]: kp.prometheusOperator[name]
-  for name in std.filter((function(name) name != 'serviceMonitor' && name != 'prometheusRule'), std.objectFields(kp.prometheusOperator))
+  ['prometheus-operator-' + name ]: kp.prometheusOperator[name]
+  // CRD are in the prometheus-crd charts
+  for name in std.filter((function(name) kp.prometheusOperator[name].kind != 'CustomResourceDefinition'), std.objectFields(kp.prometheusOperator))
 } +
-// { 'setup/pyrra-slo-CustomResourceDefinition': kp.pyrra.crd } +
-// serviceMonitor and prometheusRule are separated so that they can be created after the CRDs are ready
-{ 'prometheus-operator-serviceMonitor': kp.prometheusOperator.serviceMonitor } +
-{ 'prometheus-operator-prometheusRule': kp.prometheusOperator.prometheusRule } +
 { 'kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule } +
 (if values.kube_x.prometheus.alertmanager.enabled then {
     ['alertmanager-' + name]: (if name== 'alertmanager' then

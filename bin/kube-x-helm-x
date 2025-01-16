@@ -61,10 +61,15 @@ is_helm_chart_installed() {
   local CHART_RELEASE_NAMESPACE="$2"
   local CHART_APP_VERSION="$3"
 
+
   # Check if the release exists
-  if ! helm status "$CHART_RELEASE_NAME" -n "$CHART_RELEASE_NAMESPACE" >/dev/null 2>&1; then
-    echo::info "Release not found: $CHART_RELEASE_NAMESPACE/$CHART_RELEASE_NAME"
-    return 1
+  # The revision may be installed in another namespace
+  if ACTUAL_NAMESPACE=$(helm list --all-namespaces --no-headers --filter "$CHART_RELEASE_NAME" | awk '{print $2}'); then
+    echo::info "Release found: $ACTUAL_NAMESPACE/$CHART_RELEASE_NAME"
+    if [ "$ACTUAL_NAMESPACE" != "$CHART_RELEASE_NAMESPACE" ]; then
+      echo::err "The name $CHART_RELEASE_NAME was already found in the namespace $ACTUAL_NAMESPACE instead of the namespace $PACKAGE_NAMESPACE"
+      exit 1
+    fi
   fi
 
   # Get the installed chart version
@@ -112,10 +117,10 @@ apply(){
   case "$COMMAND" in
       "play")
         HELM_COMMAND+=( "upgrade" "--install" )
-        echo::info "Playing package $PACKAGE_NAME  (ie upgrade --install)"
+        echo::info "Playing package $PACKAGE_NAME  (ie upgrade or install if not present)"
         ;;
       "upgrade")
-        HELM_COMMAND+=( "upgrade" "--install" )
+        HELM_COMMAND+=( "upgrade" )
         echo::info "Upgrade package $PACKAGE_NAME"
         ;;
       "install")
@@ -186,7 +191,7 @@ apply(){
   # kubectl apply --server-side --force-conflicts -f https://github.com/grafana/grafana-operator/releases/download/v5.15.1/crds.yaml
   #```
   PACKAGE_CRDS_NAME="$PACKAGE_NAME-crds"
-  if PACKAGE_CRDS_DIRECTORY=$(get_chart_directory "$PACKAGE_CRDS_NAME"); then
+  if PACKAGE_CRDS_DIRECTORY=$(get_chart_directory "$PACKAGE_CRDS_NAME") && [[ "$COMMAND" =~ "play"|"upgrade"|"install" ]]; then
     echo::debug "Package Crds Directory: $PACKAGE_CRDS_DIRECTORY"
 
     CHART_APP_VERSION=$(yq '.appVersion' "$PACKAGE_DIRECTORY/Chart.yaml")
@@ -257,15 +262,15 @@ synopsis(){
 
   cat << EOF
 \`\`\`bash
-kube-x-helx [-c|--cluster clusterName] [--debug] command options
+kube-x-helx [-c|--cluster clusterName] [-n|--namespace namespace] [--debug] command options
 \`\`\`
 
 where \`command\` can be:
 
-* \`play packageName\`     - Upgrade or install if it does not exists (equivalent to upgrade --install)
-* \`upgrade packageName\`  - Upgrade a Helx package
-* \`install packageName\`  - install a Helx package
-* \`template packageName\` - Output the manifests for an package (used for ArgoCd Integration and debugging)
+* \`play packageName\`     - Upgrade or install a Helx Chart if not present
+* \`upgrade packageName\`  - Upgrade a Helx Chart
+* \`install packageName\`  - install a Helx Chart
+* \`template packageName\` - Output the manifests for a Chart (used for ArgoCd Integration and debugging)
 * \`values\` - Shows the values
 
 The cluster is determined in order of precedence by:

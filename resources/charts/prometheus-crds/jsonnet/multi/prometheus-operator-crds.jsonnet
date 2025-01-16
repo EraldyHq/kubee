@@ -29,3 +29,6 @@ local prometheusOperator = (import '../../vendor/github.com/prometheus-operator/
  ['prometheus-operator-'+name]: prometheusOperator[name]
  for name in std.filter((function(name) prometheusOperator[name].kind == 'CustomResourceDefinition'), std.objectFields(prometheusOperator))
 }
+
+// In kube-prometheus, there is also a pyrra CRD
+// { 'setup/pyrra-slo-CustomResourceDefinition': kp.pyrra.crd }

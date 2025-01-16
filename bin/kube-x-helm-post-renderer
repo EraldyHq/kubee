@@ -139,14 +139,16 @@ jsonnet_processing(){
           # Closing
           POST_PROCESSING="$POST_PROCESSING'"
 
-          JSONNET_MANIFEST=$(
+          if ! JSONNET_MANIFEST=$(
             command::echo_eval "jsonnet -J $JPATH \
             --multi $JSONNET_MULTI_OUTPUT_DIR \
-            --ext-code 'values={ kube_x: std.parseYaml(importstr \"$KUBE_X_VALUES_FILE\") }' \
+            --ext-code 'values=std.parseYaml(importstr \"$KUBE_X_VALUES_FILE\")' \
             $JSONNET_FILE \
             | $POST_PROCESSING"
-          )
-
+          ); then
+            echo::err "$JSONNET_MANIFEST"
+            exit 1
+          fi
           ;;
         *)
           echo::info "Processing in mono mode the jsonnet file: $JSONNET_FILE"
