@@ -22,7 +22,10 @@ It installs and configure:
 * [kube-state-metrics-mixin](https://github.com/kubernetes/kube-state-metrics/tree/main/jsonnet/kube-state-metrics-mixin)
 * [node-mixin](https://github.com/prometheus/node_exporter/tree/master/docs/node-mixin)
 * [prometheus-mixin](https://github.com/prometheus/prometheus/tree/main/documentation/prometheus-mixin)
+* [etd-mixin](https://github.com/etcd-io/etcd/tree/main/contrib/mixin)
 
+> [Note]
+> All mixins can be seen in [jsonnetfile.json](https://github.com/prometheus-operator/kube-prometheus/blob/main/jsonnet/kube-prometheus/jsonnetfile.json)
 
 ## Version
 

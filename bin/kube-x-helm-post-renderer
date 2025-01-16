@@ -79,10 +79,11 @@ jsonnet_processing(){
   echo::info "Jsonnet processing"
 
   # Update the dependencies (vendor directory)
+  # Mandatory when using jsonnet bundler
   JPATH="vendor"
   JSONNET_FILE="jsonnetfile.json"
   if [ ! -d "$JPATH" ] && [ -f "$JSONNET_FILE" ]; then
-    jb update
+    jb update --jsonnetpkg-home="$JPATH"
   fi
 
   # Multi processing
@@ -101,22 +102,51 @@ jsonnet_processing(){
     bash::trap "rm -rf $KUBE_X_CHART_DIRECTORY/$JSONNET_MULTI_OUTPUT_DIR" EXIT
   fi
 
-  # Processing
-  find "$JSONNET_DIR" -type f -name "*.jsonnet" | while read -r JSONNET_FILE; do
+  # The variable to store the manifests created
+  local JSONNET_MANIFESTS=""
 
-      echo "Processing: $JSONNET_FILE"
+  # Processing
+  while read -r JSONNET_FILE; do
+
+      echo::info "Processing: $JSONNET_FILE"
 
       JSONNET_PARENT_DIR_BASENAME=$(basename "$(dirname "$JSONNET_FILE")")
 
       case "$JSONNET_PARENT_DIR_BASENAME" in
         "multi")
           echo::info "Processing in multi mode the jsonnet file: $JSONNET_FILE"
-          echo::info "jsonnet -J $JPATH \
+
+          # xargs post processing command
+          # We get the list of generated file from jsonnet net
+          POST_PROCESSING="xargs -I{} sh -c '"
+          GOJSONTOYAML="gojsontoyaml"
+          if command::exists "$GOJSONTOYAML"; then
+            # transform the file to yaml
+            POST_PROCESSING="$POST_PROCESSING(cat {} | $GOJSONTOYAML > {}.yaml) && "
+          fi
+          # Output yaml to stdout with yq
+          POST_PROCESSING="$POST_PROCESSING(cat {} | yq eval -P - -- {})"
+          # Delete the json file it yaml file were created
+          if command::exists "$GOJSONTOYAML"; then
+            POST_PROCESSING="$POST_PROCESSING && rm {}"
+          fi
+          # Echo the file name to stderr (stdout is for helm)
+          POST_PROCESSING="$POST_PROCESSING && (echo {}"
+          if command::exists "$GOJSONTOYAML"; then
+            POST_PROCESSING="$POST_PROCESSING.yaml"
+          fi
+          POST_PROCESSING="$POST_PROCESSING > $(echo::get_file_descriptor))"
+          # Closing
+          POST_PROCESSING="$POST_PROCESSING'"
+
+          JSONNET_MANIFEST=$(
+            command::echo_eval "jsonnet -J $JPATH \
             --multi $JSONNET_MULTI_OUTPUT_DIR \
-            --ext-code 'values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }' \
+            --ext-code 'values={ kube_x: std.parseYaml(importstr \"$KUBE_X_VALUES_FILE\") }' \
             $JSONNET_FILE \
-            | xargs -I{} sh -c 'cat {} | gojsontoyaml > {}.yaml && rm {}' -- {}"
-          JSONNET_MANIFEST=""
+            | $POST_PROCESSING"
+          )
+
           ;;
         *)
           echo::info "Processing in mono mode the jsonnet file: $JSONNET_FILE"
@@ -132,17 +162,18 @@ jsonnet_processing(){
       esac
 
       # Add the jsonnet manifest
-      HELM_MANIFEST=$(cat <<EOF
-$HELM_MANIFEST
+      JSONNET_MANIFESTS=$(cat <<EOF
+$JSONNET_MANIFESTS
 ---
 # Source: $JSONNET_FILE
 $JSONNET_MANIFEST
 EOF
   )
+    # the `find` command should not be in a pipeline otherwise the JSONNET_MANIFESTS variable is
+    # scoped to the pipeline and is empty
+    done < <(find "$JSONNET_DIR" -type f -name "*.jsonnet")
 
-    done
-
-
+    echo "$JSONNET_MANIFESTS"
 
 }
 
@@ -218,7 +249,15 @@ fi
 # JsonNet
 ##################
 # Processing any JsonNet template if any
-jsonnet_processing
+JSONNET_MANIFEST=$(jsonnet_processing)
+if [ "$JSONNET_MANIFEST" != "" ]; then
+  HELM_MANIFEST=$(cat <<EOF
+$HELM_MANIFEST
+---
+$JSONNET_MANIFEST
+EOF
+)
+fi
 
 # Kustomize
 # Example:

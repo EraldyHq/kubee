@@ -145,18 +145,24 @@ apply(){
 
   # Package
   PACKAGE_DIRECTORY=$(get_chart_directory "$PACKAGE_NAME")
-  PACKAGE_YAML_KEY=$(echo "$PACKAGE_NAME" | tr "-" "_") # Go templating does not support `-`
-  VALUES_NAMESPACE_PATH=".kube_x.$PACKAGE_YAML_KEY.namespace"
-  PACKAGE_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$KUBE_X_VALUES_PATH")
-  if [ "$PACKAGE_NAMESPACE" == "null" ]; then
-    echo::info "No namespace found at $VALUES_NAMESPACE_PATH"
-    PACKAGE_NAMESPACE="$PACKAGE_NAME"
-    echo::info "Installing into the default namespace $PACKAGE_NAMESPACE"
+  PACKAGE_NAMESPACE=${KUBE_X_NAMESPACE:-}
+  if [ "$PACKAGE_NAMESPACE" == "" ]; then
+    PACKAGE_YAML_KEY=$(echo "$PACKAGE_NAME" | tr "-" "_") # Go templating does not support `-`
+    VALUES_NAMESPACE_PATH=".kube_x.$PACKAGE_YAML_KEY.namespace"
+    PACKAGE_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$KUBE_X_VALUES_PATH")
+    if [ "$PACKAGE_NAMESPACE" == "null" ]; then
+      echo::info "No namespace found at $VALUES_NAMESPACE_PATH"
+      PACKAGE_NAMESPACE="$PACKAGE_NAME"
+      echo::info "Default namespace $PACKAGE_NAMESPACE used"
+    else
+      echo::info "Namespace ($PACKAGE_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
+    fi
   else
-    echo::info "Installing into the namespace ($PACKAGE_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
+    echo::info "Namespace specified ($PACKAGE_NAMESPACE) via command line flag"
   fi
+
   HELM_COMMAND+=(
-    "-n" "$PACKAGE_NAMESPACE"
+    "--namespace" "$PACKAGE_NAMESPACE"
     "--create-namespace"
   )
 
@@ -324,11 +330,12 @@ print_values(){
 ##########################
 ## Collect the options
 ##########################
-args=$(getopt -l "cluster:,debug,skip-schema-validation" -o "c:" -- "$@")
+args=$(getopt -l "cluster:,debug,skip-schema-validation,namespace:" -o "c:n:" -- "$@")
 # eval set to set the positional arguments back to $args
 eval set -- "$args"
 KUBE_X_DEFAULT_CLUSTER_NAME=${KUBE_X_DEFAULT_CLUSTER_NAME:-}
 KUBE_X_CLUSTER_NAME=${KUBE_X_CLUSTER_NAME:-$KUBE_X_DEFAULT_CLUSTER_NAME}
+KUBE_X_NAMESPACE=""
 HELM_EXTRA_FLAGS=()
 while [[ $# -gt 0 ]]
 do
@@ -336,6 +343,11 @@ do
       "--cluster"|"-c")
         shift
         KUBE_X_CLUSTER_NAME=${1}
+        shift
+      ;;
+      "--namespace"|"-n")
+        shift
+        KUBE_X_NAMESPACE=${1}
         shift
       ;;
       "--skip-schema-validation")
