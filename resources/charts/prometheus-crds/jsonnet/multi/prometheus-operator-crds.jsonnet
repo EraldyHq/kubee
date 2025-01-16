@@ -3,14 +3,16 @@
 
 // Get the version from the Chart.yaml
 local chart = {
-    appVersion: error "appVersion is required"
+    versions: {
+        prometheusOperator: error "prometheusOperator is required"
+    }
 } + std.parseYaml(importstr '../../Chart.yaml');
 
 // The version and the mandatory parameters
 local params = {
     // version become the following label
     // operator.prometheus.io/version without the v. example: 0.76.2
-    version: chart.appVersion,
+    version: chart.versions.prometheusOperator,
     // crds are not namespaced
     namespace: 'whatever',
     // not in crds but mandatory

@@ -30,13 +30,18 @@ This chart gets the CRDs from [Jsonnet](jsonnet/multi/prometheus-operator-crds.j
 
 ### Version
 
-* Determine the kube-prometheus version (v0.14.0)
-* Extract the version of `prometheusOperator` in [versions.json](https://github.com/prometheus-operator/kube-prometheus/blob/v0.14.0/jsonnet/kube-prometheus/versions.json)
-* Install
+* Determine the `kube-prometheus version` in the [appVersion of the prometheus Chart.yaml](../prometheus/Chart.yaml) (v0.14.0) 
+* Use it in the URL to get the `versions.json` file: 
+  * https://github.com/prometheus-operator/kube-prometheus/blob/$KUBE_PROMETHEUS_VERSION/jsonnet/kube-prometheus/versions.json
+  * Example: https://github.com/prometheus-operator/kube-prometheus/blob/v0.14.0/jsonnet/kube-prometheus/versions.json
+* Extract the version of `prometheusOperator` from `versions.json`. For instance: `0.76.2`
+* Install `prometheusOperator` as jsonnet dependency
 ```bash
 jb install https://github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator@v0.76.2
 ```
-* Set it in the appVersion of [Chart.yaml](Chart.yaml) - used by [Jsonnet script](jsonnet/multi/prometheus-operator-crds.jsonnet)
+* In [Chart.yaml](Chart.yaml):
+  * set the appVersion to the kube-prometheus version
+  * `versions.prometheusOperator` to the prometheusOperator version (used by [Jsonnet script](jsonnet/multi/prometheus-operator-crds.jsonnet)
 
 ### Test
 
