@@ -57,10 +57,43 @@ local kp =
             limits: { cpu: '10m', memory: '50Mi' },
             requests: { cpu: '4m', memory: '50Mi' },
         },
+      },
+      kubeStateMetrics+: {
+        resources:: {
+            limits: { cpu: '10m', memory: '50Mi' },
+            requests: { cpu: '4m', memory: '50Mi' },
+        }
       }
     },
   };
 
+// Function that create an alertmanager patch
+local alertManagerPatch = ( if values.kube_x.prometheus.alertmanager.hostname != '' then
+            {
+                spec+: {
+                    externalUrl: 'https://'+ values.kube_x.prometheus.alertmanager.hostname
+                }
+            }
+            else
+            {}
+        ) + {
+            spec+: {
+                // Select all config Objects
+                alertmanagerConfigSelector: {},
+                // Select all namespace
+                alertmanagerConfigNamespaceSelector: {},
+                // By default, the alert manager had a matcher on the namespace
+                // We disable this match ie
+                // For a alertmanagerConfig in the namespace kube-prometheus, it would add to the route
+                // matchers:
+                //  - namespace="kube-prometheus"
+                // See: https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.AlertmanagerConfigMatcherStrategy
+                alertmanagerConfigMatcherStrategy: {
+                    type: 'None'
+                }
+            }
+        }
+;
 
 {
   ['prometheus-operator-' + name ]: kp.prometheusOperator[name]
@@ -69,37 +102,7 @@ local kp =
 } +
 { 'kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule } +
 (if values.kube_x.prometheus.alertmanager.enabled then {
-    ['alertmanager-' + name]: (if name== 'alertmanager' then
-        (
-            kp.alertmanager[name] +
-                ( if values.kube_x.prometheus.alertmanager.hostname != '' then
-                    {
-                        spec+: {
-                            externalUrl: 'https://'+ values.kube_x.prometheus.alertmanager.hostname
-                        }
-                    }
-                    else
-                    {}
-                ) + {
-                    spec+: {
-                        // Select all config Objects
-                        alertmanagerConfigSelector: {},
-                        // Select all namespace
-                        alertmanagerConfigNamespaceSelector: {},
-                        // By default, the alert manager had a matcher on the namespace
-                        // We disable this match ie
-                        // For a alertmanagerConfig in the namespace kube-prometheus, it would add to the route
-                        // matchers:
-                        //  - namespace="kube-prometheus"
-                        // See: https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.AlertmanagerConfigMatcherStrategy
-                        alertmanagerConfigMatcherStrategy: {
-                            type: 'None'
-                        }
-                    }
-                }
-        )
-        else kp.alertmanager[name]
-    )
+    ['alertmanager-' + name]: kp.alertmanager[name] + (if kp.alertmanager[name].kind == 'Alertmanager' then alertManagerPatch else {} )
     for name in std.objectFields(kp.alertmanager)
 } else {}) +
 (if values.kube_x.prometheus.blackbox_exporter.enabled then {
