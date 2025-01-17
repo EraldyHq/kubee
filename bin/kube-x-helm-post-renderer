@@ -83,7 +83,15 @@ jsonnet_processing(){
   JPATH="vendor"
   JSONNET_FILE="jsonnetfile.json"
   if [ ! -d "$JPATH" ] && [ -f "$JSONNET_FILE" ]; then
-    jb update --jsonnetpkg-home="$JPATH"
+    JSONNET_LOCK_FILE="jsonnetfile.lock.json"
+    JB_COMMAND="jb update --jsonnetpkg-home=$JPATH"
+    if [ ! -f $JSONNET_LOCK_FILE ]; then
+      JB_COMMAND="jb install --jsonnetpkg-home=$JPATH"
+    fi
+    if ! command::echo_eval "$JB_COMMAND"; then
+      echo::err "Error while executing the jb command (jsonnet bundler)"
+      exit 1
+    fi
   fi
 
   # Multi processing

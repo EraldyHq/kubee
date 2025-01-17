@@ -91,10 +91,13 @@ prometheus:
   namespace: 'prometheus'
   # prometheus
   hostname: ''
-  # alert manager
-  alertmanager:
-    enabled: true
-    hostname: ''
+
+# alert manager
+alertmanager:
+  enabled: true
+  hostname: ''
+
+external_services:
   # grafana cloud
   grafana_cloud:
     enabled: false
@@ -102,25 +105,32 @@ prometheus:
     prometheus:
       username: ''
       password: ''
+
   # Opsgenie
   opsgenie:
     enabled: false
+
   # new relic
   new_relic:
     enabled: false
     prometheus:
       # for remote write
       bearer: ''
-  # node_exporter
-  node_exporter:
-    enabled: true
-  # Pushgateway
-  pushgateway:
-    enabled: false
-    hostname: ''
-  # Blackbox exporter
-  blackbox_exporter:
-    enabled: false
+
+# node_exporter
+node_exporter:
+  enabled: true
+# Pushgateway
+pushgateway:
+  enabled: false
+  hostname: ''
+# Blackbox exporter
+blackbox_exporter:
+  enabled: false
+# Prometheus Adapter
+prometheus_adapter:
+  enabled: true
+
 # The cert manager kube-x env
 cert_manager:
   # Not enabled by default

@@ -55,26 +55,38 @@ local kp =
         name: 'alertmanager', # main by default
         replicas: 1,
         resources: {
-            limits: { cpu: '10m', memory: '50Mi' },
-            requests: { cpu: '4m', memory: '50Mi' },
+            limits: {}, // cpu: '10m', memory: '50Mi'
+            requests: {},
         },
       },
       kubeStateMetrics+: {
         resources:: {
-            limits: { cpu: '10m', memory: '50Mi' },
-            requests: { cpu: '4m', memory: '50Mi' },
+            limits: {},
+            requests: {},
         }
       },
       nodeExporter+: {
         resources:: {
-            limits: { },
+            limits: {},
             requests: {},
         },
         kubeRbacProxy: {
            resources:: {
-             requests: { },
-             limits: { },
+             requests: {},
+             limits: {},
            },
+        },
+      },
+      prometheusAdapter+:{
+        resources:: {
+          requests: {},
+          limits: {},
+        },
+      },
+      prometheusOperator+:{
+        resources:: {
+          requests: {},
+          limits: {},
         },
       }
     },
