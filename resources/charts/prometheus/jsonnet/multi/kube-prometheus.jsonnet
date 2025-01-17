@@ -19,7 +19,7 @@ local values =  {
         prometheus: {
             // The error is triggered as access time, not build time
             namespace: error 'must provide namespace',
-            alertmanager: {
+            alert_manager: {
                 enabled: error 'must provide alert manager enabled',
                 hostname: ''
             },
@@ -28,7 +28,8 @@ local values =  {
             },
             node_exporter:{
                 enabled: error 'must provide node exporter enabled',
-            }
+            },
+
         }
     }
 } + (std.extVar('values'));
@@ -63,6 +64,18 @@ local kp =
             limits: { cpu: '10m', memory: '50Mi' },
             requests: { cpu: '4m', memory: '50Mi' },
         }
+      },
+      nodeExporter+: {
+        resources:: {
+            limits: { },
+            requests: {},
+        },
+        kubeRbacProxy: {
+           resources:: {
+             requests: { },
+             limits: { },
+           },
+        },
       }
     },
   };
@@ -105,14 +118,21 @@ local alertManagerPatch = ( if values.kube_x.prometheus.alertmanager.hostname !=
     ['alertmanager-' + name]: kp.alertmanager[name] + (if kp.alertmanager[name].kind == 'Alertmanager' then alertManagerPatch else {} )
     for name in std.objectFields(kp.alertmanager)
 } else {}) +
+// Black box exporter for probing (black box monitoring)
+// https://prometheus-operator.dev/kube-prometheus/kube/blackbox-exporter/
 (if values.kube_x.prometheus.blackbox_exporter.enabled then {
     ['blackbox-exporter-' + name]: kp.blackboxExporter[name]
     for name in std.objectFields(kp.blackboxExporter)
 } else {}) +
 //{ ['grafana-' + name]: kp.grafana[name] for name in std.objectFields(kp.grafana) } +
 // { ['pyrra-' + name]: kp.pyrra[name] for name in std.objectFields(kp.pyrra) if name != 'crd' } +
-{ ['kube-state-metrics-' + name]: kp.kubeStateMetrics[name] for name in std.objectFields(kp.kubeStateMetrics) } +
+//{ ['kube-state-metrics-' + name]: kp.kubeStateMetrics[name] for name in std.objectFields(kp.kubeStateMetrics) } +
+// Kubernetes metrics
 { ['kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) } +
-(if values.kube_x.prometheus.blackbox_exporter.enabled then { ['node-exporter-' + name]: kp.nodeExporter[name] for name in std.objectFields(kp.nodeExporter) } else {}) +
+// Node exporter
+(if values.kube_x.prometheus.node_exporter.enabled then {
+    ['node-exporter-' + name]: kp.nodeExporter[name]
+    for name in std.objectFields(kp.nodeExporter)
+   } else {}) +
 { ['prometheus-' + name]: kp.prometheus[name] for name in std.objectFields(kp.prometheus) } +
 { ['prometheus-adapter-' + name]: kp.prometheusAdapter[name] for name in std.objectFields(kp.prometheusAdapter) }

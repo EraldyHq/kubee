@@ -1,4 +1,4 @@
-# Prometheus CRDS
+# Prometheus Operator CRDS
 
 
 ## About
@@ -20,8 +20,28 @@ kube-x-helm-x -n prometheus install prometheus-crds
 
 The output of this chart can be inspected with:
 ```bash
+# set debug (to not delete the created manifests)
+# export BASHLIB_ECHO_LEVEL=4
 kube-x-helm-x -n prometheus template prometheus-crds
 ```
+
+## List
+
+CRD's and there respective link to the documentation:
+* [alertmanagerconfigs.monitoring.coreos.com](https://prometheus-operator.dev/docs/developer/alerting/#using-alertmanagerconfig-resources) - Alert manager config creation
+* [alertmanagers.monitoring.coreos.com](https://prometheus-operator.dev/docs/platform/platform-guide/#deploying-alertmanager) - Alert manager instance creation
+* [podmonitors.monitoring.coreos.com](https://prometheus-operator.dev/docs/developer/getting-started/#using-podmonitors) - Prometheus scrape config for pods
+* [probes.monitoring.coreos.com](https://prometheus-operator.dev/docs/getting-started/design/?#probe) - Probe definition for black box exporter
+* [prometheuses.monitoring.coreos.com](https://prometheus-operator.dev/docs/platform/platform-guide/#deploying-prometheus) - Prometheus instance creation
+* [prometheusagents.monitoring.coreos.com](https://prometheus-operator.dev/docs/platform/prometheus-agent/) - Prometheus agent instance creation
+* [prometheusRules.monitoring.coreos.com](https://prometheus-operator.dev/docs/developer/alerting/#deploying-prometheus-rules) - Prometheus alerting and recording Rules definition
+* [scrapeconfig.monitoring.coreos.com](https://prometheus-operator.dev/docs/developer/scrapeconfig/) - Prometheus Scrape Config for external kubernetes target
+* [servicemonitor.monitoring.coreos.com](https://prometheus-operator.dev/docs/developer/getting-started/#using-servicemonitors) - Prometheus Scrape Config for service
+* [thanosruler.monitoring.coreos.com](https://prometheus-operator.dev/docs/platform/thanos/) - [Thanos Ruler](https://prometheus-operator.dev/docs/platform/thanos/#thanos-ruler)
+
+See also:
+* the design page: [Design](https://prometheus-operator.dev/docs/getting-started/design/)
+* the API for fields definitions: https://prometheus-operator.dev/docs/api-reference/api/
 
 
 ## Dev / Contrib

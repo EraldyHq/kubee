@@ -12,6 +12,7 @@ It installs and configure:
 * the node exporter
 * the push gateway
 * the [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics)
+* the [prometheus adapter](https://github.com/kubernetes-sigs/prometheus-adapter)
 * [the following alerts](https://runbooks.prometheus-operator.dev/)
 
 
@@ -26,6 +27,21 @@ It installs and configure:
 
 > [Note]
 > All mixins can be seen in [jsonnetfile.json](https://github.com/prometheus-operator/kube-prometheus/blob/main/jsonnet/kube-prometheus/jsonnetfile.json)
+
+## Kube Rbac Proxy - Securing metrics on Exporter
+
+Kube Rbac Proxy is a small
+but potent HTTP proxy designed
+to perform RBAC authorization
+against the Kubernetes API using SubjectAccessReview.
+It can act as a bridge between your service
+and the outside world, ensuring that only authorized entities can access specific metrics.
+
+This proxy is intended to be a sidecar that accepts incoming HTTP requests. 
+This way, one can ensure that a request is truly authorized, 
+instead of being able to access an application simply because an entity has network access to it.
+
+https://ramesses2.medium.com/securing-http-services-with-kube-rbac-proxy-a-red-hat-journey-c080b5f0a42a
 
 ## Version
 
