@@ -1,0 +1,6 @@
+dependencies:
+- name: kube-x
+  repository: file://../../charts/kube-x
+  version: 0.0.1
+digest: sha256:3ffbdee33fa93a60987e7ffd8c268613d565380e8f53a37a8531918764de42ea
+generated: "2025-01-18T16:42:52.89834378+01:00"

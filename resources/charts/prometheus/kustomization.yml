@@ -15,22 +15,7 @@ resources:
   # Secret to export the metrics to new Relic and Grafana
 - templates/prometheus-grafana-cloud-secret.yml
 - templates/prometheus-new-relic-secret.yml
-# Node exporter
-- ../node-exporter/templates/prometheus-node-exporter.yml
-- ../node-exporter/templates/prometheus-node-exporter-service.yml
-- ../node-exporter/templates/prometheus-node-exporter-service-monitor.yml
-# Push Gateway
-- ../pushgateway/templates/prometheus-pushgateway.yml
-- ../pushgateway/templates/prometheus-pushgateway-service.yml
-- ../pushgateway/templates/prometheus-pushgateway-service-monitor.yml
-- ../pushgateway/templates/prometheus-pushgateway-ingress.yml
-# Alert Manager
-- ../alertmanager/templates/prometheus-alert-manager.yml
-- ../alertmanager/templates/prometheus-alert-manager-service.yml
-- ../alertmanager/templates/prometheus-alert-manager-ingress.yml
-- ../alertmanager/templates/prometheus-alert-manager-config-secret-external.yml
-- ../alertmanager/templates/prometheus-alert-manager-config-default.yml
-- ../alertmanager/templates/prometheus-alert-manager-config-opsgenie.yml
+
 
 generatorOptions:
   # disable appending a content hash suffix to the names of generated resources

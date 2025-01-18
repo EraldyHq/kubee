@@ -1,4 +1,7 @@
-{{- if and (eq .Values.kube_x.prometheus.alertmanager.enabled true ) (ne .Values.kube_x.prometheus.alertmanager.hostname "") }}
+{{- if and (eq .Values.kube_x.alertmanager.enabled true ) (ne .Values.kube_x.alertmanager.hostname "") }}
+# https://github.com/prometheus-operator/prometheus-operator/blob/main/example/user-guides/alerting/alertmanager-example-service.yaml
+# https://prometheus-operator.dev/docs/platform/platform-guide/#exposing-the-alertmanager-service
+# We don't use a node port, we use an ingress
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -27,6 +30,6 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - {{ .Values.kube_x.prometheus.alertmanager.hostname }}
+        - {{ .Values.kube_x.alertmanager.hostname }}
       secretName: alertmanager-cert
 {{- end -}}
