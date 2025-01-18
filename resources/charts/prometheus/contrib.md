@@ -1,0 +1,44 @@
+# Contrib Dev
+
+
+## Jsonnet Bootstrap
+
+The [jsonnet project](jsonnet/README.md) was bootstrap with:
+```bash
+cd jsonnet
+```
+* The [kube-prometheus libs](jsonnet/download-jsonnet-libs):
+```bash
+./download-jsonnet-libs
+```
+* The jsonnet bundler (as seen on the [kube-prometheus jsonnetfile.json](https://github.com/prometheus-operator/kube-prometheus/blob/main/jsonnet/kube-prometheus/jsonnetfile.json)
+```bash
+jb init
+jb install github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator@main
+jb install github.com/prometheus-operator/prometheus-operator/jsonnet/mixin@main
+jb install github.com/kubernetes-monitoring/kubernetes-mixin@af5e898 # last main commit
+jb install github.com/prometheus/prometheus/documentation/prometheus-mixin@v3.1.0
+```
+
+
+
+### Develop the Manifest Ops
+
+Once, create the namespace
+```bash
+kubectl create namespace kube-prometheus
+```
+
+Then:
+* with `kube-x-kubectl`
+```bash
+kube-x-kubectl apply --server-side -k .
+# why `--server-side` because https://github.com/prometheus-operator/kube-prometheus/issues/1511
+```
+
+* with `kubectl`
+```bash
+kubectl config set-context --current --namespace=kube-prometheus
+kubectl apply --server-side -k .
+# why `--server-side` because https://github.com/prometheus-operator/kube-prometheus/issues/1511
+```

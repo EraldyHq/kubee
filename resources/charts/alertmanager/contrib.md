@@ -3,7 +3,7 @@
 
 ## Steps
 
-* Update the jsonnet library with the [script](download-jsonnet)
+* Update the jsonnet library with the [script](download-jsonnet-libs)
 * Jb
 ```bash
 jb init
