@@ -1,6 +1,6 @@
 apiVersion: v2
-name: kube-x-prometheus
-description: Kube-X Prometheus Chart
+name: kube-x-node-exporter
+description: Kube-X Node Exporter Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -28,8 +28,3 @@ dependencies:
     version: 0.0.1
     repository: file://../../charts/kube-x
     alias: kube_x
-
-# noinspection HelmChartUnknownKeys
-kube_x:
-  versions:
-    kube-prometheus: v0.14.0

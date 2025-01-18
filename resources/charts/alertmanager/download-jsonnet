@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+# This script update the version
+# and crd from the upstream traefik sub-chart
+
+source bashlib-error.sh
+error::set_strict_mode
+error::set_trap
+source bashlib-echo.sh
+
+# this works for executed script or sourced script
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+# Get the Kube-Prometheus version
+KUBE_PROMETHEUS_VERSION=$(yq '.kube_x.versions.kube-prometheus' "$SCRIPT_DIR/../prometheus/Chart.yaml" | tr -d '~')
+
+if [ "$KUBE_PROMETHEUS_VERSION" == "" ]; then
+  echo::err "Unable to retrieve the kube prometheus version (the value was empty)"
+  exit 1
+fi
+
+LIB_DIR="jsonnet/lib"
+FILE="alertmanager.libsonnet"
+mkdir -p "$LIB_DIR"
+echo::info "Download the Jsonnet lib alert manager with version $KUBE_PROMETHEUS_VERSION"
+curl \
+  -s \
+  -o "$LIB_DIR/$FILE" \
+  --fail \
+  "https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/refs/tags/$KUBE_PROMETHEUS_VERSION/jsonnet/kube-prometheus/components/$FILE"
+
+echo::success "The jsonnet lib was updated"

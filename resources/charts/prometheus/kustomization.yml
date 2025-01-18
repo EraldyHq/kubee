@@ -16,21 +16,21 @@ resources:
 - templates/prometheus-grafana-cloud-secret.yml
 - templates/prometheus-new-relic-secret.yml
 # Node exporter
-- templates/prometheus-node-exporter.yml
-- templates/prometheus-node-exporter-service.yml
-- templates/prometheus-node-exporter-service-monitor.yml
+- ../node-exporter/templates/prometheus-node-exporter.yml
+- ../node-exporter/templates/prometheus-node-exporter-service.yml
+- ../node-exporter/templates/prometheus-node-exporter-service-monitor.yml
 # Push Gateway
-- templates/prometheus-pushgateway.yml
-- templates/prometheus-pushgateway-service.yml
-- templates/prometheus-pushgateway-service-monitor.yml
-- templates/prometheus-pushgateway-ingress.yml
+- ../pushgateway/templates/prometheus-pushgateway.yml
+- ../pushgateway/templates/prometheus-pushgateway-service.yml
+- ../pushgateway/templates/prometheus-pushgateway-service-monitor.yml
+- ../pushgateway/templates/prometheus-pushgateway-ingress.yml
 # Alert Manager
-- templates/prometheus-alert-manager.yml
-- templates/prometheus-alert-manager-service.yml
-- templates/prometheus-alert-manager-ingress.yml
-- templates/prometheus-alert-manager-config-secret-external.yml
-- templates/prometheus-alert-manager-config-default.yml
-- templates/prometheus-alert-manager-config-opsgenie.yml
+- ../alertmanager/templates/prometheus-alert-manager.yml
+- ../alertmanager/templates/prometheus-alert-manager-service.yml
+- ../alertmanager/templates/prometheus-alert-manager-ingress.yml
+- ../alertmanager/templates/prometheus-alert-manager-config-secret-external.yml
+- ../alertmanager/templates/prometheus-alert-manager-config-default.yml
+- ../alertmanager/templates/prometheus-alert-manager-config-opsgenie.yml
 
 generatorOptions:
   # disable appending a content hash suffix to the names of generated resources
