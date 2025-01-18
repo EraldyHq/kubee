@@ -1,23 +1,34 @@
+# Prometheus Alert Manager
 
 
+## About
+The alert manager manages alerts created by the Prometheus server.
+
+It can:
+* aggregate them,
+* silence them,
+* route them to:
+  * email 
+  * or an external incident management platform such as OpsGenie. 
+
+## Install
+
+```bash
+helx --cluster clusterName alertmanager
+```
 
 
+## Chart Features
+
+* Alert Notifications Channels
+  * Email 
+  * OpsGenie
+* Ingress
+* Alert manager Monitoring:
+  * Metrics Collection 
+  * [Alerts](https://runbooks.prometheus-operator.dev/runbooks/alertmanager/)
 
 ## Contrib
 
-* Update the jsonnet library with the [script](download-jsonnet)
-* Jb
-```bash
-jb init
-jb install github.com/prometheus/alertmanager/doc/alertmanager-mixin@v0.28.0
-jb install github.com/kubernetes-monitoring/kubernetes-mixin@af5e898 # last main commit
-```
-* Run
-```bash
-# with jsonnet
-rm -rf jsonnet/multi/manifests && mkdir -p jsonnet/multi/manifests/setup && jsonnet -J vendor --multi jsonnet/multi/manifests "jsonnet/multi/alertmanager.jsonnet" --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
-# with helm_x to test a cluster values
-export BASHLIB_ECHO_LEVEL=4 # debug to keep the generated manifests
-kube-x-helm-x --cluster clusterName template alertmanager
-```
+See [contrib/dev](contrib.md)
 

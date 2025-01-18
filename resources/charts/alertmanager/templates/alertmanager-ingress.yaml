@@ -1,7 +1,11 @@
-{{- if and (eq .Values.kube_x.alertmanager.enabled true ) (ne .Values.kube_x.alertmanager.hostname "") }}
-# https://github.com/prometheus-operator/prometheus-operator/blob/main/example/user-guides/alerting/alertmanager-example-service.yaml
-# https://prometheus-operator.dev/docs/platform/platform-guide/#exposing-the-alertmanager-service
-# We don't use a node port, we use an ingress
+{{- if ne .Values.kube_x.alertmanager.hostname "" }}
+{{/*
+  # https://github.com/prometheus-operator/prometheus-operator/blob/main/example/user-guides/alerting/alertmanager-example-service.yaml
+  # https://prometheus-operator.dev/docs/platform/platform-guide/#exposing-the-alertmanager-service
+  # We don't use a node port, we use an ingress
+  Test:
+  helm template -s templates/alertmanager-ingress.yaml --set 'kube_x.alertmanager.hostname=alert.com' . | yq
+*/}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -11,7 +15,7 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    # Because Middleware is not namespace, we use the kube-system-traefik-dashboard-auth@kubernetescrd
+    {{- /* Auth */}}
     traefik.ingress.kubernetes.io/router.middlewares: kube-system-traefik-dashboard-auth@kubernetescrd
     {{- if ne (((.Values).kube_x).cert_manager).enabled false }}
     cert-manager.io/cluster-issuer: '{{ .Values.kube_x.cert_manager.defaultIssuerName }}'
@@ -23,7 +27,7 @@ spec:
         paths:
           - backend:
               service:
-                name: alertmanager
+                name: alertmanager-alertmanager
                 port:
                   number: 9093
             path: /

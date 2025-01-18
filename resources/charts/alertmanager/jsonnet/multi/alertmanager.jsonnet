@@ -121,7 +121,7 @@ local alertmanager = (import '../lib/alertmanager.libsonnet')(
 {
     ['alertmanager-' + name]:
         alertmanager[name]
-        + (if alertmanager[name].kind == 'Alertmanager' then { spec+: alertManagerPatch } )
+        + (if alertmanager[name].kind == 'Alertmanager' then { spec+: alertManagerPatch } else {} )
     for name in std.objectFields(alertmanager)
 } + ( if values.kube_x.alertmanager.opsgenie.apiKey != '' then
     /*
@@ -132,7 +132,7 @@ local alertmanager = (import '../lib/alertmanager.libsonnet')(
           https://support.atlassian.com/opsgenie/docs/integrate-opsgenie-with-prometheus/
     */
     {
-        'alert-manager-opsenie-config': {
+        'alertmanager-opsgenie-config': {
             apiVersion: 'monitoring.coreos.com/v1alpha1',
             kind: 'AlertmanagerConfig',
             metadata: {
@@ -186,4 +186,4 @@ local alertmanager = (import '../lib/alertmanager.libsonnet')(
               ]
             }
         }
-    })
+    } else {})

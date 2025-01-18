@@ -1,2 +1,0 @@
-{{- if ne .Values.kube_x.alertmanager.opsgenie.apiKey "" }}
-{{- end -}}

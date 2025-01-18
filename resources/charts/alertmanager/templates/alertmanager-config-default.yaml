@@ -1,4 +1,3 @@
-{{- if eq .Values.kube_x.alertmanager.enabled true }}
 # A alert manager config (by namespace)
 # https://prometheus-operator.dev/docs/developer/alerting/#using-alertmanagerconfig-resources
 # https://github.com/prometheus/alertmanager/blob/main/config/testdata/conf.opsgenie-both-file-and-apikey.yml
@@ -35,4 +34,3 @@ spec:
     - name: 'default'
       emailConfigs:
         - to: '{{ .Values.kube_x.cluster.adminUser.email }}'
-{{- end -}}
