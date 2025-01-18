@@ -79,10 +79,10 @@ traefik:
   dashboard:
     # The FQDN is dnsName.apexDomain
     # If not empty, an ingress is created
-    # example: hostname: 'traefik-haship.'
+    # example: hostname: 'traefik-haship.nip.io'
     hostname: ''
 
-# The prometheus kube-x env
+# Prometheus with Prometheus Operator
 prometheus:
   # Enable or disable prometheus
   # Not a string, a boolean so no quote
@@ -91,45 +91,59 @@ prometheus:
   namespace: 'prometheus'
   # prometheus
   hostname: ''
-
-# alert manager
-alertmanager:
-  enabled: true
-  hostname: ''
-
-external_services:
-  # grafana cloud
+  # grafana cloud remote write prometheus integration
   grafana_cloud:
     enabled: false
-    # For remote write
-    prometheus:
-      username: ''
-      password: ''
+    username: ''
+    password: ''
+  # new relic remote write prometheus integration
+  new_relic:
+    enabled: false
+    # for remote write
+    bearer: ''
 
-  # Opsgenie
+# alert manager to send alerts to email or external services
+alertmanager:
+  # Enable or disable alert manager
+  # Not a string, a boolean so no quote
+  enabled: false
+  # The installation namespace
+  namespace: 'prometheus'
+  # hostname (install an ingress if not empty)
+  hostname: ''
+  # Opsgenie to send alert
   opsgenie:
     enabled: false
 
-  # new relic
-  new_relic:
-    enabled: false
-    prometheus:
-      # for remote write
-      bearer: ''
 
-# node_exporter
+# node_exporter to gather server metrics, install dashboard and alerts
 node_exporter:
-  enabled: true
-# Pushgateway
+  # Not a string, a boolean so no quote
+  enabled: false
+  # The installation namespace
+  namespace: 'prometheus' # prometheus component
+
+# Pushgateway to push metrics from a job
 pushgateway:
   enabled: false
+  # hostname (install an ingress if not empty)
   hostname: ''
-# Blackbox exporter
+  # The installation namespace
+  namespace: 'prometheus' # prometheus component
+
+# Blackbox exporter to do synthetic probe monitoring (http,dns,...)
 blackbox_exporter:
+  # Not a string, a boolean so no quote
   enabled: false
+  # The installation namespace
+  namespace: 'prometheus' # prometheus component
+
 # Prometheus Adapter
 prometheus_adapter:
-  enabled: true
+  # Not a string, a boolean so no quote
+  enabled: false
+  # The installation namespace
+  namespace: 'prometheus' # prometheus component
 
 # The cert manager kube-x env
 cert_manager:
@@ -185,33 +199,37 @@ cert_manager:
       # The dns Zones that are managed by cloudflare, mandatory
       dnsZones: []
 
+# An HTTP application that gives you HTTP information
+# used to control Ingress configuration such as traefik
 whoami:
+  # Not a string, a boolean so no quote
+  enabled: false
   # A non-empty Hostname will create an ingress
   # example: hostname: 'whoami.kube-x.dev'
   hostname: ''
 
 
-# Grafana Operator
+# Grafana with grafana Operator
 grafana:
-  # Properties of the grafana instance
-  instance:
-    # The type of instance:
-    # * internal: installation of grafana in the cluster
-    # * external: grafana api (for instance: grafana cloud instance)
-    # An empty type does not install any instance
-    type: 'internal'
-    # The hostname
-    # A non-empty Hostname for a cluster instance will create an ingress
-    # The hostname may be used in Prometheus alert to reference dashboard
-    # For a Grafana cloud instance, you need to enter: <Grafana-cloud-stack-name>.grafana.net
-    hostname: ''
-    # The label
-    # It's used :
-    # * as selector to apply CRD objects such as Dashboard, .... to this instance. https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
-    # * as the instance name
-    label: 'grafana'
-    # The auth credential (used for an external instance)
-    apiToken: ''
+  #
+  enabled: false
+  # The type of instance:
+  # * internal: installation of grafana in the cluster
+  # * external: grafana api (for instance: grafana cloud instance, if external, the apiToken is mandatory)
+  # An empty type does not install any instance
+  type: 'internal'
+  # The hostname
+  # A non-empty Hostname for a cluster instance will create an ingress
+  # The hostname may be used in Prometheus alert to reference dashboard
+  # For a Grafana cloud instance, you need to enter: <Grafana-cloud-stack-name>.grafana.net
+  hostname: ''
+  # The label
+  # It's used :
+  # * as selector to apply CRD objects such as Dashboard, .... to this instance. https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
+  # * as the instance name
+  label: 'grafana'
+  # The auth credential (used for an external instance)
+  apiToken: ''
 
 # Hashicorp Vault
 vault:

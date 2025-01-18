@@ -16,7 +16,9 @@ It installs and configure:
 * [the following alerts](https://runbooks.prometheus-operator.dev/)
 
 
-## Mixins
+## Note
+
+### Mixins
 
 * [kubernetes-mixin](https://github.com/kubernetes-monitoring/kubernetes-mixin)
 * [prometheus-operator-mixin](https://github.com/prometheus-operator/prometheus-operator/tree/main/jsonnet/mixin)
@@ -28,7 +30,7 @@ It installs and configure:
 > [Note]
 > All mixins can be seen in [jsonnetfile.json](https://github.com/prometheus-operator/kube-prometheus/blob/main/jsonnet/kube-prometheus/jsonnetfile.json)
 
-## Kube Rbac Proxy - Securing metrics on Exporter
+### Kube Rbac Proxy - Securing metrics on Exporter
 
 Kube Rbac Proxy is a small
 but potent HTTP proxy designed
@@ -43,7 +45,7 @@ instead of being able to access an application simply because an entity has netw
 
 https://ramesses2.medium.com/securing-http-services-with-kube-rbac-proxy-a-red-hat-journey-c080b5f0a42a
 
-## Version
+### Versions
 
 See [versions.json](vendor/github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus/versions.json)
 They are imported in the [main.libsonnet](vendor/github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus/main.libsonnet)
@@ -65,7 +67,7 @@ They are imported in the [main.libsonnet](vendor/github.com/prometheus-operator/
 
 
 
-## Why Not Grafana
+### Why Not Grafana
 
 `Kube-prometheus Grafana` implementation is based on [brancz/kubernetes-grafana](https://github.com/brancz/kubernetes-grafana)
 that loads the [dashboards via file system mount](https://github.com/brancz/kubernetes-grafana/blob/5698c8940b6dadca3f42107b7839557bc041761f/grafana/grafana.libsonnet#L257)
