@@ -394,7 +394,7 @@ if [ -f "$KUBE_X_ENV_FILE" ]; then
    # shellcheck disable=SC1090
    if ! source "$KUBE_X_ENV_FILE"; then
      echo::err "Error while importing the envrc file $KUBE_X_ENV_FILE"
-     return 1
+     exit 1
    fi
 fi
 

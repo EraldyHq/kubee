@@ -16,4 +16,8 @@ jb install github.com/kubernetes-monitoring/kubernetes-mixin@af5e898 # last main
 ```bash
 # with jsonnet
 rm -rf jsonnet/multi/manifests && mkdir -p jsonnet/multi/manifests/setup && jsonnet -J vendor --multi jsonnet/multi/manifests "jsonnet/multi/alertmanager.jsonnet" --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
+# with helm_x to test a cluster values
+export BASHLIB_ECHO_LEVEL=4 # debug to keep the generated manifests
+kube-x-helm-x --cluster clusterName template alertmanager
 ```
+

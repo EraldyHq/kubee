@@ -1,9 +1,11 @@
-{{- if eq .Values.kube_x.alertmanager.opsgenie.enabled true }}
-# The opsgenie alert manager config
-# https://github.com/prometheus/alertmanager/blob/main/config/testdata/conf.opsgenie-both-file-and-apikey.yml
-# https://prometheus.io/docs/alerting/latest/configuration/#opsgenie_config
-# One receiver by priority as stated here:
-# https://support.atlassian.com/opsgenie/docs/integrate-opsgenie-with-prometheus/
+{{- if ne .Values.kube_x.alertmanager.opsgenie.apiKey "" }}
+{{/*
+  The opsgenie alert manager config
+  https://github.com/prometheus/alertmanager/blob/main/config/testdata/conf.opsgenie-both-file-and-apikey.yml
+  https://prometheus.io/docs/alerting/latest/configuration/#opsgenie_config
+  One receiver by priority as stated here:
+  https://support.atlassian.com/opsgenie/docs/integrate-opsgenie-with-prometheus/
+*/}}
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: AlertmanagerConfig
 metadata:
@@ -14,8 +16,10 @@ spec:
   route:
     receiver: "opsgenie"
     routes:
-      # Route
-      # https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1alpha1.Route
+      {{- /*
+         Route
+         https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1alpha1.Route
+      */}}
       - receiver: "opsgenie-critical"
         # !!! Match properties does not work !!!
         # Matcher: https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1alpha1.Matcher

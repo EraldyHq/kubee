@@ -16,7 +16,7 @@ cluster:
     # * `admin` does not have access to node and cluster scope related object such as ClusterRoleBinding
     clusterRole: 'cluster-admin'
     # The email
-    # Used by default for instance for letsencrypt
+    # Used by default for instance for letsencrypt and as `from email`
     email: ''
   # Authentication of internal infra ingress (ie internal website such as Traefik Dashboard, ...)
   auth: basicAuth
@@ -42,6 +42,8 @@ cluster:
       username: ''
       # the auth connection password
       password: ''
+      # hello (used to present itself, normally email domain)
+      hello: ''
 
   
 # Kube-X Dashboard Variables
@@ -111,9 +113,10 @@ alertmanager:
   namespace: 'prometheus'
   # hostname (install an ingress if not empty)
   hostname: ''
-  # Opsgenie to send alert
+  # Opsgenie integration to send alert
+  # Enabled if the api key is not empty
   opsgenie:
-    enabled: false
+    apiKey: ''
 
 
 # node_exporter to gather server metrics, install dashboard and alerts
@@ -153,12 +156,16 @@ cert_manager:
   # Not a string, a boolean so no quote
   enabled: false
 
+  # Namespace
+  namespace: 'cert-manager'
+
   # The issuer used in all certificate request
   # of kube-x.
   # Should be changed to 'letsencrypt-prod'
   # when validated
   defaultIssuerName: 'letsencrypt-staging'
 
+  # Issuers endpoint
   acmeIssuers:
     prod:
       name: 'letsencrypt-prod'
@@ -169,9 +176,10 @@ cert_manager:
 
   # Http01 challenge
   # https://cert-manager.io/docs/tutorials/acme/http-validation/
-  # It is your responsibility to point each domain name at the correct IP address for your ingress controller.
+  # This is the default configuration if there is no DNS challenge configured for the domain,
+  # You need then to update your DNS to add an A or CNAME record to point the domain name at the correct IP address
   # Wildcard certificates are not supported with HTTP01 validation and require DNS01.
-  # Disabled if ingressClassName is empty
+  # This challenge is disabled if ingressClassName is empty
   http01:
     # Default IngressClassName
     # Used by cert manager to create ingress resource to resolve the http01 challenge
@@ -180,11 +188,11 @@ cert_manager:
 
   # Dns01 challenge
   # You don't need to publish a DNS A record
-  # Doc: https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/
-  # Spec: https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderCloudflare
-  # Notes: in the doc, they use an email because they show an apiKey Auth, not an apiToken
-  # `ApiToken` is now the preferred method
   dns01:
+    # Doc: https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/
+    # Spec: https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderCloudflare
+    # Notes: in the doc, they use an email because they show an apiKey Auth, not an apiToken
+    # `ApiToken` is now the preferred method
     cloudflare:
       # See cert-manager/README.md on how to get cloudflare api key
       # A secret or external secret can be created
@@ -207,12 +215,17 @@ whoami:
   # A non-empty Hostname will create an ingress
   # example: hostname: 'whoami.kube-x.dev'
   hostname: ''
+  # Namespace
+  namespace: 'whoami'
+
 
 
 # Grafana with grafana Operator
 grafana:
-  #
+  # Not a string, a boolean so no quote
   enabled: false
+  # namespace
+  namespace: 'grafana'
   # The type of instance:
   # * internal: installation of grafana in the cluster
   # * external: grafana api (for instance: grafana cloud instance, if external, the apiToken is mandatory)
@@ -233,11 +246,12 @@ grafana:
 
 # Hashicorp Vault
 vault:
+  # Not a string, a boolean so no quote
   enabled: false
   # The hostname (create an ingress if not empty)
   hostname: ''
   # The installation namespace
-  namespace: vault
+  namespace: 'vault'
   # A KV secret store
   kvSecretStore:
     # The Vault KV secret engine version.
@@ -248,6 +262,10 @@ vault:
 
 # External Secrets
 external_secrets:
+  # Not a string, a boolean so no quote
+  enabled: false
+  # Namespace
+  namespace: 'external-secrets'
   # Cluster Secret Store
   # We support only vault for now
   # If the api token is not empty and vault is enabled, a vault secret store is created
@@ -258,9 +276,10 @@ external_secrets:
 
 # Argocd
 argocd:
-  # This namespace should not change
+  enabled: false
+  # Namespace
   # https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#installing-argo-cd-in-a-custom-namespace
-  namespace: argocd
+  namespace: 'argocd'
   # The argocd hostname
   # if not empty, an ingress is created
   hostname: ''
