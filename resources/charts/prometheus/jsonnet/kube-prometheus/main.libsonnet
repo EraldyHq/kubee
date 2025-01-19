@@ -1,12 +1,12 @@
 # A main.libsonnet script based on kube-prometheus/main.libsonnet
 # https://github.com/prometheus-operator/kube-prometheus/blob/main/jsonnet/kube-prometheus/main.libsonnet
+# alert manager is needed because it's referenced in prometheus
+local alertmanager = import './components/alertmanager.libsonnet';
 local kubernetesControlPlane = import './components/k8s-control-plane.libsonnet';
 local customMixin = import './components/mixin/custom.libsonnet';
 local prometheusOperator = import './components/prometheus-operator.libsonnet';
 local prometheus = import './components/prometheus.libsonnet';
 
-
-# local utils = import './lib/utils.libsonnet';
 
 {
   // using `values` as this is similar to helm
@@ -72,8 +72,16 @@ local prometheus = import './components/prometheus.libsonnet';
       namespace: $.values.common.namespace,
       mixin+: { ruleLabels: $.values.common.ruleLabels },
     },
+    // alertmanager is needed for reference
+    alertmanager: {
+      name: 'main',
+      namespace: $.values.common.namespace,
+      version: $.values.common.versions.alertmanager,
+      image: $.values.common.images.alertmanager,
+      mixin+: { ruleLabels: $.values.common.ruleLabels },
+    },
   },
-
+  alertmanager: alertmanager($.values.alertmanager),
   prometheus: prometheus($.values.prometheus),
   prometheusOperator: prometheusOperator($.values.prometheusOperator),
   kubernetesControlPlane: kubernetesControlPlane($.values.kubernetesControlPlane),

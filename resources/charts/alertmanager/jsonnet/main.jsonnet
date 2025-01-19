@@ -1,34 +1,60 @@
 // To execute
 // rm -rf jsonnet/multi/manifests && mkdir -p jsonnet/multi/manifests/setup && jsonnet -J vendor --multi jsonnet/multi/manifests "jsonnet/multi/kube-prometheus.jsonnet" --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
 
+local extValues = std.extVar('values');
 
-local values =  {
+local getNestedProperty(obj, path, default) =
+  local parts = if std.type(path) == 'string' then
+    std.split(path, '.')
+  else
+    path;
+
+  local get(o, p) =
+    if std.length(p) == 0 then
+      o
+    else if !std.isObject(o) then
+      default
+    else if !std.objectHas(o, p[0]) then
+      default
+    else
+      get(o[p[0]], p[1:]);
+
+  get(obj, parts);
+
+local notNullOrEmpty(obj, path) =
+    local value = getNestedProperty(obj, path, error path+' was not found and is mandatory');
+    assert value != '':  path+' has an empty value and is mandatory';
+    value;
+
+local values = {
     kube_x: {
         cluster: {
             adminUser:{
-                email: ''
+                email: getNestedProperty(extValues, 'kube_x.cluster.adminUser.email','')
             },
             email: {
                 smtp: {
-                    host: '',
-                    port: error 'kube_x.cluster.email.smtp.port is empty',
-                    from: '',
-                    username: '',
-                    password: '',
-                    hello: ''
+                    host: getNestedProperty(extValues, 'kube_x.cluster.email.smtp.host',''),
+                    port: getNestedProperty(extValues, 'kube_x.cluster.email.smtp.port','25'),
+                    from: getNestedProperty(extValues, 'kube_x.cluster.email.smtp.from',''),
+                    username: getNestedProperty(extValues, 'kube_x.cluster.email.smtp.username',''),
+                    password: getNestedProperty(extValues, 'kube_x.cluster.email.smtp.password',''),
+                    hello: getNestedProperty(extValues, 'kube_x.cluster.email.smtp.hello',''),
                 }
             }
         },
         alertmanager: {
-            enabled: error 'must provide alert manager enabled',
-            namespace: error 'must provide alert manager namespace',
-            hostname: '',
+            namespace: notNullOrEmpty(extValues,'kube_x.alertmanager.namespace'),
+            hostname: getNestedProperty(extValues, 'kube_x.alertmanager.hostname', ''),
             opsgenie:{
-                apiKey: ''
-            }
+                apiKey: getNestedProperty(extValues, 'kube_x.alertmanager.opsgenie.apiKey', ''),
+            },
+            // memory is not by default in the helm values
+            memory: getNestedProperty(extValues, 'kube_x.alertmanager.memory', '50Mi'),
         },
     }
-} + (std.extVar('values'));
+};
+
 
 
 // Function that create an alertmanager patch
@@ -59,7 +85,7 @@ local alertManagerPatch = ( if values.kube_x.alertmanager.hostname != '' then { 
 
 
 // Get the alertManagerVersion from jsonnetfile.json
-local jsonnetfile = (import '../../jsonnetfile.json');
+local jsonnetfile = (import 'jsonnetfile.json');
 local alertManagerVersion = std.filter(
     function(x) x.source.git.remote == "https://github.com/prometheus/alertmanager.git",
     jsonnetfile.dependencies)[0].version;
@@ -80,7 +106,7 @@ local smtpObject = ( if values.kube_x.cluster.email.smtp.host != '' then
         smtp_smarthost: values.kube_x.cluster.email.smtp.host+':'+values.kube_x.cluster.email.smtp.port,
         smtp_require_tls: true,
         smtp_from: smtpFromEmail,
-        smtp_hello: nonEmpty(values.kube_x.cluster.email.smtp.hello),
+        [if values.kube_x.cluster.email.smtp.hello != null then "smtp_hello"]: values.kube_x.cluster.email.smtp.hello,
         smtp_username: nonEmpty(values.kube_x.cluster.email.smtp.username),
         smtp_password: nonEmpty(values.kube_x.cluster.email.smtp.password)
     });
@@ -89,12 +115,12 @@ local smtpObject = ( if values.kube_x.cluster.email.smtp.host != '' then
 local opsGenieObject = ( if values.kube_x.alertmanager.opsgenie.apiKey != '' then {
         opsgenie_api_key: values.kube_x.alertmanager.opsgenie.apiKey,
         opsgenie_api_url: 'https://api.opsgenie.com/'
-    });
+    } else {});
 
 // Kube Prometheus Alert Manager Object
-local alertmanager = (import '../lib/alertmanager.libsonnet')(
+local alertmanager = (import './kube_prometheus/components/alertmanager.libsonnet')(
       {
-        name: 'alertmanager', # main by default
+        name: 'main', # main by default, mandatory for installation
         version: alertManagerVersion,
         namespace: values.kube_x.alertmanager.namespace,
         image: 'quay.io/prometheus/alertmanager:'+alertManagerVersion,
@@ -102,8 +128,8 @@ local alertmanager = (import '../lib/alertmanager.libsonnet')(
         // Default is 1 for an alert manager crd but kube-prometheus set it to 2
         replicas: 1,
         resources: {
-            limits: {}, // cpu: '10m', memory: '50Mi'
-            requests: {},
+            limits: { memory: values.kube_x.alertmanager.memory},
+            requests: { cpu: '10m', memory: values.kube_x.alertmanager.memory },
         },
         config+:: {
             // The Global Conf for alert manager

@@ -3,13 +3,13 @@
 
 ## Jsonnet Bootstrap
 
-The [jsonnet project](jsonnet/README.md) was bootstrap with:
+The [jsonnet project](jsonnet/README.md) was bootstrapped with:
 ```bash
 cd jsonnet
 ```
-* The [kube-prometheus libs](jsonnet/download-jsonnet-libs):
+* The [kube-prometheus libs](jsonnet/download-kube-prometheus-scripts):
 ```bash
-./download-jsonnet-libs
+./download-kube-prometheus-scripts
 ```
 * The jsonnet bundler (as seen on the [kube-prometheus jsonnetfile.json](https://github.com/prometheus-operator/kube-prometheus/blob/main/jsonnet/kube-prometheus/jsonnetfile.json)
 ```bash
@@ -29,12 +29,11 @@ kube-x-helm-x -n prometheus template prometheus > jsonnet/out/all.yaml
 * or Raw Jsonnet command
 ```bash
 cd jsonnet
-rm -rf out && \
-  mkdir -p out && \
-  jsonnet -J vendor \
-    --multi out \
-    "main.jsonnet"  \
-    | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
+rm -rf out && mkdir -p out && jsonnet -J vendor \
+  --multi out \
+  "main.jsonnet"  \
+  --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" \
+  | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
 ```
 
 
