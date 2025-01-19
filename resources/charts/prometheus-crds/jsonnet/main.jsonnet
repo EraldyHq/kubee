@@ -22,7 +22,7 @@ local params = {
 };
 
 // Import the function and executes
-local prometheusOperator = (import '../../vendor/github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator/prometheus-operator.libsonnet')(params);
+local prometheusOperator = (import 'vendor/github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator/prometheus-operator.libsonnet')(params);
 
 // Extract only the CRDS
 {

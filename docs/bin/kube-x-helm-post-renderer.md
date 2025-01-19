@@ -24,15 +24,19 @@ $SYNOPSIS
 
 # JSONNET
 
-* The files with the extension `jsonnet` stored in the `jsonnet` directory are executed.
-* The output is added as new manifest (ie new resources)
-* If the jsonnet script is in the directory:
-  * `jsonnet/multi`, a multi-execution is executed (ie with the `--multi` flag of Jsonnet where each key of the Json object is a manifest path)
-  * otherwise, a normal execution occurs and the expected output should be a single json manifest
+The project file system layout is:
+* the project directory is the subdirectory `jsonnet`
+* it contains optionally the jsonnet bundler manifest `jsonnetfile.json`
+* the main file is called `main.jsonnet`
+* the files found at the project root directory with the extension `jsonnet` are executed in multimode, each key of the Json object is a manifest path (ie with the `--multi` flag of Jsonnet)
+  * Single mode execution is supported but not recommended. It happens when the Jsonnet script contains the term `single` (ie the expected output should be a single json manifest)   
 
-The Jsonnet script got the `values` via the values external variable. 
+  
+The Jsonnet script:
+* can get the helm `values` via the `values` jsonnet external variable.
+* should not output manifest path in multimode that contains directory. ie only a name, no slash
 
-Minimal Example:
+Minimal Working Example:
 ```jsonnet
 local values =  {
     kube_x: {
@@ -42,13 +46,28 @@ local values =  {
         }
     }
 } + (std.extVar('values'));
+
+// A multimode json where each key represent the name of the generated manifest and is unique
 {
-    metatdata: {
-        namespace: values.kube_x.prometheus.namespace
+   // no slash, no subdirectory in the file name
+   // ie not `setup/my-manifest` for instance
+   "my-manifest": {
+       apiVersion: 'xxx',
+       kind: 'xxx',
+       metatdata: {
+         namespace: values.kube_x.prometheus.namespace
+       }
     }
 }
 ```
+
 Note: the name `values` is a standard because this is similar to helm (used for instance by [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus/blob/8e16c980bf74e26709484677181e6f94808a45a3/jsonnet/kube-prometheus/main.libsonnet#L17))
+
+> [!TIP]
+> You can reuse the jsonnet project as a Jsonnet bundler dependency
+> ```bash
+> jb install https://github.com/workspace/repo/path/to/chart/jsonnet@main
+> ```
 
 
 # KUSTOMIZATION

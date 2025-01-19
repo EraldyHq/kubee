@@ -1,2 +1,2 @@
-vendor
-jsonnet/multi/manifests
+jsonnet/vendor
+jsonnet/out

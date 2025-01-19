@@ -75,8 +75,12 @@ jsonnet_processing(){
   if [ ! -d "$JSONNET_DIR" ]; then
     echo::info "No Jsonnet directory found"
   fi
+  pushd "$JSONNET_DIR" > /dev/null
+  echo::debug "Working directory for jsonnet processing is $JSONNET_DIR"
+  # we can't use bash::trap on return because it's a signal processing meaning
+  trap "popd > /dev/null" EXIT
 
-  echo::info "Jsonnet processing"
+  echo::info "Jsonnet processing into the Jsonnet directory $JSONNET_DIR"
 
   # Update the dependencies (vendor directory)
   # Mandatory when using jsonnet bundler
@@ -94,20 +98,16 @@ jsonnet_processing(){
     fi
   fi
 
-  # Multi processing
-  JSONNET_MULTI_DIR="$JSONNET_DIR/multi"
-  JSONNET_MULTI_OUTPUT_DIR="$JSONNET_MULTI_DIR/manifests"
-  # sub-setup directory is needed by kube-prometheus
-  # it's to store the CRD and namespace manifest
-  JSONNET_MULTI_OUTPUT_DIR_SETUP="$JSONNET_MULTI_DIR/manifests/setup"
-  if [ ! -d "$JSONNET_MULTI_OUTPUT_DIR_SETUP" ]; then
-    mkdir -p "$JSONNET_MULTI_OUTPUT_DIR_SETUP"
+  # Manifest Out (the directory is called out as this is a standard (sometimes build, ...)
+  JSONNET_OUTPUT_DIR="out"
+  if [ ! -d "$JSONNET_OUTPUT_DIR" ]; then
+    mkdir -p "$JSONNET_OUTPUT_DIR"
   fi
   # In debug mode, we don't delete it to be able to check each file
   if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
     # cleaning because we may have secret in their
     # full qualified path is needed as it may have change at the end
-    bash::trap "rm -rf $KUBE_X_CHART_DIRECTORY/$JSONNET_MULTI_OUTPUT_DIR" EXIT
+    bash::trap "rm -rf $KUBE_X_CHART_DIRECTORY/$JSONNET_DIR/$JSONNET_OUTPUT_DIR" EXIT
   fi
 
   # The variable to store the manifests created
@@ -118,10 +118,24 @@ jsonnet_processing(){
 
       echo::info "Processing: $JSONNET_FILE"
 
-      JSONNET_PARENT_DIR_BASENAME=$(basename "$(dirname "$JSONNET_FILE")")
+      JSONNET_SCRIPT_BASENAME=$(basename "$JSONNET_FILE")
 
-      case "$JSONNET_PARENT_DIR_BASENAME" in
-        "multi")
+      case "$JSONNET_SCRIPT_BASENAME" in
+        *single*)
+            echo::info "Processing in single mode the jsonnet file: $JSONNET_FILE"
+              # Run
+              JSONNET_MANIFEST=$(
+                # --string: string as output
+                command::echo_eval "jsonnet \
+                  --jpath $JPATH \
+                  --string \
+                  --ext-code 'values=std.parseYaml(importstr \"$KUBE_X_VALUES_FILE\")' \
+                  --exec 'std.manifestYamlDoc((import \"$JSONNET_FILE\"))' "
+            )
+            ;;
+        *)
+
+          echo::debug "The file $JSONNET_FILE does not contain mono in its name, processing in multi mode"
           echo::info "Processing in multi mode the jsonnet file: $JSONNET_FILE"
 
           # xargs post processing command
@@ -149,7 +163,7 @@ jsonnet_processing(){
 
           if ! JSONNET_MANIFEST=$(
             command::echo_eval "jsonnet -J $JPATH \
-            --multi $JSONNET_MULTI_OUTPUT_DIR \
+            --multi $JSONNET_OUTPUT_DIR \
             --ext-code 'values=std.parseYaml(importstr \"$KUBE_X_VALUES_FILE\")' \
             $JSONNET_FILE \
             | $POST_PROCESSING"
@@ -158,17 +172,7 @@ jsonnet_processing(){
             exit 1
           fi
           ;;
-        *)
-          echo::info "Processing in mono mode the jsonnet file: $JSONNET_FILE"
-          # Run
-          JSONNET_MANIFEST=$(
-            # --string: string as output
-            command::echo_eval "jsonnet \
-              --jpath $JPATH \
-              --string \
-              --ext-code 'values=std.parseYaml(importstr \"$KUBE_X_VALUES_FILE\")' \
-              --exec 'std.manifestYamlDoc((import \"$JSONNET_FILE\"))' "
-          )
+
       esac
 
       # Add the jsonnet manifest
@@ -181,7 +185,7 @@ EOF
   )
     # the `find` command should not be in a pipeline otherwise the JSONNET_MANIFESTS variable is
     # scoped to the pipeline and is empty
-    done < <(find "$JSONNET_DIR" -type f -name "*.jsonnet")
+    done < <(find . -type f -maxdepth 1 -name "*.jsonnet")
 
     echo "$JSONNET_MANIFESTS"
 
