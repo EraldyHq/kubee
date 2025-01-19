@@ -1,18 +1,8 @@
 // To execute
-// jsonnet -J vendor --string -e 'std.manifestYamlDoc((import "jsonnet/kube-prometheus.jsonnet"))' --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }"
 //
 // -m / --multi <dir>   Write multiple files to the directory and output a relative list files to stdout
-// rm -rf jsonnet/multi/manifests && mkdir -p jsonnet/multi/manifests/setup && jsonnet -J vendor --multi jsonnet/multi/manifests "jsonnet/multi/kube-prometheus.jsonnet" --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
-// -m manifest :
-// multi modes - RUNTIME ERROR: multi mode: top-level object was a string, should be an object whose keys are filenames and values hold the JSON for that file.
-//
-// rm -rf manifests && mkdir -p manifests/setup && jsonnet -J vendor --multi manifests "jsonnet/multi/kube-prometheus.jsonnet" --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" | xargs -I{} sh -c 'cat {} | yq eval -P -'
-//
-// With Yq
-// jsonnet -m manifests your_file.jsonnet && \
-// for file in manifests/*.json; do \
-//  yq eval -P "$file" > "${file%.json}.yaml"; \
-// done && rm -rf manifests/*.json
+// rm -rf out && mkdir -p out && jsonnet -J vendor --multi out "main.jsonnet" --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
+
 
 local values =  {
     kube_x: {
@@ -36,7 +26,7 @@ local values =  {
 
 
 local kp =
-  (import '../../vendor/github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus/main.libsonnet') +
+  (import 'vendor/github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus/main.libsonnet') +
   // Uncomment the following imports to enable its patches
   // (import 'kube-prometheus/addons/anti-affinity.libsonnet') +
   // (import 'kube-prometheus/addons/managed-cluster.libsonnet') +

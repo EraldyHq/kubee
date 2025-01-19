@@ -29,7 +29,7 @@ The project file system layout is:
 * it contains optionally the jsonnet bundler manifest `jsonnetfile.json`
 * the main file is called `main.jsonnet`
 * the files found at the project root directory with the extension `jsonnet` are executed in multimode, each key of the Json object is a manifest path (ie with the `--multi` flag of Jsonnet)
-  * Single mode execution is supported but not recommended. It happens when the Jsonnet script contains the term `single` (ie the expected output should be a single json manifest)   
+  * Single mode execution is supported but not recommended. It happens when the Jsonnet script name contains the term `single` (ie the expected output should be a single json manifest)   
 
   
 The Jsonnet script:

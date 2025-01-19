@@ -19,6 +19,23 @@ jb install github.com/prometheus-operator/prometheus-operator/jsonnet/mixin@main
 jb install github.com/kubernetes-monitoring/kubernetes-mixin@af5e898 # last main commit
 jb install github.com/prometheus/prometheus/documentation/prometheus-mixin@v3.1.0
 ```
+* Try it out with
+* Helm X
+```bash
+# set debug (to not delete the created manifests in the jsonnet/out directory)
+export BASHLIB_ECHO_LEVEL=4
+kube-x-helm-x -n prometheus template prometheus > jsonnet/out/all.yaml
+```
+* or Raw Jsonnet command
+```bash
+cd jsonnet
+rm -rf out && \
+  mkdir -p out && \
+  jsonnet -J vendor \
+    --multi out \
+    "main.jsonnet"  \
+    | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
+```
 
 
 

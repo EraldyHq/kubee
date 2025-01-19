@@ -12,20 +12,28 @@ source bashlib-echo.sh
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 # Get the Kube-Prometheus version
-KUBE_PROMETHEUS_VERSION=$(yq '.kube_x.versions.kube-prometheus' "$SCRIPT_DIR/Chart.yaml" | tr -d '~')
+KUBE_PROMETHEUS_VERSION=$(yq '.kube_x.versions.kube-prometheus' "$SCRIPT_DIR/../Chart.yaml" | tr -d '~')
 
 if [ "$KUBE_PROMETHEUS_VERSION" == "" ]; then
   echo::err "Unable to retrieve the kube prometheus version (the value was empty)"
   exit 1
 fi
 
-LIB_DIR="jsonnet/kube-prometheus"
+LIB_DIR="kube-prometheus"
 FILES=(
   "components/k8s-control-plane.libsonnet"
   "components/prometheus.libsonnet"
   "components/prometheus-operator.libsonnet"
   "components/kube-rbac-proxy.libsonnet"
   "addons/dropping-deprecated-metrics-relabelings.libsonnet"
+  # Custom Mixon
+  "components/mixin/custom.libsonnet"
+  "components/mixin/alerts/alerts.libsonnet"
+  "components/mixin/alerts/general.libsonnet"
+  "components/mixin/alerts/node.libsonnet"
+  "components/mixin/rules/rules.libsonnet"
+  "components/mixin/rules/general.libsonnet"
+  "components/mixin/rules/node-rules.libsonnet"
 )
 for FILE in "${FILES[@]}"; do
   DEST="$LIB_DIR/$FILE"
