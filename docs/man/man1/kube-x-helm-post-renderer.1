@@ -35,12 +35,13 @@ where:
 .IP \[bu] 2
 \f[V]KUBE_X_CHART_DIRECTORY\f[R] is the directory of the app to install
 .IP \[bu] 2
-\f[V]KUBE_X_VALUES_PATH\f[R] is the path to the values file
+\f[V]KUBE_X_VALUES_FILE\f[R] is the path to the values file
 .IP \[bu] 2
 \f[V]KUBE_X_NAMESPACE\f[R] is the installation namespace
 .PP
-Note: the Helm templates should be passed via stdin
-.SH How it works
+Note: Helm: * pass the templates output via stdin * will not print any
+output if no error occurs (even with the \[en]debug flag)
+.SH HOW IT WORKS
 .IP \[bu] 2
 if a \f[V]jsonnet\f[R] directory exists at the root of the chart
 directory
@@ -59,22 +60,84 @@ if a \f[V]kustomization.yml\f[R] is present at the root of the chart
 directory
 .RS 2
 .IP \[bu] 2
-\f[V]kustomize\f[R] is applied on the whole set of templates (Helm +
-Jsonnet templates)
+the environment variables present in \f[V]kustomization.yml\f[R] are
+substituted
+.IP \[bu] 2
+the templates are rendered
+.IP \[bu] 2
+\f[V]kustomize\f[R] is applied
+.IP \[bu] 2
+the output is added to the Jsonnet templates if present
 .RE
-.SH Jsonnet
+.SH JSONNET
+.PP
+The project: * file system layout is: * the project directory is the
+subdirectory \f[V]jsonnet\f[R] * it contains optionally jsonnet bundler
+artifacts such as: * the manifest \f[V]jsonnetfile.json\f[R] * the
+\f[V]vendor\f[R] directory * the main file is called
+\f[V]main.jsonnet\f[R] * can be: * opened as an independent project (by
+\f[V]VsCode\f[R], \f[V]Idea\f[R]) * used as a Jsonnet bundler dependency
+.IP
+.nf
+\f[C]
+jb install https://github.com/workspace/repo/path/to/chart/jsonnet\[at]main
+\f[R]
+.fi
+.PP
+Execution: the files found at the project root directory with the
+extension \f[V]jsonnet\f[R] are executed: * by default, in multimode,
+each key of the Json object is a manifest path (ie Jsonnet is executed
+with the \f[V]--multi\f[R] flag) * in single mode (supported but not
+recommended) when the Jsonnet script name contains the term
+\f[V]single\f[R] (ie the expected output should be a single json
+manifest)
+.PP
+The Jsonnet script: * get: * the \f[V]values\f[R] file via the
+\f[V]values\f[R] jsonnet external variable.
+* all default values via the \f[V]values\f[R] file (no value means
+error) * if in multimode, should not output manifest path that contains
+directory (ie no slash in the name)
+.PP
+Minimal Multimode \f[V]main.jsonnet\f[R] Working Example:
+.IP
+.nf
+\f[C]
+local extValues = std.extVar(\[aq]values\[aq]);
+
+// The name \[ga]values\[ga] is a standard because this is similar to helm 
+// (used for instance by [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus/blob/8e16c980bf74e26709484677181e6f94808a45a3/jsonnet/kube-prometheus/main.libsonnet#L17))
+local values =  {
+    kube_x: {
+        prometheus: {
+            namespace: kube_x.prometheus.namespace,
+        }
+    }
+};
+
+// A multimode json where each key represent the name of the generated manifest and is unique
+{
+   // no slash, no subdirectory in the file name
+   // ie not \[ga]setup/my-manifest\[ga] for instance
+   \[dq]my-manifest\[dq]: {
+       apiVersion: \[aq]xxx\[aq],
+       kind: \[aq]xxx\[aq],
+       metatdata: {
+         namespace: values.kube_x.prometheus.namespace
+       }
+    }
+}
+\f[R]
+.fi
+.SH KUSTOMIZATION
 .IP \[bu] 2
-The files with the extension \f[V]jsonnet\f[R] stored in the
-\f[V]jsonnet\f[R] directory are executed.
-.IP \[bu] 2
-The output is added as new manifest.
-.SH Kustomization
-.IP \[bu] 2
-Your chart should have a \f[V]kustomization.yml\f[R] file at the root
-with a resources called \f[V]kube-x-helm-x-templates.yml\f[R]
+Your chart can reference Helm templates directly.
+They will be rendered before passing them to \f[V]kustomize\f[R]
 .IP \[bu] 2
 The kustomization file can include the \f[V]${KUBE_X_NAMESPACE}\f[R]
 environment variable.
+Why?
+To support this
+case (https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#installing-argo-cd-in-a-custom-namespace)
 .PP
 Example:
 .IP
@@ -84,6 +147,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: ${KUBE_X_NAMESPACE}
 patches:
+  - path: templates/patches/secret-patch.yml
   - patch: |-
       - op: replace
         path: /subjects/0/namespace
@@ -92,6 +156,17 @@ patches:
       kind: ClusterRoleBinding
 resources:
   - https://raw.githubusercontent.com/orga/project/vx.x.x/manifests/install.yaml
-  - kube-x-helm-x-templates.yml
+  - templates/resources/ingress.yml
 \f[R]
 .fi
+.RS
+.PP
+[!NOTE] Kustomize won\[cq]t let you have multiple resources with the
+same GVK, name, and namespace because it expects each resource to be
+unique.
+If a resource template report an error, setting it as a patch template,
+may resolve the problem.
+.RE
+.SH EXAMPLE
+.PP
+Check the kube-x-argocd chart for a kustomization example.

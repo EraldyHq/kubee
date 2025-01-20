@@ -8,7 +8,7 @@ that adds support for:
 
 # SYNOPSIS
 
-$SYNOPSIS
+${SYNOPSIS}
 
 # HOW IT WORKS
 
@@ -24,28 +24,46 @@ $SYNOPSIS
 
 # JSONNET
 
-The project file system layout is:
-* the project directory is the subdirectory `jsonnet`
-* it contains optionally the jsonnet bundler manifest `jsonnetfile.json`
-* the main file is called `main.jsonnet`
-* the files found at the project root directory with the extension `jsonnet` are executed in multimode, each key of the Json object is a manifest path (ie with the `--multi` flag of Jsonnet)
-  * Single mode execution is supported but not recommended. It happens when the Jsonnet script name contains the term `single` (ie the expected output should be a single json manifest)   
+The project:
+* file system layout is:
+  * the project directory is the subdirectory `jsonnet`
+  * it contains optionally jsonnet bundler artifacts such as:
+    * the manifest `jsonnetfile.json`
+    * the `vendor` directory
+  * the main file is called `main.jsonnet`
+* can be:
+  * opened as an independent project (by `VsCode`, `Idea`)
+  * used as a Jsonnet bundler dependency
+```bash
+jb install https://github.com/workspace/repo/path/to/chart/jsonnet@main
+```
+
+Execution: the files found at the project root directory with the extension `jsonnet` are executed:
+* by default, in multimode, each key of the Json object is a manifest path (ie Jsonnet is executed with the `--multi` flag)
+* in single mode (supported but not recommended) when the Jsonnet script name contains the term `single` (ie the expected output should be a single json manifest)
+
+
+The Jsonnet script:
+* get:
+  * the `values` file via the `values` jsonnet external variable.
+  * all default values via the `values` file (no value means error)
+* if in multimode, should not output manifest path that contains directory (ie no slash in the name)
 
   
-The Jsonnet script:
-* can get the helm `values` via the `values` jsonnet external variable.
-* should not output manifest path in multimode that contains directory. ie only a name, no slash
 
-Minimal Working Example:
+Minimal Multimode `main.jsonnet` Working Example:
 ```jsonnet
+local extValues = std.extVar('values');
+
+// The name `values` is a standard because this is similar to helm 
+// (used for instance by [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus/blob/8e16c980bf74e26709484677181e6f94808a45a3/jsonnet/kube-prometheus/main.libsonnet#L17))
 local values =  {
     kube_x: {
         prometheus: {
-            // The error is triggered as access time, not build time
-            namespace: error 'must provide namespace',
+            namespace: kube_x.prometheus.namespace,
         }
     }
-} + (std.extVar('values'));
+};
 
 // A multimode json where each key represent the name of the generated manifest and is unique
 {
@@ -61,13 +79,7 @@ local values =  {
 }
 ```
 
-Note: the name `values` is a standard because this is similar to helm (used for instance by [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus/blob/8e16c980bf74e26709484677181e6f94808a45a3/jsonnet/kube-prometheus/main.libsonnet#L17))
 
-> [!TIP]
-> You can reuse the jsonnet project as a Jsonnet bundler dependency
-> ```bash
-> jb install https://github.com/workspace/repo/path/to/chart/jsonnet@main
-> ```
 
 
 # KUSTOMIZATION

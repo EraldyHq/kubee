@@ -19,10 +19,10 @@ even with the `-Ee` options.
 
 Print the kubernetes and kube-x environment variables in a export format
 ```bash
-kubectl-xenv [<app name>]
+kubectl-xenv [<chart name>]
 ```
 
-where `app name` is optional if the current directory is below the `KUBE_X_APP_HOME`.
+where `chart name` is optional if the current directory is below a `KUBE_X_CHARTS_PATH`.
 
 
 # ENVIRONMENT

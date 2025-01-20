@@ -15,6 +15,7 @@ A library of kubernetes functions
 * [kube::get_resource_by_app_name](#kubeget_resource_by_app_name)
 * [kube::get_json_path](#kubeget_json_path)
 * [kube::test_connection](#kubetest_connection)
+* [kube_x::get_cluster_directory](#kube_xget_cluster_directory)
 
 ### kube::get_qualified_app_name
 
@@ -122,4 +123,12 @@ test the connection to the cluster
 #### Exit codes
 
 * **1**: - if the connection did not succeed
+
+### kube_x::get_cluster_directory
+
+Return the directory of a cluster
+
+#### Arguments
+
+* **$1** (string): The package name
 

@@ -4,15 +4,12 @@
 
 # This script uses arg $1 (name of *.jsonnet file to use) to generate the manifests/*.yaml files.
 
-set -e
-set -x
-# only exit with zero if all commands of the pipeline exit successfully
-set -o pipefail
+set -TCEeuo pipefail
 
 # @internal
 synopsis(){
 
-cat << EOT
+cat <<EOT
 
 $(basename "$0") - Jsonnet Generate the k8s manifest from jsonnet files.
 
@@ -28,6 +25,7 @@ Global Options:
 
 
 EOT
+
 }
 
 # Assign the first argument to a string

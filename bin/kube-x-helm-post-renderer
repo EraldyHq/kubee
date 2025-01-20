@@ -191,10 +191,7 @@ EOF
 
 }
 
-
-KUBE_X_CHART_DIRECTORY="${1:-}"
-
-if [[ "$KUBE_X_CHART_DIRECTORY" =~ "synopsis"|"help" ]]; then
+synopsis(){
   cat <<EOF
 A post renderer to integrate \`kustomize\` and \`jsonnet\`
 \`\`\`bash
@@ -211,6 +208,15 @@ Note: Helm:
 * pass the templates output via stdin
 * will not print any output if no error occurs (even with the --debug flag)
 EOF
+}
+
+
+KUBE_X_CHART_DIRECTORY="${1:-}"
+
+if [[ "$KUBE_X_CHART_DIRECTORY" =~ "synopsis"|"help" ]]; then
+  exec 1>&3 # Restore stdout because we want the synopsis output to stdout
+  exec 3>&- # Close the saved descriptor
+  synopsis > /dev/stdout
   exit 0
 fi
 

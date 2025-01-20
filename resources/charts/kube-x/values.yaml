@@ -117,6 +117,8 @@ alertmanager:
   # Enabled if the api key is not empty
   opsgenie:
     apiKey: ''
+  resources:
+    memory: '50Mi'
 
 
 # node_exporter to gather server metrics, install dashboard and alerts
