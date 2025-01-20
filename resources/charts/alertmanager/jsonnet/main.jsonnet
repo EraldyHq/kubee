@@ -3,56 +3,34 @@
 
 local extValues = std.extVar('values');
 
-# All values should be present (ie default are in the values.yml file of kube-x chart)
-# This function will return an error if the property is not
-local getNestedPropertyOrThrow(obj, path) =
-  local parts = if std.type(path) == 'string' then
-    std.split(path, '.')
-  else
-    path;
-
-  local get(o, p) =
-    if std.length(p) == 0 then
-      o
-    else if !std.isObject(o) then
-      error path+" property was not found"
-    else if !std.objectHas(o, p[0]) then
-      error path+" property was not found"
-    else
-      get(o[p[0]], p[1:]);
-
-  get(obj, parts);
-
-local notNullOrEmpty(obj, path) =
-    local value = getNestedPropertyOrThrow(obj, path);
-    assert value != '':  path+' has an empty value and is mandatory';
-    value;
+// Validation Library
+local validation = import './kube_x/validation.libsonnet';
 
 local values = {
     kube_x: {
         cluster: {
             adminUser:{
-                email: getNestedPropertyOrThrow(extValues, 'kube_x.cluster.adminUser.email')
+                email: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.adminUser.email')
             },
             email: {
                 smtp: {
-                    host: getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.host'),
-                    port: getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.port'),
-                    from: getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.from'),
-                    username: getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.username'),
-                    password: getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.password'),
-                    hello: getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.hello'),
+                    host: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.host'),
+                    port: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.port'),
+                    from: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.from'),
+                    username: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.username'),
+                    password: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.password'),
+                    hello: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.hello'),
                 }
             }
         },
         alertmanager: {
-            namespace: notNullOrEmpty(extValues,'kube_x.alertmanager.namespace'),
-            hostname: getNestedPropertyOrThrow(extValues, 'kube_x.alertmanager.hostname'),
+            namespace: validation.notNullOrEmpty(extValues,'kube_x.alertmanager.namespace'),
+            hostname: validation.getNestedPropertyOrThrow(extValues, 'kube_x.alertmanager.hostname'),
             opsgenie:{
-                apiKey: getNestedPropertyOrThrow(extValues, 'kube_x.alertmanager.opsgenie.apiKey'),
+                apiKey: validation.getNestedPropertyOrThrow(extValues, 'kube_x.alertmanager.opsgenie.apiKey'),
             },
             // memory is not by default in the helm values '50Mi'
-            memory: getNestedPropertyOrThrow(extValues, 'kube_x.alertmanager.resources.memory'),
+            memory: validation.getNestedPropertyOrThrow(extValues, 'kube_x.alertmanager.resources.memory'),
         },
     }
 };

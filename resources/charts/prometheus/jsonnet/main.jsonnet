@@ -1,21 +1,25 @@
 // https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/customizing.md
 
+local extValues = std.extVar('values');
+local validation = import './kube_x/validation.libsonnet';
 local values =  {
     kube_x: {
         prometheus: {
             // The error is triggered as access time, not build time
-            namespace: error 'must provide namespace',
+            namespace: validation.notNullOrEmpty(extValues, 'kube_x.prometheus.namespace'),
             // https://prometheus.io/docs/prometheus/3.1/getting_started/
             // --storage.tsdb.retention.time=24h
             // scrape frequency
-            memory: "200Mi",
+            resources: {
+                memory: validation.getNestedPropertyOrThrow(extValues, 'kube_x.prometheus.resources.memory')
+            },
             prometheus_operator: {
                 // was running on 31.5
-                memory: "50Mi"
+                memory: validation.getNestedPropertyOrThrow(extValues, 'kube_x.prometheus.operator.resources.memory')
             }
-        }
+        },
     }
-} + (std.extVar('values'));
+};
 
 local kp =
   (import 'kube-prometheus/main.libsonnet') +
@@ -29,7 +33,7 @@ local kp =
         }
       },
       alertmanager: {
-        name: 'alertmanager'
+        name: 'main' # mandatory, the default values used by kube-prometheus
       },
       prometheusOperator+:{
          resources:: {
@@ -39,8 +43,8 @@ local kp =
       },
       prometheus+:{
         resources:: {
-            requests: { memory: values.kube_x.prometheus.memory },
-            limits: { memory: values.kube_x.prometheus.memory },
+            requests: { memory: values.kube_x.prometheus.resources.memory },
+            limits: { memory: values.kube_x.prometheus.resources.memory },
          },
       }
     },

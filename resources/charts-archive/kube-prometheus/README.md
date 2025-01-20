@@ -32,6 +32,10 @@ It installs and configure:
 
 ### Kube Rbac Proxy - Securing metrics on Exporter
 
+In Kubernetes clusters without NetworkPolicies any Pod can perform requests to every other Pod in the cluster. 
+This proxy was developed in order to restrict requests to only those Pods, 
+that present a valid and RBAC authorized token or client TLS certificate.
+
 Kube Rbac Proxy is a small
 but potent HTTP proxy designed
 to perform RBAC authorization
@@ -44,6 +48,9 @@ This way, one can ensure that a request is truly authorized,
 instead of being able to access an application simply because an entity has network access to it.
 
 https://ramesses2.medium.com/securing-http-services-with-kube-rbac-proxy-a-red-hat-journey-c080b5f0a42a
+
+Deprecated: Replace the kube-rbac-proxy within Network Policies follow-up for potentially enhancements to protect the metrics endpoint
+https://github.com/kubernetes-sigs/kubebuilder/blob/master/designs/discontinue_usage_of_kube_rbac_proxy.md
 
 ### Versions
 

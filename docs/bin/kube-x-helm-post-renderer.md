@@ -49,7 +49,7 @@ The Jsonnet script:
   * all default values via the `values` file (no value means error)
 * if in multimode, should not output manifest path that contains directory (ie no slash in the name)
 
-  
+ 
 
 Minimal Multimode `main.jsonnet` Working Example:
 ```jsonnet
@@ -80,6 +80,30 @@ local values =  {
 ```
 
 
+To validate, you can take example in our [validation library](../../resources/charts/alertmanager/jsonnet/kube_x/validation.libsonnet).
+
+Minimal Example:
+```jsonnet
+local extValues = std.extVar('values');
+local validation = import './kube_x/validation.libsonnet';
+# This will throw an error if there is no property. It should as the values file should have the default.
+local email = validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.adminUser.email');
+# This will throw an error if there is no property and if this is the empty string.
+local namespace = validation.notNullOrEmpty(extValues,'kube_x.alertmanager.namespace');
+{
+    "my-manifest": {
+       apiVersion: 'xxx',
+       kind: 'xxx',
+       metatdata: {
+         namespace: namespace
+       },
+       spec: {
+        email: email
+       }
+    }
+}
+```
+
 
 
 # KUSTOMIZATION
@@ -109,7 +133,7 @@ resources:
 > [!NOTE]
 > Kustomize won't let you have multiple resources with the same GVK, name, and namespace
 > because it expects each resource to be unique.
-> If a resource template report an error, setting it as a patch template, may resolve the problem.
+> If a resource template reports an error, setting it as a patch template, may resolve the problem.
 
 # EXAMPLE
 

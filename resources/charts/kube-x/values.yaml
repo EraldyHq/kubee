@@ -93,6 +93,10 @@ prometheus:
   namespace: 'prometheus'
   # prometheus
   hostname: ''
+  # CPU/Memory
+  resources:
+    # Memory of the prometheus instance (value based on experience)
+    memory: '200Mi'
   # grafana cloud remote write prometheus integration
   grafana_cloud:
     enabled: false
@@ -103,6 +107,13 @@ prometheus:
     enabled: false
     # for remote write
     bearer: ''
+  # Prometheus Operator
+  operator:
+    # CPU/Memory
+    resources:
+      # Memory of the prometheus operator instance (value based on experience)
+      memory: '50Mi'
+
 
 # alert manager to send alerts to email or external services
 alertmanager:
