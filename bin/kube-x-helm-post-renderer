@@ -100,14 +100,21 @@ jsonnet_processing(){
 
   # Manifest Out (the directory is called out as this is a standard (sometimes build, ...)
   JSONNET_OUTPUT_DIR="out"
-  if [ ! -d "$JSONNET_OUTPUT_DIR" ]; then
-    mkdir -p "$JSONNET_OUTPUT_DIR"
-  fi
+  # full qualified path is needed as this command is executed at the end via trap
+  REMOVE_MANIFEST_COMMAND="rm -rf $KUBE_X_CHART_DIRECTORY/$JSONNET_DIR/$JSONNET_OUTPUT_DIR"
   # In debug mode, we don't delete it to be able to check each file
   if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
     # cleaning because we may have secret in their
-    # full qualified path is needed as it may have change at the end
-    bash::trap "rm -rf $KUBE_X_CHART_DIRECTORY/$JSONNET_DIR/$JSONNET_OUTPUT_DIR" EXIT
+    bash::trap "$REMOVE_MANIFEST_COMMAND" EXIT
+  else
+    # To not kept old manifests, we clean
+    command::echo_eval "$REMOVE_MANIFEST_COMMAND"
+  fi
+
+  # Create the output directory as it's mandatory by Jsonnet
+  # Should happen after the cleaning above
+  if [ ! -d "$JSONNET_OUTPUT_DIR" ]; then
+    mkdir -p "$JSONNET_OUTPUT_DIR"
   fi
 
   # The variable to store the manifests created

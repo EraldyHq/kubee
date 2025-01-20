@@ -42,7 +42,7 @@ The project:
   * the project directory is the subdirectory `jsonnet`
   * it contains optionally jsonnet bundler artifacts such as:
     * the manifest `jsonnetfile.json`
-    * the `vendor` directory
+    * the `vendor` directory. This path is fixed because no IDE plugins for now supports 
   * the main file is called `main.jsonnet`
 * can be:
   * opened as an independent project (by `VsCode`, `Idea`)
