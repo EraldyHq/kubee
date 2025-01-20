@@ -49,6 +49,7 @@ function(params, values)
         },
       ],
     },
+
     [if values.kube_x.prometheus.hostname != '' then 'ingress']: {
       apiVersion: 'networking.k8s.io/v1',
       kind: 'Ingress',
@@ -88,4 +89,10 @@ function(params, values)
         }],
       },
     },
+    prometheus+: {
+        spec+: {
+          # Number of replicas of each shard to deploy
+          replicas: 1 # could be 2 for HA, default to 1
+        }
+    }
   }
