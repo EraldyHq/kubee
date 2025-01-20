@@ -9,6 +9,8 @@ local values =  {
         prometheus: {
             // The error is triggered as access time, not build time
             namespace: validation.notNullOrEmpty(extValues, 'kube_x.prometheus.namespace'),
+            // Hostname
+            hostname: validation.getNestedPropertyOrThrow(extValues, 'kube_x.prometheus.hostname'),
             // https://prometheus.io/docs/prometheus/3.1/getting_started/
             // --storage.tsdb.retention.time=24h
             // scrape frequency
@@ -23,6 +25,10 @@ local values =  {
             // Why? Takes 20Mb memory by exporter
             noRbacProxy: true
         },
+        cert_manager: {
+            enabled: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cert_manager.enabled'),
+            defaultIssuerName: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cert_manager.defaultIssuerName')
+        }
     }
 };
 
@@ -63,7 +69,7 @@ local prometheusOperator = (if values.kube_x.prometheus.noRbacProxy then
 );
 
 // Prometheus Custom
-local customPrometheus = (import './kube_x/prometheus.libsonnet')(kp.values.prometheus);
+local customPrometheus = (import './kube_x/prometheus.libsonnet')(kp.values.prometheus, values);
 
 {
   ['prometheus-operator-' + name ]: prometheusOperator[name]
