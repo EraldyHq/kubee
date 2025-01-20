@@ -37,24 +37,29 @@ rm -rf out && mkdir -p out && jsonnet -J vendor \
 ```
 
 
+## How to
 
-### Develop the Manifest Ops
 
-Once, create the namespace
+
+### Verify that the prometheus instance is up and running
+
 ```bash
-kubectl create namespace kube-prometheus
+kubectl get prometheus -n kube-prometheus
+# continuously
+kubectl get prometheus -n kube-prometheus -w  
+```
+```
+NAME         VERSION   DESIRED   READY   RECONCILED   AVAILABLE   AGE
+prometheus                       1       True         True        39s
 ```
 
-Then:
-* with `kube-x-kubectl`
+### Check that the operator is up and running
+
 ```bash
-kube-x-kubectl apply --server-side -k .
-# why `--server-side` because https://github.com/prometheus-operator/kube-prometheus/issues/1511
+kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator -n kube-prometheus
 ```
 
-* with `kubectl`
-```bash
-kubectl config set-context --current --namespace=kube-prometheus
-kubectl apply --server-side -k .
-# why `--server-side` because https://github.com/prometheus-operator/kube-prometheus/issues/1511
-```
+
+## CRD
+
+See [](../prometheus-crds/README.md)

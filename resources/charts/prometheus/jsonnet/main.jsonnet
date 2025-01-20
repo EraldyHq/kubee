@@ -62,11 +62,14 @@ local prometheusOperator = (if values.kube_x.prometheus.noRbacProxy then
     kp.prometheusOperator
 );
 
+// Prometheus Custom
+local customPrometheus = (import './kube_x/prometheus.libsonnet')(kp.values.prometheus);
+
 {
   ['prometheus-operator-' + name ]: prometheusOperator[name]
   // CRD are in the prometheus-crd charts
   for name in std.filter((function(name) prometheusOperator[name].kind != 'CustomResourceDefinition'), std.objectFields(prometheusOperator))
-} +
-{ 'kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule } +
+}
+{ 'kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule }
 { ['kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) }
-{ ['prometheus-' + name]: kp.prometheus[name] for name in std.objectFields(kp.prometheus) }
+{ ['prometheus-prometheus-' + name]: customPrometheus[name] for name in std.objectFields(customPrometheus) }

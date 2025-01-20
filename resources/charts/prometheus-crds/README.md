@@ -22,7 +22,7 @@ The output of this chart can be inspected with:
 ```bash
 # set debug (to not delete the created manifests in the jsonnet/out directory)
 export BASHLIB_ECHO_LEVEL=4
-kube-x-helm-x -n prometheus template prometheus-crds > jsonnet/out/all.yaml
+kube-x-helm-x -n prometheus template prometheus-crds > /tmp/all.yaml
 ```
 
 ## List
@@ -43,8 +43,12 @@ See also:
 * the design page: [Design](https://prometheus-operator.dev/docs/getting-started/design/)
 * the API for fields definitions: https://prometheus-operator.dev/docs/api-reference/api/
 
+## Note
+### Why we don't use the Community Chart
 
+They are also available in the community chart [prometheus-operator-crds](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-operator-crds)
+We have it here to be able to install it automatically as dependency of [the prometheus chart](../prometheus/README.md)
 
-## Dev / Contrib
+### Dev / Contrib
 
 [contrib](contrib.md)
