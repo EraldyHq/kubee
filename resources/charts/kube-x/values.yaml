@@ -96,6 +96,8 @@ prometheus:
   # CPU/Memory
   resources:
     # Memory of the prometheus instance (value based on experience)
+    # Depend on scrape interval (default to 30s), data retention (default to 24j) and number of metrics scraped
+    # The default values are used.
     memory: '200Mi'
   # grafana cloud remote write prometheus integration
   grafana_cloud:

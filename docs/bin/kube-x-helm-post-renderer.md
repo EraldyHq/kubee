@@ -110,9 +110,11 @@ Ide Plugins, as of 2025-01-20, choose your winner.
   * can navigate the code. `import` 
     * works only for relatif path, 
     * does not support `jpath`
+  * does not support formatting the whole document
 * The Grafana Json Server in [Vs Code](https://github.com/grafana/vscode-jsonnet) or [Intellij](https://plugins.jetbrains.com/plugin/18752-jsonnet-language-server)
   * navigation works only if the document has no errors 
   * supports `jpath` (ie `import namespace/name` can be navigated)
+  * supports formatting the whole document
 
 # KUSTOMIZATION
 

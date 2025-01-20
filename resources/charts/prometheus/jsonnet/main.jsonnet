@@ -6,6 +6,9 @@ local validation = import './kube_x/validation.libsonnet';
 
 local values =  {
     kube_x: {
+        cluster: {
+            name: validation.notNullOrEmpty(extValues, 'kube_x.cluster.name')
+        },
         prometheus: {
             // The error is triggered as access time, not build time
             namespace: validation.notNullOrEmpty(extValues, 'kube_x.prometheus.namespace'),
@@ -23,7 +26,15 @@ local values =  {
             },
             // No Rbac Proxy Sidecar or Network Policies
             // Why? Takes 20Mb memory by exporter
-            noRbacProxy: true
+            noRbacProxy: true,
+            // Grafana Remote write
+            grafana_cloud: {
+                enabled: validation.notNullOrEmpty(extValues, 'kube_x.prometheus.grafana_cloud.enabled')
+            },
+            // New Relic
+            new_relic: {
+                enabled: validation.notNullOrEmpty(extValues, 'kube_x.prometheus.new_relic.enabled')
+            }
         },
         cert_manager: {
             enabled: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cert_manager.enabled'),
@@ -52,12 +63,7 @@ local kp =
             limits: { memory: values.kube_x.prometheus.prometheus_operator.memory },
          },
       },
-      prometheus+:{
-        resources:: {
-            requests: { memory: values.kube_x.prometheus.resources.memory },
-            limits: { memory: values.kube_x.prometheus.resources.memory },
-         },
-      }
+      // for prometheus, see kube_x/prometheus.libsonnet
     },
   };
 
