@@ -1,84 +1,74 @@
 // https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/customizing.md
 
-local extValues = std.extVar('values');
+
 local validation = import './kube_x/validation.libsonnet';
 
+local kxExtValues = std.extVar('values');
+// Values are flatten, so that we can:
+// * use the + operator and the error pattern in called library
+// * we can easily rename
+local kxValues = {
 
-local values =  {
-    kube_x: {
-        cluster: {
-            name: validation.notNullOrEmpty(extValues, 'kube_x.cluster.name')
-        },
-        prometheus: {
-            // The error is triggered as access time, not build time
-            namespace: validation.notNullOrEmpty(extValues, 'kube_x.prometheus.namespace'),
-            // Hostname
-            hostname: validation.getNestedPropertyOrThrow(extValues, 'kube_x.prometheus.hostname'),
-            // https://prometheus.io/docs/prometheus/3.1/getting_started/
-            // --storage.tsdb.retention.time=24h
-            // scrape frequency
-            resources: {
-                memory: validation.getNestedPropertyOrThrow(extValues, 'kube_x.prometheus.resources.memory')
-            },
-            prometheus_operator: {
-                // was running on 31.5
-                memory: validation.getNestedPropertyOrThrow(extValues, 'kube_x.prometheus.operator.resources.memory')
-            },
-            // No Rbac Proxy Sidecar or Network Policies
-            // Why? Takes 20Mb memory by exporter
-            noRbacProxy: true,
-            // Grafana Remote write
-            grafana_cloud: {
-                enabled: validation.notNullOrEmpty(extValues, 'kube_x.prometheus.grafana_cloud.enabled')
-            },
-            // New Relic
-            new_relic: {
-                enabled: validation.notNullOrEmpty(extValues, 'kube_x.prometheus.new_relic.enabled')
-            }
-        },
-        cert_manager: {
-            enabled: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cert_manager.enabled'),
-            defaultIssuerName: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cert_manager.defaultIssuerName')
-        }
-    }
+  cluster_name: validation.notNullOrEmpty(kxExtValues, 'kube_x.cluster.name'),
+  prometheus_namespace: validation.notNullOrEmpty(kxExtValues, 'kube_x.prometheus.namespace'),
+  prometheus_hostname: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.prometheus.hostname'),
+  prometheus_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.prometheus.resources.memory'),
+  prometheus_version: '3.1.0',
+  prometheus_operator_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.prometheus.operator.resources.memory'),
+  prometheus_operator_version: '0.79.2',
+  // No Rbac Proxy Sidecar or Network Policies
+  // Why? Takes 20Mb memory by exporter
+  noRbacProxy: true,
+  // Grafana Remote write
+  grafana_cloud_enabled: validation.notNullOrEmpty(kxExtValues, 'kube_x.prometheus.grafana_cloud.enabled'),
+  grafana_cloud_prometheus_username: validation.notNullOrEmpty(kxExtValues, 'kube_x.prometheus.grafana_cloud.username'),
+  grafana_cloud_prometheus_password: validation.notNullOrEmpty(kxExtValues, 'kube_x.prometheus.grafana_cloud.password'),
+  // New Relic
+  new_relic_enabled: validation.notNullOrEmpty(kxExtValues, 'kube_x.prometheus.new_relic.enabled'),
+  new_relic_bearer: validation.notNullOrEmpty(kxExtValues, 'kube_x.prometheus.new_relic.bearer'),
+  // Cert Manager
+  cert_manager_enabled: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.cert_manager.enabled'),
+  cert_manager_issuer_name: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.cert_manager.defaultIssuerName'),
+
 };
 
 local kp =
   (import 'kube-prometheus/main.libsonnet') +
   {
-    values+:: {
+    kxValues+:: {
       common+: {
-        namespace: values.kube_x.prometheus.namespace,
+        namespace: kxValues.prometheus_namespace,
         versions+: {
-            prometheus: "3.1.0",
-            prometheusOperator: "0.79.2",
-        }
+          prometheus: kxValues.prometheus_version,
+          prometheusOperator: kxValues.prometheus_operator_version,
+        },
       },
       alertmanager: {
-        name: 'main' # mandatory, the default values used by kube-prometheus
+        name: 'main',  // mandatory, the default kxValues used by kube-prometheus
       },
-      prometheusOperator+:{
-         resources:: {
-            requests: { memory: values.kube_x.prometheus.prometheus_operator.memory },
-            limits: { memory: values.kube_x.prometheus.prometheus_operator.memory },
-         },
+      prometheusOperator+: {
+        resources:: {
+          requests: { memory: kxValues.prometheus_operator_memory },
+          limits: { memory: kxValues.prometheus_operator_memory },
+        },
       },
-      // for prometheus, see kube_x/prometheus.libsonnet
+      // for prometheus, we overwrite the config in kube_x/prometheus.libsonnet
     },
   };
 
 // Prometheus Operator without Rbac Configuration (ie with original manifest)
-local prometheusOperator = (if values.kube_x.prometheus.noRbacProxy then
+local prometheusOperator = (
+  if kxValues.noRbacProxy then
     (import './kube_x/prometheus-operator-rbac-free.libsonnet')(kp.values.prometheusOperator)
-    else
+  else
     kp.prometheusOperator
 );
 
 // Prometheus Custom
-local customPrometheus = (import './kube_x/prometheus.libsonnet')(kp.values.prometheus, values);
+local customPrometheus = (import './kube_x/prometheus.libsonnet')(kp.values.prometheus, kxValues);
 
 {
-  ['prometheus-operator-' + name ]: prometheusOperator[name]
+  ['prometheus-operator-' + name]: prometheusOperator[name]
   // CRD are in the prometheus-crd charts
   for name in std.filter((function(name) prometheusOperator[name].kind != 'CustomResourceDefinition'), std.objectFields(prometheusOperator))
 }

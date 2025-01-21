@@ -111,10 +111,14 @@ Ide Plugins, as of 2025-01-20, choose your winner.
     * works only for relatif path, 
     * does not support `jpath`
   * does not support formatting the whole document
+  * does not support variable renaming
+  * no outline (structure)
 * The Grafana Json Server in [Vs Code](https://github.com/grafana/vscode-jsonnet) or [Intellij](https://plugins.jetbrains.com/plugin/18752-jsonnet-language-server)
   * navigation works only if the document has no errors 
   * supports `jpath` (ie `import namespace/name` can be navigated)
   * supports formatting the whole document
+  * supports variables renaming but not based on AST symbol (meaning that it's just a search and replace of a word by name and you may ends up renaming just text, not symbol if the name is common such as values)
+  * no outline (structure)
 
 # KUSTOMIZATION
 
