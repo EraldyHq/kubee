@@ -1,4 +1,4 @@
-{{- if and (eq .Values.kube_x.prometheus.pushgateway.enabled true) (ne .Values.kube_x.prometheus.pushgateway.hostname "") }}
+{{- if (ne .Values.kube_x.pushgateway.hostname "") }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -13,7 +13,7 @@ metadata:
     {{- end }}
 spec:
   rules:
-    - host: {{ required "kube_x.prometheus.pushgateway.hostname is required" .Values.kube_x.prometheus.pushgateway.hostname }}
+    - host: {{ required "kube_x.prometheus.pushgateway.hostname is required" .Values.kube_x.pushgateway.hostname }}
       http:
         paths:
           - backend:
@@ -25,6 +25,6 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - {{ .Values.kube_x.prometheus.pushgateway.hostname }}
+        - {{ .Values.kube_x.pushgateway.hostname }}
       secretName: pushgateway-cert
 {{- end}}

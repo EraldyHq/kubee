@@ -176,11 +176,12 @@ function(kpValues, kxValues)
 
   (import '../kube-prometheus/components/prometheus.libsonnet')(kpValues) {
     local p = self,
-    // delete, roleBindingSpecificNamespaces
+    // deleting due to the :: operaror
     roleBindingSpecificNamespaces:: null,
     roleSpecificNamespaces:: null,
     roleConfig:: null,
     roleBindingConfig:: null,
+    networkPolicy:: null, # We can't access prometheus from Traefik otherwise
     // Rbac ClusterRole comes from https://prometheus-operator.dev/docs/platform/rbac/#prometheus-rbac
     clusterRole: {
       apiVersion: 'rbac.authorization.k8s.io/v1',
@@ -237,6 +238,7 @@ function(kpValues, kxValues)
                   service: {
                     name: p._metadata.name,
                     port: {
+                      // 9090 is the good one - Not the reloader port 8080
                       number: 9090,
                     },
                   },
