@@ -21,7 +21,7 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "0.76.2" # The version of prometheus operator
+appVersion: "v0.76.2" # The version of prometheus operator (should be the same on crds)
 
 dependencies:
   - name: kube-x

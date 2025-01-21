@@ -19,14 +19,14 @@ source "kube-x-lib.sh"
 #     Return the directory of a package
 # @arg $1 string The package name
 get_chart_directory(){
-  local PACKAGE_NAME="$1"
+  local CHART_NAME="$1"
   # All packages directories in an array
   local KUBE_X_CHARTS_DIRS=()
   IFS=":" read -ra KUBE_X_CHARTS_DIRS <<< "${KUBE_X_CHARTS_PATH:-}"
   # this works for executed script or sourced script
   local SCRIPT_DIR
   SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  local KUBE_X_RESOURCE_CHARTS_DIR
+  # KUBE_X_RESOURCE_CHARTS_DIR is not local because we use it in case of error in the message
   KUBE_X_RESOURCE_CHARTS_DIR=$(realpath "$SCRIPT_DIR/../resources/charts")
   local KUBE_X_CHARTS_DIRS+=("$KUBE_X_RESOURCE_CHARTS_DIR")
   for KUBE_X_PACKAGES_DIR in "${KUBE_X_CHARTS_DIRS[@]}"; do
@@ -34,15 +34,12 @@ get_chart_directory(){
         echo::warn "The path ($KUBE_X_PACKAGES_DIR) set in KUBE_X_CHARTS_PATH does not exist or is not a directory"
         continue
       fi
-      local APP_DIR="$KUBE_X_PACKAGES_DIR/${PACKAGE_NAME}"
+      local APP_DIR="$KUBE_X_PACKAGES_DIR/${CHART_NAME}"
       if [ -d "$APP_DIR" ]; then
         echo "$APP_DIR"
         return
       fi
   done
-  echo::err "No chart directory found with the name ($PACKAGE_NAME) in"
-  echo::err "  * the cluster app resources directory (${KUBE_X_RESOURCE_CHARTS_DIR}) "
-  echo::err "  * or the paths of the KUBE_X_CHARTS_PATH variable (${KUBE_X_CHARTS_PATH:-'not set'})"
   return 1
 
 }
@@ -67,7 +64,7 @@ is_helm_chart_installed() {
   if ACTUAL_NAMESPACE=$(helm list --all-namespaces --no-headers --filter "$CHART_RELEASE_NAME" | awk '{print $2}'); then
     echo::info "Release found: $ACTUAL_NAMESPACE/$CHART_RELEASE_NAME"
     if [ "$ACTUAL_NAMESPACE" != "$CHART_RELEASE_NAMESPACE" ]; then
-      echo::err "The name $CHART_RELEASE_NAME was already found in the namespace $ACTUAL_NAMESPACE instead of the namespace $PACKAGE_NAMESPACE"
+      echo::err "The name $CHART_RELEASE_NAME was already found in the namespace $ACTUAL_NAMESPACE instead of the namespace $CHART_NAMESPACE"
       exit 1
     fi
   fi
@@ -93,7 +90,49 @@ is_helm_chart_installed() {
 
 }
 
+# Crds first
+# CRD first installation is becoming a standard
+# Example with Prometheus: https://github.com/prometheus-operator/kube-prometheus#quickstart
+# They create the namespace and CustomResourceDefinitions first
+# to avoid race conditions when deploying the components.
+#
+# We could also do
+#```bash
+# kubectl apply --server-side --force-conflicts -f https://github.com/grafana/grafana-operator/releases/download/v5.15.1/crds.yaml
+#```
+# If this is not a CRD chart that we install and that the CRD charts exists
+install_crd_first(){
 
+  PACKAGE_CRDS_NAME="$CHART_NAME$CRD_SUFFIX"
+
+  if [ "$IS_CRD_CHART" == 1 ]; then
+    echo::debug "Package is a package Crds. No extra Crd installation needed"
+    return
+  fi
+
+  if [[ ! "$COMMAND" =~ "play"|"upgrade"|"install" ]]; then
+    echo::debug "Command ($COMMAND) is not an installation command, no crds installation"
+    return
+  fi
+
+  if ! PACKAGE_CRDS_DIRECTORY=$(get_chart_directory "$PACKAGE_CRDS_NAME"); then
+    echo::debug "No CRD Chart directory for package $CHART_NAME found with the name $PACKAGE_CRDS_NAME"
+    return
+  fi
+
+  echo::debug "Chart Crds $PACKAGE_CRDS_NAME found (Directory : $PACKAGE_CRDS_DIRECTORY)"
+  CHART_APP_VERSION=$(yq '.appVersion' "$CHART_DIRECTORY/Chart.yaml")
+  if is_helm_chart_installed "$PACKAGE_CRDS_NAME" "$CHART_NAMESPACE" "$CHART_APP_VERSION"; then
+    echo::debug "CRD Chart $PACKAGE_CRDS_NAME already installed in the namespace $CHART_NAMESPACE with the appVersion $CHART_APP_VERSION"
+    return
+  fi
+
+  # recursion
+  # We don't use helm directly as we have now CRD charts that are only with Jsonnet
+  echo::info "Installing CRD Chart $PACKAGE_CRDS_NAME in namespace $CHART_NAMESPACE"
+  command::echo_eval "$(basename "$0") play -n $CHART_NAMESPACE $PACKAGE_CRDS_NAME"
+
+}
 
 apply(){
 
@@ -102,8 +141,8 @@ apply(){
 
   # Package Name
   # Come first because we use it in the log
-  PACKAGE_NAME="${2:-}"
-  if [ "$PACKAGE_NAME" == "" ]; then
+  CHART_NAME="${2:-}"
+  if [ "$CHART_NAME" == "" ]; then
     echo::err "A package name is mandatory as second argument"
     return 1
   fi
@@ -117,19 +156,19 @@ apply(){
   case "$COMMAND" in
       "play")
         HELM_COMMAND+=( "upgrade" "--install" )
-        echo::info "Playing package $PACKAGE_NAME  (ie upgrade or install if not present)"
+        echo::info "Playing package $CHART_NAME  (ie upgrade or install if not present)"
         ;;
       "upgrade")
         HELM_COMMAND+=( "upgrade" )
-        echo::info "Upgrade package $PACKAGE_NAME"
+        echo::info "Upgrade package $CHART_NAME"
         ;;
       "install")
         HELM_COMMAND+=( "install" )
-        echo::info "Install package $PACKAGE_NAME"
+        echo::info "Install package $CHART_NAME"
         ;;
       "template")
         HELM_COMMAND+=( "template" )
-        echo::info "Templating package $PACKAGE_NAME "
+        echo::info "Templating package $CHART_NAME "
         ;;
       *)
         echo::err "The command $COMMAND is unknown"
@@ -156,70 +195,54 @@ apply(){
   fi
   HELM_COMMAND+=("-f" "${KUBE_X_VALUES_PATH}")
 
-  # Package
-  PACKAGE_DIRECTORY=$(get_chart_directory "$PACKAGE_NAME")
-  PACKAGE_NAMESPACE=${KUBE_X_NAMESPACE:-}
-  if [ "$PACKAGE_NAMESPACE" == "" ]; then
-    PACKAGE_YAML_KEY=$(echo "$PACKAGE_NAME" | tr "-" "_") # Go templating does not support `-`
+  # Chart Directory
+  if ! CHART_DIRECTORY=$(get_chart_directory "$CHART_NAME"); then
+    echo::err "No chart directory found with the name ($CHART_NAME) in"
+    echo::err "  * the cluster resources directory (${KUBE_X_RESOURCE_CHARTS_DIR}) " # the /resources/charts dir
+    echo::err "  * or the paths of the KUBE_X_CHARTS_PATH variable (${KUBE_X_CHARTS_PATH:-'not set'})"
+    exit 1
+  fi
+
+  # CRD
+  CRD_SUFFIX="-crds"
+  IS_CRD_CHART=0
+  # glob match
+  if [[ $CHART_NAME == *"$CRD_SUFFIX" ]]; then
+    IS_CRD_CHART=1
+  fi
+
+  # Package Namespace
+  CHART_NAMESPACE=${KUBE_X_NAMESPACE:-}
+  if [ "$CHART_NAMESPACE" == "" ]; then
+
+    # replace - by _ because Go templating does not support `-`
+    # delete the crds if this is a crds package
+    PACKAGE_YAML_KEY=$(echo "${CHART_NAME%"$CRD_SUFFIX"}" | tr "-" "_")
     VALUES_NAMESPACE_PATH=".kube_x.$PACKAGE_YAML_KEY.namespace"
-    PACKAGE_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$KUBE_X_VALUES_PATH")
-    if [ "$PACKAGE_NAMESPACE" == "null" ]; then
+    CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$KUBE_X_VALUES_PATH")
+    if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
       echo::info "No namespace found at $VALUES_NAMESPACE_PATH"
-      PACKAGE_NAMESPACE="$PACKAGE_NAME"
-      echo::info "Default namespace $PACKAGE_NAMESPACE used"
+      CHART_NAMESPACE="$CHART_NAME"
+      echo::info "Default namespace $CHART_NAMESPACE used"
     else
-      echo::info "Namespace ($PACKAGE_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
+      echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
     fi
   else
-    echo::info "Namespace specified ($PACKAGE_NAMESPACE) via command line flag"
+    echo::info "Namespace specified ($CHART_NAMESPACE) via command line flag"
   fi
 
   HELM_COMMAND+=(
-    "--namespace" "$PACKAGE_NAMESPACE"
+    "--namespace" "$CHART_NAMESPACE"
     "--create-namespace"
   )
 
 
-  # Crds first
-  # CRD first installation is becoming a standard
-  # Example with Prometheus: https://github.com/prometheus-operator/kube-prometheus#quickstart
-  # They create the namespace and CustomResourceDefinitions first
-  # to avoid race conditions when deploying the components.
-  #
-  # We could also do
-  #```bash
-  # kubectl apply --server-side --force-conflicts -f https://github.com/grafana/grafana-operator/releases/download/v5.15.1/crds.yaml
-  #```
-  PACKAGE_CRDS_NAME="$PACKAGE_NAME-crds"
-  if PACKAGE_CRDS_DIRECTORY=$(get_chart_directory "$PACKAGE_CRDS_NAME"); then
-    if [[ "$COMMAND" =~ "play"|"upgrade"|"install" ]]; then
-      echo::debug "Package Crds Directory: $PACKAGE_CRDS_DIRECTORY"
-
-      CHART_APP_VERSION=$(yq '.appVersion' "$PACKAGE_DIRECTORY/Chart.yaml")
-      if ! is_helm_chart_installed "$PACKAGE_CRDS_NAME" "$PACKAGE_NAMESPACE" "$CHART_APP_VERSION"; then
-
-        command::echo_eval "helm upgrade --install -n $PACKAGE_NAMESPACE ${HELM_EXTRA_FLAGS[*]} --create-namespace $PACKAGE_CRDS_NAME $PACKAGE_CRDS_DIRECTORY"
-
-        # Wait
-        echo::info "Waiting until all CRD are established in the namespace $PACKAGE_NAMESPACE"
-        kubectl wait \
-          --for condition=Established \
-          --all CustomResourceDefinition \
-          --namespace="$PACKAGE_NAMESPACE"
-
-      else
-        echo::info "CRD Chart $PACKAGE_CRDS_NAME already installed"
-      fi
-    else
-      echo::info "No CRD Chart installation during the command $COMMAND"
-    fi
-  else
-    echo::info "No CRD Chart directory for package $PACKAGE_NAME found with the name $PACKAGE_CRDS_NAME"
-  fi
+  # Install CRD first
+  install_crd_first
 
 
   # To update the kube-x helm
-  command::echo_eval "helm dependency update ${HELM_EXTRA_FLAGS[*]} $PACKAGE_DIRECTORY 1>&2"
+  command::echo_eval "helm dependency update ${HELM_EXTRA_FLAGS[*]} $CHART_DIRECTORY 1>&2"
   HELM_COMMAND+=( "--dependency-update" )
 
   # Options ???
@@ -230,9 +253,9 @@ apply(){
   # Post renderer
   HELM_COMMAND+=(
     "--post-renderer" "kube-x-helm-post-renderer"
-    "--post-renderer-args" "$PACKAGE_DIRECTORY"
+    "--post-renderer-args" "$CHART_DIRECTORY"
     "--post-renderer-args" "$KUBE_X_VALUES_PATH"
-    "--post-renderer-args" "$PACKAGE_NAMESPACE"
+    "--post-renderer-args" "$CHART_NAMESPACE"
     )
 
   # Debug
@@ -244,8 +267,8 @@ apply(){
   # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
   # See https://github.com/helm/helm/issues/7214
   # values.yaml file is taken by default
-  PACKAGE_RELEASE_NAME="$PACKAGE_NAME"
-  HELM_COMMAND+=("$PACKAGE_RELEASE_NAME" "$PACKAGE_DIRECTORY")
+  PACKAGE_RELEASE_NAME="$CHART_NAME"
+  HELM_COMMAND+=("$PACKAGE_RELEASE_NAME" "$CHART_DIRECTORY")
 
 
   # Working directory is the cluster directory
@@ -255,8 +278,16 @@ apply(){
   command::echo_eval "${HELM_COMMAND[*]}"
   popd 1>&2
 
-  # Wait?
+  # Can we Wait with that?
   # kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator
+  #
+  if [ "$IS_CRD_CHART" == 1 ]; then
+    echo::info "Waiting until all CRD are established in the namespace $CHART_NAMESPACE"
+    kubectl wait \
+      --for condition=Established \
+      --all CustomResourceDefinition \
+      --namespace="$CHART_NAMESPACE"
+  fi
 
 }
 
@@ -285,6 +316,8 @@ The cluster is determined in order of precedence by:
 EOF
 
 }
+
+
 
 # @description
 #     Print the kube-x values files used for Helm Installation and Jsonnet Configuration
@@ -344,6 +377,7 @@ print_values(){
   yq eval-all '. as $item ireduce ({}; . * $item )' "$SHM_DEFAULT_VALUES" "$SHM_VALUES"
 
 }
+
 
 
 ##########################
