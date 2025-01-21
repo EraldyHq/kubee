@@ -191,26 +191,30 @@ apply(){
   # kubectl apply --server-side --force-conflicts -f https://github.com/grafana/grafana-operator/releases/download/v5.15.1/crds.yaml
   #```
   PACKAGE_CRDS_NAME="$PACKAGE_NAME-crds"
-  if PACKAGE_CRDS_DIRECTORY=$(get_chart_directory "$PACKAGE_CRDS_NAME") && [[ "$COMMAND" =~ "play"|"upgrade"|"install" ]]; then
-    echo::debug "Package Crds Directory: $PACKAGE_CRDS_DIRECTORY"
+  if PACKAGE_CRDS_DIRECTORY=$(get_chart_directory "$PACKAGE_CRDS_NAME"); then
+    if [[ "$COMMAND" =~ "play"|"upgrade"|"install" ]]; then
+      echo::debug "Package Crds Directory: $PACKAGE_CRDS_DIRECTORY"
 
-    CHART_APP_VERSION=$(yq '.appVersion' "$PACKAGE_DIRECTORY/Chart.yaml")
-    if ! is_helm_chart_installed "$PACKAGE_CRDS_NAME" "$PACKAGE_NAMESPACE" "$CHART_APP_VERSION"; then
+      CHART_APP_VERSION=$(yq '.appVersion' "$PACKAGE_DIRECTORY/Chart.yaml")
+      if ! is_helm_chart_installed "$PACKAGE_CRDS_NAME" "$PACKAGE_NAMESPACE" "$CHART_APP_VERSION"; then
 
-      command::echo_eval "helm upgrade --install -n $PACKAGE_NAMESPACE ${HELM_EXTRA_FLAGS[*]} --create-namespace $PACKAGE_CRDS_NAME $PACKAGE_CRDS_DIRECTORY"
+        command::echo_eval "helm upgrade --install -n $PACKAGE_NAMESPACE ${HELM_EXTRA_FLAGS[*]} --create-namespace $PACKAGE_CRDS_NAME $PACKAGE_CRDS_DIRECTORY"
 
-      # Wait
-      echo::info "Waiting until all CRD are established in the namespace $PACKAGE_NAMESPACE"
-      kubectl wait \
-      	--for condition=Established \
-      	--all CustomResourceDefinition \
-      	--namespace="$PACKAGE_NAMESPACE"
+        # Wait
+        echo::info "Waiting until all CRD are established in the namespace $PACKAGE_NAMESPACE"
+        kubectl wait \
+          --for condition=Established \
+          --all CustomResourceDefinition \
+          --namespace="$PACKAGE_NAMESPACE"
 
+      else
+        echo::info "CRD Chart $PACKAGE_CRDS_NAME already installed"
+      fi
     else
-      echo::info "CRD Chart $PACKAGE_CRDS_NAME already installed"
+      echo::info "No CRD Chart installation during the command $COMMAND"
     fi
   else
-    echo::info "No CRD Chart for package $PACKAGE_NAME found"
+    echo::info "No CRD Chart directory for package $PACKAGE_NAME found with the name $PACKAGE_CRDS_NAME"
   fi
 
 
