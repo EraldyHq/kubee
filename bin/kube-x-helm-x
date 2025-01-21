@@ -413,7 +413,7 @@ fi
 shift  # Remove the first argument from the argument list
 
 case "$COMMAND" in
-  "install"|"template"|"upgrade")
+  "install"|"template"|"upgrade"|"play")
      apply "$COMMAND" "$@" || error::exit $?
     ;;
   "synopsis")

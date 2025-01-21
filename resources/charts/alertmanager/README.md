@@ -14,9 +14,17 @@ It can:
 ## Install
 
 ```bash
-helx --cluster clusterName alertmanager
+kube-x-helm-x --cluster clusterName alertmanager
 ```
 
+## Inspect
+
+The output of this chart can be inspected with:
+```bash
+# set debug (to not delete the created manifests in the jsonnet/out directory)
+export BASHLIB_ECHO_LEVEL=4
+kube-x-helm-x -n prometheus template alertmanager > /tmp/all.yaml
+```
 
 ## Chart Features
 

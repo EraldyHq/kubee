@@ -34,14 +34,76 @@ local kxDefaults = {
   grafana_cloud_enabled: error 'grafana_cloud_enabled value property should be provided',
   grafana_cloud_password: error 'grafana_cloud_password value property should be provided',
   grafana_cloud_username: error 'grafana_cloud_username value property should be provided',
+  grafana_cloudrelabel_keep_regex: error 'grafana_cloudrelabel_keep_regex value property should be provided',
   new_relic_enabled: error 'new_relic_enabled value property should be provided',
   new_relic_bearer: error 'new_relic_bearer value property should be provided',
+  new_relic_relabel_keep_regex: error 'new_relic_relabel_keep_regex value property should be provided',
+  new_relic_keep_regex: error 'new_relic_keep_regex value property should be provided',
 };
 
+
 // Return the secret
-local grafanaCloudSecret = function(kxConfig, p)
+local newRelicCloudSecret = function(bearer, secretType, externalStoreName, p)
   (
-    if kxConfig.secret_type == 'ExternalSecret' then
+    if secretType == 'ExternalSecret' then
+      {
+        apiVersion: 'external-secrets.io/v1beta1',
+        kind: 'ExternalSecret',
+        metadata: p._metadata {
+          name: kxNaming.newRelicSecretName,
+        },
+        spec: {
+          // The store from where
+          secretStoreRef: {
+            name: externalStoreName,
+            kind: 'ClusterSecretStore',
+          },
+          // The target define the secret created
+          // and may be pre-processed via template
+          target: {
+            name: kxNaming.newRelicSecretName,  // Secret name in Kubernetes
+            template: {
+              metadata: {
+                annotations: {
+                  description: 'The Remote Write Credentials for Prometheus',
+                },
+              },
+            },
+          },
+          // Mapping to local secret from remote secret
+          data: [
+            {
+              secretKey: kxNaming.newRelicSecretBearerKey,  // Prop Name in the secret
+              remoteRef: {
+                key: kxNaming.newRelicSecretName,  // Name of the remote secret
+                property: kxNaming.newRelicSecretBearerKey,  // Prop Name in the remote secret
+              },
+            },
+          ],
+        },
+      }
+    else
+      {
+        apiVersion: 'v1',
+        kind: 'Secret',
+        metadata: p._metadata {
+          name: kxNaming.newRelicSecretName,
+        },
+        /*
+         The values for all keys in the data field have to be base64-encoded strings.
+         If the conversion to base64 string is not desirable, you can choose to specify the stringData field instead,
+         which accepts arbitrary strings as values.
+        */
+        data: {
+          [kxNaming.newRelicSecretBearerKey]: std.base64(bearer),
+        },
+      }
+  );
+
+// Return the secret
+local grafanaCloudSecret = function(username, password, secretType, externalStoreName, p)
+  (
+    if secretType == 'ExternalSecret' then
       {
         apiVersion: 'external-secrets.io/v1beta1',
         kind: 'ExternalSecret',
@@ -51,7 +113,7 @@ local grafanaCloudSecret = function(kxConfig, p)
         spec: {
           // The store from where
           secretStoreRef: {
-            name: kxConfig.external_secret_store_name,
+            name: externalStoreName,
             kind: 'ClusterSecretStore',
           },
           // The target define the secret created
@@ -98,8 +160,8 @@ local grafanaCloudSecret = function(kxConfig, p)
          which accepts arbitrary strings as values.
         */
         data: {
-          [kxNaming.grafanaCloudSecretUserNameKey]: std.base64(kxConfig.grafana_cloud_prometheus_username),
-          [kxNaming.grafanaCloudSecretPasswordKey]: std.base64(kxConfig.grafana_cloud_prometheus_password),
+          [kxNaming.grafanaCloudSecretUserNameKey]: std.base64(username),
+          [kxNaming.grafanaCloudSecretPasswordKey]: std.base64(password),
         },
 
       }
@@ -112,7 +174,6 @@ function(kpValues, kxValues)
 
   assert std.member(secretTypeDomain, kxConfig.secret_type) : "Value '" + kxConfig.secret_type + "' must be one of " + std.toString(secretTypeDomain);
 
-  local prometheus = (import '../vendor/github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator/prometheus.libsonnet')(kpValues);
   (import '../kube-prometheus/components/prometheus.libsonnet')(kpValues) {
     local p = self,
     // delete, roleBindingSpecificNamespaces
@@ -262,26 +323,31 @@ function(kpValues, kxValues)
                             key: kxNaming.grafanaCloudSecretPasswordKey,
                           },
                         },
+                        [if kxConfig.grafana_cloudrelabel_keep_regex != '' then 'writeRelabelConfigs']: [
+                          // Doc: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
+                          // Example: https://docs.newrelic.com/docs/infrastructure/prometheus-integrations/install-configure-remote-write/set-your-prometheus-remote-write-integration/#allow-deny
+                          {
+                            sourceLabels: ['__name__'],
+                            regex: kxConfig.grafana_cloudrelabel_keep_regex,
+                            action: 'keep',
+                          },
+                        ],
                       }] else []) +
                      (if kxConfig.new_relic_enabled then [{
                         // Doc: https://docs.newrelic.com/docs/infrastructure/prometheus-integrations/install-configure-remote-write/set-your-prometheus-remote-write-integration/#optional-prometheus-operator-configuration
                         // Make sure the API key is of the type `Ingest - License`
                         url: 'https://metric-api.newrelic.com/prometheus/v1/write?prometheus_server=' + kxConfig.cluster_name,
-                        /*
-                          # spec: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#authorization
-                        writeRelabelConfigs:
-                          # Send only the phpfpm_* metrics
-                          # Doc: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
-                          # Example: https://docs.newrelic.com/docs/infrastructure/prometheus-integrations/install-configure-remote-write/set-your-prometheus-remote-write-integration/#allow-deny
-                          - sourceLabels: [ __name__ ]
-                            regex: "(phpfpm|argocd|node|traefik)_(.*)"
-                            action: keep
-                          - sourceLabels: [ __name__ ]
-                            regex: ^my_counter$
-                            targetLabel: newrelic_metric_type
-                            replacement: "counter"
-                            action: replace
-                         */
+
+                        // spec: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#authorization
+                        [if kxConfig.new_relic_relabel_keep_regex != '' then 'writeRelabelConfigs']: [
+                          // Doc: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
+                          // Example: https://docs.newrelic.com/docs/infrastructure/prometheus-integrations/install-configure-remote-write/set-your-prometheus-remote-write-integration/#allow-deny
+                          {
+                            sourceLabels: ['__name__'],
+                            regex: kxConfig.new_relic_relabel_keep_regex,
+                            action: 'keep',
+                          },
+                        ],
                         authorization: {
                           credentials: {
                             // The key of the secret to select from
@@ -292,21 +358,18 @@ function(kpValues, kxValues)
                         },
                       }] else []),
       },
-      [if kxConfig.grafana_cloud_enabled then 'grafanaCloudSecret']: grafanaCloudSecret(kxConfig, p),
-      [if kxConfig.new_relic_enabled then 'newRelicSecret']: {
-        apiVersion: 'v1',
-        kind: 'Secret',
-        metadata: p._metadata {
-          name: kxNaming.newRelicSecretName,
-        },
-        /*
-         The values for all keys in the data field have to be base64-encoded strings.
-         If the conversion to base64 string is not desirable, you can choose to specify the stringData field instead,
-         which accepts arbitrary strings as values.
-        */
-        data: {
-          [kxNaming.newRelicSecretBearerKey]: std.base64(kxConfig.new_relic_bearer),
-        },
-      },
+      [if kxConfig.grafana_cloud_enabled then 'grafanaCloudSecret']: grafanaCloudSecret(
+        kxConfig.grafana_cloud_username,
+        kxConfig.grafana_cloud_password,
+        kxConfig.secret_type,
+        kxConfig.external_secret_store_name,
+        p
+      ),
+      [if kxConfig.new_relic_enabled then 'newRelicSecret']: newRelicCloudSecret(
+        kxConfig.new_relic_bearer,
+        kxConfig.secret_type,
+        kxConfig.external_secret_store_name,
+        p
+      ),
     },
   }

@@ -13,7 +13,7 @@ This chart is automatically installed when the [prometheus chart](../prometheus)
 You can also install it individually with:
 
 ```bash
-kube-x-helm-x -n prometheus install prometheus-crds
+kube-x-helm-x -n prometheus play prometheus-crds
 ```
 
 ## Inspect

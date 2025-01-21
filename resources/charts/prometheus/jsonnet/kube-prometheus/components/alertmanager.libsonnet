@@ -85,7 +85,7 @@ function(params) {
     labels: am._config.commonLabels,
   },
 
-  mixin:: (import 'github.com/prometheus/alertmanager/doc/alertmanager-mixin/mixin.libsonnet') +
+  mixin:: //(import 'github.com/prometheus/alertmanager/doc/alertmanager-mixin/mixin.libsonnet') +
           (import 'github.com/kubernetes-monitoring/kubernetes-mixin/lib/add-runbook-links.libsonnet') {
             _config+:: am._config.mixin._config,
           },

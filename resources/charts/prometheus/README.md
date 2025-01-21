@@ -1,4 +1,4 @@
-# Prometheus Operator
+# Prometheus
 
 ## About
 
@@ -7,7 +7,21 @@ This `Kube-x` chart installs and configures:
 * install a prometheus server
 
 ## How to
+### Install
 
+```bash
+kube-x-helm-x --cluster clusterName play prometheus
+```
+
+
+### Inspect
+
+The output of this chart can be inspected with:
+```bash
+# set debug (to not delete the created manifests in the jsonnet/out directory)
+export BASHLIB_ECHO_LEVEL=4
+kube-x-helm-x -n prometheus template prometheus > /tmp/all.yaml
+```
 
 ### Get Access
 

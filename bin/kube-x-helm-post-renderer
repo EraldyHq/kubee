@@ -69,6 +69,70 @@ create_empty_templates_with_empty_files(){
 
 }
 
+# Start Kustomize processing
+kustomize_processing(){
+
+    echo::info "Kustomization processing (File: $KUSTOMIZATION_FILE)"
+
+    # The root run dir is fix so that the content is deleted at every run
+    # To be able to debug, the content is not deleted on error only
+    KUSTOMIZE_ROOT_TEMP_DIR="$(dirname "$(mktemp -u)")/kube-x"
+    rm -rf "$KUSTOMIZE_ROOT_TEMP_DIR"
+
+    # Package Run/Temp Dir
+    # The name of the directory is not random
+    # It follows the usage of the output command `helm template --output-dir=$KUSTOMIZE_ROOT_TEMP_DIR`
+    # The templates are then stored at $KUSTOMIZE_ROOT_TEMP_DIR/CHART_NAME/templates/...yml
+    CHART_NAME=$(yq '.name' "$KUBE_X_CHART_DIRECTORY/Chart.yaml")
+    KUSTOMIZE_PACKAGE_TEMP_DIR="$KUSTOMIZE_ROOT_TEMP_DIR/$CHART_NAME"
+    mkdir -p "$KUSTOMIZE_PACKAGE_TEMP_DIR"
+
+    # Output of Kustomization
+    export KUBE_X_NAMESPACE
+    # Variable Substitution: Check the variables
+    if ! UNDEFINED_VARS=$(template::check_vars -f "$KUSTOMIZATION_FILE"); then
+         # Should exit because of the strict mode
+         # but it was not working
+         echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUSTOMIZATION_FILE"
+         exit 1
+    fi
+    envsubst < "$KUSTOMIZATION_FILE" >| "${KUSTOMIZE_PACKAGE_TEMP_DIR}/kustomization.yml"
+
+    # Output templates
+    # helm template --output-dir /tmp
+    # will output all templates one by one at: $KUSTOMIZE_ROOT_TEMP_DIR/chart-name/templates/argocd-service-monitor-metrics.yml
+    command::echo_eval "helm template --output-dir $KUSTOMIZE_ROOT_TEMP_DIR -f $KUBE_X_VALUES_FILE $KUBE_X_CHART_DIRECTORY"
+
+    # Sync
+    echo::info "Create empty template files"
+    create_empty_templates_with_empty_files "$KUBE_X_CHART_DIRECTORY/templates" "$KUSTOMIZE_PACKAGE_TEMP_DIR/templates"
+
+    # The argument must be:
+    # * a file system path
+    # * or git repository path (git URL with path)
+    # containing 'kustomization.yaml'
+    # equivalent to: kustomize build .
+    # https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/helmcharts/
+    # https://github.com/mgoltzsche/khelm
+    # Flag --reorder has been deprecated, use the new 'sortOptions' field in kustomization.yaml instead.
+    if ! KUSTOMIZE_MANIFEST=$(cd "$KUSTOMIZE_PACKAGE_TEMP_DIR" && kubectl kustomize --reorder=none .); then
+      echo::err "An error occurred during the kustomization"
+      echo::err "The command 'kubectl kustomize .' failed with the $KUSTOMIZE_PACKAGE_TEMP_DIR working directory"
+      return 1
+    fi
+
+    # we delete the directory only on success
+    # most errors comes from the generation,
+    if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
+      rm -rf "$KUSTOMIZE_PACKAGE_TEMP_DIR"
+    else
+      echo::info "The command 'kubectl kustomize .' was executed with the $KUSTOMIZE_PACKAGE_TEMP_DIR working directory"
+    fi
+
+    echo "$KUSTOMIZE_MANIFEST"
+
+}
+
 jsonnet_processing(){
 
   JSONNET_DIR="jsonnet"
@@ -153,8 +217,9 @@ jsonnet_processing(){
             # transform the file to yaml
             POST_PROCESSING="$POST_PROCESSING(cat {} | $GOJSONTOYAML > {}.yaml) && "
           fi
-          # Output yaml to stdout with yq
-          POST_PROCESSING="$POST_PROCESSING(cat {} | yq eval -P - -- {})"
+          # Transform Json to yaml and output to stdout with yq
+          # -P means pretty print and - refers to stdin
+          POST_PROCESSING="$POST_PROCESSING(cat {} | yq eval -P - && echo '---')"
           # Delete the json file it yaml file were created
           if command::exists "$GOJSONTOYAML"; then
             POST_PROCESSING="$POST_PROCESSING && rm {}"
@@ -290,69 +355,14 @@ fi
 # Example:
 # https://github.com/thomastaylor312/advanced-helm-demos/tree/master/post-render
 if [ "$KUSTOMIZATION_MODE" -eq 1 ]; then
-  echo::info "Kustomization processing (File: $KUSTOMIZATION_FILE)"
-
-  # The root run dir is fix so that the content is deleted at every run
-  # To be able to debug, the content is not deleted on error
-  KUSTOMIZE_ROOT_TEMP_DIR="$(dirname "$(mktemp -u)")/kube-x"
-  rm -rf "$KUSTOMIZE_ROOT_TEMP_DIR"
-
-  # Package Run/Temp Dir
-  # The name of the directory is not random
-  # It follows the usage of the output command `helm template --output-dir=$KUSTOMIZE_ROOT_TEMP_DIR`
-  # The templates are then stored at $KUSTOMIZE_ROOT_TEMP_DIR/CHART_NAME/templates/...yml
-  CHART_NAME=$(yq '.name' "$KUBE_X_CHART_DIRECTORY/Chart.yaml")
-  KUSTOMIZE_PACKAGE_TEMP_DIR="$KUSTOMIZE_ROOT_TEMP_DIR/$CHART_NAME"
-  mkdir -p "$KUSTOMIZE_PACKAGE_TEMP_DIR"
-
-  # Output of Kustomization
-  export KUBE_X_NAMESPACE
-  # Variable Substitution: Check the variables
-  if ! UNDEFINED_VARS=$(template::check_vars -f "$KUSTOMIZATION_FILE"); then
-       # Should exit because of the strict mode
-       # but it was not working
-       echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUSTOMIZATION_FILE"
-       exit 1
-  fi
-  envsubst < "$KUSTOMIZATION_FILE" >| "${KUSTOMIZE_PACKAGE_TEMP_DIR}/kustomization.yml"
-
-  # Output templates
-  # helm template --output-dir /tmp
-  # will output all templates one by one at: $KUSTOMIZE_ROOT_TEMP_DIR/chart-name/templates/argocd-service-monitor-metrics.yml
-  command::echo_eval "helm template --output-dir $KUSTOMIZE_ROOT_TEMP_DIR -f $KUBE_X_VALUES_FILE $KUBE_X_CHART_DIRECTORY"
-
-  # Sync
-  echo::info "Create empty template files"
-  create_empty_templates_with_empty_files "$KUBE_X_CHART_DIRECTORY/templates" "$KUSTOMIZE_PACKAGE_TEMP_DIR/templates"
-
-  # The argument must be:
-  # * a file system path
-  # * or git repository path (git URL with path)
-  # containing 'kustomization.yaml'
-  # equivalent to: kustomize build .
-  # https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/helmcharts/
-  # https://github.com/mgoltzsche/khelm
-  # Flag --reorder has been deprecated, use the new 'sortOptions' field in kustomization.yaml instead.
-  if KUSTOMIZE_MANIFEST=$(cd "$KUSTOMIZE_PACKAGE_TEMP_DIR" && kubectl kustomize --reorder=none .); then
-    # we delete the directory only on success
-    # most errors comes from the generation,
-    if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
-      rm -rf "$KUSTOMIZE_PACKAGE_TEMP_DIR"
-    else
-      echo::info "The command 'kubectl kustomize .' was executed with the $KUSTOMIZE_PACKAGE_TEMP_DIR working directory"
-    fi
-    # Add the kustomize manifest to the Jsonnet manifest if any
-    HELM_MANIFEST=$(cat <<EOF
+  KUSTOMIZE_MANIFEST=$(kustomize_processing)
+  # Add the kustomize manifest
+  HELM_MANIFEST=$(cat <<EOF
 $HELM_MANIFEST
 ---
 $KUSTOMIZE_MANIFEST
 EOF
-)
-  else
-    echo::err "An error occurred during the kustomization"
-    echo::err "The command 'kubectl kustomize .' failed with the $KUSTOMIZE_PACKAGE_TEMP_DIR working directory"
-    exit 1
-  fi
+  )
 fi
 
 # Output

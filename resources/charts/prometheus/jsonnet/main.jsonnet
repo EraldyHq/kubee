@@ -25,9 +25,11 @@ local kxValues = {
   grafana_cloud_enabled: validation.notNullOrEmpty(kxExtValues, 'kube_x.prometheus.grafana_cloud.enabled'),
   grafana_cloud_prometheus_username: validation.notNullOrEmpty(kxExtValues, 'kube_x.prometheus.grafana_cloud.username'),
   grafana_cloud_prometheus_password: validation.notNullOrEmpty(kxExtValues, 'kube_x.prometheus.grafana_cloud.password'),
+  grafana_cloud_relabel_keep_regexp: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.prometheus.grafana_cloud.relabel_keep_regex'),
   // New Relic
   new_relic_enabled: validation.notNullOrEmpty(kxExtValues, 'kube_x.prometheus.new_relic.enabled'),
   new_relic_bearer: validation.notNullOrEmpty(kxExtValues, 'kube_x.prometheus.new_relic.bearer'),
+  new_relic_relabel_keep_regexp: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.prometheus.new_relic.relabel_keep_regex'),
   // Cert Manager
   cert_manager_enabled: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.cert_manager.enabled'),
   cert_manager_issuer_name: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.cert_manager.defaultIssuerName'),
@@ -37,7 +39,7 @@ local kxValues = {
 local kp =
   (import 'kube-prometheus/main.libsonnet') +
   {
-    kxValues+:: {
+    values+:: {
       common+: {
         namespace: kxValues.prometheus_namespace,
         versions+: {
@@ -73,7 +75,7 @@ local customPrometheus = (import './kube_x/prometheus.libsonnet')(kp.values.prom
   ['prometheus-operator-' + name]: prometheusOperator[name]
   // CRD are in the prometheus-crd charts
   for name in std.filter((function(name) prometheusOperator[name].kind != 'CustomResourceDefinition'), std.objectFields(prometheusOperator))
-}
-{ 'kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule }
-{ ['kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) }
+} +
+{ 'kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule } +
+{ ['kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) } +
 { ['prometheus-prometheus-' + name]: customPrometheus[name] for name in std.objectFields(customPrometheus) }

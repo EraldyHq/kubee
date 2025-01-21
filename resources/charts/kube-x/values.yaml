@@ -114,13 +114,29 @@ prometheus:
   # grafana cloud remote write prometheus integration
   grafana_cloud:
     enabled: false
+    # The username
     username: ''
+    # The password
     password: ''
+    # The regexp used to filter the metrics name (ie if the regexp matches, the metrics are passed keep to new relic)
+    # Example:
+    # `phpfpm_*` would send only the metrics starting with phpfpm
+    # `(phpfpm|argocd|node|traefik)_(.*)` would send the metrics starting with phpfpm, argocd, node and traefik
+    # Doc: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
+    # By default, no filtering is applied
+    relabel_keep_regex: ''
   # new relic remote write prometheus integration
   new_relic:
     enabled: false
     # for remote write
     bearer: ''
+    # The regexp used to filter the metrics name (ie if the regexp matches, the metrics are passed keep to new relic)
+    # Example:
+    # `phpfpm_*` would send only the metrics starting with phpfpm
+    # `(phpfpm|argocd|node|traefik)_(.*)` would send the metrics starting with phpfpm, argocd, node and traefik
+    # Doc: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
+    # By default, no filtering is applied
+    relabel_keep_regex: ''
   # Prometheus Operator
   operator:
     # CPU/Memory
