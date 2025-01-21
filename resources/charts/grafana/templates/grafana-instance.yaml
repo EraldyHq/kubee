@@ -5,14 +5,14 @@
 apiVersion: grafana.integreatly.org/v1beta1
 kind: Grafana
 metadata:
-  name: {{ .Values.kube_x.grafana.instance.label }}
+  name: {{ .Values.kube_x.grafana.label }}
   namespace: '{{.Release.Namespace}}'
   labels:
     {{/*
       Label used to apply Grafana CRD to this instance (ie which Grafana instance a CRD dashboard, ... resource applies to)
       https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
     */}}
-    dashboards: {{ required "kube_x.grafana.instance.label is required" .Values.kube_x.grafana.instance.label }}
+    dashboards: {{ required "kube_x.grafana.label is required" .Values.kube_x.grafana.label }}
 spec:
 {{/*
 Create a external instance (cloud)
@@ -22,15 +22,15 @@ Grafana Cloud: https://grafana.com/docs/grafana-cloud/developer-resources/infras
 
 Test:
   helm template -s templates/grafana-instance.yaml \
-    --set 'kube_x.grafana.instance.type=external'  \
-    --set 'kube_x.grafana.instance.apiToken=xxxx'  \
-    --set 'kube_x.grafana.instance.hostname=stackName.grafana.net'  \
+    --set 'kube_x.grafana.type=external'  \
+    --set 'kube_x.grafana.apiToken=xxxx'  \
+    --set 'kube_x.grafana.hostname=stackName.grafana.net'  \
     . | yq
 
 */}}
-{{- if eq ( required ".Values.kube_x.grafana.instance.type is required" .Values.kube_x.grafana.instance.type) "external" -}}
+{{- if eq ( required ".Values.kube_x.grafana.type is required" .Values.kube_x.grafana.type) "external" -}}
   external:
-    url: https://{{ .Values.kube_x.grafana.instance.hostname }}/
+    url: https://{{ .Values.kube_x.grafana.hostname }}/
     apiKey:
       name: '{{ template "grafana-instance-api-token-secret-name" . }}'
       key: '{{ template "grafana-instance-api-token-secret-key" . }}'
@@ -40,8 +40,8 @@ Test:
 
   Test:
   helm template -s templates/grafana-instance.yaml \
-    --set 'kube_x.grafana.instance.type=internal'  \
-    --set 'kube_x.grafana.instance.hostname=grafana.bar.com'  \
+    --set 'kube_x.grafana.type=internal'  \
+    --set 'kube_x.grafana.hostname=grafana.bar.com'  \
     --set 'kube_x.cluster.adminUser.username=xxxx'  \
     --set 'kube_x.cluster.adminUser.password=xxxx'  \
     --set 'kube_x.cluster.adminUser.email=xxxx'  \
@@ -54,7 +54,7 @@ Test:
     Nonte: it seems that they use the Helm Chart ???
     https://github.com/grafana/helm-charts/blob/main/charts/grafana/templates/ingress.yaml
    */}}
-  {{- if ne ( ((.Values.kube_x).grafana).instance.hostname) "" }}
+  {{- if ne ( ((.Values.kube_x).grafana).hostname) "" }}
   ingress:
     metadata:
       annotations:
@@ -66,12 +66,12 @@ Test:
     spec:
       ingressClassName: traefik
       rules:
-        - host: '{{ .Values.kube_x.grafana.instance.hostname }}'
+        - host: '{{ .Values.kube_x.grafana.hostname }}'
           http:
             paths:
               - backend:
                   service:
-                    name: '{{ .Values.kube_x.grafana.instance.label }}-service'
+                    name: '{{ .Values.kube_x.grafana.label }}-service'
                     port:
                       number: 3000
                 path: /
@@ -79,7 +79,7 @@ Test:
       {{- if ne (((.Values.kube_x).cert_manager).enabled) false }}
       tls:
         - hosts:
-            - '{{ .Values.kube_x.grafana.instance.hostname }}'
+            - '{{ .Values.kube_x.grafana.hostname }}'
           secretName: '{{ include "grafana-name" . }}'
       {{- end }}
   {{- end -}}
