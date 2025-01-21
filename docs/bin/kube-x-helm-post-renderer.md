@@ -104,7 +104,7 @@ local namespace = validation.notNullOrEmpty(extValues,'kube_x.alertmanager.names
 }
 ```
 
-Ide Plugins, as of 2025-01-20, choose your winner.
+Ide Plugins, as of 2025-01-20, choose your winner:
 * The [Idea Databricks Jsonnet Plugin](https://plugins.jetbrains.com/plugin/10852-jsonnet) is:
   * heavy used by Databricks
   * can navigate the code. `import` 
@@ -113,12 +113,20 @@ Ide Plugins, as of 2025-01-20, choose your winner.
   * does not support formatting the whole document
   * does not support variable renaming
   * no outline (structure)
+  * supports object heritage structure when the parsing has no errors (ie if the object `config` defined as `config = defaults + values`, you will get to the `defaults` property structure in navigation and intellisense)
+  * `Find usage (F7)` is not working
 * The Grafana Json Server in [Vs Code](https://github.com/grafana/vscode-jsonnet) or [Intellij](https://plugins.jetbrains.com/plugin/18752-jsonnet-language-server)
   * navigation works only if the document has no errors 
   * supports `jpath` (ie `import namespace/name` can be navigated)
   * supports formatting the whole document
-  * supports variables renaming but not based on AST symbol (meaning that it's just a search and replace of a word by name and you may ends up renaming just text, not symbol if the name is common such as values)
+  * supports variables renaming but not based on AST symbol (meaning that it's just a search and replace of a word by name, and you may ends up renaming just text, not symbol if the name is common such as values)
   * no outline (structure)
+  * does not support object heritage structure (ie the object `config` defined as `config = defaults +values` will not get any intellisense on the `defaults` property)
+  * `Find All References` is not working
+
+What we do:
+* in Databricks Intellij plugin, we develop
+* in Grafana VsCode plugin, we format the whole file, we navigate `import` statement that uses `Jpath`.
 
 # KUSTOMIZATION
 

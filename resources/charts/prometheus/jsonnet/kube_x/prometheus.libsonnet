@@ -16,18 +16,26 @@ local kxNaming = {
   newRelicSecretBearerKey: 'bearer',
 };
 
-// Defaults
+// Defaults are just here to give structure
+// They should be all provided to be sure that there is no path problem
 local kxDefaults = {
+  cluster_name: error 'cluster_name should be provided (no empty string)',
   prometheus_hostname: error 'prometheus hostname should be provided (empty string at minima)',
   prometheus_memory: error 'prometheus memory should be provided (50Mi for instance)',
   cert_manager_enabled: error 'Cert manager enabled should be provided (false or true)',
   cert_manager_issuer_name: error 'Cert manager issuer name should be provided',  // Accessed and triggered when cert manager is enabled
+  grafana_cloud_enabled: error 'grafana_cloud_enabled value property should be provided',
+  grafana_cloud_password: error 'grafana_cloud_password value property should be provided',
+  grafana_cloud_username: error 'grafana_cloud_username value property should be provided',
+  new_relic_enabled: error 'new_relic_enabled value property should be provided',
+  new_relic_bearer: error 'new_relic_bearer value property should be provided',
 };
 
 // kpValues = values for kubernetes-prometheus
 // kxValues = values for kube-x
 function(kpValues, kxValues)
   local kxConfig = kxDefaults + kxValues;
+
   local prometheus = (import '../vendor/github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator/prometheus.libsonnet')(kpValues);
   (import '../kube-prometheus/components/prometheus.libsonnet')(kpValues) {
     local p = self,
