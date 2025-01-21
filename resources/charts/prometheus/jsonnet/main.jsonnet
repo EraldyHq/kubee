@@ -10,6 +10,8 @@ local kxExtValues = std.extVar('values');
 local kxValues = {
 
   cluster_name: validation.notNullOrEmpty(kxExtValues, 'kube_x.cluster.name'),
+  secret_type: validation.notNullOrEmpty(kxExtValues, 'kube_x.cluster.secret'),
+  external_secret_store_name: validation.notNullOrEmpty(kxExtValues, 'kube_x.external_secrets.store.name'),
   prometheus_namespace: validation.notNullOrEmpty(kxExtValues, 'kube_x.prometheus.namespace'),
   prometheus_hostname: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.prometheus.hostname'),
   prometheus_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.prometheus.resources.memory'),

@@ -10,17 +10,25 @@ cluster:
   #  * added in basicAuth
   adminUser:
     username: 'admin'
+    # The password
     password: ''
     # Kubernetes clusterRole
     # * `cluster-admin` has full access
     # * `admin` does not have access to node and cluster scope related object such as ClusterRoleBinding
     clusterRole: 'cluster-admin'
     # The email
-    # Used by default for instance for letsencrypt and as `from email`
+    # It's used by default in apps. For instance:
+    # * letsencrypt registration email
+    # * alert notifications: prometheus, argocd
     email: ''
-  # Authentication of internal infra ingress (ie internal website such as Traefik Dashboard, ...)
-  auth: basicAuth
-  # Secret kind created
+  # Ingress Authentication of infra web app (such as Traefik Dashboard, Prometheus, Alert Manager, ...)
+  # The app or api are still available from an internal container
+  auth: 'basicAuth'
+  # The kind of Secret manifest created
+  # Valid values are:
+  # `Secret`: A Kubernetes Secret manifest is created, the values are passed in the values.yaml with environment variables substitution
+  # `ExternalSecret`: A ExternalSecret Manifest is created that retrieves the value in a store (External Secret should be installed).
+  #                   Used for GitOps pulling such as in ArgoCd where the git repository is pulled and applied.
   secret: 'Secret'
   # Private Network ranges
   # used for Ingress Ip restrictions (Traefik IpAllowList)
@@ -42,7 +50,7 @@ cluster:
       username: ''
       # the auth connection password
       password: ''
-      # hello (used to present itself, normally email domain)
+      # hello (used to present itself, normally the email apex domain name)
       hello: ''
 
   
@@ -58,7 +66,8 @@ traefik:
   # Not a string, a boolean so no quote
   enabled: true
   # Instance/Release Name
-  namespace: traefik
+  # the kube-system namespace tells kubernetes that this app has a higher priority
+  namespace: 'kube-system'
   # Middleware
   # https://doc.traefik.io/traefik/middlewares
   middleware:
@@ -68,7 +77,10 @@ traefik:
     basicAuth:
       # List of extra users
       users:
-      # user1: password1
+      # Example:
+      # users:
+      #   user1: password1
+      #   user2: password2
   # Set the default certificate as default traefik cert
   # Mandatory for kubernetes-dashboard on a local development
   # The rootCA should be added to the OS/Browser as trusted root CA
@@ -117,12 +129,12 @@ prometheus:
       memory: '50Mi'
 
 
-# alert manager to send alerts to email or external services
+# Prometheus Alert manager that receives alert from Prometheus and manage them (silence, group, send alerts to email or external services)
 alertmanager:
   # Enable or disable alert manager
   # Not a string, a boolean so no quote
   enabled: false
-  # The installation namespace
+  # The installation namespace (should be the same as prometheus)
   namespace: 'prometheus'
   # hostname (install an ingress if not empty)
   hostname: ''
@@ -130,26 +142,30 @@ alertmanager:
   # Enabled if the api key is not empty
   opsgenie:
     apiKey: ''
+  # Memory
   resources:
     memory: '50Mi'
 
 
-# node_exporter to gather server metrics, install dashboard and alerts
+# Prometheus node exporter to gather server metrics, install dashboard and alerts
+# for node (ie OS, ie VPS)
 node_exporter:
   # Not a string, a boolean so no quote
   enabled: false
   # The installation namespace
   namespace: 'prometheus' # prometheus component
 
-# Pushgateway to push metrics from a job
+# Prometheus Pushgateway to send metrics to Prometheus from a job
 pushgateway:
+  # Not a string, a boolean so no quote
   enabled: false
   # hostname (install an ingress if not empty)
   hostname: ''
   # The installation namespace
   namespace: 'prometheus' # prometheus component
 
-# Blackbox exporter to do synthetic probe monitoring (http,dns,...)
+# A prometheus exporter - Blackbox to do synthetic probe monitoring (ie verify the status of http,dns,... query)
+# Probe definition can be done via the Probes Manifest of prometheus operator
 blackbox_exporter:
   # Not a string, a boolean so no quote
   enabled: false
@@ -163,14 +179,12 @@ prometheus_adapter:
   # The installation namespace
   namespace: 'prometheus' # prometheus component
 
-# The cert manager kube-x env
+# The cert manager with monitoring (alert and dashboard)
 cert_manager:
-  # Not enabled by default
-  # This is the kube-x template condition used to create certificate for ingress route
-  # when disabled, the default traefik certificate is used
+  # If true, certificate are created for ingress routes.
+  # When disabled, the default certificate specified on Traefik is used
   # Not a string, a boolean so no quote
   enabled: false
-
   # Namespace
   namespace: 'cert-manager'
 

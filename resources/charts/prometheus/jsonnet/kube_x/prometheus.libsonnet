@@ -7,6 +7,7 @@
 //   https://prometheus-operator.dev/docs/platform/rbac/
 //   https://prometheus-operator.dev/docs/platform/rbac/#prometheus-rbac
 
+
 // For consistency
 local kxNaming = {
   grafanaCloudSecretName: 'grafana-cloud',
@@ -16,10 +17,16 @@ local kxNaming = {
   newRelicSecretBearerKey: 'bearer',
 };
 
+local secretValue = 'Secret';
+local externalSecretValue = 'ExternalSecret';
+local secretTypeDomain = [secretValue, externalSecretValue];
+
 // Defaults are just here to give structure
 // They should be all provided to be sure that there is no path problem
 local kxDefaults = {
   cluster_name: error 'cluster_name should be provided (no empty string)',
+  secret_type: error 'secret_type should be provided (Secret or ExternalSecret)',
+  external_secret_store_name: error 'external_secret_store should be provided',
   prometheus_hostname: error 'prometheus hostname should be provided (empty string at minima)',
   prometheus_memory: error 'prometheus memory should be provided (50Mi for instance)',
   cert_manager_enabled: error 'Cert manager enabled should be provided (false or true)',
@@ -31,10 +38,79 @@ local kxDefaults = {
   new_relic_bearer: error 'new_relic_bearer value property should be provided',
 };
 
+// Return the secret
+local grafanaCloudSecret = function(kxConfig, p)
+  (
+    if kxConfig.secret_type == 'ExternalSecret' then
+      {
+        apiVersion: 'external-secrets.io/v1beta1',
+        kind: 'ExternalSecret',
+        metadata: p._metadata {
+          name: kxNaming.grafanaCloudSecretName,
+        },
+        spec: {
+          // The store from where
+          secretStoreRef: {
+            name: kxConfig.external_secret_store_name,
+            kind: 'ClusterSecretStore',
+          },
+          // The target define the secret created
+          // and may be pre-processed via template
+          target: {
+            name: kxNaming.grafanaCloudSecretName,  // Secret name in Kubernetes
+            template: {
+              metadata: {
+                annotations: {
+                  description: 'The Remote Write Credentials for Prometheus',
+                },
+              },
+            },
+          },
+          // Mapping to local secret from remote secret
+          data: [
+            {
+              secretKey: kxNaming.grafanaCloudSecretUserNameKey,  // Prop Name in the secret
+              remoteRef: {
+                key: kxNaming.grafanaCloudSecretName,  // Name of the remote secret
+                property: kxNaming.grafanaCloudSecretUserNameKey,  // Prop Name in the remote secret
+              },
+            },
+            {
+              secretKey: kxNaming.grafanaCloudSecretPasswordKey,  // Prop Name in the secret
+              remoteRef: {
+                key: kxNaming.grafanaCloudSecretName,  // Name of the remote secret
+                property: kxNaming.grafanaCloudSecretPasswordKey,  // Prop Name in the remote secret
+              },
+            },
+          ],
+        },
+      }
+    else
+      {
+        apiVersion: 'v1',
+        kind: 'Secret',
+        metadata: p._metadata {
+          name: kxNaming.grafanaCloudSecretName,
+        },
+        /*
+         The values for all keys in the data field have to be base64-encoded strings.
+         If the conversion to base64 string is not desirable, you can choose to specify the stringData field instead,
+         which accepts arbitrary strings as values.
+        */
+        data: {
+          [kxNaming.grafanaCloudSecretUserNameKey]: std.base64(kxConfig.grafana_cloud_prometheus_username),
+          [kxNaming.grafanaCloudSecretPasswordKey]: std.base64(kxConfig.grafana_cloud_prometheus_password),
+        },
+
+      }
+  );
+
 // kpValues = values for kubernetes-prometheus
 // kxValues = values for kube-x
 function(kpValues, kxValues)
   local kxConfig = kxDefaults + kxValues;
+
+  assert std.member(secretTypeDomain, kxConfig.secret_type) : "Value '" + kxConfig.secret_type + "' must be one of " + std.toString(secretTypeDomain);
 
   local prometheus = (import '../vendor/github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator/prometheus.libsonnet')(kpValues);
   (import '../kube-prometheus/components/prometheus.libsonnet')(kpValues) {
@@ -216,22 +292,7 @@ function(kpValues, kxValues)
                         },
                       }] else []),
       },
-      [if kxConfig.grafana_cloud_enabled then 'grafanaCloudSecret']: {
-        apiVersion: 'v1',
-        kind: 'Secret',
-        metadata: p._metadata {
-          name: kxNaming.grafanaCloudSecretName,
-        },
-        /*
-         The values for all keys in the data field have to be base64-encoded strings.
-         If the conversion to base64 string is not desirable, you can choose to specify the stringData field instead,
-         which accepts arbitrary strings as values.
-        */
-        data: {
-          [kxNaming.grafanaCloudSecretUserNameKey]: std.base64(kxConfig.grafana_cloud_prometheus_username),
-          [kxNaming.grafanaCloudSecretPasswordKey]: std.base64(kxConfig.grafana_cloud_prometheus_password),
-        },
-      },
+      [if kxConfig.grafana_cloud_enabled then 'grafanaCloudSecret']: grafanaCloudSecret(kxConfig, p),
       [if kxConfig.new_relic_enabled then 'newRelicSecret']: {
         apiVersion: 'v1',
         kind: 'Secret',
