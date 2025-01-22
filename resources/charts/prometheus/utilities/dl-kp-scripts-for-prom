@@ -12,7 +12,6 @@ FILES=(
   "components/prometheus.libsonnet"
   "components/prometheus-operator.libsonnet"
   "components/kube-rbac-proxy.libsonnet"
-  "addons/dropping-deprecated-metrics-relabelings.libsonnet"
   "components/alertmanager.libsonnet" # needed for variable reference
   "versions.json"
 )

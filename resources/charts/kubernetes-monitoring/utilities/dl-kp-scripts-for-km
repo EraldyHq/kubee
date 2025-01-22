@@ -17,6 +17,7 @@ FILES=(
   "components/mixin/rules/rules.libsonnet"
   "components/mixin/rules/general.libsonnet"
   "components/mixin/rules/node-rules.libsonnet"
+  "addons/dropping-deprecated-metrics-relabelings.libsonnet"
 )
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )

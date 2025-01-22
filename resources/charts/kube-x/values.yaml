@@ -64,6 +64,14 @@ kubernetes_dashboard:
   # If set, an ingress will be created
   hostname: ''
 
+# Install Monitoring for the core Kubernetes components
+# Api Server, Dns, Controller Manager, Kubelet, Scheduler
+kubernetes_monitoring:
+  # Not a string, a boolean so no quote
+  enabled: false
+  # namespace. This is a prometheus component
+  namespace: 'prometheus'
+
 # Kube-X Traefik Variables
 traefik:
   # Not a string, a boolean so no quote

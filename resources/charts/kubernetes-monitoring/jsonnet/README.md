@@ -5,4 +5,4 @@
 This is the Jsonnet project of the kube-x Kubernetes monitoring chart
 
 
-For more information, see [](../contrib.md#jsonnet-bootstrap)
+For more information, see [](../contrib.md#how-this-project-was-bootstrapped-jsonnet-bootstrap)
