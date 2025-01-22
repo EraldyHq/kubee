@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+
+
+synopsis(){
+
+  cat<<EOF
+This helper script downloads scripts from the jsonnet kube-prometheus project
+
+   $(basename "$0") --jsonnet-dir /path/to/jsonnet FILE1 FILE2
+
+FILES should be relative file to
+https://github.com/prometheus-operator/kube-prometheus/tree/main/jsonnet/kube-prometheus
+
+EOF
+}
+
+source bashlib-error.sh
+error::set_strict_mode
+error::set_trap
+source bashlib-echo.sh
+
+##########################
+## Collect the options
+##########################
+args=$(getopt -l "jsonnet-dir:" -o "d:" -- "$@")
+# eval set to set the positional arguments back to $args
+eval set -- "$args"
+
+JSONNET_DIR=""
+while [[ $# -gt 0 ]]
+do
+   case "$1" in
+      "--jsonnet-dir"|"-d")
+        shift
+        JSONNET_DIR=${1}
+        shift
+      ;;
+      "--")
+        shift
+        break;
+        # from now on, $@ contains only the arguments, ie list of files
+        ;;
+   esac
+done
+
+if [ "$JSONNET_DIR" == "" ]; then
+  echo::err "The Jsonnet project directory flag is mandatory"
+  echo::err "$(basename "$0") --jsonnet-dir=/path/of/dir"
+  synopsis
+  exit 1
+fi
+
+if [ ! -d "$JSONNET_DIR" ]; then
+  echo::err "The Jsonnet project directory ($JSONNET_DIR) does not exists"
+  exit 1
+fi
+
+CHART_NAME=$(dirname "$JSONNET_DIR/..")
+if [ "$CHART_NAME" == "prometheus" ]; then
+  PROMETHEUS_CHART_FILE="$JSONNET_DIR/../Chart.yaml"
+else
+  PROMETHEUS_CHART_FILE="$JSONNET_DIR/../../prometheus/Chart.yaml"
+fi
+
+
+if [ ! -f "$PROMETHEUS_CHART_FILE" ]; then
+    echo::err "The prometheus chart file could not be found at the path: ($(realpath "$PROMETHEUS_CHART_FILE")"
+    echo::tip "You should execute this script from the jsonnet directory of your chart"
+    exit 1
+fi
+
+# Get the Kube-Prometheus version
+KUBE_PROMETHEUS_VERSION=$(yq '.kube_x.versions.kube-prometheus' "$PROMETHEUS_CHART_FILE" | tr -d '~')
+
+if [ "$KUBE_PROMETHEUS_VERSION" == "" ]; then
+  echo::err "Unable to retrieve the kube prometheus version (the value was empty)"
+  exit 1
+fi
+
+LIB_DIR="kube-prometheus"
+
+for FILE in "$@"; do
+  DEST="$JSONNET_DIR/$LIB_DIR/$FILE"
+  # directory needs to exists
+  mkdir -p "$(dirname "$DEST")"
+  echo::info "Download the Kube Prometheus Jsonnet lib $FILE with version $KUBE_PROMETHEUS_VERSION"
+  curl \
+    -s \
+    -o "$DEST" \
+    --fail \
+    "https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/refs/tags/$KUBE_PROMETHEUS_VERSION/jsonnet/kube-prometheus/$FILE"
+
+  echo::success "The jsonnet lib was updated"
+done

@@ -2,8 +2,6 @@
 # https://github.com/prometheus-operator/kube-prometheus/blob/main/jsonnet/kube-prometheus/main.libsonnet
 # alert manager is needed because it's referenced in prometheus
 local alertmanager = import './components/alertmanager.libsonnet';
-local kubernetesControlPlane = import './components/k8s-control-plane.libsonnet';
-local customMixin = import './components/mixin/custom.libsonnet';
 local prometheusOperator = import './components/prometheus-operator.libsonnet';
 local prometheus = import './components/prometheus.libsonnet';
 
@@ -68,10 +66,6 @@ local prometheus = import './components/prometheus.libsonnet';
       mixin+: { ruleLabels: $.values.common.ruleLabels },
       kubeRbacProxyImage: $.values.common.images.kubeRbacProxy,
     },
-    kubernetesControlPlane: {
-      namespace: $.values.common.namespace,
-      mixin+: { ruleLabels: $.values.common.ruleLabels },
-    },
     // alertmanager is needed for reference
     alertmanager: {
       name: 'main',
@@ -84,11 +78,4 @@ local prometheus = import './components/prometheus.libsonnet';
   alertmanager: alertmanager($.values.alertmanager),
   prometheus: prometheus($.values.prometheus),
   prometheusOperator: prometheusOperator($.values.prometheusOperator),
-  kubernetesControlPlane: kubernetesControlPlane($.values.kubernetesControlPlane),
-  kubePrometheus: customMixin(
-    {
-      namespace: $.values.common.namespace,
-      mixin+: { ruleLabels: $.values.common.ruleLabels },
-    }
-  )
 }

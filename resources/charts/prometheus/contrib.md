@@ -7,7 +7,7 @@ The [jsonnet project](jsonnet/README.md) was bootstrapped with:
 ```bash
 cd jsonnet
 ```
-* The [kube-prometheus libs](jsonnet/download-kube-prometheus-scripts):
+* The [kube-prometheus libs](utilities/download-kube-prometheus-scripts):
 ```bash
 ./download-kube-prometheus-scripts
 ```
@@ -16,7 +16,7 @@ cd jsonnet
 jb init
 jb install github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator@main
 jb install github.com/prometheus-operator/prometheus-operator/jsonnet/mixin@main
-jb install github.com/kubernetes-monitoring/kubernetes-mixin@af5e898 # last main commit
+jb install github.com/kubernetes-monitoring/kubernetes-mixin@master # for alerts, dashboard for prometheus and prometheus operator
 jb install github.com/prometheus/prometheus/documentation/prometheus-mixin@v3.1.0
 ```
 * Try it out with

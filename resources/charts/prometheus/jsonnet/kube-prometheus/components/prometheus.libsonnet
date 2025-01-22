@@ -72,7 +72,7 @@ function(params) {
     },
 
   mixinThanos::
-    //(import 'github.com/thanos-io/thanos/mixin/alerts/sidecar.libsonnet') +
+    (import 'github.com/thanos-io/thanos/mixin/alerts/sidecar.libsonnet') +
     (import 'github.com/kubernetes-monitoring/kubernetes-mixin/lib/add-runbook-links.libsonnet') + {
       _config+:: p._config.mixin._config,
       targetGroups+: p._config.mixin._config.thanos.targetGroups,

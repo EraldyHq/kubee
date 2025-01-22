@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# This script download the kube-prometheus scripts for this chart
+
+source bashlib-error.sh
+error::set_strict_mode
+error::set_trap
+source bashlib-echo.sh
+
+FILES=(
+  "components/k8s-control-plane.libsonnet"
+  # Custom Mixin
+  "components/mixin/custom.libsonnet"
+  "components/mixin/alerts/alerts.libsonnet"
+  "components/mixin/alerts/general.libsonnet"
+  "components/mixin/alerts/node.libsonnet"
+  "components/mixin/rules/rules.libsonnet"
+  "components/mixin/rules/general.libsonnet"
+  "components/mixin/rules/node-rules.libsonnet"
+)
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+"$SCRIPT_DIR"/../../prometheus/utilities/kube-prometheus-downloader-helper --jsonnet-dir="$SCRIPT_DIR/../jsonnet" "${FILES[@]}"

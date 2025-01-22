@@ -76,6 +76,6 @@ local customPrometheus = (import './kube_x/prometheus.libsonnet')(kp.values.prom
   // CRD are in the prometheus-crd charts
   for name in std.filter((function(name) prometheusOperator[name].kind != 'CustomResourceDefinition'), std.objectFields(prometheusOperator))
 } +
-{ 'kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule } +
-{ ['kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) } +
+//{ 'kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule } +
+//{ ['kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) } +
 { ['prometheus-prometheus-' + name]: customPrometheus[name] for name in std.objectFields(customPrometheus) }
