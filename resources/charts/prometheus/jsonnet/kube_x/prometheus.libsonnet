@@ -209,7 +209,10 @@ function(kpValues, kxValues)
           verbs: ['get', 'list', 'watch'],
         },
         {
-          nonResourceURLs: ['/metrics'],
+          nonResourceURLs: [
+            '/metrics',
+            '/metrics/slis' # to scrape SLIS (ie https://capi:6443/metrics/slis)
+            ],
           verbs: ['get'],
         },
       ],

@@ -1,5 +1,13 @@
-local certManager = import 'cert-manager-mixin/mixin.libsonnet';
+
 local values = std.extVar('values');
+local mixin = (import 'cert-manager-mixin/mixin.libsonnet') {
+   // https://github.com/imusmanmalik/cert-manager-mixin/blob/main/config.libsonnet
+   _config+:: {
+     grafanaExternalUrl: 'https://' + values.kube_x.grafana.hostname,
+   }
+};
+local mixinName='cert-manager';
+
 
 // Generate a GrafanaDashboard
 // https://grafana.github.io/grafana-operator/docs/dashboards/
@@ -31,31 +39,24 @@ local values = std.extVar('values');
         // https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
         instanceSelector: {
           matchLabels: {
-            dashboards: values.kube_x.grafana.label,
+            dashboards: values.kube_x.grafana.name,
           },
         },
         // std.manifestJson to output a Json string
-        json: std.manifestJson(
-          certManager {
-            // https://github.com/imusmanmalik/cert-manager-mixin/blob/main/config.libsonnet
-            _config+:: {},
-          }.grafanaDashboards['overview.json']
-        ),
+        json: std.manifestJson(mixin.grafanaDashboards['overview.json']),
       },
   },
-  // Generate a Prometheus Alert object
-  'prometheus-rule':
-    {
+  // Generate a Prometheus Rules for Alert and Rules object
+  prometheusRule: {
       apiVersion: 'monitoring.coreos.com/v1',
       kind: 'PrometheusRule',
       metadata: {
-        name: 'cert-manager-mixin-alert-rules',
+        name: mixinName+'-prometheus-rules',
       },
-      spec: certManager {
-        // https://github.com/imusmanmalik/cert-manager-mixin/blob/main/config.libsonnet
-        _config+:: {
-          grafanaExternalUrl: 'https://' + values.kube_x.grafana.hostname,
-        },
-      }.prometheusAlerts,
+      spec: {
+        local r = if std.objectHasAll(mixin, 'prometheusRules') then mixin.prometheusRules.groups else [],
+        local a = if std.objectHasAll(mixin, 'prometheusAlerts') then mixin.prometheusAlerts.groups else [],
+        groups: a + r,
+      },
     },
 }

@@ -8,13 +8,13 @@ metadata:
 spec:
   instanceSelector:
     matchLabels:
-      dashboards: "{{ .Values.kube_x.grafana.label }}"
+      dashboards: "{{ .Values.kube_x.grafana.name }}"
   datasource:
     name: prometheus # used by default by mixins
     type: prometheus
     access: proxy
     {{/* prometheus-k8s is the default name of kube-prometheus */}}
-    url: http://prometheus-k8s.{{ .Values.kube_x.prometheus.namespace }}:9090
+    url: http://{{ .Values.kube_x.prometheus.name }}.{{ .Values.kube_x.prometheus.namespace }}:9090
     isDefault: true
     jsonData:
       'tlsSkipVerify': true

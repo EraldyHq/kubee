@@ -74,7 +74,7 @@ spec:
                 "kubePodContainerResourceRequestsMemoryBytesSelector": "container=\"cert-manager\"",
                 "namespaceSelector": "namespace=\"cert-manager\""
             },
-            "grafanaExternalUrl": "https://grafana.example.com"
+            "grafanaExternalUrl": "https://"
         },
         "annotations": {
             "list": [

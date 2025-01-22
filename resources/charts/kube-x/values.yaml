@@ -3,7 +3,10 @@
 
 # Cluster Wide variables
 cluster:
-  # The cluster name (used when prometheus metrics are send to remote-write for instance)
+  # The cluster name
+  # used:
+  # * to identify the cluster (for instance, on prometheus remote-write metrics, the name is added as label)
+  # * as default first instance name for operator (for instance, prometheus operator allows to install multiple prometheus that needs to be unique. Kube-prometheus asks for a unique name)
   name: 'kube-x'
   # Admin user
   #  * created as admin user in Kubernetes and other app
@@ -271,6 +274,11 @@ grafana:
   enabled: false
   # namespace
   namespace: 'grafana'
+  # The name of the instance (known also as label)
+  # It's used :
+  # * as selector to apply CRD objects such as Dashboard, .... to this instance. https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
+  # * as the instance name
+  name: 'grafana'
   # The type of instance:
   # * internal: installation of grafana in the cluster
   # * external: grafana api (for instance: grafana cloud instance, if external, the apiToken is mandatory)
@@ -281,11 +289,6 @@ grafana:
   # The hostname may be used in Prometheus alert to reference dashboard
   # For a Grafana cloud instance, you need to enter: <Grafana-cloud-stack-name>.grafana.net
   hostname: ''
-  # The label
-  # It's used :
-  # * as selector to apply CRD objects such as Dashboard, .... to this instance. https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
-  # * as the instance name
-  label: 'grafana'
   # The auth credential (used for an external instance)
   apiToken: ''
 
