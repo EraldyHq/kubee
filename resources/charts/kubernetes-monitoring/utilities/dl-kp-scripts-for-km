@@ -9,6 +9,10 @@ source bashlib-echo.sh
 
 FILES=(
   "components/k8s-control-plane.libsonnet"
+  # The exporters needed for the dashboard
+  "components/kube-state-metrics.libsonnet"
+  "components/node-exporter.libsonnet"
+  "components/kube-rbac-proxy.libsonnet" # dep of exporters
   # Custom Mixin
   "components/mixin/custom.libsonnet"
   "components/mixin/alerts/alerts.libsonnet"
@@ -18,6 +22,7 @@ FILES=(
   "components/mixin/rules/general.libsonnet"
   "components/mixin/rules/node-rules.libsonnet"
   "addons/dropping-deprecated-metrics-relabelings.libsonnet"
+  "versions.json"
 )
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )

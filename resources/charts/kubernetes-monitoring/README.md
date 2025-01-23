@@ -11,19 +11,25 @@ This [kube-x jsonnet chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-jsonnet
 * Scheduler
 
 
+The dashboards are using metrics from:
+* Kubernetes components
+* `Kube-State-Metrics` exporter
+* and `node-exporter`
+
+
 The following monitoring elements are installed for each:
 * prometheus scrape configuration
-* prometheus alerts
-* prometheus rules
+* prometheus alerts and rules
+  * `kubernetes-apps`: kube-state-metrics metrics
+  * `kubernetes-resources`: kube-state-metrics metrics 
 * and grafana dashboard
-  * Kubernetes / API server
-  * Kubernetes Kubelet 
-  * Kubernetes / Persistent Volumes
-  * Kubernetes / Scheduler
-  * Kubernetes / Controller Manager
+  * `Kubernetes / API server`
+  * `Kubernetes Kubelet` 
+  * `Kubernetes / Persistent Volumes`
+  * `Kubernetes / Scheduler`
+  * `Kubernetes / Controller Manager`
 
-Kube-State-Metrics:
-* Kubernetes / Compute Resources / Cluster
+
 
 ## Doc
 
@@ -49,6 +55,9 @@ The following server flag needs to be set`--etcd-expose-metrics=true`.
 
 ### Why does tne scheduler dashboard check the api server job
 
-With k3s, there is only one binary and the api server endpoint gives you metrics from:
+With k3s, there is only one binary.
+The api server endpoint gives you metrics from:
 * the `controller manager`
 * and `scheduler`
+The kubelet endpoint gives you metrics from:
+* the `cadvisor`

@@ -27,6 +27,8 @@ jb init
 jb install github.com/kubernetes-monitoring/kubernetes-mixin@master # last main commit
 # Release branch	Kubernetes Compatibility	Prometheus Compatibility	Kube-state-metrics Compatibility
 # compatibility     v1.26+	                    v2.11.0+                    v2.0+
+jb install github.com/kubernetes/kube-state-metrics/jsonnet/kube-state-metrics@main
+jb install github.com/kubernetes/kube-state-metrics/jsonnet/kube-state-metrics-mixin@main
 ```
 * Try it out with
 * Helm X

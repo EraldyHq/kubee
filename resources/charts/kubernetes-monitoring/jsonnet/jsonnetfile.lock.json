@@ -50,6 +50,26 @@
       },
       "version": "af5e89820645ab7f99c8be0c247ab2f9f845869d",
       "sum": "h+Ay46EcuMsXqx1DyzbVcAOc5C9T7gC9TIn5K5swc2E="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/kubernetes/kube-state-metrics.git",
+          "subdir": "jsonnet/kube-state-metrics"
+        }
+      },
+      "version": "288b3cf855c33e6e222dcd16a4c44d3490c757ef",
+      "sum": "lO7jUSzAIy8Yk9pOWJIWgPRhubkWzVh56W6wtYfbVH4="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/kubernetes/kube-state-metrics.git",
+          "subdir": "jsonnet/kube-state-metrics-mixin"
+        }
+      },
+      "version": "288b3cf855c33e6e222dcd16a4c44d3490c757ef",
+      "sum": "qclI7LwucTjBef3PkGBkKxF0mfZPbHnn4rlNWKGtR4c="
     }
   ],
   "legacyImports": false
