@@ -15,6 +15,7 @@ local kxValues = {
   prometheus_namespace: validation.notNullOrEmpty(kxExtValues, 'kube_x.prometheus.namespace'),
   prometheus_hostname: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.prometheus.hostname'),
   prometheus_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.prometheus.resources.memory'),
+  prometheus_retention: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.prometheus.retention'),
   prometheus_version: '3.1.0',
   prometheus_operator_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.prometheus.operator.resources.memory'),
   prometheus_operator_version: '0.79.2',

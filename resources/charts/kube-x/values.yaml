@@ -120,8 +120,11 @@ prometheus:
   resources:
     # Memory of the prometheus instance (value based on experience)
     # Depend on scrape interval (default to 30s), data retention (default to 24j) and number of metrics scraped
-    # The default values are used.
-    memory: '200Mi'
+    # 400Mi is the default of Kube-Prometheus and is what we see with all metrics running
+    memory: '400Mi'
+  # Retention
+  # How long to retain data (it the prometheus server argument --storage.tsdb.retention.time=24h)
+  retention: '4h'
   # grafana cloud remote write prometheus integration
   grafana_cloud:
     enabled: false

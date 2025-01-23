@@ -20,7 +20,7 @@ The output of this chart can be inspected with:
 ```bash
 # set debug (to not delete the created manifests in the jsonnet/out directory)
 export BASHLIB_ECHO_LEVEL=4
-kube-x-helm-x -n prometheus template prometheus > /tmp/all.yaml
+kube-x-helm-x -n prometheus -c clusterName template prometheus > /tmp/all.yaml
 ```
 
 ### Get Access

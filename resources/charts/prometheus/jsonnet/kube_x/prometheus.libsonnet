@@ -29,6 +29,7 @@ local kxDefaults = {
   external_secret_store_name: error 'external_secret_store should be provided',
   prometheus_hostname: error 'prometheus hostname should be provided (empty string at minima)',
   prometheus_memory: error 'prometheus memory should be provided (50Mi for instance)',
+  prometheus_retention: error 'prometheus memory should be provided (50Mi for instance)',
   cert_manager_enabled: error 'Cert manager enabled should be provided (false or true)',
   cert_manager_issuer_name: error 'Cert manager issuer name should be provided',  // Accessed and triggered when cert manager is enabled
   grafana_cloud_enabled: error 'grafana_cloud_enabled value property should be provided',
@@ -176,7 +177,7 @@ function(kpValues, kxValues)
 
   (import '../kube-prometheus/components/prometheus.libsonnet')(kpValues) {
     local p = self,
-    // deleting due to the :: operaror
+    // hidding (ie deleting) due to the :: hiding operaror
     roleBindingSpecificNamespaces:: null,
     roleSpecificNamespaces:: null,
     roleConfig:: null,
@@ -269,7 +270,7 @@ function(kpValues, kxValues)
         // For consistencyloy
         replicas: 1,  // could be 2 for HA, kxNaming to 1
         // Resources
-        resources:: {
+        resources: {
           requests: { memory: kxConfig.prometheus_memory },
           limits: { memory: kxConfig.prometheus_memory },
         },
@@ -290,7 +291,7 @@ function(kpValues, kxValues)
         // Retention: How long to retain
         // For consistency the Prometheus data
         // becomes the following prometheus server argument --storage.tsdb.retention.time=24h
-        retention: '24h',
+        retention: kxConfig.prometheus_retention,
         // The external URL under which the Prometheus service is externally available.
         // Implements the --web.external-url flag: https://prometheus.io/docs/prometheus/latest/command-line/prometheus/
         [if kxConfig.prometheus_hostname == '' then 'externalUrl']: 'https://' + kxConfig.prometheus_hostname,
