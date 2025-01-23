@@ -25,7 +25,14 @@ local custom = (import './kube-prometheus/components/mixin/custom.libsonnet')(
   }
 );
 
-local dashboards = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.libsonnet').grafanaDashboards;
+local dashboards = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.libsonnet') {
+  _config+:: {
+    // Kubernetes Scheduler and Controller manager metrics comes from the api server endpoint
+    // in k3s
+    kubeSchedulerSelector: 'job="apiserver"',
+    kubeControllerManagerSelector: self.kubeSchedulerSelector,
+  },
+}.grafanaDashboards;
 
 { 'kube-custom-prometheusRule': custom.prometheusRule } +
 {
@@ -43,6 +50,9 @@ local dashboards = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mi
               if !std.member([
                     'kubernetes-apps',  // metrics are from kube-state-metrics
                     'kubernetes-resources',  // metrics are from kube-state-metrics
+                    // The api server endpoint gives you metrics from controller manager and scheduler as well.
+                    // You have all the metrics but rules and dashboard don't expect them to be tagged with job=apiserver.
+                    // Ref: https://github.com/k3s-io/k3s/issues/425#issuecomment-813017614
                     'kubernetes-system-controller-manager',  // k3s does not have any controller-manager, no need to alert
                     'kubernetes-system-scheduler',  // k3s does not have any scheduler, no need to alert
                     ], group.name)

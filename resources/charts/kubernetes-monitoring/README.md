@@ -18,6 +18,9 @@ The following monitoring elements are installed for each:
 * and grafana dashboard
   * Kubernetes / API server
   * Kubernetes Kubelet 
+  * Kubernetes / Persistent Volumes
+  * Kubernetes / Scheduler
+  * Kubernetes / Controller Manager
 
 Kube-State-Metrics:
 * Kubernetes / Compute Resources / Cluster
@@ -33,9 +36,19 @@ This `kube-x` charts should have been enabled and installed:
   * [Prometheus](../prometheus/README.md) for the prometheus scrape, alert and rules
 
 
+
 ## Dev/Contrib
 
 See [Dev/Contrib](contrib.md)
 
+## Support 
+### Why no Etcd monitoring
 
+Because k3s disables it by [default](https://docs.k3s.io/cli/server#database)
+The following server flag needs to be set`--etcd-expose-metrics=true`.
 
+### Why does tne scheduler dashboard check the api server job
+
+With k3s, there is only one binary and the api server endpoint gives you metrics from:
+* the `controller manager`
+* and `scheduler`
