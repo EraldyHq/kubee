@@ -1,5 +1,9 @@
 # Contrib Dev
 
+## About
+
+This chart is a [kube-x jsonnet chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-jsonnet-kube-x-chart)
+
 ## Dependency
 
 This chart has the following Jsonnet Dependencies:
@@ -40,3 +44,10 @@ rm -rf out && mkdir -p out && jsonnet -J vendor \
   --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" \
   | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
 ```
+
+## Support
+
+### Kubelet SLI metrics not found
+
+* Target Kubelet Sli Metrics at `:10250/metics/slis` is not found. `Error scraping target : server returned HTTP status 404 Not Found`
+* Discussions: https://github.com/k3s-io/k3s/discussions/11637

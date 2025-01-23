@@ -3,9 +3,9 @@
 
 ## About
 
-This chart installs monitoring for the core Kubernetes components:
+This [kube-x jsonnet chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-jsonnet-kube-x-chart) installs monitoring for the core Kubernetes components:
 * Api Server
-* Dns
+* Core Dns
 * Controller Manager
 * Kubelet
 * Scheduler
@@ -16,11 +16,19 @@ The following monitoring elements are installed for each:
 * prometheus alerts
 * prometheus rules
 * and grafana dashboard
+  * Kubernetes / API server
+  * Kubernetes Kubelet 
 
+Kube-State-Metrics:
+* Kubernetes / Compute Resources / Cluster
+
+## Doc
+
+* Metrics: https://monitoring.mixins.dev/kubernetes/
 
 ## Optional Prerequisites: Kube-x Chart Dependency
 
-This charts should have been enabled and installed:
+This `kube-x` charts should have been enabled and installed:
   * [Grafana](../grafana/README.md) for the dashboards
   * [Prometheus](../prometheus/README.md) for the prometheus scrape, alert and rules
 
@@ -29,10 +37,5 @@ This charts should have been enabled and installed:
 
 See [Dev/Contrib](contrib.md)
 
-## Support
 
-### Kubelet SLI metrics not found
-
-* Target Kubelet Sli Metrics at `:10250/metics/slis` is not found. `Error scraping target : server returned HTTP status 404 Not Found`
-* Discussions: https://github.com/k3s-io/k3s/discussions/11637
 

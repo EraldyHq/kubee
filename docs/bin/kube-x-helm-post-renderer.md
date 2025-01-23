@@ -53,16 +53,15 @@ The Jsonnet script:
 
 Minimal Multimode `main.jsonnet` Working Example:
 ```jsonnet
-local extValues = std.extVar('values');
+local kxValues = std.extVar('values');
 
 // The name `values` is a standard because this is similar to helm 
 // (used for instance by [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus/blob/8e16c980bf74e26709484677181e6f94808a45a3/jsonnet/kube-prometheus/main.libsonnet#L17))
+// The values objects are flatten to allows the standard values pattern (defaultValues + values) with basic inheritance https://jsonnet.org/ref/language.html#inheritance
 local values =  {
-    kube_x: {
-        prometheus: {
-            namespace: kube_x.prometheus.namespace,
-        }
-    }
+    
+  prometheus_namespace: kxValues.kube_x.prometheus.namespace,
+    
 };
 
 // A multimode json where each key represent the name of the generated manifest and is unique
@@ -73,7 +72,7 @@ local values =  {
        apiVersion: 'xxx',
        kind: 'xxx',
        metatdata: {
-         namespace: values.kube_x.prometheus.namespace
+         namespace: values.prometheus_namespace
        }
     }
 }

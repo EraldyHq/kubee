@@ -79,3 +79,21 @@ Each `values.yaml` top configuration node contains the following common properti
     * cluster bootstrapping (ie install all charts at once)
 
 
+# What is a Jsonnet Kube-X Chart?
+
+A `Jsonnet Kube-x chart` is a chart that has only a [Jsonnet project](kube-x-helm-post-renderer.md#jsonnet).
+
+It could be then:
+* executed only with `Jsonnet`. Example:
+```bash
+cd jsonnet
+rm -rf out && mkdir -p out && jsonnet -J vendor \
+  --multi out \
+  "main.jsonnet"  \
+  --ext-code "values={ kube_x: std.parseYaml(importstr \"../../cluster/values.yaml\") }" \
+  | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
+```
+* or added as Jsonnet dependency
+
+You can then add them in GitOps Pull app such as [ArgoCd](https://argo-cd.readthedocs.io/en/stable/user-guide/jsonnet/)
+to manage your infrastructure.
