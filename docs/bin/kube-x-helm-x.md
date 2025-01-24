@@ -10,7 +10,7 @@
 
 It's based on the following well-supported Kubernetes tools.
 * [Helm](https://helm.sh/), the Kubernetes Package Manager
-* [kustomize](https://github.com/kubernetes-sigs/kustomize), the official manifest customization tool 
+* [Kustomize](https://github.com/kubernetes-sigs/kustomize), the official manifest customization tool 
 * [Jsonnet Kubernetes](https://jsonnet.org/articles/kubernetes.html), the Google configuration language
 
 At its core, `helm-x` is a `Helm` wrapper.
@@ -35,7 +35,6 @@ There is no magic. All commands are:
 * cluster based installation through the use of the [kube-x library chart](../../resources/charts/kube-x/) the same values are used accros multiple app/charts
   * with environment variables processing
   * with configurable namespace
-
 
 # Synopsis
 
@@ -98,16 +97,26 @@ rm -rf out && mkdir -p out && jsonnet -J vendor \
 You can then add them in GitOps Pull app such as [ArgoCd](https://argo-cd.readthedocs.io/en/stable/user-guide/jsonnet/)
 to manage your infrastructure.
 
-# What is the format of a Helx Values file?
+# What is the format of a Cluster Values file?
 
-Every value in a Helx value file has a scope that is the name of the chart
-to be able to have one file by cluster.
+Every root property in a cluster values file is the alias name of the chart.
 
-Helm expects the values of the actual Chart to be at the root (without scope).
-`Helx` don't.
+Example:
+```yaml
+chart_1:
+  hostname: foo.bar
+chart_2:
+  hostname: bar.foo
+```
 
-You can:
-* see the Helm values applied with:
+Helx will transform it in a compliant Helm values.
+
+You can see the Helm values:
+* to be applied with:
+```bash
+helx values --cluster clusterName chartName
+```
+* applied with:
 ```bash
 helm get -n prometheus values prometheus
 ```
@@ -115,7 +124,7 @@ helm get -n prometheus values prometheus
 # Note
 ## Secret Security
 
-The Helm values are stored in a secret. You can retrieve the applied secret.
+The Helm values are stored in a secret. You can retrieve the applied values and secret.
 ```bash
 helm get -n namespace values chartReleaseName
 ```
