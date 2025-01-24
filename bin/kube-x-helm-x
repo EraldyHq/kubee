@@ -295,8 +295,9 @@ apply(){
 
 # Cluster file
 # Return the name of the values files or empty
-values_get_cluster_files(){
+get_cluster_values_files(){
 
+    local CLUSTER_FILES=()
     if [ "$KUBE_X_CLUSTER_DIR" == "" ]; then
        if [[ $COMMAND =~ "install"|"play"|"upgrade" ]]; then
          echo::err "Cluster is mandatory when installing or upgrading."
@@ -320,7 +321,6 @@ values_get_cluster_files(){
         return
     fi
 
-
     ############################
     # Variable Substitution
     # Check the variables
@@ -330,16 +330,34 @@ values_get_cluster_files(){
        echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBE_X_CLUSTER_VALUES"
        return 1
     fi
-    local SHM_VALUES="/dev/shm/kube-x-cluster-values.yml"
-    envsubst < "$KUBE_X_CLUSTER_VALUES" >| "$SHM_VALUES"
+    local SHM_CLUSTER_VALUES="/dev/shm/kube-x-cluster-values.yml"
+    envsubst < "$KUBE_X_CLUSTER_VALUES" >| "$SHM_CLUSTER_VALUES"
     if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
-      bash::trap "rm $SHM_VALUES" EXIT # EXIT executes also on error
+      bash::trap "rm $SHM_CLUSTER_VALUES" EXIT # EXIT executes also on error
     fi
+    echo::debug "Returned the cluster values files $SHM_CLUSTER_VALUES"
+    CLUSTER_FILES+=("$SHM_CLUSTER_VALUES")
 
-    echo::debug "Returned the cluster values files $SHM_VALUES"
+    # Extraction of the values in the cluster values files for the current chart
+    # The cluster values need to lose their scope
+    local SHM_CLUSTER_CHART_VALUES="/dev/shm/kube-x-cluster-chart-values.yml"
+    local CHART_VALUES;
+    CHART_VALUES=$(command::echo_debug_eval "yq '.$ACTUAL_CHART_ALIAS' $SHM_CLUSTER_VALUES")
+    if [ "$CHART_VALUES" == "null" ]; then
+      echo::warn "No chart values found for $ACTUAL_CHART_ALIAS in the cluster value file $SHM_CLUSTER_VALUES"
+      echo "${CLUSTER_FILES[@]}"
+      return
+    fi
+    # Write the value to the file
+    echo "$CHART_VALUES" >| $SHM_CLUSTER_CHART_VALUES;
+    CLUSTER_FILES+=("$SHM_CLUSTER_CHART_VALUES")
+    echo::debug "Returned the cluster chart values files $SHM_CLUSTER_CHART_VALUES"
 
-    echo "$SHM_VALUES"
-    # local SHM_VALUES="/dev/shm/kube-x-cluster-actual-chart-values.yml"
+    echo::debug "Delete the property $ACTUAL_CHART_ALIAS of the cluster values files for cleanness"
+    yq "del(.$ACTUAL_CHART_ALIAS)" $SHM_CLUSTER_VALUES >| $SHM_CLUSTER_VALUES
+
+    # return
+    echo "${CLUSTER_FILES[@]}"
 
 }
 # The synopsis function is required by the doc::usage
@@ -377,7 +395,7 @@ print_values(){
   # Context
   local ACTUAL_CHART_DIRECTORY=$PWD
   local ACTUAL_CHART_ALIAS
-  ACTUAL_CHART_ALIAS=$(dirname "$PWD" | tr "-" "_");
+  ACTUAL_CHART_ALIAS=$(basename "$PWD" | tr "-" "_");
   local ACTUAL_CHART_FILE="$ACTUAL_CHART_DIRECTORY/Chart.yaml";
 
   if [ ! -f "$ACTUAL_CHART_FILE" ]; then
@@ -396,31 +414,35 @@ print_values(){
 
       case "$DEPENDENCY_CHART_REPOSITORY" in
         file://.*)
-            # Delete the file scheme (not supported by `helm get values`
-            DEPENDENCY_CHART_REPOSITORY=${DEPENDENCY_CHART_REPOSITORY#"file://"}
+          # Delete the file scheme (not supported by `helm get values`
+          DEPENDENCY_CHART_REPOSITORY=${DEPENDENCY_CHART_REPOSITORY#"file://"}
         ;;
         *)
           # Other scheme
-          ;;
+        ;;
       esac
       local SHM_DEPENDENCY_CHART_VALUES_FILE="/dev/shm/kube-x-$DEPENDENCY_CHART_NAME.yml"
       if ! command::echo_debug_eval "helm show values $DEPENDENCY_CHART_REPOSITORY >| $SHM_DEPENDENCY_CHART_VALUES_FILE"; then
         echo::err "Error while trying to the get values for the Chart $DEPENDENCY_CHART_NAME"
         return 1
       fi
+      if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
+        bash::trap "rm $SHM_DEPENDENCY_CHART_VALUES_FILE" EXIT # EXIT executes also on error
+      fi
 
       # Before merge, dependencies values should be below their alias name property
       local DEPENDENCY_CHART_ALIAS
       DEPENDENCY_CHART_ALIAS=$(echo "$DEPENDENCY_CHART_NAME" | tr "-" "_" )
+      local SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE="/dev/shm/kube-x-$DEPENDENCY_CHART_NAME-with_scope.yml"
       # --null-input flag: does not have any input as we create a new file
-      if ! command::echo_debug_eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$SHM_DEPENDENCY_CHART_VALUES_FILE\"))' >| $SHM_DEPENDENCY_CHART_VALUES_FILE"; then
+      if ! command::echo_debug_eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$SHM_DEPENDENCY_CHART_VALUES_FILE\"))' >| $SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE"; then
         echo::err "Error while processing the chart values file $SHM_DEPENDENCY_CHART_VALUES_FILE"
         return 1
       fi
-      SHM_VALUES_FILE+=("$SHM_DEPENDENCY_CHART_VALUES_FILE")
-      echo::debug "Values file generated: ${SHM_DEPENDENCY_CHART_VALUES_FILE}"
+      SHM_VALUES_FILE+=("$SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE")
+      echo::debug "Values file generated: ${SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE}"
       if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
-        bash::trap "rm $SHM_DEPENDENCY_CHART_VALUES_FILE" EXIT # EXIT executes also on error
+        bash::trap "rm $SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE" EXIT # EXIT executes also on error
       fi
   done
 
@@ -432,11 +454,14 @@ print_values(){
     SHM_VALUES_FILE+=("$CHART_VALUES_FILE")
   fi
 
-  if ! read -r -a CLUSTER_FILES <<< "$(values_get_cluster_files)"; then
-    echo::err "Error while retrieving the cluster file"
-    return 1;
+  if ! CLUSTER_VALUE_FILES=$(get_cluster_values_files); then
+    echo::err "Error while trying to retrieve the cluster values"
+    return 1
   fi
-  SHM_VALUES_FILE+=("${CLUSTER_FILES[@]}")
+  echo::debug "Adding cluster files: $CLUSTER_VALUE_FILES"
+  IFS=" " read -ra CLUSTER_VALUE_FILES_ARRAY <<< "${CLUSTER_VALUE_FILES}"
+  SHM_VALUES_FILE+=("${CLUSTER_VALUE_FILES_ARRAY[@]}")
+
 
   ###########################
   # Merge
