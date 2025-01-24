@@ -21,25 +21,25 @@ local kxValues = {
   cert_manager_issuer_name: validation.getNestedPropertyOrThrow(kxExtValues, 'cert_manager.defaultIssuerName'),
 
   // Local
-  prometheus_namespace: validation.notNullOrEmpty(kxExtValues, 'prometheus.namespace'),
-  prometheus_hostname: validation.getNestedPropertyOrThrow(kxExtValues, 'prometheus.hostname'),
-  prometheus_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'prometheus.resources.memory'),
-  prometheus_retention: validation.getNestedPropertyOrThrow(kxExtValues, 'prometheus.retention'),
+  prometheus_namespace: validation.notNullOrEmpty(kxExtValues, 'namespace'),
+  prometheus_hostname: validation.getNestedPropertyOrThrow(kxExtValues, 'hostname'),
+  prometheus_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'resources.memory'),
+  prometheus_retention: validation.getNestedPropertyOrThrow(kxExtValues, 'retention'),
   prometheus_version: '3.1.0',
-  prometheus_operator_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'prometheus.operator.resources.memory'),
+  prometheus_operator_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'operator.resources.memory'),
   prometheus_operator_version: '0.79.2',
   // No Rbac Proxy Sidecar or Network Policies
   // Why? Takes 20Mb memory by exporter
   noRbacProxy: true,
   // Grafana Remote write
-  grafana_cloud_enabled: validation.notNullOrEmpty(kxExtValues, 'prometheus.grafana_cloud.enabled'),
-  grafana_cloud_prometheus_username: validation.notNullOrEmpty(kxExtValues, 'prometheus.grafana_cloud.username'),
-  grafana_cloud_prometheus_password: validation.notNullOrEmpty(kxExtValues, 'prometheus.grafana_cloud.password'),
-  grafana_cloud_relabel_keep_regexp: validation.getNestedPropertyOrThrow(kxExtValues, 'prometheus.grafana_cloud.relabel_keep_regex'),
+  grafana_cloud_enabled: validation.notNullOrEmpty(kxExtValues, 'grafana_cloud.enabled'),
+  grafana_cloud_prometheus_username: validation.notNullOrEmpty(kxExtValues, 'grafana_cloud.username'),
+  grafana_cloud_prometheus_password: validation.notNullOrEmpty(kxExtValues, 'grafana_cloud.password'),
+  grafana_cloud_relabel_keep_regexp: validation.getNestedPropertyOrThrow(kxExtValues, 'grafana_cloud.relabel_keep_regex'),
   // New Relic
-  new_relic_enabled: validation.notNullOrEmpty(kxExtValues, 'prometheus.new_relic.enabled'),
-  new_relic_bearer: validation.notNullOrEmpty(kxExtValues, 'prometheus.new_relic.bearer'),
-  new_relic_relabel_keep_regexp: validation.getNestedPropertyOrThrow(kxExtValues, 'prometheus.new_relic.relabel_keep_regex'),
+  new_relic_enabled: validation.notNullOrEmpty(kxExtValues, 'new_relic.enabled'),
+  new_relic_bearer: validation.notNullOrEmpty(kxExtValues, 'new_relic.bearer'),
+  new_relic_relabel_keep_regexp: validation.getNestedPropertyOrThrow(kxExtValues, 'new_relic.relabel_keep_regex'),
 
 
 };

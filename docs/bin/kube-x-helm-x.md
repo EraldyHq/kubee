@@ -77,6 +77,8 @@ Each `values.yaml` top configuration node contains the following common properti
     * conditionally applied manifest. If there is no grafana, don't install the dashboard
     * cluster bootstrapping (ie install all charts at once)
 
+> [!Info]
+> The `enabled` property comes from the [Helm best practices](https://helm.sh/docs/chart_best_practices/dependencies/#conditions-and-tags)
 
 # What is a Jsonnet Kube-X Chart?
 

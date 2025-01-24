@@ -1,3 +1,6 @@
+
+# The installation namespace (used by Grafana to create the data source)
+namespace: 'prometheus'
 # Prometheus with Prometheus Operator
 # If not null, an ingress is added
 hostname: ''
@@ -42,3 +45,7 @@ operator:
   resources:
     # Memory of the prometheus operator instance (value based on experience)
     memory: '50Mi'
+
+# Tweak to not apply the dependencies
+dependency:
+  enabled: false

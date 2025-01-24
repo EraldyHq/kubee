@@ -1,4 +1,4 @@
-# Bootstrap and common cluster values
+# Bootstrap and common cluster values (ie global)
 
 # Cluster Wide variables
 cluster:
@@ -111,8 +111,6 @@ prometheus:
   # Enable or disable prometheus
   # Not a string, a boolean so no quote
   enabled: false
-  # The installation namespace (used by Grafana to create the data source)
-  namespace: 'prometheus'
 
 
 # Prometheus Alert manager that receives alert from Prometheus and manage them (silence, group, send alerts to email or external services)

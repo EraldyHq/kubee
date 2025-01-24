@@ -28,16 +28,16 @@ dependencies:
     version: 0.0.1
     repository: file://../kube-x
     alias: kube_x
-  - name: cert-manager
+  - name: kube-x-cert-manager
     version: 0.0.1
     repository: file://../cert-manager
     alias: cert_manager
-    condition: 1=0
-  - name: external-secrets
+    condition: dependency.enabled
+  - name: kube-x-external-secrets
     version: 0.0.1
     repository: file://../external-secrets
     alias: external_secrets
-    condition: 1=0
+    condition: dependency.enabled
 
 # noinspection HelmChartUnknownKeys
 kube_x:
