@@ -26,8 +26,18 @@ appVersion: "v0.76.2" # The version of prometheus operator (should be the same o
 dependencies:
   - name: kube-x
     version: 0.0.1
-    repository: file://../../charts/kube-x
+    repository: file://../kube-x
     alias: kube_x
+  - name: cert-manager
+    version: 0.0.1
+    repository: file://../cert-manager
+    alias: cert_manager
+    condition: 1=0
+  - name: external-secrets
+    version: 0.0.1
+    repository: file://../external-secrets
+    alias: external_secrets
+    condition: 1=0
 
 # noinspection HelmChartUnknownKeys
 kube_x:

@@ -63,3 +63,9 @@ kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-op
 ## CRD
 
 See [](../prometheus-crds/README.md)
+
+## Why Not Full Kubernetes Prometheus
+
+Because we want to be able to manage the installation granularity. No big bang.
+When I installed the kubernetes-monitoring, the prometheus memory went to the roof (1G)
+

@@ -12,6 +12,8 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-bash.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-command.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
 # shellcheck source=./kube-x-lib.sh
 source "kube-x-lib.sh"
 
@@ -320,61 +322,85 @@ EOF
 
 
 # @description
-#     Print the kube-x values files used for Helm Installation and Jsonnet Configuration
+#     Print the kube-x values files
 # @stdout - the values
 print_values(){
 
+  # helm show values . | yq
   ##########################
   # Default values
   #
-  KUBE_X_CHART_DIR=$(get_chart_directory "kube-x")
-  DEFAULT_VALUES_PATH="$KUBE_X_CHART_DIR/values.yaml"
-  if [ ! -f "$DEFAULT_VALUES_PATH" ]; then
-    echo::err "Internal Error: The default values file ($DEFAULT_VALUES_PATH) was not found"
-    return 1
-  fi
-  # Before merge, values should be below the kube_x property
-  SHM_DEFAULT_VALUES="/dev/shm/kube-x-lib-default-values.yml"
-  # --null-input: does not have any input as we create a new file
-  yq eval --null-input ".kube_x = load(\"$DEFAULT_VALUES_PATH\")" >| "$SHM_DEFAULT_VALUES"
-  bash::trap "rm $SHM_DEFAULT_VALUES" EXIT # EXIT executes also on error
+  local SHM_VALUES_FILE=()
+  local ACTUAL_CHART_DIRECTORY=$PWD
+  local -A dependencies
+  eval "dependencies=($(yq -r '.dependencies[] | ["[" + .name + "]=" + .repository] | join(" ")' "$ACTUAL_CHART_DIRECTORY/Chart.yaml"))"
+  for DEPENDENCY_CHART_NAME in "${!dependencies[@]}"; do
+      DEPENDENCY_CHART_REPOSITORY=${dependencies[$DEPENDENCY_CHART_NAME]}
+      if [[ "$DEPENDENCY_CHART_REPOSITORY" != file://* ]]; then
+        echo::warn "$DEPENDENCY_CHART_NAME: Not a repository file path dependency, skipping"
+        continue
+      fi
 
-  # Template
+      local DEPENDENCY_CHART_REPOSITORY=${DEPENDENCY_CHART_REPOSITORY#"file://"}
+      local DEPENDENCY_CHART_DIRECTORY
+      DEPENDENCY_CHART_DIRECTORY=$(realpath "$ACTUAL_CHART_DIRECTORY/$DEPENDENCY_CHART_REPOSITORY")
+      if [ ! -d "$DEPENDENCY_CHART_DIRECTORY" ]; then
+        echo::err "The dependency directory could not be found $DEPENDENCY_CHART_REPOSITORY for the chart $DEPENDENCY_CHART_NAME"
+        return 1
+      fi
+      local DEPENDENCY_CHART_VALUES_PATH="$DEPENDENCY_CHART_DIRECTORY/values.yaml"
+      if [ ! -f "$DEPENDENCY_CHART_VALUES_PATH" ]; then
+          echo::warn "No values files found at $DEPENDENCY_CHART_VALUES_PATH"
+          continue
+      fi
+      echo::debug "Dependency values files: $DEPENDENCY_CHART_VALUES_PATH (found)"
+      local DEPENDENCY_CHART_ALIAS
+      DEPENDENCY_CHART_ALIAS=$(echo "$DEPENDENCY_CHART_NAME" | tr "-" "_" )
+      # Before merge, values should be below the name property
+      SHM_DEPENDENCY_CHART_VALUES_FILE="/dev/shm/kube-x-$DEPENDENCY_CHART_NAME.yml"
+      # --null-input: does not have any input as we create a new file
+      if ! command::echo_debug_eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$DEPENDENCY_CHART_VALUES_PATH\"))' >| $SHM_DEPENDENCY_CHART_VALUES_FILE"; then
+        echo::err "Error while processing the chart values file $DEPENDENCY_CHART_VALUES_PATH"
+        return 1
+      fi
+      SHM_VALUES_FILE+=("$SHM_DEPENDENCY_CHART_VALUES_FILE")
+      echo::debug "Values file generated: ${SHM_DEPENDENCY_CHART_VALUES_FILE}"
+      if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
+        bash::trap "rm $SHM_DEPENDENCY_CHART_VALUES_FILE" EXIT # EXIT executes also on error
+      fi
+  done
+
+
+  # Cluster file
   local KUBE_X_HELM_VALUES;
   KUBE_X_HELM_VALUES=$(realpath "${KUBE_X_CLUSTER_DIR}/values.yaml")
-  if [ ! -f "$KUBE_X_HELM_VALUES" ]; then
-
-    cat "$SHM_DEFAULT_VALUES"
-
+  if [ -f "$KUBE_X_HELM_VALUES" ]; then
+    ############################
+    # Variable Substitution
+    # Check the variables
+    if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBE_X_HELM_VALUES"); then
+       # Should exit because of the strict mode
+       # but it was not working
+       echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBE_X_HELM_VALUES"
+       return 1
+    fi
+    local SHM_VALUES="/dev/shm/kube-x-cluster-values.yml"
+    envsubst < "$KUBE_X_HELM_VALUES" >| "$SHM_VALUES"
+    bash::trap "rm $SHM_VALUES" EXIT # EXIT executes also on error
+    SHM_VALUES_FILE+=("$SHM_VALUES")
+  else
     echo::warn "No cluster values file found at $KUBE_X_HELM_VALUES"
     echo::warn "Cluster directory: $KUBE_X_CLUSTER_DIR"
-    echo::warn "Default values returned"
-
-    return 0
-
   fi
-
-
-  ############################
-  # Variable Substitution
-  # Check the variables
-  if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBE_X_HELM_VALUES"); then
-     # Should exit because of the strict mode
-     # but it was not working
-     echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBE_X_HELM_VALUES"
-     return 1
-  fi
-  local SHM_VALUES="/dev/shm/kube-x-lib-values.yml"
-  envsubst < "$KUBE_X_HELM_VALUES" >| "$SHM_VALUES"
-  bash::trap "rm $SHM_VALUES" EXIT # EXIT executes also on error
-
-
 
   ###########################
   # Merge
   # shellcheck disable=SC2016
   # https://mikefarah.gitbook.io/yq/commands/evaluate-all
-  yq eval-all '. as $item ireduce ({}; . * $item )' "$SHM_DEFAULT_VALUES" "$SHM_VALUES"
+  if ! command::echo_debug_eval "yq eval-all '. as \$item ireduce ({}; . * \$item )' ${SHM_VALUES_FILE[*]}"; then
+    echo::err "Error while merging the yaml files"
+    return 1
+  fi
 
 }
 

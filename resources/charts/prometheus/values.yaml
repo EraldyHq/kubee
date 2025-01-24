@@ -1,0 +1,44 @@
+# Prometheus with Prometheus Operator
+# If not null, an ingress is added
+hostname: ''
+# CPU/Memory
+resources:
+  # Memory of the prometheus instance (value based on experience)
+  # Depend on scrape interval (default to 30s), data retention (default to 24j) and number of metrics scraped
+  # 400Mi is the default of Kube-Prometheus and is what we see with all Kubernetes monitoring scrapers running
+  memory: '400Mi'
+# Retention
+# How long to retain data (it the prometheus server argument --storage.tsdb.retention.time=24h)
+retention: '4h'
+# grafana cloud remote write prometheus integration
+grafana_cloud:
+  enabled: false
+  # The username
+  username: ''
+  # The password
+  password: ''
+  # The regexp used to filter the metrics name (ie if the regexp matches, the metrics are passed keep to new relic)
+  # Example:
+  # `phpfpm_*` would send only the metrics starting with phpfpm
+  # `(phpfpm|argocd|node|traefik)_(.*)` would send the metrics starting with phpfpm, argocd, node and traefik
+  # Doc: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
+  # By default, no filtering is applied
+  relabel_keep_regex: ''
+# new relic remote write prometheus integration
+new_relic:
+  enabled: false
+  # for remote write
+  bearer: ''
+  # The regexp used to filter the metrics name (ie if the regexp matches, the metrics are passed keep to new relic)
+  # Example:
+  # `phpfpm_*` would send only the metrics starting with phpfpm
+  # `(phpfpm|argocd|node|traefik)_(.*)` would send the metrics starting with phpfpm, argocd, node and traefik
+  # Doc: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
+  # By default, no filtering is applied
+  relabel_keep_regex: ''
+# Prometheus Operator
+operator:
+  # CPU/Memory
+  resources:
+    # Memory of the prometheus operator instance (value based on experience)
+    memory: '50Mi'

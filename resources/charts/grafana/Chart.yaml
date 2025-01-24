@@ -32,3 +32,6 @@ dependencies:
     version: 0.0.1
     repository: file://../kube-x
     alias: kube_x
+  - name: prometheus
+    version: 0.0.1
+    repository: file://../prometheus

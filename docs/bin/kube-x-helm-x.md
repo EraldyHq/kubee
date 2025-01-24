@@ -49,7 +49,7 @@ A `Kube-x Chart`:
   * that installed only one application 
   * with the name of the app installed (ie grafana, not grafana operator) 
   * that depends on:
-    * the [kube-x Chart](../../resources/charts/kube-x/README.md) to share
+    * the [kube-x Chart](../../resources/charts/kube-x/README.md) to share cluster and installation wide
       * `values.yaml` file 
       * and `library` 
     * and optionally one other Chart
@@ -97,3 +97,26 @@ rm -rf out && mkdir -p out && jsonnet -J vendor \
 
 You can then add them in GitOps Pull app such as [ArgoCd](https://argo-cd.readthedocs.io/en/stable/user-guide/jsonnet/)
 to manage your infrastructure.
+
+# What is the format of a Helx Values file?
+
+Every value in a Helx value file has a scope that is the name of the chart
+to be able to have one file by cluster.
+
+Helm expects the values of the actual Chart to be at the root (without scope).
+`Helx` don't.
+
+You can:
+* see the Helm values applied with:
+```bash
+helm get -n prometheus values prometheus
+```
+
+# Note
+## Secret Security
+
+The Helm values are stored in a secret. You can retrieve the applied secret.
+```bash
+helm get -n namespace values chartReleaseName
+```
+
