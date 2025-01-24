@@ -293,7 +293,55 @@ apply(){
 
 }
 
+# Cluster file
+# Return the name of the values files or empty
+values_get_cluster_files(){
 
+    if [ "$KUBE_X_CLUSTER_DIR" == "" ]; then
+       if [[ $COMMAND =~ "install"|"play"|"upgrade" ]]; then
+         echo::err "Cluster is mandatory when installing or upgrading."
+         echo::err "Why? Installing with the default Chart values would delete Resources such as Ingress"
+         return 1
+       fi
+       echo::warn "No Cluster specified"
+       return
+    fi
+
+    local KUBE_X_CLUSTER_VALUES;
+    KUBE_X_CLUSTER_VALUES=$(realpath "${KUBE_X_CLUSTER_DIR}/values.yaml")
+    if [ ! -f "$KUBE_X_CLUSTER_VALUES" ]; then
+        if [[ $COMMAND =~ "install"|"play"|"upgrade" ]]; then
+           echo::err "No Cluster values found at $KUBE_X_CLUSTER_VALUES"
+           echo::err "Cluster is mandatory when installing or upgrading."
+           echo::err "Why? Installing with the default Chart values would delete Resources such as Ingress"
+           return 1
+        fi
+        echo::warn "No Cluster values found at $KUBE_X_CLUSTER_VALUES"
+        return
+    fi
+
+
+    ############################
+    # Variable Substitution
+    # Check the variables
+    if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBE_X_CLUSTER_VALUES"); then
+       # Should exit because of the strict mode
+       # but it was not working
+       echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBE_X_CLUSTER_VALUES"
+       return 1
+    fi
+    local SHM_VALUES="/dev/shm/kube-x-cluster-values.yml"
+    envsubst < "$KUBE_X_CLUSTER_VALUES" >| "$SHM_VALUES"
+    if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
+      bash::trap "rm $SHM_VALUES" EXIT # EXIT executes also on error
+    fi
+
+    echo::debug "Returned the cluster values files $SHM_VALUES"
+
+    echo "$SHM_VALUES"
+    # local SHM_VALUES="/dev/shm/kube-x-cluster-actual-chart-values.yml"
+
+}
 # The synopsis function is required by the doc::usage
 synopsis(){
 
@@ -326,41 +374,47 @@ EOF
 # @stdout - the values
 print_values(){
 
-  # helm show values . | yq
-  ##########################
+  # Context
+  local ACTUAL_CHART_DIRECTORY=$PWD
+  local ACTUAL_CHART_ALIAS
+  ACTUAL_CHART_ALIAS=$(dirname "$PWD" | tr "-" "_");
+  local ACTUAL_CHART_FILE="$ACTUAL_CHART_DIRECTORY/Chart.yaml";
+
+  if [ ! -f "$ACTUAL_CHART_FILE" ]; then
+    echo::err "No actual Chart file found ($ACTUAL_CHART_FILE does not exists)"
+    return 1
+  fi
+
   # Default values
   #
   local SHM_VALUES_FILE=()
-  local ACTUAL_CHART_DIRECTORY=$PWD
-  local -A dependencies
-  eval "dependencies=($(yq -r '.dependencies[] | ["[" + .name + "]=" + .repository] | join(" ")' "$ACTUAL_CHART_DIRECTORY/Chart.yaml"))"
-  for DEPENDENCY_CHART_NAME in "${!dependencies[@]}"; do
-      DEPENDENCY_CHART_REPOSITORY=${dependencies[$DEPENDENCY_CHART_NAME]}
-      if [[ "$DEPENDENCY_CHART_REPOSITORY" != file://* ]]; then
-        echo::warn "$DEPENDENCY_CHART_NAME: Not a repository file path dependency, skipping"
-        continue
-      fi
 
-      local DEPENDENCY_CHART_REPOSITORY=${DEPENDENCY_CHART_REPOSITORY#"file://"}
-      local DEPENDENCY_CHART_DIRECTORY
-      DEPENDENCY_CHART_DIRECTORY=$(realpath "$ACTUAL_CHART_DIRECTORY/$DEPENDENCY_CHART_REPOSITORY")
-      if [ ! -d "$DEPENDENCY_CHART_DIRECTORY" ]; then
-        echo::err "The dependency directory could not be found $DEPENDENCY_CHART_REPOSITORY for the chart $DEPENDENCY_CHART_NAME"
+  local -A dependencies
+  eval "dependencies=($(yq -r '.dependencies[] | ["[" + .name + "]=" + .repository] | join(" ")' "$ACTUAL_CHART_FILE"))"
+  for DEPENDENCY_CHART_NAME in "${!dependencies[@]}"; do
+      local DEPENDENCY_CHART_REPOSITORY=${dependencies[$DEPENDENCY_CHART_NAME]}
+
+      case "$DEPENDENCY_CHART_REPOSITORY" in
+        file://.*)
+            # Delete the file scheme (not supported by `helm get values`
+            DEPENDENCY_CHART_REPOSITORY=${DEPENDENCY_CHART_REPOSITORY#"file://"}
+        ;;
+        *)
+          # Other scheme
+          ;;
+      esac
+      local SHM_DEPENDENCY_CHART_VALUES_FILE="/dev/shm/kube-x-$DEPENDENCY_CHART_NAME.yml"
+      if ! command::echo_debug_eval "helm show values $DEPENDENCY_CHART_REPOSITORY >| $SHM_DEPENDENCY_CHART_VALUES_FILE"; then
+        echo::err "Error while trying to the get values for the Chart $DEPENDENCY_CHART_NAME"
         return 1
       fi
-      local DEPENDENCY_CHART_VALUES_PATH="$DEPENDENCY_CHART_DIRECTORY/values.yaml"
-      if [ ! -f "$DEPENDENCY_CHART_VALUES_PATH" ]; then
-          echo::warn "No values files found at $DEPENDENCY_CHART_VALUES_PATH"
-          continue
-      fi
-      echo::debug "Dependency values files: $DEPENDENCY_CHART_VALUES_PATH (found)"
+
+      # Before merge, dependencies values should be below their alias name property
       local DEPENDENCY_CHART_ALIAS
       DEPENDENCY_CHART_ALIAS=$(echo "$DEPENDENCY_CHART_NAME" | tr "-" "_" )
-      # Before merge, values should be below the name property
-      SHM_DEPENDENCY_CHART_VALUES_FILE="/dev/shm/kube-x-$DEPENDENCY_CHART_NAME.yml"
-      # --null-input: does not have any input as we create a new file
-      if ! command::echo_debug_eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$DEPENDENCY_CHART_VALUES_PATH\"))' >| $SHM_DEPENDENCY_CHART_VALUES_FILE"; then
-        echo::err "Error while processing the chart values file $DEPENDENCY_CHART_VALUES_PATH"
+      # --null-input flag: does not have any input as we create a new file
+      if ! command::echo_debug_eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$SHM_DEPENDENCY_CHART_VALUES_FILE\"))' >| $SHM_DEPENDENCY_CHART_VALUES_FILE"; then
+        echo::err "Error while processing the chart values file $SHM_DEPENDENCY_CHART_VALUES_FILE"
         return 1
       fi
       SHM_VALUES_FILE+=("$SHM_DEPENDENCY_CHART_VALUES_FILE")
@@ -370,28 +424,19 @@ print_values(){
       fi
   done
 
-
-  # Cluster file
-  local KUBE_X_HELM_VALUES;
-  KUBE_X_HELM_VALUES=$(realpath "${KUBE_X_CLUSTER_DIR}/values.yaml")
-  if [ -f "$KUBE_X_HELM_VALUES" ]; then
-    ############################
-    # Variable Substitution
-    # Check the variables
-    if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBE_X_HELM_VALUES"); then
-       # Should exit because of the strict mode
-       # but it was not working
-       echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBE_X_HELM_VALUES"
-       return 1
-    fi
-    local SHM_VALUES="/dev/shm/kube-x-cluster-values.yml"
-    envsubst < "$KUBE_X_HELM_VALUES" >| "$SHM_VALUES"
-    bash::trap "rm $SHM_VALUES" EXIT # EXIT executes also on error
-    SHM_VALUES_FILE+=("$SHM_VALUES")
+  # Chart Own values files
+  local CHART_VALUES_FILE="$ACTUAL_CHART_DIRECTORY/values.yaml"
+  if [ ! -f "$CHART_VALUES_FILE" ]; then
+    echo::warn "No values files found for the actual Chart"
   else
-    echo::warn "No cluster values file found at $KUBE_X_HELM_VALUES"
-    echo::warn "Cluster directory: $KUBE_X_CLUSTER_DIR"
+    SHM_VALUES_FILE+=("$CHART_VALUES_FILE")
   fi
+
+  if ! read -r -a CLUSTER_FILES <<< "$(values_get_cluster_files)"; then
+    echo::err "Error while retrieving the cluster file"
+    return 1;
+  fi
+  SHM_VALUES_FILE+=("${CLUSTER_FILES[@]}")
 
   ###########################
   # Merge
@@ -448,19 +493,22 @@ done
 
 
 # Cluster Directory
-KUBE_X_CLUSTER_DIR=$(kube_x::get_cluster_directory "$KUBE_X_CLUSTER_NAME")
-
-# Envrc
-# Used in all function
-KUBE_X_ENV_FILE="${KUBE_X_CLUSTER_ENV_FILE:-"$KUBE_X_CLUSTER_DIR/.envrc"}"
-if [ -f "$KUBE_X_ENV_FILE" ]; then
-   echo::debug "Sourcing cluster env file $KUBE_X_ENV_FILE"
-   # shellcheck disable=SC1090
-   if ! source "$KUBE_X_ENV_FILE"; then
-     echo::err "Error while importing the envrc file $KUBE_X_ENV_FILE"
-     exit 1
-   fi
+KUBE_X_CLUSTER_DIR=""
+if [ "$KUBE_X_CLUSTER_NAME" != "" ]; then
+  KUBE_X_CLUSTER_DIR=$(kube_x::get_cluster_directory "$KUBE_X_CLUSTER_NAME")
+  # Envrc
+  # Used in all function
+  KUBE_X_ENV_FILE="${KUBE_X_CLUSTER_ENV_FILE:-"$KUBE_X_CLUSTER_DIR/.envrc"}"
+  if [ -f "$KUBE_X_ENV_FILE" ]; then
+     echo::debug "Sourcing cluster env file $KUBE_X_ENV_FILE"
+     # shellcheck disable=SC1090
+     if ! source "$KUBE_X_ENV_FILE"; then
+       echo::err "Error while importing the envrc file $KUBE_X_ENV_FILE"
+       exit 1
+     fi
+  fi
 fi
+
 
 # Assign the first argument to a string
 COMMAND=${1:-}
