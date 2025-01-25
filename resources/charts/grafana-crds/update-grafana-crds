@@ -7,30 +7,35 @@ source bashlib-error.sh
 error::set_strict_mode
 error::set_trap
 source bashlib-echo.sh
+source bashlib-command.sh
 
 # this works for executed script or sourced script
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-# Get the Traefik chart
-GRAFANA_CHART_VERSION=$(yq '.dependencies[] | select(.name == "grafana-operator") | .version' "$SCRIPT_DIR/../../apps/grafana/Chart.yaml" | tr -d '~' )
-if [ "$GRAFANA_CHART_VERSION" == "" ]; then
+# Get the version
+GRAFANA_APP_VERSION=$(yq '.appVersion' "$SCRIPT_DIR"/../grafana/Chart.yaml | tr -d '~' )
+# GRAFANA_APP_VERSION=$(yq '.dependencies[] | select(.name == "grafana-operator") | .version' "$SCRIPT_DIR/../grafana/Chart.yaml" | tr -d '~' )
+if [ "$GRAFANA_APP_VERSION" == "" ]; then
   echo::err "Unable to retrieve the grafana chart version (the value was empty)"
   exit 1
 fi
-echo::info "Updating crds for the Grafana chart $GRAFANA_CHART_VERSION"
-
-GRAFANA_VERSION="???"
+echo::info "Updating crds for the Grafana chart $GRAFANA_APP_VERSION"
 
 
-echo::info "Updating crds Chart.yml with Grafana version: $GRAFANA_VERSION. Chart: $GRAFANA_CHART_VERSION"
-yq ".appVersion = \"$GRAFANA_VERSION\"" -i Chart.yaml
-yq ".version = \"$GRAFANA_CHART_VERSION\"" -i Chart.yaml
+echo::info "Updating crds Chart.yml with Grafana Chart: $GRAFANA_APP_VERSION"
+yq ".appVersion = \"$GRAFANA_APP_VERSION\"" -i Chart.yaml
 
-echo::info "Download the CRD of Grafana $GRAFANA_VERSION"
-curl \
-  -s \
-  -o "templates/crds.yaml" \
-  --fail \
-  "https://github.com/grafana/grafana-operator/releases/download/$GRAFANA_CHART_VERSION/crds.yaml"
+URL="https://github.com/grafana/grafana-operator/releases/download/$GRAFANA_APP_VERSION/crds.yaml"
+TARGET="$SCRIPT_DIR/templates/crds.yaml"
+mkdir -p "$(dirname "$TARGET")"
+echo::info "Download the CRD of Grafana Operator $GRAFANA_APP_VERSION"
+echo::info "Url: $URL"
+echo::info "Target: $TARGET"
+# curl --help http
+# --location  to follow redirections
+# --silent
+# --fail Fail fast with no output on HTTP errors
+command::echo_eval "curl --location -o $TARGET --fail $URL"
+
 
 echo::success "The grafana chart was updated"

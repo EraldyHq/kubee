@@ -51,7 +51,13 @@ A `Kube-x Chart`:
     * the [kube-x Chart](../../resources/charts/kube-x/README.md) to share cluster and installation wide
       * `values.yaml` file 
       * and `library` 
-    * and optionally one other Chart
+    * and optionally: 
+      * cross dependency Charts:
+        * to bring cross values to create cross conditional expression. Example:
+          * conditional: `if cert_manager.enabled then create_certificate_request`
+          * cross: `if prometheus.enabled then create_grafana_data_source with promtheus.name`
+        * with a mandatory false condition `kube_x_internal.dont_install_dependency: false`
+      * direct/wrapped dependency Chart (for instance, `kube-x-external-secrets` wraps the `external-secret` Chart)
   * with optional `Jsonnet` and `kustomize` processing through [the kube-x helm post-renderer](kube-x-helm-post-renderer.md)
     
 * installs only one application as `kube-x` is a platform. 
@@ -101,14 +107,20 @@ to manage your infrastructure.
 
 # What is the format of a Cluster Values file?
 
-Every root property in a cluster values file is the alias name of the chart.
+Rules:
+* Hard: Every root property in a cluster values file is the alias name of the chart in `snake_case`.
+* Soft: Every property name should be written in `snake_case` 
+  * Why? `hyphen-case` is not supported by Helm Template (ie Go template)
+  * Why Not in `CamelCase`? So that we get used to the fact that we don't use `-` as a separator
 
 Example:
 ```yaml
 chart_1:
   hostname: foo.bar
+  issuer_name: julia
 chart_2:
   hostname: bar.foo
+  dns_zones: []
 ```
 
 Helx will transform it in a compliant Helm values.

@@ -1,4 +1,14 @@
-
+# Not a string, a boolean so no quote
+enabled: false
+# Namespace
+namespace: 'external-secrets'
+# Cluster Secret Store
+# We support only vault for now
+# If the api token is not empty and vault is enabled, a vault secret store is created
+store:
+  name: 'kube-x-external-secret-store'
+  vault:
+    api_token: ''
 
 external-secrets:
   # Installed with our chart

@@ -1,0 +1,28 @@
+
+
+# Not a string, a boolean so no quote
+enabled: false
+# namespace
+namespace: 'grafana'
+# The name of the instance (known also as label)
+# It's used :
+# * as selector to apply CRD objects such as Dashboard, .... to this instance. https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
+# * as the instance name
+name: 'grafana'
+# The type of instance:
+# * internal: installation of grafana in the cluster
+# * external: grafana api (for instance: grafana cloud instance, if external, the apiToken is mandatory)
+# An empty type does not install any instance
+type: 'internal'
+# The hostname
+# A non-empty Hostname for a cluster instance will create an ingress
+# The hostname may be used in Prometheus alert to reference dashboard
+# For a Grafana cloud instance, you need to enter: <Grafana-cloud-stack-name>.grafana.net
+hostname: ''
+# The auth credential (used for an external instance)
+api_token: ''
+
+# The data sources created
+data_sources:
+  prometheus:
+    name: 'prometheus'

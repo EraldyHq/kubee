@@ -21,9 +21,4 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "v0.76.2" # The version of prometheus operator
-
-# The versions in kube-prometheus (used by the jsonnet script)
-# noinspection HelmChartUnknownKeys
-versions:
-  prometheusOperator: "0.76.2" # operator (without the v in kube-prometheus)
+appVersion: "v0.79.2" # The version of prometheus operator

@@ -141,14 +141,6 @@ apply(){
   # The final helm command (installation, or template)
   local HELM_COMMAND=("helm")
 
-  # Package Name
-  # Come first because we use it in the log
-  CHART_NAME="${2:-}"
-  if [ "$CHART_NAME" == "" ]; then
-    echo::err "A package name is mandatory as second argument"
-    return 1
-  fi
-
   # Mode
   COMMAND=${1:-}
   if [ "$COMMAND" == "" ]; then
@@ -197,13 +189,6 @@ apply(){
   fi
   HELM_COMMAND+=("-f" "${KUBE_X_VALUES_PATH}")
 
-  # Chart Directory
-  if ! CHART_DIRECTORY=$(get_chart_directory "$CHART_NAME"); then
-    echo::err "No chart directory found with the name ($CHART_NAME) in"
-    echo::err "  * the cluster resources directory (${KUBE_X_RESOURCE_CHARTS_DIR}) " # the /resources/charts dir
-    echo::err "  * or the paths of the KUBE_X_CHARTS_PATH variable (${KUBE_X_CHARTS_PATH:-'not set'})"
-    exit 1
-  fi
 
   # CRD
   CRD_SUFFIX="-crds"
@@ -393,10 +378,9 @@ EOF
 print_values(){
 
   # Context
-  local ACTUAL_CHART_DIRECTORY=$PWD
+  local ACTUAL_CHART_FILE="$CHART_DIRECTORY/Chart.yaml";
   local ACTUAL_CHART_ALIAS
-  ACTUAL_CHART_ALIAS=$(basename "$PWD" | tr "-" "_");
-  local ACTUAL_CHART_FILE="$ACTUAL_CHART_DIRECTORY/Chart.yaml";
+  ACTUAL_CHART_ALIAS=$(echo "$CHART_NAME" | tr "-" "_");
 
   if [ ! -f "$ACTUAL_CHART_FILE" ]; then
     echo::err "No actual Chart file found ($ACTUAL_CHART_FILE does not exists)"
@@ -408,32 +392,34 @@ print_values(){
   local SHM_VALUES_FILE=()
 
   local -A dependencies
-  eval "dependencies=($(yq -r '.dependencies[] | ["[" + .name + "]=" + .repository] | join(" ")' "$ACTUAL_CHART_FILE"))"
-  for DEPENDENCY_CHART_NAME in "${!dependencies[@]}"; do
-      local DEPENDENCY_CHART_REPOSITORY=${dependencies[$DEPENDENCY_CHART_NAME]}
+  eval "dependencies=($(yq -r '.dependencies[] | ["[" + .alias + "]=" + .repository] | join(" ")' "$ACTUAL_CHART_FILE"))"
+  for DEPENDENCY_CHART_ALIAS in "${!dependencies[@]}"; do
+      local DEPENDENCY_CHART_REPOSITORY=${dependencies[$DEPENDENCY_CHART_ALIAS]}
+      if [ "$DEPENDENCY_CHART_ALIAS" == "" ]; then
+        echo::err "All dependency should have an alias"
+        echo::err "The repository $DEPENDENCY_CHART_REPOSITORY does not have one"
+        return 1
+      fi
 
       case "$DEPENDENCY_CHART_REPOSITORY" in
         file://.*)
           # Delete the file scheme (not supported by `helm get values`
-          DEPENDENCY_CHART_REPOSITORY=${DEPENDENCY_CHART_REPOSITORY#"file://"}
+          DEPENDENCY_CHART_REPOSITORY="$CHART_DIRECTORY/${DEPENDENCY_CHART_REPOSITORY#"file://"}"
         ;;
         *)
           # Other scheme
         ;;
       esac
-      local SHM_DEPENDENCY_CHART_VALUES_FILE="/dev/shm/kube-x-$DEPENDENCY_CHART_NAME.yml"
+      local SHM_DEPENDENCY_CHART_VALUES_FILE="/dev/shm/kube-x-$DEPENDENCY_CHART_ALIAS.yml"
       if ! command::echo_debug_eval "helm show values $DEPENDENCY_CHART_REPOSITORY >| $SHM_DEPENDENCY_CHART_VALUES_FILE"; then
-        echo::err "Error while trying to the get values for the Chart $DEPENDENCY_CHART_NAME"
+        echo::err "Error while trying to the get values for the Chart $DEPENDENCY_CHART_ALIAS"
         return 1
       fi
       if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
         bash::trap "rm $SHM_DEPENDENCY_CHART_VALUES_FILE" EXIT # EXIT executes also on error
       fi
 
-      # Before merge, dependencies values should be below their alias name property
-      local DEPENDENCY_CHART_ALIAS
-      DEPENDENCY_CHART_ALIAS=$(echo "$DEPENDENCY_CHART_NAME" | tr "-" "_" )
-      local SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE="/dev/shm/kube-x-$DEPENDENCY_CHART_NAME-with_scope.yml"
+      local SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE="/dev/shm/kube-x-$DEPENDENCY_CHART_ALIAS-with_scope.yml"
       # --null-input flag: does not have any input as we create a new file
       if ! command::echo_debug_eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$SHM_DEPENDENCY_CHART_VALUES_FILE\"))' >| $SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE"; then
         echo::err "Error while processing the chart values file $SHM_DEPENDENCY_CHART_VALUES_FILE"
@@ -447,12 +433,15 @@ print_values(){
   done
 
   # Chart Own values files
-  local CHART_VALUES_FILE="$ACTUAL_CHART_DIRECTORY/values.yaml"
+  local CHART_VALUES_FILE="$CHART_DIRECTORY/values.yaml"
   if [ ! -f "$CHART_VALUES_FILE" ]; then
-    echo::warn "No values files found for the actual Chart"
-  else
-    SHM_VALUES_FILE+=("$CHART_VALUES_FILE")
+    echo::err "No values files found for the actual Chart"
+    # mandatory because sometimes it's written values.yml and
+    # enabled and namespace are mandatory anyway
+    return 1
   fi
+  SHM_VALUES_FILE+=("$CHART_VALUES_FILE")
+
 
   if ! CLUSTER_VALUE_FILES=$(get_cluster_values_files); then
     echo::err "Error while trying to retrieve the cluster values"
@@ -534,6 +523,21 @@ if [ "$KUBE_X_CLUSTER_NAME" != "" ]; then
   fi
 fi
 
+# Package Name
+# Come first because we use it in the log, we use it in all command
+CHART_NAME="${2:-}"
+if [ "$CHART_NAME" == "" ]; then
+  echo::err "A package name is mandatory as second argument"
+  return 1
+fi
+
+# Chart Directory
+if ! CHART_DIRECTORY=$(get_chart_directory "$CHART_NAME"); then
+  echo::err "No chart directory found with the name ($CHART_NAME) in"
+  echo::err "  * the cluster resources directory (${KUBE_X_RESOURCE_CHARTS_DIR}) " # the /resources/charts dir
+  echo::err "  * or the paths of the KUBE_X_CHARTS_PATH variable (${KUBE_X_CHARTS_PATH:-'not set'})"
+  exit 1
+fi
 
 # Assign the first argument to a string
 COMMAND=${1:-}

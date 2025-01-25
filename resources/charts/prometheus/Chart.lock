@@ -8,5 +8,8 @@ dependencies:
 - name: kube-x-external-secrets
   repository: file://../external-secrets
   version: 0.0.1
-digest: sha256:3a6ea87404661041485fd943d51895a015acf2543ecaf4ec78a50b3852a6c45b
-generated: "2025-01-24T22:31:35.688666495+01:00"
+- name: kube-x-prometheus-crds
+  repository: file://../prometheus-crds
+  version: 0.0.1
+digest: sha256:75253973140291cb8a5d184e92cf2e9249bace738ba44891dec422ff725ac0cd
+generated: "2025-01-25T16:52:42.148688611+01:00"

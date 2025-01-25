@@ -3,6 +3,11 @@
 
 local validation = import './kube_x/validation.libsonnet';
 
+// Get the version from the Chart.yaml
+local chart = {
+    appVersion: error "Chart appVersion is required (ie should be prometheusOperator)"
+} + std.parseYaml(importstr '../../Chart.yaml');
+
 local kxExtValues = std.extVar('values');
 // Values are flatten, so that we can:
 // * use the + operator and the error pattern in called library
@@ -12,22 +17,25 @@ local kxValues = {
   # Cluster
   cluster_name: validation.notNullOrEmpty(kxExtValues, 'kube_x.cluster.name'),
 
-  # Secret
-  secret_type: validation.notNullOrEmpty(kxExtValues, 'kube_x.cluster.secret'),
+  # Secret Kind
+  secret_type: validation.notNullOrEmpty(kxExtValues, 'secret.kind'),
+
+  # External Secret
+  external_secret_enabled: validation.notNullOrEmpty(kxExtValues, 'external_secrets.enabled'),
   external_secret_store_name: validation.notNullOrEmpty(kxExtValues, 'external_secrets.store.name'),
 
   // Cert Manager
-  cert_manager_enabled: validation.getNestedPropertyOrThrow(kxExtValues, 'kube_x.cert_manager.enabled'),
-  cert_manager_issuer_name: validation.getNestedPropertyOrThrow(kxExtValues, 'cert_manager.defaultIssuerName'),
+  cert_manager_enabled: validation.getNestedPropertyOrThrow(kxExtValues, 'cert_manager.enabled'),
+  cert_manager_issuer_name: validation.getNestedPropertyOrThrow(kxExtValues, 'cert_manager.issuername'),
 
   // Local
   prometheus_namespace: validation.notNullOrEmpty(kxExtValues, 'namespace'),
   prometheus_hostname: validation.getNestedPropertyOrThrow(kxExtValues, 'hostname'),
   prometheus_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'resources.memory'),
   prometheus_retention: validation.getNestedPropertyOrThrow(kxExtValues, 'retention'),
-  prometheus_version: '3.1.0',
+  prometheus_version: validation.getNestedPropertyOrThrow(kxExtValues, 'version'),
   prometheus_operator_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'operator.resources.memory'),
-  prometheus_operator_version: '0.79.2',
+  prometheus_operator_version: std.substr(chart.appVersion, 1, std.length(chart.appVersion) - 1),
   // No Rbac Proxy Sidecar or Network Policies
   // Why? Takes 20Mb memory by exporter
   noRbacProxy: true,
@@ -43,6 +51,8 @@ local kxValues = {
 
 
 };
+
+
 
 local kp =
   (import 'kube-prometheus/main.libsonnet') +

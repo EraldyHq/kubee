@@ -6,10 +6,10 @@ local kxExtValues = std.extVar('values');
 // * we can easily rename
 local kxValues = {
 
-  kubernetes_monitoring_namespace: validation.notNullOrEmpty(kxExtValues, 'kube_x.kubernetes_monitoring.namespace'),
-  grafana_name: validation.notNullOrEmpty(kxExtValues, 'kube_x.grafana.name'),
+  kubernetes_monitoring_namespace: validation.notNullOrEmpty(kxExtValues, 'namespace'),
+  grafana_name: validation.notNullOrEmpty(kxExtValues, 'grafana.name'),
   grafana_folder: 'kubernetes-monitoring',
-  grafana_data_source: 'prometheus',
+  grafana_data_source: validation.notNullOrEmpty(kxExtValues, 'grafana.data_source.prometheus.name')
 
 };
 
@@ -34,7 +34,8 @@ local kpValues = {
     versions: {
       kubeStateMetrics: error 'must provide version',
       nodeExporter: error 'must provide version',
-      prometheusAdapter: error 'must provide version',
+      # RbacProxy is used by kube-prometheus to protect exporter endpoints
+      # We delete it but it's mandatory by the code
       kubeRbacProxy: error 'must provide version',
     } + (import 'kube-prometheus/versions.json'),
     images: {

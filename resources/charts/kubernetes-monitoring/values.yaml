@@ -1,0 +1,70 @@
+# Install Monitoring for the core Kubernetes components
+# Api Server, Dns, Controller Manager, Kubelet, Scheduler
+
+# Not a string, a boolean so no quote
+enabled: false
+# namespace. This is a prometheus component
+namespace: 'monitoring'
+
+# The mixin
+# https://github.com/kubernetes-monitoring/kubernetes-mixin
+kube_mixin:
+  alerts_enabled:
+    kubernetes_apps
+    kubernetes_resources
+    kubernetes_storage
+    kubernetes_system
+    kube_apiserver_slos
+    kubernetes_system_apiserver
+    kubernetes_system_kubelet
+    kubernetes_system_scheduler
+    kubernetes_system_controller_manager
+    kubernetes_system_kube_proxy
+  recording_rules_enabled:
+    apps: false
+    # https://monitoring.mixins.dev/kubernetes/#kube-apiserver-availabilityrules
+    api_server_availability: false
+    api_server_burn_rate: false
+    api_server_config: false
+    node_rules: false
+
+#  Recording rules
+#  kube-apiserver-availability.rules
+#  kube-apiserver-burnrate.rules
+#  kube-apiserver-histogram.rules
+#  k8s.rules.container_cpu_usage_seconds_total
+#  k8s.rules.container_memory_working_set_bytes
+#  k8s.rules.container_memory_rss
+#  k8s.rules.container_memory_cache
+#  k8s.rules.container_memory_swap
+#  k8s.rules.container_memory_requests
+#  k8s.rules.container_cpu_requests
+#  k8s.rules.container_memory_limits
+#  k8s.rules.container_cpu_limits
+#  k8s.rules.pod_owner
+#  kube-scheduler.rules
+#  node.rules
+#  kubelet.rules
+
+
+# Kube State Metrics Exporter
+# It exports apps/functional state metrics
+# https://github.com/kubernetes/kube-state-metrics
+kube_state_metrics:
+  enabled: false
+  version: 'v2.14.0'
+
+# Node Exporter to gather server resources metrics
+# https://github.com/prometheus/node_exporter
+node_exporter:
+  enabled: false
+  version:
+
+# Rbac Proxy
+# if enabled, every exporter (node and state metrics) will get an extra containers
+# that handle RBAC authorization
+# The drawback is authorization problem and memory shortage (20M by exporters)
+# https://github.com/brancz/kube-rbac-proxy
+kube_rbac_proxy:
+  enabled: false
+  version: 0.18.2

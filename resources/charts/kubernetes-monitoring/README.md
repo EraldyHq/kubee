@@ -22,7 +22,7 @@ The following monitoring elements are installed for each:
 * prometheus alerts and rules
   * `kubernetes-apps`: kube-state-metrics metrics
   * `kubernetes-resources`: kube-state-metrics metrics 
-* and grafana dashboard
+* and [grafana dashboards](https://monitoring.mixins.dev/kubernetes/#dashboards)
   * `Kubernetes / API server`
   * `Kubernetes Kubelet` 
   * `Kubernetes / Persistent Volumes`

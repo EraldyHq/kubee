@@ -68,8 +68,6 @@ kubernetes_dashboard:
 kubernetes_monitoring:
   # Not a string, a boolean so no quote
   enabled: false
-  # namespace. This is a prometheus component
-  namespace: 'prometheus'
 
 # Kube-X Traefik Variables
 traefik:
@@ -163,62 +161,7 @@ prometheus_adapter:
   # The installation namespace
   namespace: 'prometheus' # prometheus component
 
-# The cert manager with monitoring (alert and dashboard)
-cert_manager:
-  # If true, certificate are created for ingress routes.
-  # When disabled, the default certificate specified on Traefik is used
-  # Not a string, a boolean so no quote
-  enabled: false
-  # Namespace
-  namespace: 'cert-manager'
 
-  # The issuer used in all certificate request
-  # of kube-x.
-  # Should be changed to 'letsencrypt-prod'
-  # when validated
-  defaultIssuerName: 'letsencrypt-staging'
-
-  # Issuers endpoint
-  acmeIssuers:
-    prod:
-      name: 'letsencrypt-prod'
-      url: 'https://acme-v02.api.letsencrypt.org/directory'
-    staging:
-      name: 'letsencrypt-staging'
-      url: 'https://acme-staging-v02.api.letsencrypt.org/directory'
-
-  # Http01 challenge
-  # https://cert-manager.io/docs/tutorials/acme/http-validation/
-  # This is the default configuration if there is no DNS challenge configured for the domain,
-  # You need then to update your DNS to add an A or CNAME record to point the domain name at the correct IP address
-  # Wildcard certificates are not supported with HTTP01 validation and require DNS01.
-  # This challenge is disabled if ingressClassName is empty
-  http01:
-    # Default IngressClassName
-    # Used by cert manager to create ingress resource to resolve the http01 challenge
-    # A new ingress resource with a randomly generated name is created in order to solve the challenge.
-    ingressClassName: traefik
-
-  # Dns01 challenge
-  # You don't need to publish a DNS A record
-  dns01:
-    # Doc: https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/
-    # Spec: https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderCloudflare
-    # Notes: in the doc, they use an email because they show an apiKey Auth, not an apiToken
-    # `ApiToken` is now the preferred method
-    cloudflare:
-      # See cert-manager/README.md on how to get cloudflare api key
-      # A secret or external secret can be created
-      secret:
-        # A Kubernetes secret will be created if not empty
-        cloudflareApiToken: ''
-        # An external secret will be created
-        # if remote ref key is not empty
-        externalSecretRemoteRef:
-          key: ''
-          property: ''
-      # The dns Zones that are managed by cloudflare, mandatory
-      dnsZones: []
 
 # An HTTP application that gives you HTTP information
 # used to control Ingress configuration such as traefik
@@ -231,31 +174,6 @@ whoami:
   # Namespace
   namespace: 'whoami'
 
-
-
-# Grafana with grafana Operator
-grafana:
-  # Not a string, a boolean so no quote
-  enabled: false
-  # namespace
-  namespace: 'grafana'
-  # The name of the instance (known also as label)
-  # It's used :
-  # * as selector to apply CRD objects such as Dashboard, .... to this instance. https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
-  # * as the instance name
-  name: 'grafana'
-  # The type of instance:
-  # * internal: installation of grafana in the cluster
-  # * external: grafana api (for instance: grafana cloud instance, if external, the apiToken is mandatory)
-  # An empty type does not install any instance
-  type: 'internal'
-  # The hostname
-  # A non-empty Hostname for a cluster instance will create an ingress
-  # The hostname may be used in Prometheus alert to reference dashboard
-  # For a Grafana cloud instance, you need to enter: <Grafana-cloud-stack-name>.grafana.net
-  hostname: ''
-  # The auth credential (used for an external instance)
-  apiToken: ''
 
 # Hashicorp Vault
 vault:
@@ -272,20 +190,6 @@ vault:
     version: 2
     # the mount Path
     mountPath: 'secret'
-
-# External Secrets
-external_secrets:
-  # Not a string, a boolean so no quote
-  enabled: false
-  # Namespace
-  namespace: 'external-secrets'
-  # Cluster Secret Store
-  # We support only vault for now
-  # If the api token is not empty and vault is enabled, a vault secret store is created
-  store:
-    name: 'kube-x-external-secret-store'
-    vault:
-      apiToken: ''
 
 # Argocd
 argocd:

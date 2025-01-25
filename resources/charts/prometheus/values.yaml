@@ -1,6 +1,9 @@
-
-# The installation namespace (used by Grafana to create the data source)
-namespace: 'prometheus'
+# The installation namespace
+# used by the Grafana Chart to create the data source URI
+namespace: 'monitoring'
+# The prometheus version
+# https://github.com/prometheus/prometheus/releases
+version: '3.1.0'
 # Prometheus with Prometheus Operator
 # If not null, an ingress is added
 hostname: ''
@@ -47,5 +50,11 @@ operator:
     memory: '50Mi'
 
 # Tweak to not apply the dependencies
-dependency:
-  enabled: false
+kube_x_internal:
+  dont_install_dependency: false
+
+# The kind of secret created
+secret:
+  # The kind of manifest created
+  # Values supported `Secret` or `ExternalSecret`
+  kind: 'Secret'

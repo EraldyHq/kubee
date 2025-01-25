@@ -8,8 +8,8 @@
           "subdir": "jsonnet/prometheus-operator"
         }
       },
-      "version": "d38b976c4a76ae2c2f0b772f5911fd1f6b9d183d",
-      "sum": "Qs56OWJ2PLCEGRPlJ2Xd1LukXKj8KBzqMYncwjYTEwo="
+      "version": "b12e3cbec283ae8d778ba64299d664d98e711c15",
+      "sum": "gOCVfxMEvdSyPdh7c3UJPZoxHOUUTT6z5G2sZ8PACCM="
     }
   ],
   "legacyImports": false
