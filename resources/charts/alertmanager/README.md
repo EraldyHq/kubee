@@ -2,19 +2,21 @@
 
 
 ## About
-The alert manager manages alerts created by the Prometheus server.
-
-It can:
-* aggregate them,
-* silence them,
+`Prometheus Alert manager` receives alerts from Prometheus
+and manage them:
+* silence, 
+* group,
+* aggregate
 * route them to:
-  * email 
-  * or an external incident management platform such as OpsGenie. 
+  * email
+  * or an external incident management platform such as OpsGenie.
+
+ 
 
 ## Install
 
 ```bash
-kube-x-helm-x --cluster clusterName alertmanager
+kube-x-helm-x --cluster clusterName play alertmanager
 ```
 
 ## Inspect

@@ -111,23 +111,6 @@ prometheus:
   enabled: false
 
 
-# Prometheus Alert manager that receives alert from Prometheus and manage them (silence, group, send alerts to email or external services)
-alertmanager:
-  # Enable or disable alert manager
-  # Not a string, a boolean so no quote
-  enabled: false
-  # The installation namespace (should be the same as prometheus)
-  namespace: 'prometheus'
-  # hostname (install an ingress if not empty)
-  hostname: ''
-  # Opsgenie integration to send alert
-  # Enabled if the api key is not empty
-  opsgenie:
-    apiKey: ''
-  # Memory
-  resources:
-    memory: '50Mi'
-
 
 # Prometheus node exporter to gather server metrics, install dashboard and alerts
 # for node (ie OS, ie VPS)
@@ -139,12 +122,7 @@ node_exporter:
 
 # Prometheus Pushgateway to send metrics to Prometheus from a job
 pushgateway:
-  # Not a string, a boolean so no quote
-  enabled: false
-  # hostname (install an ingress if not empty)
-  hostname: ''
-  # The installation namespace
-  namespace: 'prometheus' # prometheus component
+  enabled: true
 
 # A prometheus exporter - Blackbox to do synthetic probe monitoring (ie verify the status of http,dns,... query)
 # Probe definition can be done via the Probes Manifest of prometheus operator

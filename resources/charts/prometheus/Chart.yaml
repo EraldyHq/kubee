@@ -24,6 +24,7 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # https://github.com/prometheus-operator/prometheus-operator/releases
 appVersion: "v0.79.2" # The version of prometheus operator (should be the same on crds)
 
+# The dependencies
 dependencies:
   - name: kube-x
     version: 0.0.1
@@ -39,13 +40,20 @@ dependencies:
     repository: file://../external-secrets
     alias: external_secrets
     condition: kube_x_internal.dont_install_dependency
+  # For the alert integraton
+  - name: kube-x-alertmanager
+    version: 0.0.1
+    repository: file://../alertmanager
+    alias: alert_manager
+    condition: kube_x_internal.dont_install_dependency
+  # For the dashboard
+  - name: kube-x-grafana
+    version: 0.0.1
+    repository: file://../grafana
+    alias: grafana
+    condition: kube_x_internal.dont_install_dependency
   # Not sure
   - name: kube-x-prometheus-crds
     version: 0.0.1
     repository: file://../prometheus-crds
     condition: kube_x_internal.dont_install_dependency
-
-# noinspection HelmChartUnknownKeys
-kube_x:
-  versions:
-    kube-prometheus: v0.14.0

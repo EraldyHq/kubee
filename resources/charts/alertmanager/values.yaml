@@ -1,0 +1,22 @@
+# Enable or disable alert manager
+# Not a string, a boolean so no quote
+enabled: false
+# version
+# https://github.com/prometheus/alertmanager/releases
+version: "v0.28.0"
+# The installation namespace
+# The same value as kube-prometheus
+namespace: 'monitoring'
+# Instance name
+# The operator uses it to create unique alertmanager
+# It's also a Kube-Prometheus mandatory variable
+name: 'kube-x'
+# hostname (install an ingress if not empty)
+hostname: ''
+# Opsgenie integration to send alert
+# Enabled if the api key is not empty
+opsgenie:
+  api_key: ''
+# Memory
+resources:
+  memory: '50Mi'

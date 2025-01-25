@@ -1,6 +1,11 @@
+# Enabled
+enabled: false
 # The installation namespace
 # used by the Grafana Chart to create the data source URI
 namespace: 'monitoring'
+# The name of the prometheus instance
+# (used by the grafana Chart to create a connection)
+name: 'kube-x'
 # The prometheus version
 # https://github.com/prometheus/prometheus/releases
 version: '3.1.0'
@@ -49,12 +54,17 @@ operator:
     # Memory of the prometheus operator instance (value based on experience)
     memory: '50Mi'
 
-# Tweak to not apply the dependencies
-kube_x_internal:
-  dont_install_dependency: false
 
 # The kind of secret created
 secret:
   # The kind of manifest created
   # Values supported `Secret` or `ExternalSecret`
   kind: 'Secret'
+
+
+# Tweak to not output the template of the kube-x cross-dependency chart
+# in the prometheus release
+# It's used in the chart dependencies condition
+# Don't modify, don't change
+kube_x_internal:
+  dont_install_dependency: false

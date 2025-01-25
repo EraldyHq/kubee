@@ -1,9 +1,15 @@
 dependencies:
 - name: grafana-operator
   repository: oci://ghcr.io/grafana/helm-charts
-  version: v5.15.1
+  version: v5.16.0
 - name: kube-x
   repository: file://../kube-x
   version: 0.0.1
-digest: sha256:05343706012b4ed09111e21110a5074769e114a48ac2b007d9117370dcd19b79
-generated: "2025-01-08T10:21:29.760077065+01:00"
+- name: kube-x-prometheus
+  repository: file://../prometheus
+  version: 0.0.1
+- name: kube-x-cert-manager
+  repository: file://../cert-manager
+  version: 0.0.1
+digest: sha256:a763f2d1aa3b8344fad29dea3e0ee7c46b296e4f53d6d89f604c1fe1d70c68d7
+generated: "2025-01-25T23:14:30.58206333+01:00"

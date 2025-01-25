@@ -65,8 +65,8 @@ is_helm_chart_installed() {
   # The revision may be installed in another namespace
   if ACTUAL_NAMESPACE=$(helm list --all-namespaces --no-headers --filter "$CHART_RELEASE_NAME" | awk '{print $2}'); then
     echo::info "Release found: $ACTUAL_NAMESPACE/$CHART_RELEASE_NAME"
-    if [ "$ACTUAL_NAMESPACE" != "$CHART_RELEASE_NAMESPACE" ]; then
-      echo::err "The name $CHART_RELEASE_NAME was already found in the namespace $ACTUAL_NAMESPACE instead of the namespace $CHART_NAMESPACE"
+    if [ "$ACTUAL_NAMESPACE" != "" ] && [ "$ACTUAL_NAMESPACE" != "$CHART_RELEASE_NAMESPACE" ]; then
+      echo::err "The name $CHART_RELEASE_NAME was already found in the namespace ($ACTUAL_NAMESPACE) instead of the namespace $CHART_NAMESPACE"
       exit 1
     fi
   fi
@@ -132,7 +132,16 @@ install_crd_first(){
   # recursion
   # We don't use helm directly as we have now CRD charts that are only with Jsonnet
   echo::info "Installing CRD Chart $PACKAGE_CRDS_NAME in namespace $CHART_NAMESPACE"
-  command::echo_eval "$(basename "$0") play -n $CHART_NAMESPACE $PACKAGE_CRDS_NAME"
+  if ! command::echo_eval "$(basename "$0") play -n $CHART_NAMESPACE $PACKAGE_CRDS_NAME"; then
+    return 1
+  fi
+
+  # The recursion overwrite the chart values files
+  # We regenerate it
+  if ! print_values >| $CHART_VALUES_PATH; then
+    echo::err "An error has happened while generating the values file for the chart"
+    return 1
+  fi
 
 }
 
@@ -175,19 +184,7 @@ apply(){
   KUBECTX_ENV=$(source kubectl-xenv) || error::exit $?
   eval "$KUBECTX_ENV"
 
-  # The kube-x values
-  # We need them to determine the namespace
-  KUBE_X_VALUES_PATH="/dev/shm/kube-x-values.yml"
-  if ! print_values >| $KUBE_X_VALUES_PATH; then
-    echo::err "An error has happened while generating the values file"
-    return 1
-  fi
-  # In debug mode, we don't delete it to be able to run the
-  # command again
-  if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
-    bash::trap "rm $KUBE_X_VALUES_PATH" EXIT # EXIT execute also on error
-  fi
-  HELM_COMMAND+=("-f" "${KUBE_X_VALUES_PATH}")
+  HELM_COMMAND+=("-f" "${CHART_VALUES_PATH}")
 
 
   # CRD
@@ -198,26 +195,6 @@ apply(){
     IS_CRD_CHART=1
   fi
 
-  # Package Namespace
-  CHART_NAMESPACE=${KUBE_X_NAMESPACE:-}
-  if [ "$CHART_NAMESPACE" == "" ]; then
-
-    # replace - by _ because Go templating does not support `-`
-    # delete the crds if this is a crds package
-    PACKAGE_YAML_KEY=$(echo "${CHART_NAME%"$CRD_SUFFIX"}" | tr "-" "_")
-    VALUES_NAMESPACE_PATH=".kube_x.$PACKAGE_YAML_KEY.namespace"
-    CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$KUBE_X_VALUES_PATH")
-    if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
-      echo::info "No namespace found at $VALUES_NAMESPACE_PATH"
-      CHART_NAMESPACE="$CHART_NAME"
-      echo::info "Default namespace $CHART_NAMESPACE used"
-    else
-      echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
-    fi
-  else
-    echo::info "Namespace specified ($CHART_NAMESPACE) via command line flag"
-  fi
-
   HELM_COMMAND+=(
     "--namespace" "$CHART_NAMESPACE"
     "--create-namespace"
@@ -225,7 +202,10 @@ apply(){
 
 
   # Install CRD first
-  install_crd_first
+  if ! install_crd_first; then
+    echo::err "An error has occurred while installing the CRD chart"
+    return 1
+  fi
 
 
   # To update the kube-x helm
@@ -241,7 +221,7 @@ apply(){
   HELM_COMMAND+=(
     "--post-renderer" "kube-x-helm-post-renderer"
     "--post-renderer-args" "$CHART_DIRECTORY"
-    "--post-renderer-args" "$KUBE_X_VALUES_PATH"
+    "--post-renderer-args" "$CHART_VALUES_PATH"
     "--post-renderer-args" "$CHART_NAMESPACE"
     )
 
@@ -339,7 +319,7 @@ get_cluster_values_files(){
     echo::debug "Returned the cluster chart values files $SHM_CLUSTER_CHART_VALUES"
 
     echo::debug "Delete the property $ACTUAL_CHART_ALIAS of the cluster values files for cleanness"
-    yq "del(.$ACTUAL_CHART_ALIAS)" $SHM_CLUSTER_VALUES >| $SHM_CLUSTER_VALUES
+    yq -i "del(.$ACTUAL_CHART_ALIAS)" $SHM_CLUSTER_VALUES
 
     # return
     echo "${CLUSTER_FILES[@]}"
@@ -373,7 +353,7 @@ EOF
 
 
 # @description
-#     Print the kube-x values files
+#     Print the kube-x values file for the chart
 # @stdout - the values
 print_values(){
 
@@ -435,12 +415,16 @@ print_values(){
   # Chart Own values files
   local CHART_VALUES_FILE="$CHART_DIRECTORY/values.yaml"
   if [ ! -f "$CHART_VALUES_FILE" ]; then
-    echo::err "No values files found for the actual Chart"
-    # mandatory because sometimes it's written values.yml and
-    # enabled and namespace are mandatory anyway
-    return 1
+    if [[ "$CHART_NAME" != *-crds ]]; then
+      echo::err "No values files found for the actual Chart"
+      # mandatory because sometimes it's written values.yml and
+      # enabled and namespace are mandatory anyway
+      return 1
+    fi
+  else
+    SHM_VALUES_FILE+=("$CHART_VALUES_FILE")
   fi
-  SHM_VALUES_FILE+=("$CHART_VALUES_FILE")
+
 
 
   if ! CLUSTER_VALUE_FILES=$(get_cluster_values_files); then
@@ -539,6 +523,33 @@ if ! CHART_DIRECTORY=$(get_chart_directory "$CHART_NAME"); then
   exit 1
 fi
 
+# The kube-x values
+# We need them to determine the namespace
+CHART_VALUES_PATH="/dev/shm/kube-x-values.yml"
+if ! print_values >| $CHART_VALUES_PATH; then
+  echo::err "An error has happened while generating the values file for the chart"
+  exit 1
+fi
+# In debug mode, we don't delete it
+if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
+  bash::trap "rm $CHART_VALUES_PATH" EXIT # EXIT execute also on error
+fi
+
+# Package Namespace
+CHART_NAMESPACE=${KUBE_X_NAMESPACE:-}
+if [ "$CHART_NAMESPACE" == "" ]; then
+
+  VALUES_NAMESPACE_PATH=".namespace"
+  CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$CHART_VALUES_PATH")
+  if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
+    echo::error "No namespace found at $VALUES_NAMESPACE_PATH"
+    exit 1
+  fi
+  echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
+else
+  echo::info "Namespace specified ($CHART_NAMESPACE) via command line flag"
+fi
+
 # Assign the first argument to a string
 COMMAND=${1:-}
 if [ "$COMMAND" = "" ]; then
@@ -561,8 +572,14 @@ case "$COMMAND" in
     synopsis
     ;;
   "values")
-    # Don't know how yq does it but the output is already colored
-    print_values
+    # The -t test checks if the file descriptor is connected to a terminal.
+    # When in a pipeline, stdout is redirected and not connected to a terminal.
+    if [ -t 1 ]; then
+      # Not in a pipeline (terminal output)
+      yq "$CHART_VALUES_PATH"
+      exit 0
+    fi
+    cat "$CHART_VALUES_PATH"
     ;;
   *)
     doc::help synopsis

@@ -5,8 +5,11 @@
 This `Kube-x` chart installs and configures:
 * install the [prometheus operator](https://prometheus-operator.dev/) 
 * install a prometheus server
+* the [Promtheus Alert and dashboards](https://monitoring.mixins.dev/prometheus/#dashboards)
+* the [Promtheus Operator Alerts](https://monitoring.mixins.dev/prometheus-operator/)
 
 ## How to
+
 ### Install
 
 ```bash

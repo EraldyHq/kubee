@@ -26,10 +26,14 @@ local kxValues = {
 
   // Cert Manager
   cert_manager_enabled: validation.getNestedPropertyOrThrow(kxExtValues, 'cert_manager.enabled'),
-  cert_manager_issuer_name: validation.getNestedPropertyOrThrow(kxExtValues, 'cert_manager.issuername'),
+  cert_manager_issuer_name: validation.getNestedPropertyOrThrow(kxExtValues, 'cert_manager.issuer_name'),
+
+  // Alert Manager
+  alert_manager_name: validation.getNestedPropertyOrThrow(kxExtValues, 'alert_manager.name'),
 
   // Local
   prometheus_namespace: validation.notNullOrEmpty(kxExtValues, 'namespace'),
+  prometheus_name: validation.notNullOrEmpty(kxExtValues, 'name'),
   prometheus_hostname: validation.getNestedPropertyOrThrow(kxExtValues, 'hostname'),
   prometheus_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'resources.memory'),
   prometheus_retention: validation.getNestedPropertyOrThrow(kxExtValues, 'retention'),
@@ -48,7 +52,9 @@ local kxValues = {
   new_relic_enabled: validation.notNullOrEmpty(kxExtValues, 'new_relic.enabled'),
   new_relic_bearer: validation.notNullOrEmpty(kxExtValues, 'new_relic.bearer'),
   new_relic_relabel_keep_regexp: validation.getNestedPropertyOrThrow(kxExtValues, 'new_relic.relabel_keep_regex'),
-
+  // Grafana Instance
+  grafana_enabled: validation.notNullOrEmpty(kxExtValues, 'grafana.enabled'),
+  grafana_name: validation.notNullOrEmpty(kxExtValues, 'grafana.name'),
 
 };
 
@@ -66,7 +72,8 @@ local kp =
         },
       },
       alertmanager: {
-        name: 'main',  // mandatory, the default kxValues used by kube-prometheus
+        // mandatory, the default kxValues used by kube-prometheus
+        name: kxValues.alert_manager_name,
       },
       prometheusOperator+: {
         resources:: {
@@ -74,7 +81,11 @@ local kp =
           limits: { memory: kxValues.prometheus_operator_memory },
         },
       },
-      // for prometheus, we overwrite the config in kube_x/prometheus.libsonnet
+      // for prometheus, we overwrite also the config in kube_x/prometheus.libsonnet
+      prometheus+: {
+        name: kxValues.prometheus_name,
+        version: kxValues.prometheus_version
+      }
     },
   };
 

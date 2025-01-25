@@ -1,5 +1,3 @@
-
-
 # Not a string, a boolean so no quote
 enabled: false
 # namespace
@@ -26,3 +24,9 @@ api_token: ''
 data_sources:
   prometheus:
     name: 'prometheus'
+
+# Don't install cross-dependency
+# used in dependency condition in chart.yaml
+# Don't touch
+kube_x_internal:
+  dont_install_dependency: false

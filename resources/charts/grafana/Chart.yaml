@@ -32,7 +32,13 @@ dependencies:
     version: 0.0.1
     repository: file://../kube-x
     alias: kube_x
-  - name: prometheus
+  - name: kube-x-prometheus
     version: 0.0.1
     repository: file://../prometheus
-    condition: enabled
+    alias: prometheus
+    condition: kube_x_internal.dont_install_dependency
+  - name: kube-x-cert-manager
+    version: 0.0.1
+    repository: file://../cert-manager
+    alias: cert_manager
+    condition: kube_x_internal.dont_install_dependency

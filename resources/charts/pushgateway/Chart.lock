@@ -1,6 +1,9 @@
 dependencies:
 - name: kube-x
-  repository: file://../../charts/kube-x
+  repository: file://../kube-x
   version: 0.0.1
-digest: sha256:3ffbdee33fa93a60987e7ffd8c268613d565380e8f53a37a8531918764de42ea
-generated: "2025-01-21T23:48:04.885278649+01:00"
+- name: kube-x-cert-manager
+  repository: file://../cert-manager
+  version: 0.0.1
+digest: sha256:1a80570498b5a49bc5b3516407a67b8eb4b88982ed07e28489c30d3f020ea120
+generated: "2025-01-25T22:03:13.219370145+01:00"

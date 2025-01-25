@@ -27,6 +27,7 @@ local kxDefaults = {
   cluster_name: error 'cluster_name should be provided (no empty string)',
   secret_type: error 'secret_type should be provided (Secret or ExternalSecret)',
   external_secret_store_name: error 'external_secret_store should be provided',
+  prometheus_name: error 'prometheus name should be provided',
   prometheus_hostname: error 'prometheus hostname should be provided (empty string at minima)',
   prometheus_memory: error 'prometheus memory should be provided (50Mi for instance)',
   prometheus_retention: error 'prometheus memory should be provided (50Mi for instance)',
@@ -40,6 +41,9 @@ local kxDefaults = {
   new_relic_bearer: error 'new_relic_bearer value property should be provided',
   new_relic_relabel_keep_regex: error 'new_relic_relabel_keep_regex value property should be provided',
   new_relic_keep_regex: error 'new_relic_keep_regex value property should be provided',
+  grafana_enabled: error 'grafana_enabled value property should be provided',
+  grafana_folder: 'Prometheus',
+  grafana_name: error 'grafana_name value property should be provided',
 };
 
 
@@ -168,6 +172,15 @@ local grafanaCloudSecret = function(username, password, secretType, externalStor
       }
   );
 
+// mixin is not a function but an object
+local dashboards = (import 'github.com/prometheus/prometheus/documentation/prometheus-mixin/mixin.libsonnet') {
+  _config+:: {
+    // Optout of multicluster
+    showMultiCluster: false,
+  },
+}.grafanaDashboards;
+local stripJson = function(name) std.substr(name, 0, std.length(name) - std.length('.json'));
+
 // kpValues = values for kubernetes-prometheus
 // kxValues = values for kube-x
 function(kpValues, kxValues)
@@ -182,7 +195,7 @@ function(kpValues, kxValues)
     roleSpecificNamespaces:: null,
     roleConfig:: null,
     roleBindingConfig:: null,
-    networkPolicy:: null, # We can't access prometheus from Traefik otherwise
+    networkPolicy:: null,  // We can't access prometheus from Traefik otherwise
     // Rbac ClusterRole comes from https://prometheus-operator.dev/docs/platform/rbac/#prometheus-rbac
     clusterRole: {
       apiVersion: 'rbac.authorization.k8s.io/v1',
@@ -212,8 +225,8 @@ function(kpValues, kxValues)
         {
           nonResourceURLs: [
             '/metrics',
-            '/metrics/slis' # to scrape SLIS (ie https://capi:6443/metrics/slis)
-            ],
+            '/metrics/slis',  // to scrape SLIS (ie https://capi:6443/metrics/slis)
+          ],
           verbs: ['get'],
         },
       ],
@@ -364,18 +377,69 @@ function(kpValues, kxValues)
                         },
                       }] else []),
       },
-      [if kxConfig.grafana_cloud_enabled then 'grafanaCloudSecret']: grafanaCloudSecret(
-        kxConfig.grafana_cloud_username,
-        kxConfig.grafana_cloud_password,
-        kxConfig.secret_type,
-        kxConfig.external_secret_store_name,
-        p
-      ),
-      [if kxConfig.new_relic_enabled then 'newRelicSecret']: newRelicCloudSecret(
-        kxConfig.new_relic_bearer,
-        kxConfig.secret_type,
-        kxConfig.external_secret_store_name,
-        p
-      ),
     },
-  }
+    [if kxConfig.grafana_cloud_enabled then 'grafanaCloudSecret']: grafanaCloudSecret(
+      kxConfig.grafana_cloud_username,
+      kxConfig.grafana_cloud_password,
+      kxConfig.secret_type,
+      kxConfig.external_secret_store_name,
+      p
+    ),
+    [if kxConfig.new_relic_enabled then 'newRelicSecret']: newRelicCloudSecret(
+      kxConfig.new_relic_bearer,
+      kxConfig.secret_type,
+      kxConfig.external_secret_store_name,
+      p
+    ),
+    // Dashboard Folder
+    [if kxConfig.grafana_enabled then 'grafanaFolder']: {
+      apiVersion: 'grafana.integreatly.org/v1beta1',
+      kind: 'GrafanaFolder',
+      metadata: {
+        name: 'prometheus-grafana-folder', # Does not allow Uppercase
+      },
+      spec: {
+        instanceSelector: {
+          matchLabels: {
+            dashboards: kxConfig.grafana_name,
+          },
+        },
+        // If title is not defined, the value will be taken from metadata.name
+        // Allow uppercase
+        title: kxConfig.grafana_folder,
+      },
+    },
+
+  } +
+  // Dashboard
+  (if ! kxConfig.grafana_enabled then {} else
+  {
+    ['grafana-dashboard-' + stripJson(name)]: {
+      apiVersion: 'grafana.integreatly.org/v1beta1',
+      kind: 'GrafanaDashboard',
+      metadata: {
+        name: 'prometheus-grafana-' + stripJson(name),
+      },
+      spec:
+        {
+          // Allow import from grafana instance in another namespace
+          // https://github.com/grafana/grafana-operator/tree/master/examples/crossnamespace
+          // https://grafana.github.io/grafana-operator/docs/examples/crossnamespace/readme/
+          allowCrossNamespaceImport: true,
+          // https://grafana.github.io/grafana-operator/docs/overview/#resyncperiod
+          // 10m by default
+          // 0m: never poll for changes in the dashboards
+          resyncPeriod: '0m',
+          folder: kxConfig.grafana_folder,
+          // https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
+          instanceSelector: {
+            matchLabels: {
+              dashboards: kxValues.grafana_name,
+            },
+          },
+          // std.manifestJson to output a Json string
+          json: std.manifestJson(dashboards[name]),
+        },
+    }
+    for name in std.objectFields(dashboards)
+  })

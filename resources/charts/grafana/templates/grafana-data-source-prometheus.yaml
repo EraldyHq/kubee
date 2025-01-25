@@ -1,6 +1,7 @@
 {{/*
   https://grafana.github.io/grafana-operator/docs/datasources/
 */}}
+{{- if eq .Values.prometheus.enabled true -}}
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDatasource
 metadata:
@@ -8,14 +9,15 @@ metadata:
 spec:
   instanceSelector:
     matchLabels:
-      dashboards: "{{ .Values.kube_x.grafana.name }}"
+      dashboards: "{{ .Values.name }}"
   datasource:
-    name: prometheus # used by default by mixins
+    name: {{ .Values.data_sources.prometheus.name }} # used by default by mixins
+    isDefault: true # sometimes they use just default
     type: prometheus
     access: proxy
-    {{/* prometheus-k8s is the default name of kube-prometheus */}}
-    url: http://{{ .Values.kube_x.prometheus.name }}.{{ .Values.kube_x.prometheus.namespace }}:9090
-    isDefault: true
+    {{/* prometheus-name is the default name of kube-prometheus */}}
+    url: http://prometheus-{{ .Values.prometheus.name }}.{{ .Values.prometheus.namespace }}:9090
     jsonData:
       'tlsSkipVerify': true
       'timeInterval': "5s"
+{{- end -}}

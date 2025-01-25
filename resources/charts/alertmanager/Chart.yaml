@@ -17,11 +17,9 @@ type: application
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 
-# This is the version number of the application being deployed. This version number should be
-# incremented each time you make changes to the application. Versions are not expected to
-# follow Semantic Versioning. They should reflect the version the application is using.
-# It is recommended to use it with quotes.
-appVersion: "v0.28.0" # The version of alert manager
+# This is the version number of the application being deployed.
+# The version of prometheus operator
+appVersion: "v0.28.0"
 
 dependencies:
   - name: kube-x

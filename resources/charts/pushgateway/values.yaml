@@ -1,0 +1,15 @@
+# Enabled
+# Not a string, a boolean so no quote
+enabled: false
+# Namespace
+namespace: 'monitoring'
+# The version
+# https://hub.docker.com/r/prom/pushgateway
+version: 'v1.10.0'
+# hostname (install an ingress if not empty)
+hostname: ''
+
+
+# Don't change
+kube_x_internal:
+  dont_install_dependency: false
