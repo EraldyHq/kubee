@@ -1,10 +1,10 @@
 # Enabled
 enabled: false
 # The installation namespace
-# used by the Grafana Chart to create the data source URI
+# used by clients such as the Grafana Chart to create the data source URI
 namespace: 'monitoring'
 # The name of the prometheus instance
-# (used by the grafana Chart to create a connection)
+# (used by clients such as the grafana Chart to create a connection)
 name: 'kube-x'
 # The prometheus version
 # https://github.com/prometheus/prometheus/releases
@@ -12,11 +12,11 @@ version: '3.1.0'
 # Prometheus with Prometheus Operator
 # If not null, an ingress is added
 hostname: ''
-# CPU/Memory
+# Memory Limit
 resources:
-  # Statically, depend on scrape interval, max_block_duration and number of metrics scraped
-  # If you query data above the max_block_duration, data is loaded in memory
-  # 400Mi is the default of Kube-Prometheus
+  # Depend on scrape interval, max_block_duration, number of metrics scraped, number of recording rules
+  # Dynamically, if you query data above the max_block_duration, data is loaded in memory
+  # 400Mi is the default of Kube-Prometheus with default memory setting.
   memory: '200Mi'
 # Retention
 # How long to retain data (it's the prometheus server argument --storage.tsdb.retention.time=24h)
@@ -70,12 +70,13 @@ operator:
 secret:
   # The kind of manifest created
   # Values supported `Secret` or `ExternalSecret`
+  # With `ExternalSecret`, you can use a gitops pull solutions such as ArgoCd/Flux.
   kind: 'Secret'
 
 
 # Tweak to not output the template of the kube-x cross-dependency chart
 # in the prometheus release
 # It's used in the chart dependencies condition
-# Don't modify, don't change
 kube_x_internal:
-  dont_install_dependency: false
+  # Don't modify the value, don't change
+  install_cross_dependency: false
