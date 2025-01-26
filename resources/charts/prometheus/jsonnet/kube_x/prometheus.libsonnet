@@ -30,7 +30,9 @@ local kxDefaults = {
   prometheus_name: error 'prometheus name should be provided',
   prometheus_hostname: error 'prometheus hostname should be provided (empty string at minima)',
   prometheus_memory: error 'prometheus memory should be provided (50Mi for instance)',
-  prometheus_retention: error 'prometheus memory should be provided (50Mi for instance)',
+  prometheus_retention: error 'prometheus retention should be provided',
+  prometheus_scrape_interval: error 'prometheus scrape interval should be provided',
+  prometheus_max_block_duration: error 'prometheus max_block_duration should be provided',
   cert_manager_enabled: error 'Cert manager enabled should be provided (false or true)',
   cert_manager_issuer_name: error 'Cert manager issuer name should be provided',  // Accessed and triggered when cert manager is enabled
   grafana_cloud_enabled: error 'grafana_cloud_enabled value property should be provided',
@@ -297,7 +299,7 @@ function(kpValues, kxValues)
         serviceMonitorNamespaceSelector: {},  // Select all namespace
         // Interval between consecutive scrap
         // For consistencyes.
-        scrapeInterval: '30s',
+        scrapeInterval: kxConfig.prometheus_scrape_interval,
         // Defines the intervals at which the ale
         // For consistencyrting rules are evaluated
         evaluationInterval: '30s',
@@ -325,16 +327,19 @@ function(kpValues, kxValues)
         },
         // Arguments to the prometheus server
         // https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.Argument
-        additionalArgs: [
-          {
-            // Duration of block in memory
-            // Default to 2 hours (we gain 100Mb of memory)
-            // There is also a min storage.tsdb.min-block-duration
-            // https://github.com/prometheus-operator/prometheus-operator/issues/4414
-            name: 'storage.tsdb.max-block-duration',
-            value: '1h',
-          },
-        ],
+        additionalArgs: []
+                        + (
+                          if kxConfig.prometheus_max_block_duration == '2h' then [] else [
+                            {
+                              // Duration of block in memory
+                              // Default to 2 hours (we gain 100Mb of memory)
+                              // There is also a min storage.tsdb.min-block-duration
+                              // https://github.com/prometheus-operator/prometheus-operator/issues/4414
+                              name: 'storage.tsdb.max-block-duration',
+                              value: kxConfig.prometheus_max_block_duration,
+                            },
+                          ]
+                        ),
         // overrideHonorLaels:false enforces honorLabels:true
         // ie don't create `exported_` metrics
         overrideHonorLabels: false,

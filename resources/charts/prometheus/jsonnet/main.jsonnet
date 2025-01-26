@@ -36,6 +36,8 @@ local kxValues = {
   prometheus_hostname: validation.getNestedPropertyOrThrow(kxExtValues, 'hostname'),
   prometheus_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'resources.memory'),
   prometheus_retention: validation.getNestedPropertyOrThrow(kxExtValues, 'retention'),
+  prometheus_scrape_interval: validation.getNestedPropertyOrThrow(kxExtValues, 'scrape_interval'),
+  prometheus_max_block_duration: validation.getNestedPropertyOrThrow(kxExtValues, 'max_block_duration'),
   prometheus_version: validation.getNestedPropertyOrThrow(kxExtValues, 'version'),
   prometheus_operator_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'operator.resources.memory'),
   prometheus_operator_version: std.substr(chart.appVersion, 1, std.length(chart.appVersion) - 1),

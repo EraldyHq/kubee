@@ -14,17 +14,23 @@ version: '3.1.0'
 hostname: ''
 # CPU/Memory
 resources:
-  # Memory of the prometheus instance (value based on experience)
-  # Depend on scrape interval (default to 30s), data retention (default to 24j) and number of metrics scraped
-  # 400Mi is the default of Kube-Prometheus and is what we see with all Kubernetes monitoring scrapers running
-  memory: '400Mi'
+  # Statically, depend on scrape interval, max_block_duration and number of metrics scraped
+  # If you query data above the max_block_duration, data is loaded in memory
+  # 400Mi is the default of Kube-Prometheus
+  memory: '200Mi'
 # Retention
-# How long to retain data (it the prometheus server argument --storage.tsdb.retention.time=24h)
+# How long to retain data (it's the prometheus server argument --storage.tsdb.retention.time=24h)
 # Data in memory is 2 hour old, by setting retention to 2h, we don't allow to query data over 2 hours and to load data in memory
+# The default is 24h
 retention: '2h'
-# The default scrape interval
-# It does influence memory as Prometheus keeps by default 2 hours of scraping in memory
-scrap_interval: '1m'
+# The duration that Prometheus keeps the data in memory
+# The default is 2h. If the value is 2h, no arguments is applied.
+# It's the prometheus tsdb server argument --storage.tsdb.max-block-duration=2h)
+max_block_duration: '1h'
+# The default scrape interval for target
+# It does influence memory as Prometheus keeps by default 2 hours of scraping in memory (max_block_duration)
+# Default is 30s
+scrape_interval: '1m'
 
 # grafana cloud remote write prometheus integration
 grafana_cloud:
