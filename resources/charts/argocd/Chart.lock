@@ -8,5 +8,8 @@ dependencies:
 - name: kube-x-grafana
   repository: file://../grafana
   version: 0.0.1
-digest: sha256:b096ad1cef878fbedf7e0fa96d52477edb4cb6933451272c7e0a1aebc5dbea2c
-generated: "2025-01-26T14:10:44.033897938+01:00"
+- name: kube-x-external-secrets
+  repository: file://../external-secrets
+  version: 0.0.1
+digest: sha256:7eca095fce29e030f3475021109a0c30c535b2cc024915b9d34bc40316b25631
+generated: "2025-01-26T18:14:53.593680418+01:00"

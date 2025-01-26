@@ -42,6 +42,9 @@ conf:
   controller_metrics_cache_expiration: '24h0m0s'
 
 
+secret:
+  # Kind of secret generated
+  kind: 'Secret'
 
 # Internal
 # Used to not output manifest from cross dependency in this charts

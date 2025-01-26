@@ -42,3 +42,10 @@ dependencies:
     repository: file://../grafana
     alias: grafana
     condition: kube_x_internal.dont_install_cross_dependency
+  # For CI
+  - name: kube-x-external-secrets
+    version: 0.0.1
+    repository: file://../external-secrets
+    alias: external_secrets
+    condition: kube_x_internal.dont_install_cross_dependency
+
