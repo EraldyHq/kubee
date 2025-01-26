@@ -3,12 +3,13 @@
 
 ## About
 
-This [kube-x jsonnet chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-jsonnet-kube-x-chart) installs monitoring for the core Kubernetes components:
+This [kube-x jsonnet chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-jsonnet-kube-x-chart) installs monitoring for the core systems Kubernetes components:
 * Api Server
 * Core Dns
 * Controller Manager
 * Kubelet
 * Scheduler
+
 
 
 The dashboards are using metrics from:
@@ -33,7 +34,12 @@ The following monitoring elements are installed for each:
 
 ## Doc
 
-* Metrics: https://monitoring.mixins.dev/kubernetes/
+Metrics: 
+* https://monitoring.mixins.dev/kubernetes/
+* [Metrics For Kubernetes System Components](https://kubernetes.io/docs/concepts/cluster-administration/system-metrics/)
+
+They all exposes at /metrics.
+kubelet also exposes metrics in /metrics/cadvisor, /metrics/resource and /metrics/probes endpoints. 
 
 ## Optional Prerequisites: Kube-x Chart Dependency
 
