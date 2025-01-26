@@ -17,9 +17,10 @@ This chart is a [Helm-x Chart](../../../docs/bin/kube-x-helm-x.md) that:
 
 ### Test/Check values before installation
 
-* With Helm-x For instance, to check the [repo creation](templates/resources/argocd-secret-repo.yaml)
+With Helm-x For instance, to check the [repo creation](templates/resources/argocd-secret-repo.yaml)
 ```bash
-kube-x-helx -c kube-x-ssh template argocd | grep 'name: argocd-secret-repo' -A 2 -B 11
+export BASHLIB_ECHO_LEVEL=4;
+kube-x-helm-x -c clusterName template argocd | grep 'name: argocd-secret-repo' -A 2 -B 11
 ```
 
 

@@ -1,6 +1,5 @@
 // https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/customizing.md
 
-
 local validation = import './kube_x/validation.libsonnet';
 
 // Get the version from the Chart.yaml

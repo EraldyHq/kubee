@@ -1,0 +1,31 @@
+
+# If enabled or not
+enabled: false
+# the namespace
+namespace: 'argcod'
+# the hostname (install ingress if not empty)
+hostname: ''
+
+# Git
+git:
+  # Git repo creation
+  repo:
+    # A git url to add the repo with the git extension
+    # https://github.com/xxx/argocd.git
+    url: ''
+    # username password
+    username: ''
+    password: ''
+  # Git webhook creation (to notify Argocd of commit)
+  webhook:
+    # The git service (github)
+    service: ''
+    # The secret that sends the webhook for authentication
+    secret: ''
+
+
+# Internal
+# Used to not output manifest from cross dependency in this charts
+kube_x_internal:
+  dont_install_cross_dependency: false
+

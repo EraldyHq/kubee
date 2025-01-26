@@ -30,3 +30,15 @@ dependencies:
     version: 0.0.1
     repository: file://../kube-x
     alias: kube_x
+  # For the ingress
+  - name: kube-x-cert-manager
+    version: 0.0.1
+    repository: file://../cert-manager
+    alias: cert_manager
+    condition: kube_x_internal.dont_install_cross_dependency
+  # For the dashboard
+  - name: kube-x-grafana
+    version: 0.0.1
+    repository: file://../grafana
+    alias: grafana
+    condition: kube_x_internal.dont_install_cross_dependency
