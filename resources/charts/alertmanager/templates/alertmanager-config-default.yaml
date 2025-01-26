@@ -33,4 +33,4 @@ spec:
     # https://prometheus.io/docs/alerting/latest/configuration/#email_config
     - name: 'default'
       emailConfigs:
-        - to: '{{ .Values.kube_x.cluster.adminUser.email }}'
+        - to: '{{ .Values.kube_x.auth.admin_user.email }}'

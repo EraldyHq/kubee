@@ -130,7 +130,8 @@ What we do:
 # KUSTOMIZATION
 
 * Your chart can reference Helm templates directly. They will be rendered before passing them to `kustomize`
-* The kustomization file can include the `${KUBE_X_NAMESPACE}` environment variable. Why? To support [this case](https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#installing-argo-cd-in-a-custom-namespace)
+* The kustomization file can include:
+  * the `${KUBE_X_NAMESPACE}` environment variable. Why? To support [this case](https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#installing-argo-cd-in-a-custom-namespace)
 
 
 Example:
@@ -147,7 +148,7 @@ patches:
     target:
       kind: ClusterRoleBinding
 resources:
-  - https://raw.githubusercontent.com/orga/project/vx.x.x/manifests/install.yaml
+  - https://raw.githubusercontent.com/orga/project/xxx/manifests/install.yaml
   - templates/resources/ingress.yml
 ```
 

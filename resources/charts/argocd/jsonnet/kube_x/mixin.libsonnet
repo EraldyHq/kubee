@@ -58,8 +58,8 @@ function(params)
 
 
   // Dashboard
-  local dashboards = if !std.objectHasAll(values.mixin, 'grafanaDashboards') then {} else {
-    [if !values.grafana_enabled then 'grafana-dashboard-' + stripJsonLowerCase(name)]: {
+  local dashboards = if !std.objectHasAll(values.mixin, 'grafanaDashboards') || !values.grafana_enabled  then {} else {
+    ['grafana-dashboard-' + stripJsonLowerCase(name)]: {
       apiVersion: 'grafana.integreatly.org/v1beta1',
       kind: 'GrafanaDashboard',
       metadata: {

@@ -1,12 +1,12 @@
 # If not enabled=false
-{{- if ne (((.Values.kube_x).cert_manager).enabled) false -}}
+{{- if ne .Values.cert_manager.enabled false -}}
 # The certificate
 # (Because we use IngressRoute, it needs to be created manually)
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: '{{ include "kubernetes-dashboard-name" . }}'
-  namespace: '{{.Release.Namespace}}'
+  namespace: '{{.Values.namespace}}'
 spec:
   commonName: '{{ .Values.kube_x.kubernetes_dashboard.hostname }}'
   secretName: '{{ include "kubernetes-dashboard-name" .}}'

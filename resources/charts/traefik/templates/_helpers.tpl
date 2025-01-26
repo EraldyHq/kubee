@@ -17,7 +17,7 @@ Traefik expects the passwords to be hashed using MD5, SHA1, or BCrypt.
 {{- define "basic-auth-list-base64-encode" }}
 {{- $result := list }}
 {{/* Add the admin user */}}
-{{- $result = append $result (htpasswd .Values.kube_x.cluster.adminUser.username .Values.kube_x.cluster.adminUser.password | b64enc)}}
+{{- $result = append $result (htpasswd .Values.kube_x.auth.admin_user.username .Values.kube_x.auth.admin_user.password | b64enc)}}
 {{/*https://github.com/helm/helm/issues/7533#issuecomment-1039521776*/}}
 {{- range $user, $password := .Values.kube_x.traefik.middleware.basicAuth.users }}
 {{- $result = append $result (htpasswd $user $password | b64enc) }}

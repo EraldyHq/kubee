@@ -2,26 +2,26 @@
    Doc: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#traefik-v22
   Chart: https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd#ingress-configuration
 */}}
-{{- if ne ( ((.Values.kube_x).argocd).hostname) "" -}}
+{{- if ne .Values.hostname "" -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: argocd
-{{/*  namespace: {{ .Values.kube_x.argocd.namespace }}*/}}
+{{/*  namespace: {{ .Values.namespace }}*/}}
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    {{- if ne (((.Values.kube_x).cert_manager).enabled) false }}
-    cert-manager.io/cluster-issuer: '{{ .Values.kube_x.cert_manager.defaultIssuerName }}'
+    {{- if ne .Values.cert_manager.enabled false }}
+    cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuer_name }}'
     {{- end }}
     {{- /* Only from Github or our network */}}
-    {{- if and (not (empty (((.Values.kube_x).cluster).private_networks))) ( eq .Values.kube_x.argocd.git.webhook.service "github") }}
+    {{- if and (not (empty (.Values.kube_x.auth.private_networks))) ( eq .Values.git.webhook.service "github") }}
     traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.kube_x.traefik.namespace }}-{{ include "kube-x-traefik-github-hooks-allow-list-name" . }}@kubernetescrd
     {{- end}}
 spec:
   ingressClassName: traefik
   rules:
-    - host: '{{ .Values.kube_x.argocd.hostname }}'
+    - host: '{{ .Values.hostname }}'
       http:
         paths:
           - backend:
@@ -31,10 +31,10 @@ spec:
                   number: 443
             path: /
             pathType: Prefix
-  {{- if ne (((.Values.kube_x).cert_manager).enabled) false }}
+  {{- if ne .Values.cert_manager.enabled false }}
   tls:
     - hosts:
-        - '{{ .Values.kube_x.argocd.hostname }}'
+        - '{{ .Values.hostname }}'
       secretName: 'argocd-cert'
   {{- end }}
 {{- end -}}

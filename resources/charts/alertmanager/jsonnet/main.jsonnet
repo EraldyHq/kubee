@@ -10,16 +10,16 @@ local values = {
     kube_x: {
         cluster: {
             adminUser:{
-                email: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.adminUser.email')
+                email: validation.getNestedPropertyOrThrow(extValues, 'kube_x.auth.admin_user.email')
             },
             email: {
                 smtp: {
-                    host: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.host'),
-                    port: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.port'),
-                    from: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.from'),
-                    username: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.username'),
-                    password: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.password'),
-                    hello: validation.getNestedPropertyOrThrow(extValues, 'kube_x.cluster.email.smtp.hello'),
+                    host: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.host'),
+                    port: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.port'),
+                    from: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.from'),
+                    username: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.username'),
+                    password: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.password'),
+                    hello: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.hello'),
                 }
             }
         },
@@ -71,24 +71,24 @@ local alertManagerVersion = std.filter(
     jsonnetfile.dependencies)[0].version;
 
 // Get the smtpFromEmail
-local smtpFromEmail  = ( if values.kube_x.cluster.email.smtp.from != '' then
-    values.kube_x.cluster.email.smtp.from else if values.kube_x.cluster.adminUser.email != '' then
-    values.kube_x.cluster.adminUser.email else
-    error "No email could be determined for the `for` email header. Set at least: kube_x.cluster.adminUser.email"
+local smtpFromEmail  = ( if values.kube_x.email.smtp.from != '' then
+    values.kube_x.email.smtp.from else if values.kube_x.auth.admin_user.email != '' then
+    values.kube_x.auth.admin_user.email else
+    error "No email could be determined for the `for` email header. Set at least: kube_x.auth.admin_user.email"
 );
 
 // Helper function that returns null for empty strings
 local nonEmpty(str) = if std.length(str) > 0 then str;
 
 // Email
-local smtpObject = ( if values.kube_x.cluster.email.smtp.host != '' then
+local smtpObject = ( if values.kube_x.email.smtp.host != '' then
     {
-        smtp_smarthost: values.kube_x.cluster.email.smtp.host+':'+values.kube_x.cluster.email.smtp.port,
+        smtp_smarthost: values.kube_x.email.smtp.host+':'+values.kube_x.email.smtp.port,
         smtp_require_tls: true,
         smtp_from: smtpFromEmail,
-        [if values.kube_x.cluster.email.smtp.hello != null then "smtp_hello"]: values.kube_x.cluster.email.smtp.hello,
-        smtp_username: nonEmpty(values.kube_x.cluster.email.smtp.username),
-        smtp_password: nonEmpty(values.kube_x.cluster.email.smtp.password)
+        [if values.kube_x.email.smtp.hello != null then "smtp_hello"]: values.kube_x.email.smtp.hello,
+        smtp_username: nonEmpty(values.kube_x.email.smtp.username),
+        smtp_password: nonEmpty(values.kube_x.email.smtp.password)
     });
 
 // Opsgenie

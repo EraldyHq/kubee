@@ -14,8 +14,8 @@ metadata:
     app.kubernetes.io/part-of: argocd
 data:
   {{- /* Prometheus's metrics cache expiration (disabled  by default. e.g. 24h0m0s) */}}
-  controller.metrics.cache.expiration: '{{ .Values.kube_x.argocd.conf.controller_metrics_cache_expiration }}'
+  controller.metrics.cache.expiration: '{{ .Values.conf.controller_metrics_cache_expiration }}'
   {{- /* Argo Cd Controller CPU Parallelism */}}
-  controller.kubectl.parallelism.limit: '{{ .Values.kube_x.argocd.conf.controller_kubectl_parallelism_limit }}'
+  controller.kubectl.parallelism.limit: '{{ .Values.conf.controller_kubectl_parallelism_limit }}'
   {{- /*  ArgoCd Controller Parallelism */}}
-  reposerver.parallelism.limit: '{{ .Values.kube_x.argocd.conf.reposerver_parallelism_limit }}'
+  reposerver.parallelism.limit: '{{ .Values.conf.reposerver_parallelism_limit }}'

@@ -9,11 +9,11 @@
 
 Test:
 helm template -s templates/argocd-notifications-config-map-patch.yml \
-  --set 'kube_x.cluster.email.smtp.host=smtp.gmail.com'  \
-  --set 'kube_x.cluster.email.smtp.port=587'  \
-  --set 'kube_x.cluster.email.smtp.username=nico'  \
-  --set 'kube_x.cluster.email.smtp.password=welcome'  \
-  --set 'kube_x.cluster.adminUser.email=foo@gmail.com' \
+  --set 'kube_x.email.smtp.host=smtp.gmail.com'  \
+  --set 'kube_x.email.smtp.port=587'  \
+  --set 'kube_x.email.smtp.username=nico'  \
+  --set 'kube_x.email.smtp.password=welcome'  \
+  --set 'kube_x.auth.admin_user.email=foo@gmail.com' \
   . | yq
 
 */}}
@@ -21,7 +21,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: argocd-notifications-cm
-{{/*  namespace: {{ .Values.kube_x.argocd.namespace }}*/}}
+{{/*  namespace: {{ .Values.namespace }}*/}}
   annotations:
     {{/*
       The behavior annotation will influence how conflicts are handled for resources emitted by the plugin.
@@ -36,11 +36,11 @@ data:
   # Email
   # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/email/
 */}}
-  {{- if ne .Values.kube_x.cluster.email.smtp.host ""}}
+  {{- if ne .Values.kube_x.email.smtp.host ""}}
   service.email: |
-    host: {{ .Values.kube_x.cluster.email.smtp.host }}
-    port: {{ required ".Values.kube_x.cluster.email.smtp.port is required" .Values.kube_x.cluster.email.smtp.port }}
-    from: {{ required "kube_x.cluster.adminUser.email or kube_x.cluster.email.smtp.from is requried" (default .Values.kube_x.cluster.adminUser.email .Values.kube_x.cluster.email.smtp.from) }}
+    host: {{ .Values.kube_x.email.smtp.host }}
+    port: {{ required ".Values.kube_x.email.smtp.port is required" .Values.kube_x.email.smtp.port }}
+    from: {{ required "kube_x.auth.admin_user.email or kube_x.email.smtp.from is requried" (default .Values.kube_x.auth.admin_user.email .Values.kube_x.email.smtp.from) }}
     username: ${{ template "kube-x-argocd-email-username-variable-name" }}
     password: ${{ template "kube-x-argocd-email-password-variable-name" }}
     html: true
@@ -72,10 +72,10 @@ data:
   ##############################
   # Context holds list of variables that can be referenced in templates
   */}}
-  {{- if ne .Values.kube_x.argocd.hostname "" }}
+  {{- if ne .Values.hostname "" }}
   context: |
-    {{- if ne .Values.kube_x.argocd.hostname "" }}
-    argocdUrl: https://{{ .Values.kube_x.argocd.hostname }}
+    {{- if ne .Values.hostname "" }}
+    argocdUrl: https://{{ .Values.hostname }}
     {{- end }}
   {{- end }}
   {{- /*
@@ -83,12 +83,12 @@ data:
     # Global Subscriptions
     ##############################
   */}}
-  {{- if ne .Values.kube_x.cluster.adminUser.email "" }}
+  {{- if ne .Values.kube_x.auth.admin_user.email "" }}
   subscriptions: |
-    {{- if ne .Values.kube_x.cluster.adminUser.email "" }}
+    {{- if ne .Values.kube_x.auth.admin_user.email "" }}
     # Global Subscription for on-deployed trigger notifications
     - recipients:
-        - "email:{{ .Values.kube_x.cluster.adminUser.email }}"
+        - "email:{{ .Values.kube_x.auth.admin_user.email }}"
       triggers:
         - on-deployed
     {{- end }}

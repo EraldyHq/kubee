@@ -1,10 +1,12 @@
+# Enabled or not
+enabled: false
+# The namespace
+namespace: 'kubernetes-dashboard'
+# The external DNS
+# Example: hostname: 'dash.kube-x.dev'
+# If set, an ingress will be created
+hostname: ''
 
-
-
-# Suffix Name of the cert for the ingress
-ingressDashboardCertSuffix: 'cert'
-# The name of the secret that holds the certificate
-ingressDashboardCertSecretNameSuffix: 'cert-secret'
 
 
 # Default of
@@ -34,12 +36,26 @@ kubernetes-dashboard:
       #  # List of namespaces that should be presented to user without namespace list privileges.
       #  namespaceFallbackList:
       #  - default
-      ## Pinned resources that will be displayed in dashboard's menu
+      ## Pinned resources that will be displayed in the dashboard's menu below the CRD node
       pinnedResources:
         - kind: customresourcedefinition
           #  Fully qualified name of a CRD
-          name: prometheus.monitoring.coreos.com
+          name: prometheusrules.monitoring.coreos.com
           #  Display name
-          displayName: Prometheus
-          #  Is this CRD namespaced?
-          namespaced: true
+          displayName: 'Prometheus Rules'
+        - kind: customresourcedefinition
+          #  Fully qualified name of a CRD
+          name: servicemonitors.monitoring.coreos.com
+          #  Display name
+          displayName: 'Service Monitors'
+
+# Internal, don't change
+kube_x_internal:
+  dont_install_cross_dependency: false
+
+# Move these values to helpers
+# Name used for consistency
+# Suffix Name of the cert for the ingress
+ingressDashboardCertSuffix: 'cert'
+# The name of the secret that holds the certificate
+ingressDashboardCertSecretNameSuffix: 'cert-secret'

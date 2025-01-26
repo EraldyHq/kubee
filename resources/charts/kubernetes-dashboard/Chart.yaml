@@ -15,18 +15,18 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 7.10.0 # The version of the chart (doesn't matter and can stay the same)
+version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "7.10.0" # The version of the app packaged
+appVersion: "7.10.1" # The version of the app packaged
 
 # https://artifacthub.io/packages/helm/k8s-dashboard/kubernetes-dashboard
 dependencies:
   - name: kubernetes-dashboard
-    version: 7.10.0
+    version: 7.10.1
     repository: https://kubernetes.github.io/dashboard/
     # for some reason, the helm use the alias in the name
     # As it's not a valid DNS name, due to the underscore, we get:
@@ -38,3 +38,9 @@ dependencies:
     version: 0.0.1
     repository: file://../kube-x
     alias: kube_x
+  # For the ingress
+  - name: kube-x-cert-manager
+    version: 0.0.1
+    repository: file://../cert-manager
+    alias: cert_manager
+    condition: kube_x_internal.dont_install_cross_dependency

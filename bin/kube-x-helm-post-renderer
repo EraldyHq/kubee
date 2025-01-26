@@ -27,43 +27,60 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
 source kube-x-lib.sh
 
 
+# Resources or patches:
+# * are not created by Helm when the output is empty
+# * or the content may be empty with only comments
+#
+# and kustomize don't like that
+#
 # Check that a target directory has the same files than a source directory (in name not size)
 # Create an empty file in the target directory if a source file was not found
 #
-# Why?
-# Kustomize expects to have a file for all resources and patches
-# but template Files may return an empty string and the files are not created
-# if we use comments to not get an empty file
-# The validation fails with
-# Error: unable to build kubernetes objects from release manifest: error validating "": error validating data: invalid object to validate
-# Disabling with --skip-schema-validation would not work
 # Without any solution, we have written this function
-create_empty_templates_with_empty_files(){
+#
+# Example:
+#  Error: unable to build kubernetes objects from release manifest: error validating "": error validating data: invalid object to validate
+#  Disabling with --skip-schema-validation would not work
+handle_empty_templates_output(){
 
   # Source and target templates directories
-  SOURCE_DIR="${1:-}"
-  TARGET_DIR="${2:-}"
+  local SOURCE_PROJECT_DIR="${1:-}"
+  local TARGET_PROJECT_DIR="${2:-}"
+  local TEMPLATE_BASE="templates"
 
   # Check if both directories are provided
-  if [[ "$SOURCE_DIR" == "" || "$TARGET_DIR" == "" ]]; then
+  if [[ "$SOURCE_PROJECT_DIR" == "" || "$TARGET_PROJECT_DIR" == "" ]]; then
     echo::err "Usage: $0 <source_directory> <target_directory>"
     return 1
   fi
 
+
   # Traverse the source directory
-  find "$SOURCE_DIR" -type f -name "*.yaml" -o -name "*.yml" | while read -r source_file; do
+  find "$SOURCE_PROJECT_DIR/$TEMPLATE_BASE" -type f -name "*.yaml" -o -name "*.yml" | while read -r source_file; do
     # Get the relative path of the file
-    relative_path="${source_file#"$SOURCE_DIR"/}"
-    target_file="$TARGET_DIR/$relative_path"
+    relative_path="${source_file#"$SOURCE_PROJECT_DIR"/}"
+    target_file="$TARGET_PROJECT_DIR/$relative_path"
 
     # Check if the file exists in the target directory
     if [[ ! -f "$target_file" ]]; then
+
       # Create an empty file in the target directory
       mkdir -p "$(dirname "$target_file")"
+
+      # Patches does not allow empty files
+      # error: trouble configuring builtin PatchTransformer with config: `
+      # path: templates/patches/argocd-secret-patch.yaml
+      #`: unable to parse SM or JSON patch from []
+      command::echo_debug_eval "yq -i 'del(.patches[] | select(.path == \"$relative_path\"))' $TARGET_PROJECT_DIR/kustomization.yml"
+
+      # Empty file
       touch "$target_file"
       echo::info "Template File $target_file Status: Created"
+
     else
+
       echo::debug "Template File $target_file Status: Exists"
+
     fi
   done
 
@@ -101,11 +118,11 @@ kustomize_processing(){
     # Output templates
     # helm template --output-dir /tmp
     # will output all templates one by one at: $KUSTOMIZE_ROOT_TEMP_DIR/chart-name/templates/argocd-service-monitor-metrics.yml
-    command::echo_eval "helm template --output-dir $KUSTOMIZE_ROOT_TEMP_DIR -f $KUBE_X_VALUES_FILE $KUBE_X_CHART_DIRECTORY"
+    command::echo_eval "helm template --output-dir $KUSTOMIZE_ROOT_TEMP_DIR -f $KUBE_X_VALUES_FILE $KUBE_X_CHART_DIRECTORY 1>&2"
 
     # Sync
     echo::info "Create empty template files"
-    create_empty_templates_with_empty_files "$KUBE_X_CHART_DIRECTORY/templates" "$KUSTOMIZE_PACKAGE_TEMP_DIR/templates"
+    handle_empty_templates_output "$KUBE_X_CHART_DIRECTORY" "$KUSTOMIZE_PACKAGE_TEMP_DIR"
 
     # The argument must be:
     # * a file system path
@@ -115,7 +132,7 @@ kustomize_processing(){
     # https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/helmcharts/
     # https://github.com/mgoltzsche/khelm
     # Flag --reorder has been deprecated, use the new 'sortOptions' field in kustomization.yaml instead.
-    if ! KUSTOMIZE_MANIFEST=$(cd "$KUSTOMIZE_PACKAGE_TEMP_DIR" && kubectl kustomize --reorder=none .); then
+    if ! KUSTOMIZE_MANIFEST=$(cd "$KUSTOMIZE_PACKAGE_TEMP_DIR" && kubectl kustomize .); then
       echo::err "An error occurred during the kustomization"
       echo::err "The command 'kubectl kustomize .' failed with the $KUSTOMIZE_PACKAGE_TEMP_DIR working directory"
       return 1
