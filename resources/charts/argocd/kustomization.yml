@@ -24,7 +24,7 @@ patches:
 
 # Note: External Secret are resources while secret already present in install.yaml are patches
 resources:
-  - https://raw.githubusercontent.com/argoproj/argo-cd/v2.11.7/manifests/install.yaml
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v2.13.3/manifests/install.yaml
   - templates/resources/argocd-ingress.yaml
   - templates/resources/argocd-namespace.yaml
   - templates/resources/argocd-notifications-secret-external.yaml

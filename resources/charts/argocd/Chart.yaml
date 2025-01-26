@@ -21,7 +21,7 @@ version: 0.0.1
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "v2.11.7" # The version of argocd (in kustomization.yml url)
+appVersion: "v2.13.3" # The version of argocd (in kustomization.yml url)
 
 
 # https://github.com/external-secrets/external-secrets/releases
