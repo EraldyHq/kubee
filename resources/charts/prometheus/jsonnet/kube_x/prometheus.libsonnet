@@ -323,6 +323,21 @@ function(kpValues, kxValues)
         externalLabels: {
           cluster: kxConfig.cluster_name,
         },
+        // Arguments to the prometheus server
+        // https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.Argument
+        additionalArgs: [
+          {
+            // Duration of block in memory
+            // Default to 2 hours (we gain 100Mb of memory)
+            // There is also a min storage.tsdb.min-block-duration
+            // https://github.com/prometheus-operator/prometheus-operator/issues/4414
+            name: 'storage.tsdb.max-block-duration',
+            value: '1h',
+          },
+        ],
+        // overrideHonorLaels:false enforces honorLabels:true
+        // ie don't create `exported_` metrics
+        overrideHonorLabels: false,
         // Remote Write to Grafana Cloud
         // Spec: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#monitoring.coreos.com/v1.RemoteWriteSpec
         remoteWrite: [] +
@@ -396,7 +411,7 @@ function(kpValues, kxValues)
       apiVersion: 'grafana.integreatly.org/v1beta1',
       kind: 'GrafanaFolder',
       metadata: {
-        name: 'prometheus-grafana-folder', # Does not allow Uppercase
+        name: 'prometheus-grafana-folder',  // Does not allow Uppercase
       },
       spec: {
         instanceSelector: {
@@ -412,34 +427,34 @@ function(kpValues, kxValues)
 
   } +
   // Dashboard
-  (if ! kxConfig.grafana_enabled then {} else
-  {
-    ['grafana-dashboard-' + stripJson(name)]: {
-      apiVersion: 'grafana.integreatly.org/v1beta1',
-      kind: 'GrafanaDashboard',
-      metadata: {
-        name: 'prometheus-grafana-' + stripJson(name),
-      },
-      spec:
-        {
-          // Allow import from grafana instance in another namespace
-          // https://github.com/grafana/grafana-operator/tree/master/examples/crossnamespace
-          // https://grafana.github.io/grafana-operator/docs/examples/crossnamespace/readme/
-          allowCrossNamespaceImport: true,
-          // https://grafana.github.io/grafana-operator/docs/overview/#resyncperiod
-          // 10m by default
-          // 0m: never poll for changes in the dashboards
-          resyncPeriod: '0m',
-          folder: kxConfig.grafana_folder,
-          // https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
-          instanceSelector: {
-            matchLabels: {
-              dashboards: kxValues.grafana_name,
-            },
-          },
-          // std.manifestJson to output a Json string
-          json: std.manifestJson(dashboards[name]),
-        },
-    }
-    for name in std.objectFields(dashboards)
-  })
+  (if !kxConfig.grafana_enabled then {} else
+     {
+       ['grafana-dashboard-' + stripJson(name)]: {
+         apiVersion: 'grafana.integreatly.org/v1beta1',
+         kind: 'GrafanaDashboard',
+         metadata: {
+           name: 'prometheus-grafana-' + stripJson(name),
+         },
+         spec:
+           {
+             // Allow import from grafana instance in another namespace
+             // https://github.com/grafana/grafana-operator/tree/master/examples/crossnamespace
+             // https://grafana.github.io/grafana-operator/docs/examples/crossnamespace/readme/
+             allowCrossNamespaceImport: true,
+             // https://grafana.github.io/grafana-operator/docs/overview/#resyncperiod
+             // 10m by default
+             // 0m: never poll for changes in the dashboards
+             resyncPeriod: '0m',
+             folder: kxConfig.grafana_folder,
+             // https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
+             instanceSelector: {
+               matchLabels: {
+                 dashboards: kxValues.grafana_name,
+               },
+             },
+             // std.manifestJson to output a Json string
+             json: std.manifestJson(dashboards[name]),
+           },
+       }
+       for name in std.objectFields(dashboards)
+     })

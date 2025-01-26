@@ -5,17 +5,17 @@ dependencies:
 - name: kube-x-cert-manager
   repository: file://../cert-manager
   version: 0.0.1
+- name: kube-x-grafana
+  repository: file://../grafana
+  version: 0.0.1
 - name: kube-x-external-secrets
   repository: file://../external-secrets
   version: 0.0.1
 - name: kube-x-alertmanager
   repository: file://../alertmanager
   version: 0.0.1
-- name: kube-x-grafana
-  repository: file://../grafana
-  version: 0.0.1
 - name: kube-x-prometheus-crds
   repository: file://../prometheus-crds
   version: 0.0.1
-digest: sha256:263a06c22d72d7a4875f5f9eda5f4205d0919ff0abbf26c479f80b8b28fca5f4
-generated: "2025-01-25T21:33:30.045138152+01:00"
+digest: sha256:d7fcf254097f2933f5678b3be3d8dbf33cd96a2110b55f051565d27b458fd7e6
+generated: "2025-01-26T22:45:41.538306005+01:00"

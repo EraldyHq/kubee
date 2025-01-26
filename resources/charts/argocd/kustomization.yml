@@ -9,6 +9,7 @@ namespace: ${KUBE_X_NAMESPACE}
 
 patches:
   # Patch needed to apply the server transport via annotation to disable tls validation from Traefik
+  - path: templates/patches/argocd-application-controller.yaml
   - path: templates/patches/argocd-cmd-params-cm.yaml
   - path: templates/patches/argocd-notifications-cm.yaml
   - path: templates/patches/argocd-notifications-secret-patch.yaml

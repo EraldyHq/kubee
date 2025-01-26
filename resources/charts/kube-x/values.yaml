@@ -33,14 +33,6 @@ auth:
     # * alert notifications: prometheus, argocd
     email: ''
 
-  # The default kind of Secret manifest created
-  # Valid values are:
-  # `Secret`: A Kubernetes Secret manifest is created, the values are passed in the values.yaml with environment variables substitution
-  # `ExternalSecret`: A ExternalSecret Manifest is created that retrieves the value in a store (External Secret should be installed).
-  #                   Used for GitOps pulling such as in ArgoCd where the git repository is pulled and applied.
-  # Not all Charts support it
-  secret_kind: 'Secret'
-
   # Private Network ranges
   # used for Ingress Ip restrictions (Traefik IpAllowList)
   # example for a home ip: 143.176.206.80/32

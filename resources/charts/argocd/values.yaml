@@ -41,10 +41,22 @@ conf:
   # As recommended here: https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/#application-controller-metrics
   controller_metrics_cache_expiration: '24h0m0s'
 
-
+# Kind of secret generated
 secret:
-  # Kind of secret generated
+  # Valid values are:
+  # `Secret`: A Kubernetes Secret manifest is created, the values are passed in the values.yaml with environment variables substitution
+  # `ExternalSecret`: A ExternalSecret Manifest is created that retrieves the value in a store (External Secret should be installed).
+  #                   Used for GitOps pulling such as in ArgoCd where the git repository is pulled and applied.
   kind: 'Secret'
+
+# ArgoCd Components parameters
+components:
+  argocd_application_controller:
+    resources:
+      # The controller may go out of hand with memory
+      # Works at 238 and peak at 370
+      memory: '400Mi'
+
 
 # Internal
 # Used to not output manifest from cross dependency in this charts

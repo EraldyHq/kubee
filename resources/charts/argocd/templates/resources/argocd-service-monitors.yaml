@@ -21,6 +21,7 @@ spec:
       app.kubernetes.io/name: argocd-metrics
   endpoints:
     - port: metrics
+      interval: 5m # 5m to lower the memory consumption as this is not a critical component
       relabelings:
         # Drop the discovery service label
         # We keep service to be able to get the kb by service
@@ -50,6 +51,7 @@ spec:
       app.kubernetes.io/name: argocd-server-metrics
   endpoints:
     - port: metrics
+      interval: 5m
       relabelings:
         # Drop the discovery service label
         # We keep service to be able to get the kb by service
@@ -70,6 +72,7 @@ spec:
       app.kubernetes.io/name: argocd-repo-server
   endpoints:
     - port: metrics
+      interval: 5m
       relabelings:
         # Drop the discovery service label
         # We keep service to be able to get the kb by service
@@ -90,6 +93,7 @@ spec:
       app.kubernetes.io/name: argocd-applicationset-controller
   endpoints:
     - port: metrics
+      interval: 5m
       relabelings:
         # Drop the discovery service label
         # We keep service to be able to get the kb by service
@@ -109,6 +113,7 @@ spec:
       app.kubernetes.io/name: argocd-notifications-controller-metrics
   endpoints:
     - port: metrics
+      interval: 5m
       relabelings:
       # Drop the discovery service label
       # We keep service to be able to get the kb by service

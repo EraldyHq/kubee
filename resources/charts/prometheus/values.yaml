@@ -20,7 +20,12 @@ resources:
   memory: '400Mi'
 # Retention
 # How long to retain data (it the prometheus server argument --storage.tsdb.retention.time=24h)
-retention: '4h'
+# Data in memory is 2 hour old, by setting retention to 2h, we don't allow to query data over 2 hours and to load data in memory
+retention: '2h'
+# The default scrape interval
+# It does influence memory as Prometheus keeps by default 2 hours of scraping in memory
+scrap_interval: '1m'
+
 # grafana cloud remote write prometheus integration
 grafana_cloud:
   enabled: false
