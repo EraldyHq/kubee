@@ -6,7 +6,7 @@
   The controller metrics to get health status
   https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/#application-controller-metrics
 */}}
-{{- if eq .Values.kube_x.prometheus.enabled true }}
+{{- if eq .Values.prometheus.enabled true }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:

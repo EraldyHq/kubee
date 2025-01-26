@@ -42,6 +42,12 @@ dependencies:
     repository: file://../grafana
     alias: grafana
     condition: kube_x_internal.dont_install_cross_dependency
+  # For the scrape
+  - name: kube-x-prometheus
+    version: 0.0.1
+    repository: file://../prometheus
+    alias: prometheus
+    condition: kube_x_internal.dont_install_cross_dependency
   # For CI
   - name: kube-x-external-secrets
     version: 0.0.1

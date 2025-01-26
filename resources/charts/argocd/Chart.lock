@@ -8,8 +8,11 @@ dependencies:
 - name: kube-x-grafana
   repository: file://../grafana
   version: 0.0.1
+- name: kube-x-prometheus
+  repository: file://../prometheus
+  version: 0.0.1
 - name: kube-x-external-secrets
   repository: file://../external-secrets
   version: 0.0.1
-digest: sha256:7eca095fce29e030f3475021109a0c30c535b2cc024915b9d34bc40316b25631
-generated: "2025-01-26T18:14:53.593680418+01:00"
+digest: sha256:1acb28162b4c9d0867a798fdcf5bacf817829f33b798f38c123603bca24cf572
+generated: "2025-01-26T18:35:57.529651386+01:00"

@@ -16,7 +16,7 @@ and restarted if found with the command `kubectl rollout restart`
 Restart an app (ie rollout restart a deployment or statefulset)
 
 ```bash
-kube-app-restart [app name]
+kube-x-restart [app name]
 ```
 where `app name` is
 * optional if you run the command in the app directory (default to: `$KUBE_APP_NAME`)
