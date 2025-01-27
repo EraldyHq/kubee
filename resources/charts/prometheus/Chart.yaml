@@ -58,3 +58,10 @@ dependencies:
     version: 0.0.1
     repository: file://../prometheus-crds
     condition: kube_x_internal.install_cross_dependency
+
+
+kube_x:
+  versions:
+    # Used to download the library with kube-prometheus-downloader-helper
+    # https://github.com/prometheus-operator/kube-prometheus/releases
+    kube-prometheus: 'v0.14.0'

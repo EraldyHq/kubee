@@ -1,9 +1,12 @@
 # Contrib / Dev
 
+## Config
+
+Prometheus operator generate an `alertmanager.yaml` from the secret `alertmanager-<alertmanager-name>`
 
 ## Steps
 
-* Update the jsonnet library with the [script](download-jsonnet-libs)
+* Download the lib from kube-prometheus with this script: [script](utilities/dl-alertmanager-kube-prometheus)
 * Jb
 ```bash
 jb init
@@ -18,5 +21,13 @@ rm -rf jsonnet/multi/manifests && mkdir -p jsonnet/multi/manifests/setup && json
 export BASHLIB_ECHO_LEVEL=4 # debug to keep the generated manifests
 kube-x-helm-x --cluster clusterName template alertmanager > /tmp/all.yml
 # to test only helm template with -s (show-only)
-helm template -s templates/alertmanager-ingress.yaml --set 'kube_x.alertmanager.hostname=alert.com' . | yq
+helm template -s templates/alertmanager-ingress.yaml --set 'kube_x.hostname=alert.com' . | yq
 ```
+
+
+## Support
+
+### field smtp_password not found in type config.plain
+
+It means that the `smtp_password` is not a known configuration.
+Check the conf here: https://prometheus.io/docs/alerting/latest/configuration/#file-layout-and-global-settings

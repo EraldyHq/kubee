@@ -20,3 +20,18 @@ opsgenie:
 # Memory
 resources:
   memory: '50Mi'
+
+# Secret
+secret:
+  # The kind of Secret manifest created
+  # Valid values are:
+  # `Secret`: A Kubernetes Secret manifest is created, the values are passed in the values.yaml with environment variables substitution
+  # `ExternalSecret`: A ExternalSecret Manifest is created that retrieves the value in a store (External Secret should be installed).
+  #                   Used for GitOps pulling such as in ArgoCd where the git repository is pulled and applied.
+  secret_kind: 'Secret'
+
+
+# Internal, don't change
+# Used to not output manifest from cross helm dependency
+kube_x_internal:
+  install_cross_dependency: false

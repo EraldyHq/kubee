@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+#!/usr/bin/env bash
+
+# This script download the kube-prometheus scripts
+# for the prometheus chart
+
+source bashlib-error.sh
+error::set_strict_mode
+error::set_trap
+source bashlib-echo.sh
+
+FILES=(
+  "components/alertmanager.libsonnet"
+)
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+"$SCRIPT_DIR"/../../prometheus/utilities/kube-prometheus-downloader-helper --jsonnet-dir="$SCRIPT_DIR/../jsonnet" "${FILES[@]}"
+

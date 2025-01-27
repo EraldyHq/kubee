@@ -17,5 +17,5 @@ dependencies:
 - name: kube-x-prometheus-crds
   repository: file://../prometheus-crds
   version: 0.0.1
-digest: sha256:d7fcf254097f2933f5678b3be3d8dbf33cd96a2110b55f051565d27b458fd7e6
-generated: "2025-01-26T22:45:41.538306005+01:00"
+digest: sha256:7571ed9cfe9420433f0c001fafad5023f3e2b25da9e72deb5b7f05052aa02523
+generated: "2025-01-27T12:51:30.885203037+01:00"

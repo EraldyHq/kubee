@@ -326,7 +326,8 @@ function(kpValues, kxValues)
           cluster: kxConfig.cluster_name,
         },
         // Arguments to the prometheus server
-        // https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.Argument
+        // CRD:https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.Argument
+        // List (not complete: https://prometheus.io/docs/prometheus/latest/command-line/prometheus/
         additionalArgs: []
                         + (
                           if kxConfig.prometheus_max_block_duration == '2h' then [] else [
@@ -335,7 +336,20 @@ function(kpValues, kxValues)
                               // Default to 2 hours (we gain 100Mb of memory)
                               // There is also a min storage.tsdb.min-block-duration
                               // https://github.com/prometheus-operator/prometheus-operator/issues/4414
+                              // Not found in the official doc
+                              // https://prometheus.io/docs/prometheus/latest/command-line/prometheus/
+                              // but well documented on the internet and it works boy
                               name: 'storage.tsdb.max-block-duration',
+                              value: kxConfig.prometheus_max_block_duration,
+                            },
+                            {
+                              // The web says that it should be set to the same value as max_block_duration
+                              // Not sure what it means.
+                              // Not found in the official doc
+                              // https://prometheus.io/docs/prometheus/latest/command-line/prometheus/
+                              // Chat Gpt: min-block-duration determines how long Prometheus waits
+                              // before converting the WAL (Write-Ahead Log) entries into TSDB blocks.
+                              name: 'storage.tsdb.min-block-duration',
                               value: kxConfig.prometheus_max_block_duration,
                             },
                           ]

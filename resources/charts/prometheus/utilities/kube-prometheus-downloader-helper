@@ -58,9 +58,9 @@ fi
 
 CHART_NAME=$(dirname "$JSONNET_DIR/..")
 if [ "$CHART_NAME" == "prometheus" ]; then
-  PROMETHEUS_CHART_FILE="$JSONNET_DIR/../Chart.yaml"
+  PROMETHEUS_CHART_FILE=$(realpath "$JSONNET_DIR/../Chart.yaml")
 else
-  PROMETHEUS_CHART_FILE="$JSONNET_DIR/../../prometheus/Chart.yaml"
+  PROMETHEUS_CHART_FILE=$(realpath "$JSONNET_DIR/../../prometheus/Chart.yaml")
 fi
 
 
@@ -73,8 +73,8 @@ fi
 # Get the Kube-Prometheus version
 KUBE_PROMETHEUS_VERSION=$(yq '.kube_x.versions.kube-prometheus' "$PROMETHEUS_CHART_FILE" | tr -d '~')
 
-if [ "$KUBE_PROMETHEUS_VERSION" == "" ]; then
-  echo::err "Unable to retrieve the kube prometheus version (the value was empty)"
+if [ "$KUBE_PROMETHEUS_VERSION" == "" ] || [ "$KUBE_PROMETHEUS_VERSION" == "null" ]; then
+  echo::err "Unable to retrieve the kube prometheus version (the value was empty) in $PROMETHEUS_CHART_FILE"
   exit 1
 fi
 
@@ -85,11 +85,13 @@ for FILE in "$@"; do
   # directory needs to exists
   mkdir -p "$(dirname "$DEST")"
   echo::info "Download the Kube Prometheus Jsonnet lib $FILE with version $KUBE_PROMETHEUS_VERSION"
-  curl \
-    -s \
-    -o "$DEST" \
-    --fail \
-    "https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/refs/tags/$KUBE_PROMETHEUS_VERSION/jsonnet/kube-prometheus/$FILE"
+  URL="https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/refs/tags/$KUBE_PROMETHEUS_VERSION/jsonnet/kube-prometheus/$FILE"
+  echo::info "$URL"
+  if ! curl -s -o "$DEST" --fail "$URL"; then
+    # If an error occurred do it again without silent (-s)
+    # to show to the user
+    curl -o "$DEST" --fail "$URL"
+  fi
 
   echo::success "The jsonnet lib was updated"
 done

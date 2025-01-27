@@ -7,34 +7,25 @@ local extValues = std.extVar('values');
 local validation = import './kube_x/validation.libsonnet';
 
 local values = {
-    kube_x: {
-        cluster: {
-            adminUser:{
-                email: validation.getNestedPropertyOrThrow(extValues, 'kube_x.auth.admin_user.email')
-            },
-            email: {
-                smtp: {
-                    host: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.host'),
-                    port: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.port'),
-                    from: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.from'),
-                    username: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.username'),
-                    password: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.password'),
-                    hello: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.hello'),
-                }
-            }
-        },
-        alertmanager: {
-            namespace: validation.notNullOrEmpty(extValues,'kube_x.alertmanager.namespace'),
-            hostname: validation.getNestedPropertyOrThrow(extValues, 'kube_x.alertmanager.hostname'),
-            opsgenie:{
-                apiKey: validation.getNestedPropertyOrThrow(extValues, 'kube_x.alertmanager.opsgenie.apiKey'),
-            },
-            // memory is not by default in the helm values '50Mi'
-            memory: validation.getNestedPropertyOrThrow(extValues, 'kube_x.alertmanager.resources.memory'),
-        },
-    }
-};
 
+  admin_user_email: validation.getNestedPropertyOrThrow(extValues, 'kube_x.auth.admin_user.email'),
+  smtp_host: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.host'),
+  smtp_port: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.port'),
+  smtp_from: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.from'),
+  smtp_username: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.username'),
+  smtp_password: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.password'),
+  smtp_hello: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.hello'),
+  alert_manager_name: validation.notNullOrEmpty(extValues, 'name'),
+  alert_manager_version: validation.notNullOrEmpty(extValues, 'version'),
+  alert_manager_namespace: validation.notNullOrEmpty(extValues, 'namespace'),
+  alert_manager_hostname: validation.getNestedPropertyOrThrow(extValues, 'hostname'),
+  alert_manager_opsgenie_apikey: validation.getNestedPropertyOrThrow(extValues, 'opsgenie.api_key'),
+  alert_manager_memory: validation.getNestedPropertyOrThrow(extValues, 'resources.memory'),
+  cert_manager_enabled: validation.getNestedPropertyOrThrow(extValues, 'cert_manager.enabled'),
+  cert_manager_issuer_name: validation.getNestedPropertyOrThrow(extValues, 'cert_manager.issuer_name'),
+  prometheus_interval: validation.getNestedPropertyOrThrow(extValues, 'prometheus.scrape_interval'),
+
+};
 
 
 // Function that create an alertmanager patch
@@ -45,151 +36,97 @@ local values = {
   # Example: https://github.com/prometheus-operator/prometheus-operator/blob/main/example/user-guides/alerting/
   # equivalent to alertmanager.yml ?
 */
-local alertManagerPatch = ( if values.kube_x.alertmanager.hostname != '' then { externalUrl: 'https://'+ values.kube_x.alertmanager.hostname } else {} )
-    + {
-        // Select all config Objects
-        alertmanagerConfigSelector: {},
-        // Select all namespace
-        alertmanagerConfigNamespaceSelector: {},
-        // By default, the alert manager had a matcher on the namespace
-        // We disable this match ie
-        // For a alertmanagerConfig in the namespace kube-prometheus, it would add to the route
-        // matchers:
-        //  - namespace="kube-prometheus"
-        // See: https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.AlertmanagerConfigMatcherStrategy
-        alertmanagerConfigMatcherStrategy: {
-            type: 'None'
-        },
-    }
+local alertManagerPatch = {
+  // External Url
+  [if values.alert_manager_hostname != '' then 'externalUrl']: 'https://' + values.alert_manager_hostname,
+  // Select all config Objects
+  alertmanagerConfigSelector: {},
+  // Select all namespace
+  alertmanagerConfigNamespaceSelector: {},
+  // By default, the alert manager had a matcher on the namespace
+  // We disable this match ie
+  // For a alertmanagerConfig in the namespace kube-prometheus, it would add to the route
+  // matchers:
+  //  - namespace="kube-prometheus"
+  // See: https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.AlertmanagerConfigMatcherStrategy
+  alertmanagerConfigMatcherStrategy: {
+    type: 'None',
+  },
+}
 ;
 
 
-// Get the alertManagerVersion from jsonnetfile.json
-local jsonnetfile = (import 'jsonnetfile.json');
-local alertManagerVersion = std.filter(
-    function(x) x.source.git.remote == "https://github.com/prometheus/alertmanager.git",
-    jsonnetfile.dependencies)[0].version;
-
 // Get the smtpFromEmail
-local smtpFromEmail  = ( if values.kube_x.email.smtp.from != '' then
-    values.kube_x.email.smtp.from else if values.kube_x.auth.admin_user.email != '' then
-    values.kube_x.auth.admin_user.email else
-    error "No email could be determined for the `for` email header. Set at least: kube_x.auth.admin_user.email"
+local smtpFromEmail = (
+  if values.smtp_from != '' then
+    values.smtp_from else if values.admin_user_email != '' then
+    values.admin_user_email else
+    error 'No email could be determined for the `for` email header. Set at least: kube_x.auth.admin_user.email'
 );
 
 // Helper function that returns null for empty strings
 local nonEmpty(str) = if std.length(str) > 0 then str;
 
 // Email
-local smtpObject = ( if values.kube_x.email.smtp.host != '' then
-    {
-        smtp_smarthost: values.kube_x.email.smtp.host+':'+values.kube_x.email.smtp.port,
-        smtp_require_tls: true,
-        smtp_from: smtpFromEmail,
-        [if values.kube_x.email.smtp.hello != null then "smtp_hello"]: values.kube_x.email.smtp.hello,
-        smtp_username: nonEmpty(values.kube_x.email.smtp.username),
-        smtp_password: nonEmpty(values.kube_x.email.smtp.password)
-    });
+// https://prometheus.io/docs/alerting/latest/configuration/#file-layout-and-global-settings
+local smtpGolbalConfigObject = (if values.smtp_host == '' then {} else
+                                  {
+                                    smtp_smarthost: values.smtp_host + ':' + values.smtp_port,
+                                    smtp_require_tls: true,
+                                    smtp_from: smtpFromEmail,
+                                    [if values.smtp_hello != null then 'smtp_hello']: values.smtp_hello,
+                                    smtp_auth_username: nonEmpty(values.smtp_username),
+                                    smtp_auth_password: nonEmpty(values.smtp_password),
+                                  });
 
-// Opsgenie
-local opsGenieObject = ( if values.kube_x.alertmanager.opsgenie.apiKey != '' then {
-        opsgenie_api_key: values.kube_x.alertmanager.opsgenie.apiKey,
-        opsgenie_api_url: 'https://api.opsgenie.com/'
-    } else {});
+// Ops Genie
+local opsGenieGlobalConfigObject = (if values.alert_manager_opsgenie_apikey == '' then null else (import 'kube_x/ops-genie.libsonnet')(values));
 
 // Kube Prometheus Alert Manager Object
 local alertmanager = (import './kube_prometheus/components/alertmanager.libsonnet')(
-      {
-        name: 'main', # main by default, mandatory for installation
-        version: alertManagerVersion,
-        namespace: values.kube_x.alertmanager.namespace,
-        image: 'quay.io/prometheus/alertmanager:'+alertManagerVersion,
-        // Number of replicas of each shard to deploy
-        // Default is 1 for an alert manager crd but kube-prometheus set it to 2
-        replicas: 1,
-        resources: {
-            limits: { memory: values.kube_x.alertmanager.memory},
-            requests: { cpu: '10m', memory: values.kube_x.alertmanager.memory },
-        },
-        config+:: {
-            // The Global Conf for alert manager
-            global+: {
-              // Clients are expected to continuously re-send alerts as long as they are still active (usually on the order of 30 seconds to 3 minutes)
-              // An alert is considered as resolved if it has not been resend after the resolve_timeout configuration.
-              resolve_timeout: '5m',
-            }
-            + smtpObject
-            + opsGenieObject,
-        }
-      }
+  {
+    name: values.alert_manager_name,  // main by default, mandatory for installation
+    version: values.alert_manager_version,
+    namespace: values.alert_manager_namespace,
+    image: 'quay.io/prometheus/alertmanager:' + values.alert_manager_version,
+    // Number of replicas of each shard to deploy
+    // Default is 1 for an alert manager crd but kube-prometheus set it to 2
+    replicas: 1,
+    resources: {
+      limits: { memory: values.alert_manager_memory },
+      requests: { cpu: '10m', memory: values.alert_manager_memory },
+    },
+    config+:: {
+      // The Global Conf for alert manager
+      global+: {
+                 // Clients are expected to continuously re-send alerts as long as they are still active (usually on the order of 30 seconds to 3 minutes)
+                 // An alert is considered as resolved if it has not been resend after the resolve_timeout configuration.
+                 resolve_timeout: '5m',
+               }
+               + smtpGolbalConfigObject
+               + (if opsGenieGlobalConfigObject == null then {} else opsGenieGlobalConfigObject.Alertmanager),
+    },
+  }
 );
 
-{
-    ['alertmanager-' + name]:
-        alertmanager[name]
-        + (if alertmanager[name].kind == 'Alertmanager' then { spec+: alertManagerPatch } else {} )
-    for name in std.objectFields(alertmanager)
-} + ( if values.kube_x.alertmanager.opsgenie.apiKey != '' then
-    /*
-          The opsgenie alert manager config
-          https://github.com/prometheus/alertmanager/blob/main/config/testdata/conf.opsgenie-both-file-and-apikey.yml
-          https://prometheus.io/docs/alerting/latest/configuration/#opsgenie_config
-          One receiver by priority as stated here:
-          https://support.atlassian.com/opsgenie/docs/integrate-opsgenie-with-prometheus/
-    */
-    {
-        'alertmanager-opsgenie-config': {
-            apiVersion: 'monitoring.coreos.com/v1alpha1',
-            kind: 'AlertmanagerConfig',
-            metadata: {
-              name: 'opsgenie',
-              labels: {
-                'app.kubernetes.io/name': 'alertmanager'
-                }
-            },
-            spec: {
-            /*
-              Route
-              https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1alpha1.Route
-            */
-              route: {
-                receiver: "opsgenie",
+// 30s is the kube-prometheus default
+local serviceMonitorPatch = {
+  endpoints: [
+      { port: 'web', interval: values.prometheus_interval },
+      { port: 'reloader-web', interval: values.prometheus_interval },
+  ],
+};
 
-                routes: [
-                  {
-                       receiver: "opsgenie-critical",
-                        # !!! Match properties does not work !!!
-                        # Matcher: https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1alpha1.Matcher
-                        matchers: [{
-                             name: "severity",
-                            value: "critical",
-                            matchType: "="
-                        }],
-                  },
-                  {
-                    receiver: "opsgenie-warning",
-                    matchers: [{
-                        name: "severity",
-                        value: "warning",
-                        matchType: "="
-                        }],
-                  }
-                ]
-              },
-              receivers: [
-                {
-                  name: "opsgenie-critical",
-                  opsgenieConfigs: [{ priority: 'P1' }]
-                },
-                {
-                    name: "opsgenie-warning",
-                  opsgenieConfigs: [{ priority: 'P2' }]
-                },
-                {
-                  name: "opsgenie",
-                  opsgenieConfigs: [{ priority: 'P3' }]
-                }
-              ]
-            }
-        }
-    } else {})
+// Returned Objects
+{
+  ['alertmanager-' + name]:
+    alertmanager[name]
+    + (if alertmanager[name].kind == 'Alertmanager' then { spec+: alertManagerPatch } else {})
+    + (if alertmanager[name].kind == 'ServiceMonitor' then { spec+: serviceMonitorPatch } else {})
+  for name in std.objectFields(alertmanager)
+  # filter out network policy otherwise no ingress from Traefik
+  if name != 'networkPolicy'
+} + {
+  [if opsGenieGlobalConfigObject != null then 'alertmanager-config-ops-genie']: opsGenieGlobalConfigObject.AlertmanagerConfig,
+  [if values.alert_manager_hostname != '' then 'alertmanager-ingress']: (import "kube_x/ingress.libsonnet")(values),
+}
