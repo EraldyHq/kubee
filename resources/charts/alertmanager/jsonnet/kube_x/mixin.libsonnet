@@ -1,9 +1,3 @@
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// Don't modify this script if you are not in the Kube-X Utilities Promtheus Chart directory
-// Otherwise this file will be overwritten
-// as this is not the source
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 // A kube-x mixin function
 // to create the Kubernetes Manifests
 // * PromtetheusRule from the Promtheuse Operator

@@ -2,6 +2,8 @@
 
 
 ## About
+This is a `Kube-x Chart` that installs `Prometheus Alert manager`.
+
 `Prometheus Alert manager` receives alerts from Prometheus
 and manage them, ie:
 * silence, 
@@ -10,8 +12,6 @@ and manage them, ie:
 * route them to:
   * email
   * or an external incident management platform such as OpsGenie.
-
- 
 
 ## Install
 
@@ -32,11 +32,17 @@ kube-x-helm-x -c clusterName template alertmanager > /tmp/all.yaml
 
 * Alert Notifications Channels
   * Email 
-  * OpsGenie
-* Ingress if hostname is not null
-* Alert manager Monitoring:
-  * Metrics Collection 
+  * OpsGenie (if api_key is not null)
+* Ingress (if hostname is not null)
+* Monitoring:
+  * Metrics Scraping 
   * [Alerts](https://runbooks.prometheus-operator.dev/runbooks/alertmanager/)
+  * [Grafana Dashboard](https://monitoring.mixins.dev/alertmanager/#dashboards)
+
+## How to adapt 
+
+This `Kube-x Chart` is a [Jsonnet Chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-jsonnet-kube-x-chart). 
+You can use it as Jsonnet dependency in your projects.
 
 ## Contrib
 

@@ -1,12 +1,10 @@
 # Contrib / Dev
 
-## Config
 
-Prometheus operator generate an `alertmanager.yaml` from the secret `alertmanager-<alertmanager-name>`
 
 ## Steps
 
-* Download the lib from kube-prometheus with this script: [script](utilities/dl-alertmanager-kube-prometheus)
+* Download the dependency scripts with this script: [script](utilities/dl-alertmanager-dependency-scripts)
 * Jb
 ```bash
 jb init
@@ -24,6 +22,12 @@ kube-x-helm-x --cluster clusterName template alertmanager > /tmp/all.yml
 helm template -s templates/alertmanager-ingress.yaml --set 'kube_x.hostname=alert.com' . | yq
 ```
 
+## How 
+### How does Alert Manager config is searched
+
+Prometheus operator searches:
+* an `alertmanager.yaml` from the secret `alertmanager-<alertmanager-name>`
+* all other `AlertConfig CRDs`
 
 ## Support
 

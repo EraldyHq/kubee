@@ -24,6 +24,9 @@ local values = {
   cert_manager_enabled: validation.getNestedPropertyOrThrow(extValues, 'cert_manager.enabled'),
   cert_manager_issuer_name: validation.getNestedPropertyOrThrow(extValues, 'cert_manager.issuer_name'),
   prometheus_interval: validation.getNestedPropertyOrThrow(extValues, 'prometheus.scrape_interval'),
+  secret_kind: validation.getNestedPropertyOrThrow(extValues, 'secret.kind'),
+  external_secrets_store_name: validation.getNestedPropertyOrThrow(extValues, 'external_secrets.store.name'),
+  grafana_name: validation.getNestedPropertyOrThrow(extValues, 'grafana.name'),
 
 };
 
@@ -109,13 +112,15 @@ local alertmanager = (import './kube_prometheus/components/alertmanager.libsonne
   }
 );
 
+
 // 30s is the kube-prometheus default
 local serviceMonitorPatch = {
   endpoints: [
-      { port: 'web', interval: values.prometheus_interval },
-      { port: 'reloader-web', interval: values.prometheus_interval },
+    { port: 'web', interval: values.prometheus_interval },
+    { port: 'reloader-web', interval: values.prometheus_interval },
   ],
 };
+
 
 // Returned Objects
 {
@@ -124,9 +129,26 @@ local serviceMonitorPatch = {
     + (if alertmanager[name].kind == 'Alertmanager' then { spec+: alertManagerPatch } else {})
     + (if alertmanager[name].kind == 'ServiceMonitor' then { spec+: serviceMonitorPatch } else {})
   for name in std.objectFields(alertmanager)
-  # filter out network policy otherwise no ingress from Traefik
-  if name != 'networkPolicy'
+  // filter out network policy otherwise no ingress from Traefik
+  // Secret is managed apart as we allow also a ExternalSecrets
+  if !std.member(['NetworkPolicy', 'Secret'], alertmanager[name].kind)
 } + {
+  // Ops Genie Config Object
   [if opsGenieGlobalConfigObject != null then 'alertmanager-config-ops-genie']: opsGenieGlobalConfigObject.AlertmanagerConfig,
-  [if values.alert_manager_hostname != '' then 'alertmanager-ingress']: (import "kube_x/ingress.libsonnet")(values),
-}
+  // Ingress
+  [if values.alert_manager_hostname != '' then 'alertmanager-ingress']: (import 'kube_x/ingress.libsonnet')(values),
+  // AlertManager Config (is in a secret)
+  'alertmanager-secret-config': if std.asciiLower(values.secret_kind) == 'externalsecret' then
+    (import 'kube_x/external-secret-config.libsonnet')(values {
+      alert_manager_config: std.parseYaml(alertmanager.secret.stringData['alertmanager.yaml']),
+    })
+  else
+    alertmanager.secret,
+  // Default Config to send an email
+  'alertmanager-config-default' : (import 'kube_x/alertmanager-config-default.libsonnet')(values),
+} +  (import 'kube_x/mixin-grafana.libsonnet')(values{
+          mixin: alertmanager.mixin,
+          mixin_name: 'alertmanager',
+          grafana_name: values.grafana_name,
+          grafana_folder_label: 'Alertmanager',
+      })

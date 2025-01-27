@@ -5,11 +5,13 @@
 synopsis(){
 
   cat<<EOF
-This helper script downloads scripts from the jsonnet kube-prometheus project
+This helper script:
+ * downloads scripts from the jsonnet kube-prometheus project
+ * and copy the mixin libsonnet
 
-   $(basename "$0") --jsonnet-dir /path/to/jsonnet FILE1 FILE2
+   $(basename "$0") --jsonnet-dir /path/to/jsonnet KP_FILE1 KP_FILE2
 
-FILES should be relative file to
+Kubernetes Prometheus files KP_FILES should be relative file to
 https://github.com/prometheus-operator/kube-prometheus/tree/main/jsonnet/kube-prometheus
 
 EOF
@@ -56,7 +58,9 @@ if [ ! -d "$JSONNET_DIR" ]; then
   exit 1
 fi
 
+
 CHART_NAME=$(dirname "$JSONNET_DIR/..")
+
 if [ "$CHART_NAME" == "prometheus" ]; then
   PROMETHEUS_CHART_FILE=$(realpath "$JSONNET_DIR/../Chart.yaml")
 else
@@ -95,3 +99,12 @@ for FILE in "$@"; do
 
   echo::success "The jsonnet lib was updated"
 done
+
+# Mixin
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+KUBE_X_TARGET_DIR="$JSONNET_DIR/kube_x"
+mkdir -p "$KUBE_X_TARGET_DIR"
+cp --force "$SCRIPT_DIR"/mixin-grafana.libsonnet "$KUBE_X_TARGET_DIR"
+echo::success "The mixin-grafana.libsonnet was copied to $KUBE_X_TARGET_DIR"
+cp --force "$SCRIPT_DIR"/mixin.libsonnet "$KUBE_X_TARGET_DIR"
+echo::success "The mixin.libsonnet was copied to $KUBE_X_TARGET_DIR"

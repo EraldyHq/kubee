@@ -138,8 +138,17 @@ helm get -n prometheus values prometheus
 # Note
 ## Secret Security
 
-The Helm values are stored in a secret. You can retrieve the applied values and secret.
+With Helm, you retrieve the applied data (manifests, values) from a storage backend.
+
+The default storage backend for Helm is a `Kubernetes secret`, 
+therefore the security is by default managed by Kubernetes RBAC.
+
+Example:
+With this command, if you have access to the Kubernetes secret, 
+you should be able to see the applied values files with eventually your secrets.
 ```bash
 helm get -n namespace values chartReleaseName
 ```
+
+More information can be found in the [storage backend section](https://helm.sh/docs/topics/advanced/#configmap-storage-backend)
 

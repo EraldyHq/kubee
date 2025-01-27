@@ -7,6 +7,10 @@ This is a `Kube-X`:
 * and [Jsonnet chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-jsonnet-kube-x-chart) to install the monitoring mixin
 
 
+## Dependency Script
+
+Run [utilties/dl-dependency-scripts](utilties/dl-dependency-scripts) to update to the last [mixin library](jsonnet/kube_x/mixin.libsonnet)
+
 ## How to
 
 ### Test/Check template at dev

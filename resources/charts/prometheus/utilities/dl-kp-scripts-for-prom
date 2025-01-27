@@ -17,4 +17,4 @@ FILES=(
 )
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-"$SCRIPT_DIR"/kube-prometheus-downloader-helper --jsonnet-dir="$SCRIPT_DIR/../jsonnet" "${FILES[@]}"
+"$SCRIPT_DIR"/prometheus-dependency-helper --jsonnet-dir="$SCRIPT_DIR/../jsonnet" "${FILES[@]}"
