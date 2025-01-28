@@ -14,5 +14,5 @@ spec:
     - '{{ .Values.kube_x.kubernetes_dashboard.hostname }}'
   issuerRef:
     kind: ClusterIssuer
-    name: '{{ .Values.kube_x.cert_manager.defaultIssuerName }}'
+    name: '{{ .Values.cert_manager.issuer_name }}'
 {{- end}}

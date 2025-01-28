@@ -9,7 +9,7 @@ error::set_trap
 source bashlib-echo.sh
 
 
-# Kube Prometheus
+# Kube Prometheus Files
 FILES=(
   "components/alertmanager.libsonnet"
 )

@@ -7,6 +7,6 @@ apiVersion: traefik.io/v1alpha1
 kind: ServersTransport
 metadata:
   name: '{{ include "kubernetes-dashboard-transport-no-tls-name" .}}'
-  namespace: '{{.Release.Namespace}}'
+  namespace: '{{.Values.namespace}}'
 spec:
   insecureSkipVerify: true

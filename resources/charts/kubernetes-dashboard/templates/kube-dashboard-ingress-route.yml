@@ -8,6 +8,7 @@ Note that we set this value to true
 with the argument --serverstransport.insecureskipverify=true
 We don't need it anymore but if the value change, it will not break.
 */}}
+{{- if ne .Values.hostname "" }}
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -26,7 +27,7 @@ spec:
   {{- end }}
   routes:
     - kind: Rule
-      match: Host(`{{ .Values.kube_x.kubernetes_dashboard.hostname }}`)
+      match: Host(`{{ .Values.hostname }}`)
       services:
         # Ingress in front of kong
         # written here https://github.com/kubernetes/dashboard?tab=readme-ov-file#installation
@@ -43,3 +44,4 @@ spec:
         # We can't use the basic auth  because it uses the `Authentication` header, and it conflicts with
         # the bearer token of the dashboard
         # - name: 'xxx'
+{{- end}}

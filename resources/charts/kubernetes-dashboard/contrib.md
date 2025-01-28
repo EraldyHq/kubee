@@ -15,7 +15,8 @@ helm dependency update
 * Verify
 ```bash
 helm lint
-kube-x-helm-x -c clusertName template kubernetes-dashboard
+# output them all at out 
+helm template --set 'cert_manager.enabled=true' --output-dir out .
 ```
 * Install
 ```bash

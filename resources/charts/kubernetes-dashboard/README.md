@@ -14,7 +14,7 @@ All configurations can be seen in their respectives `values file`
 ```yaml
 kubernetes_dashboard:
   # Set a hostname if you want the dashboard to be available 
-  # We recommend to use a DNS name based loolup server such as sslip.io or sslip.io
+  # We recommend to use a DNS name based lookup server such as sslip.io or sslip.io
   # to not advertise it in your DNS
   hostname: ''
 kube_x:

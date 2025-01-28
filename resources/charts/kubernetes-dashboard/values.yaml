@@ -48,10 +48,52 @@ kubernetes-dashboard:
           name: servicemonitors.monitoring.coreos.com
           #  Display name
           displayName: 'Service Monitors'
+  auth:
+    containers:
+      resources:
+        requests:
+          memory: 30Mi
+        limits:
+          memory: 30Mi
+  api:
+    containers:
+      resources:
+        requests:
+          cpu: 100m
+          # was set to 200Mi and was taking 140Mi
+          # https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L218C8-L218C22
+          # works with 50 only, takes 23Mi
+          memory: 50Mi
+        limits:
+          memory: 50Mi
+  web:
+    containers:
+      resources:
+        requests:
+          cpu: 100m
+          # was set to 200Mi, consume no more than 10Mi
+          memory: 20Mi
+        limits:
+          memory: 20Mi
+  # They use the sub-chart https://charts.konghq.com version 2.46.0
+  # See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/Chart.yaml#L46
+  # A DBless configuration to act as a gateway
+  # https://github.com/Kong/charts/blob/main/charts/kong/README.md#db-less-deployment
+  kong:
+    # Below are kong values files: https://github.com/Kong/charts/blob/kong-2.46.0/charts/kong/values.yaml
+    # See the values set by kubernetes-dashboard at: https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L371
+    resources:
+       limits:
+        # 80Mi is the minimum to forward request .... pfff we see 75
+        # Otherwise we get:
+        # nginx: [emerg] bind() to unix:/kong_prefix/sockets/we failed (98: Address already in use)
+        memory: 80Mi
+       requests:
+        memory: 80Mi
 
 # Internal, don't change
 kube_x_internal:
-  dont_install_cross_dependency: false
+  install_cross_dependency: false
 
 # Move these values to helpers
 # Name used for consistency
