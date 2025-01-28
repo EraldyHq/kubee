@@ -84,12 +84,13 @@ kubernetes-dashboard:
     # See the values set by kubernetes-dashboard at: https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L371
     resources:
        limits:
-        # 80Mi is the minimum to forward request .... pfff we see 75
+        # 90Mi is the minimum to forward request ....
+        # pfff start with 75, but crash after a couple of minute
         # Otherwise we get:
         # nginx: [emerg] bind() to unix:/kong_prefix/sockets/we failed (98: Address already in use)
-        memory: 80Mi
+        memory: 90Mi
        requests:
-        memory: 80Mi
+        memory: 90Mi
 
 # Internal, don't change
 kube_x_internal:

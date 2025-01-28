@@ -7,7 +7,7 @@ This [kube-x jsonnet chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-jsonnet
 * Api Server
 * Core Dns
 * Controller Manager
-* Kubelet
+* Kubelet: 
 * Scheduler
 
 
@@ -31,11 +31,17 @@ The following monitoring elements are installed for each:
   * `Kubernetes / Controller Manager`
 
 
+## Metrics List
 
+https://monitoring.mixins.dev/kubernetes/
+where:
+* `apiserver_xxx`: Api server metrics
+* `kube_xxx`: Kubelet metrics:
+
+## Alerts / Rules and Dashboard
+* https://kubernetes.io/docs/reference/instrumentation/metrics/
 ## Doc
 
-Metrics: 
-* https://monitoring.mixins.dev/kubernetes/
 * [Metrics For Kubernetes System Components](https://kubernetes.io/docs/concepts/cluster-administration/system-metrics/)
 
 They all exposes at /metrics.
