@@ -300,12 +300,12 @@ get_cluster_values_files(){
     local CHART_VALUES;
     CHART_VALUES=$(command::echo_debug_eval "yq '.$ACTUAL_CHART_ALIAS' $SHM_CLUSTER_VALUES")
     if [ "$CHART_VALUES" == "null" ]; then
-      echo::warn "No chart values found for $ACTUAL_CHART_ALIAS in the cluster value file $SHM_CLUSTER_VALUES"
+      echo::warn "No values found for the actual chart $ACTUAL_CHART_ALIAS in the cluster value file $KUBE_X_CLUSTER_VALUES"
       echo "${CLUSTER_FILES[@]}"
       return
     fi
     # Write the value to the file
-    echo "$CHART_VALUES" >| $SHM_CLUSTER_CHART_VALUES;
+    echo "$CHART_VALUES" >| "$SHM_CLUSTER_CHART_VALUES";
     CLUSTER_FILES+=("$SHM_CLUSTER_CHART_VALUES")
     echo::debug "Returned the cluster chart values files $SHM_CLUSTER_CHART_VALUES"
 

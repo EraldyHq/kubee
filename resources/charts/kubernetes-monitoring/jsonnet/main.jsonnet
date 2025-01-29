@@ -9,7 +9,7 @@ local kxValues = {
   kubernetes_monitoring_namespace: validation.notNullOrEmpty(kxExtValues, 'namespace'),
   grafana_name: validation.notNullOrEmpty(kxExtValues, 'grafana.name'),
   grafana_folder: 'kubernetes-monitoring',
-  grafana_data_source: validation.notNullOrEmpty(kxExtValues, 'grafana.data_source.prometheus.name')
+  grafana_data_source: validation.notNullOrEmpty(kxExtValues, 'grafana.data_sources.prometheus.name')
 
 };
 
@@ -144,6 +144,5 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
 } +  (import 'kube-x/mixin-grafana.libsonnet')(kxValues{
       mixin: mixin,
       mixin_name: 'kubernetes-monitoring',
-      grafana_name: values.grafana_name,
       grafana_folder_label: 'Kubernetes Monitoring',
  })

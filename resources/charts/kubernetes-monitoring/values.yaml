@@ -68,3 +68,9 @@ node_exporter:
 kube_rbac_proxy:
   enabled: false
   version: 0.18.2
+
+
+# Don't change, don't touch
+# Used to not output template for cross dependency in Chart.yaml
+kube_x_internal:
+  install_cross_dependency: false
