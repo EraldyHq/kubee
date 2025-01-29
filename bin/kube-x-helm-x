@@ -187,14 +187,6 @@ apply(){
   HELM_COMMAND+=("-f" "${CHART_VALUES_PATH}")
 
 
-  # CRD
-  CRD_SUFFIX="-crds"
-  IS_CRD_CHART=0
-  # glob match
-  if [[ $CHART_NAME == *"$CRD_SUFFIX" ]]; then
-    IS_CRD_CHART=1
-  fi
-
   HELM_COMMAND+=(
     "--namespace" "$CHART_NAMESPACE"
     "--create-namespace"
@@ -223,6 +215,7 @@ apply(){
     "--post-renderer-args" "$CHART_DIRECTORY"
     "--post-renderer-args" "$CHART_VALUES_PATH"
     "--post-renderer-args" "$CHART_NAMESPACE"
+    "--post-renderer-args" "$CHART_OUTPUT_DIR"
     )
 
   # Debug
@@ -295,17 +288,14 @@ get_cluster_values_files(){
        echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBE_X_CLUSTER_VALUES"
        return 1
     fi
-    local SHM_CLUSTER_VALUES="/dev/shm/kube-x-cluster-values.yml"
+    local SHM_CLUSTER_VALUES="$CHART_OUTPUT_VALUES_DIR/cluster-values.yml"
     envsubst < "$KUBE_X_CLUSTER_VALUES" >| "$SHM_CLUSTER_VALUES"
-    if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
-      bash::trap "rm $SHM_CLUSTER_VALUES" EXIT # EXIT executes also on error
-    fi
     echo::debug "Returned the cluster values files $SHM_CLUSTER_VALUES"
     CLUSTER_FILES+=("$SHM_CLUSTER_VALUES")
 
     # Extraction of the values in the cluster values files for the current chart
     # The cluster values need to lose their scope
-    local SHM_CLUSTER_CHART_VALUES="/dev/shm/kube-x-cluster-chart-values.yml"
+    local SHM_CLUSTER_CHART_VALUES="$CHART_OUTPUT_VALUES_DIR/cluster-chart-values.yml"
     local CHART_VALUES;
     CHART_VALUES=$(command::echo_debug_eval "yq '.$ACTUAL_CHART_ALIAS' $SHM_CLUSTER_VALUES")
     if [ "$CHART_VALUES" == "null" ]; then
@@ -330,16 +320,20 @@ synopsis(){
 
   cat << EOF
 \`\`\`bash
-kube-x-helx [-c|--cluster clusterName] [-n|--namespace namespace] [--debug] command options
+kube-x-helx [-c|--cluster clusterName] [--debug] command options
 \`\`\`
 
-where \`command\` can be:
-
-* \`play packageName\`     - Upgrade or install a Helx Chart if not present
-* \`upgrade packageName\`  - Upgrade a Helx Chart
-* \`install packageName\`  - install a Helx Chart
-* \`template packageName\` - Output the manifests for a Chart (used for ArgoCd Integration and debugging)
-* \`values\` - Shows the values
+where:
+* \`command\` can be:
+  * \`play packageName\`     - Upgrade or install a Helx Chart if not present
+  * \`upgrade packageName\`  - Upgrade a Helx Chart
+  * \`install packageName\`  - Install a Helx Chart
+  * \`template packageName\` - Output the manifests for a Chart (used for ArgoCd Integration and debugging)
+  * \`values\` - Shows the values
+* \`-c|--cluster clusterName\` - Defines the cluster
+* \`--output-dir string\`: Writes the executed templates to files in output-dir instead of stdout
+* \`--out string\`: Writes the executed templates to the \`out\` relatif directory
+* \`--debug\`: run in debug mode, a more verbose mode
 
 The cluster is determined in order of precedence by:
 
@@ -360,7 +354,9 @@ print_values(){
   # Context
   local ACTUAL_CHART_FILE="$CHART_DIRECTORY/Chart.yaml";
   local ACTUAL_CHART_ALIAS
-  ACTUAL_CHART_ALIAS=$(echo "$CHART_NAME" | tr "-" "_");
+  # Alias
+  # We just get rid of the crds for the CRD chart
+  ACTUAL_CHART_ALIAS=$(echo "${CHART_NAME#"$CRD_SUFFIX"}" | tr "-" "_");
 
   if [ ! -f "$ACTUAL_CHART_FILE" ]; then
     echo::err "No actual Chart file found ($ACTUAL_CHART_FILE does not exists)"
@@ -369,7 +365,7 @@ print_values(){
 
   # Default values
   #
-  local SHM_VALUES_FILE=()
+  local CHART_VALUES_FILES=()
 
   local -A dependencies
   eval "dependencies=($(yq -r '.dependencies[] | ["[" + .alias + "]=" + .repository] | join(" ")' "$ACTUAL_CHART_FILE"))"
@@ -390,57 +386,57 @@ print_values(){
           # Other scheme
         ;;
       esac
-      local SHM_DEPENDENCY_CHART_VALUES_FILE="/dev/shm/kube-x-$DEPENDENCY_CHART_ALIAS.yml"
+      local SHM_DEPENDENCY_CHART_VALUES_FILE="$CHART_OUTPUT_VALUES_DIR/$DEPENDENCY_CHART_ALIAS.yml"
       if ! command::echo_debug_eval "helm show values $DEPENDENCY_CHART_REPOSITORY >| $SHM_DEPENDENCY_CHART_VALUES_FILE"; then
         echo::err "Error while trying to the get values for the Chart $DEPENDENCY_CHART_ALIAS"
         return 1
       fi
-      if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
-        bash::trap "rm $SHM_DEPENDENCY_CHART_VALUES_FILE" EXIT # EXIT executes also on error
-      fi
-
-      local SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE="/dev/shm/kube-x-$DEPENDENCY_CHART_ALIAS-with_scope.yml"
+      local SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE="$CHART_OUTPUT_VALUES_DIR/$DEPENDENCY_CHART_ALIAS-with_scope.yml"
       # --null-input flag: does not have any input as we create a new file
       if ! command::echo_debug_eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$SHM_DEPENDENCY_CHART_VALUES_FILE\"))' >| $SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE"; then
         echo::err "Error while processing the chart values file $SHM_DEPENDENCY_CHART_VALUES_FILE"
         return 1
       fi
-      SHM_VALUES_FILE+=("$SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE")
+      CHART_VALUES_FILES+=("$SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE")
       echo::debug "Values file generated: ${SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE}"
-      if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
-        bash::trap "rm $SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE" EXIT # EXIT executes also on error
-      fi
   done
 
   # Chart Own values files
   local CHART_VALUES_FILE="$CHART_DIRECTORY/values.yaml"
-  if [ ! -f "$CHART_VALUES_FILE" ]; then
-    if [[ "$CHART_NAME" != *-crds ]]; then
-      echo::err "No values files found for the actual Chart"
-      # mandatory because sometimes it's written values.yml and
-      # enabled and namespace are mandatory anyway
-      return 1
-    fi
-  else
-    SHM_VALUES_FILE+=("$CHART_VALUES_FILE")
+  if [[ "$CHART_NAME" == *"$CRD_SUFFIX" ]]; then
+      local PARENT_CHART_NAME;
+      PARENT_CHART_NAME=${CHART_NAME#CRD_SUFFIX};
+      if ! PARENT_CHART_DIRECTORY=$(get_chart_directory "$PARENT_CHART_NAME"); then
+        echo::err "The parent chart ($PARENT_CHART_NAME) of the CRD chart ($PARENT_CHART_NAME) was not found"
+        echo::err "  * the cluster resources directory (${KUBE_X_RESOURCE_CHARTS_DIR}) " # the /resources/charts dir
+        echo::err "  * or the paths of the KUBE_X_CHARTS_PATH variable (${KUBE_X_CHARTS_PATH:-'not set'})"
+        exit 1
+      fi
+      CHART_VALUES_FILE="$PARENT_CHART_DIRECTORY/values.yaml"
   fi
+  if [ ! -f "$CHART_VALUES_FILE" ]; then
+    echo::err "Values files ($CHART_VALUES_FILE) should exist"
+    echo::err "Every kube-x chart should have a values file to set the enabled and namespace properties"
+    # mandatory because sometimes it's written values.yml and
+    return 1
+  fi
+  CHART_VALUES_FILES+=("$CHART_VALUES_FILE")
 
 
-  # The function get_cluster_values_files has trap to delete
-  # the files at exit, we can't use a subshell
-  get_cluster_values_files >| /dev/shm/kube-x-cluster-values-files.txt
-  local CLUSTER_VALUE_FILES;
-  CLUSTER_VALUE_FILES=$(cat cluster_values_files.txt)
+  if ! CLUSTER_VALUE_FILES=$(get_cluster_values_files); then
+    echo::err "Error while creating the values file"
+    return 1
+  fi
   echo::debug "Adding cluster files: $CLUSTER_VALUE_FILES"
   IFS=" " read -ra CLUSTER_VALUE_FILES_ARRAY <<< "${CLUSTER_VALUE_FILES}"
-  SHM_VALUES_FILE+=("${CLUSTER_VALUE_FILES_ARRAY[@]}")
+  CHART_VALUES_FILES+=("${CLUSTER_VALUE_FILES_ARRAY[@]}")
 
 
   ###########################
   # Merge
   # shellcheck disable=SC2016
   # https://mikefarah.gitbook.io/yq/commands/evaluate-all
-  if ! command::echo_debug_eval "yq eval-all '. as \$item ireduce ({}; . * \$item )' ${SHM_VALUES_FILE[*]}"; then
+  if ! command::echo_debug_eval "yq eval-all '. as \$item ireduce ({}; . * \$item )' ${CHART_VALUES_FILES[*]}"; then
     echo::err "Error while merging the yaml files"
     return 1
   fi
@@ -448,17 +444,16 @@ print_values(){
 }
 
 
-
 ##########################
 ## Collect the options
 ##########################
-args=$(getopt -l "cluster:,debug,skip-schema-validation,namespace:" -o "c:n:" -- "$@")
+args=$(getopt -l "cluster:,debug,skip-schema-validation,output-dir:,out" -o "c:o:" -- "$@")
 # eval set to set the positional arguments back to $args
 eval set -- "$args"
 KUBE_X_DEFAULT_CLUSTER_NAME=${KUBE_X_DEFAULT_CLUSTER_NAME:-}
 KUBE_X_CLUSTER_NAME=${KUBE_X_CLUSTER_NAME:-$KUBE_X_DEFAULT_CLUSTER_NAME}
-KUBE_X_NAMESPACE=""
 HELM_EXTRA_FLAGS=()
+OPTION_OUTPUT_DIR=""
 while [[ $# -gt 0 ]]
 do
    case "$1" in
@@ -467,11 +462,15 @@ do
         KUBE_X_CLUSTER_NAME=${1}
         shift
       ;;
-      "--namespace"|"-n")
+      "--output-dir"|"-o")
         shift
-        KUBE_X_NAMESPACE=${1}
+        OPTION_OUTPUT_DIR=${1}
         shift
-      ;;
+        ;;
+      "--out")
+        shift
+        OPTION_OUTPUT_DIR="out"
+        ;;
       "--skip-schema-validation")
         shift
         HELM_EXTRA_FLAGS+=("--skip-schema-validation")
@@ -515,6 +514,14 @@ if [ "$CHART_NAME" == "" ]; then
   return 1
 fi
 
+# CRD
+CRD_SUFFIX="-crds"
+IS_CRD_CHART=0
+# glob match
+if [[ $CHART_NAME == *"$CRD_SUFFIX" ]]; then
+  IS_CRD_CHART=1
+fi
+
 # Chart Directory
 if ! CHART_DIRECTORY=$(get_chart_directory "$CHART_NAME"); then
   echo::err "No chart directory found with the name ($CHART_NAME) in"
@@ -523,32 +530,68 @@ if ! CHART_DIRECTORY=$(get_chart_directory "$CHART_NAME"); then
   exit 1
 fi
 
+
+
+# CHART_OUTPUT_DIR
+# * Jsonnet require an output directory
+# * Kustomize processing also: we generate the Helm templates
+# The content is deleted at every run
+# It's a subdirectory so that we don't do `rm -rf` on data that we don't own
+# That's what Helm does also
+# The name of the directory is not random
+# It follows the usage of the output command `helm template --output-dir=xxx`
+# KUBE_X_OUTPUT_DIR
+# * Jsonnet require an output directory
+# * Kustomize processing also: we generate the Helm templates
+# The content is deleted at every run
+# It's a subdirectory so that we don't do `rm -rf` on data that we don't own
+# That's what Helm does also
+# The name of the directory is not random
+# It follows the usage of the output command `helm template --output-dir=xxx`
+CHART_OUTPUT_NAME=$(yq '.name' "$CHART_DIRECTORY/Chart.yaml")
+CHART_OUTPUT_DIR="${OPTION_OUTPUT_DIR:-out}/$CHART_OUTPUT_NAME"
+if [[ "$CHART_OUTPUT_DIR" != /* ]]; then
+  # For now, the output path is relative to the Chart Directory
+  # so that we get them in the IDE
+  # * pwd ?
+  # * or temp ? TEMP_OUT_DIR="$(dirname "$(mktemp -u)")/kube-x"
+  CHART_OUTPUT_DIR="$CHART_DIRECTORY/$CHART_OUTPUT_DIR"
+fi
+# full qualified path is needed as this command is executed at the end via trap
+CLEAN_OUT_COMMAND="rm -rf $CHART_OUTPUT_DIR"
+# In debug mode, we don't delete it to be able to check each file
+if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ] && [ "$OPTION_OUTPUT_DIR" == "" ]; then
+  # cleaning on exit because we may have secret in their
+  bash::trap "$CLEAN_OUT_COMMAND" EXIT
+else
+  # To not kept old manifests, we clean
+  command::echo_eval "$CLEAN_OUT_COMMAND"
+fi
+# Create the output directory as it's mandatory by Jsonnet
+# Should happen after the cleaning above
+if [ ! -d "$CHART_OUTPUT_DIR" ]; then
+  mkdir -p "$CHART_OUTPUT_DIR"
+fi
+# When we manipulate values, we put them hier
+CHART_OUTPUT_VALUES_DIR="$CHART_OUTPUT_DIR/values"
+mkdir -p "$CHART_OUTPUT_VALUES_DIR"
+
 # The kube-x values
 # We need them to determine the namespace
-CHART_VALUES_PATH="/dev/shm/kube-x-values.yml"
-if ! print_values >| $CHART_VALUES_PATH; then
+CHART_VALUES_PATH="$CHART_OUTPUT_VALUES_DIR/values.yml"
+if ! print_values >| "$CHART_VALUES_PATH"; then
   echo::err "An error has happened while generating the values file for the chart"
   exit 1
 fi
-# In debug mode, we don't delete it
-if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
-  bash::trap "rm $CHART_VALUES_PATH" EXIT # EXIT execute also on error
-fi
 
 # Package Namespace
-CHART_NAMESPACE=${KUBE_X_NAMESPACE:-}
-if [ "$CHART_NAMESPACE" == "" ]; then
-
-  VALUES_NAMESPACE_PATH=".namespace"
-  CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$CHART_VALUES_PATH")
-  if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
-    echo::error "No namespace found at $VALUES_NAMESPACE_PATH"
-    exit 1
-  fi
-  echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
-else
-  echo::info "Namespace specified ($CHART_NAMESPACE) via command line flag"
+VALUES_NAMESPACE_PATH=".namespace"
+CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$CHART_VALUES_PATH")
+if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
+  echo::error "No namespace found at $VALUES_NAMESPACE_PATH"
+  exit 1
 fi
+echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
 
 # Assign the first argument to a string
 COMMAND=${1:-}

@@ -19,3 +19,4 @@ version: 33.1.0
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "v3.2.1"
+

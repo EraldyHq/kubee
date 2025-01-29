@@ -26,9 +26,9 @@ function(params)
   local values = defaultValues + params;
 
 
-  // Return obejct
+  // Returned object
   {
-    'prometheus-rules': {
+    [values.mixin_name+'-prometheus-rules']: {
       apiVersion: 'monitoring.coreos.com/v1',
       kind: 'PrometheusRule',
       metadata: {

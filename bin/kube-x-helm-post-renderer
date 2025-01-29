@@ -91,19 +91,6 @@ kustomize_processing(){
 
     echo::info "Kustomization processing (File: $KUSTOMIZATION_FILE)"
 
-    # The root run dir is fix so that the content is deleted at every run
-    # To be able to debug, the content is not deleted on error only
-    KUSTOMIZE_ROOT_TEMP_DIR="$(dirname "$(mktemp -u)")/kube-x"
-    rm -rf "$KUSTOMIZE_ROOT_TEMP_DIR"
-
-    # Package Run/Temp Dir
-    # The name of the directory is not random
-    # It follows the usage of the output command `helm template --output-dir=$KUSTOMIZE_ROOT_TEMP_DIR`
-    # The templates are then stored at $KUSTOMIZE_ROOT_TEMP_DIR/CHART_NAME/templates/...yml
-    CHART_NAME=$(yq '.name' "$KUBE_X_CHART_DIRECTORY/Chart.yaml")
-    KUSTOMIZE_PACKAGE_TEMP_DIR="$KUSTOMIZE_ROOT_TEMP_DIR/$CHART_NAME"
-    mkdir -p "$KUSTOMIZE_PACKAGE_TEMP_DIR"
-
     # Output of Kustomization
     export KUBE_X_NAMESPACE
     # Variable Substitution: Check the variables
@@ -113,16 +100,17 @@ kustomize_processing(){
          echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUSTOMIZATION_FILE"
          exit 1
     fi
-    envsubst < "$KUSTOMIZATION_FILE" >| "${KUSTOMIZE_PACKAGE_TEMP_DIR}/kustomization.yml"
+
+    envsubst < "$KUSTOMIZATION_FILE" >| "${KUBE_X_OUTPUT_DIR}/kustomization.yml"
 
     # Output templates
     # helm template --output-dir /tmp
-    # will output all templates one by one at: $KUSTOMIZE_ROOT_TEMP_DIR/chart-name/templates/argocd-service-monitor-metrics.yml
-    command::echo_eval "helm template --output-dir $KUSTOMIZE_ROOT_TEMP_DIR -f $KUBE_X_VALUES_FILE $KUBE_X_CHART_DIRECTORY 1>&2"
+    # will output all templates one by one at: $KUSTOMIZE_OUT_DIR/chart-name/templates/argocd-service-monitor-metrics.yml
+    command::echo_eval "helm template --output-dir $(dirname "$KUBE_X_OUTPUT_DIR") -f $KUBE_X_VALUES_FILE $KUBE_X_CHART_DIRECTORY 1>&2"
 
     # Sync
     echo::info "Create empty template files"
-    handle_empty_templates_output "$KUBE_X_CHART_DIRECTORY" "$KUSTOMIZE_PACKAGE_TEMP_DIR"
+    handle_empty_templates_output "$KUBE_X_CHART_DIRECTORY" "$KUBE_X_OUTPUT_DIR"
 
     # The argument must be:
     # * a file system path
@@ -132,18 +120,10 @@ kustomize_processing(){
     # https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/helmcharts/
     # https://github.com/mgoltzsche/khelm
     # Flag --reorder has been deprecated, use the new 'sortOptions' field in kustomization.yaml instead.
-    if ! KUSTOMIZE_MANIFEST=$(cd "$KUSTOMIZE_PACKAGE_TEMP_DIR" && kubectl kustomize .); then
+    if ! KUSTOMIZE_MANIFEST=$(cd "$KUBE_X_OUTPUT_DIR" && kubectl kustomize .); then
       echo::err "An error occurred during the kustomization"
-      echo::err "The command 'kubectl kustomize .' failed with the $KUSTOMIZE_PACKAGE_TEMP_DIR working directory"
+      echo::err "The command 'kubectl kustomize .' failed with the $KUBE_X_OUTPUT_DIR working directory"
       return 1
-    fi
-
-    # we delete the directory only on success
-    # most errors comes from the generation,
-    if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
-      rm -rf "$KUSTOMIZE_PACKAGE_TEMP_DIR"
-    else
-      echo::info "The command 'kubectl kustomize .' was executed with the $KUSTOMIZE_PACKAGE_TEMP_DIR working directory"
     fi
 
     echo "$KUSTOMIZE_MANIFEST"
@@ -179,25 +159,6 @@ jsonnet_processing(){
     fi
   fi
 
-  # Manifest Out (the directory is called out as this is a standard (sometimes build, ...)
-  JSONNET_OUTPUT_DIR="out"
-  # full qualified path is needed as this command is executed at the end via trap
-  REMOVE_MANIFEST_COMMAND="rm -rf $KUBE_X_CHART_DIRECTORY/$JSONNET_DIR/$JSONNET_OUTPUT_DIR"
-  # In debug mode, we don't delete it to be able to check each file
-  if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
-    # cleaning because we may have secret in their
-    bash::trap "$REMOVE_MANIFEST_COMMAND" EXIT
-  else
-    # To not kept old manifests, we clean
-    command::echo_eval "$REMOVE_MANIFEST_COMMAND"
-  fi
-
-  # Create the output directory as it's mandatory by Jsonnet
-  # Should happen after the cleaning above
-  if [ ! -d "$JSONNET_OUTPUT_DIR" ]; then
-    mkdir -p "$JSONNET_OUTPUT_DIR"
-  fi
-
   # The variable to store the manifests created
   local JSONNET_MANIFESTS=""
 
@@ -207,6 +168,8 @@ jsonnet_processing(){
       echo::debug "Processing: $JSONNET_FILE"
 
       JSONNET_SCRIPT_BASENAME=$(basename "$JSONNET_FILE")
+      JSONNET_OUTPUT_DIR="$KUBE_X_OUTPUT_DIR/$JSONNET_DIR"
+      mkdir -p "$JSONNET_OUTPUT_DIR"
 
       case "$JSONNET_SCRIPT_BASENAME" in
         *single*)
@@ -228,22 +191,22 @@ jsonnet_processing(){
 
           # xargs post processing command
           # We get the list of generated file from jsonnet net
-          POST_PROCESSING="xargs -I{} sh -c '"
-          GOJSONTOYAML="gojsontoyaml"
-          if command::exists "$GOJSONTOYAML"; then
+          local POST_PROCESSING="xargs -I{} sh -c '"
+          local GO_JSON_TO_YAML="gojsontoyaml"
+          if command::exists "$GO_JSON_TO_YAML"; then
             # transform the file to yaml
-            POST_PROCESSING="$POST_PROCESSING(cat {} | $GOJSONTOYAML > {}.yaml) && "
+            POST_PROCESSING="$POST_PROCESSING(cat {} | $GO_JSON_TO_YAML > {}.yaml) && "
           fi
           # Transform Json to yaml and output to stdout with yq
           # -P means pretty print and - refers to stdin
           POST_PROCESSING="$POST_PROCESSING(cat {} | yq eval -P - && echo '---')"
           # Delete the json file it yaml file were created
-          if command::exists "$GOJSONTOYAML"; then
+          if command::exists "$GO_JSON_TO_YAML"; then
             POST_PROCESSING="$POST_PROCESSING && rm {}"
           fi
           # Echo the file name to stderr (stdout is for helm)
           POST_PROCESSING="$POST_PROCESSING && (echo {}"
-          if command::exists "$GOJSONTOYAML"; then
+          if command::exists "$GO_JSON_TO_YAML"; then
             POST_PROCESSING="$POST_PROCESSING.yaml"
           fi
           POST_PROCESSING="$POST_PROCESSING > $(echo::get_file_descriptor))"
@@ -284,14 +247,15 @@ synopsis(){
   cat <<EOF
 A post renderer to integrate \`kustomize\` and \`jsonnet\`
 \`\`\`bash
-$(basename "$0") appDirectory valuesPath KUBE_X_NAMESPACE
+$(basename "$0") appDirectory valuesPath namespace output_dir
 \`\`\`
 
 where:
 
 * \`KUBE_X_CHART_DIRECTORY\` is the directory of the app to install
 * \`KUBE_X_VALUES_FILE\` is the path to the values file
-* \`KUBE_X_NAMESPACE\` is the installation namespace
+* \`NAMESPACE\` is the installation namespace
+* \`OUTPUT_DIR\` is the output dir (Helm)
 
 Note: Helm:
 * pass the templates output via stdin
@@ -325,6 +289,15 @@ fi
 KUBE_X_NAMESPACE="${3:-}"
 if [ "$KUBE_X_NAMESPACE" == "" ]; then
   echo::err "Internal Error: the third argument namespace should not be empty"
+  exit 1
+fi
+
+# Output
+# The output dir is mandatory for Jsonnet or Kustomize processing
+KUBE_X_OUTPUT_DIR="${4}"
+if [ "$KUBE_X_OUTPUT_DIR" == "" ]; then
+  echo::err "Internal Error: the fourth argument namespace should not be empty"
+  synopsis
   exit 1
 fi
 
