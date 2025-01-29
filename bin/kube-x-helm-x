@@ -201,7 +201,8 @@ apply(){
 
 
   # To update the kube-x helm
-  command::echo_eval "helm dependency update ${HELM_EXTRA_FLAGS[*]} $CHART_DIRECTORY 1>&2"
+  # 2>FD_STDOUT_COMMAND to silence: walk.go:75: found symbolic link in path
+  command::echo_eval "helm dependency update ${HELM_EXTRA_FLAGS[*]} $CHART_DIRECTORY 1>$FD_STDOUT_COMMAND 2>$FD_STDOUT_COMMAND"
   HELM_COMMAND+=( "--dependency-update" )
 
   # Options ???
@@ -234,9 +235,9 @@ apply(){
   # Working directory is the cluster directory
   # Why? To be able to set relative path to the cluster object such as certificate
   # example: "--set-file kube_x.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem"
-  command::echo_debug_eval "pushd $KUBE_X_CLUSTER_DIR 1>/dev/null"
+  command::echo_debug_eval "pushd $KUBE_X_CLUSTER_DIR 1>$FD_STDOUT_COMMAND"
   command::echo_eval "${HELM_COMMAND[*]}"
-  command::echo_debug_eval "popd 1>/dev/null"
+  command::echo_debug_eval "popd 1>$FD_STDOUT_COMMAND"
 
   # Can we Wait with that?
   # kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator
@@ -386,17 +387,20 @@ print_values(){
           # Other scheme
         ;;
       esac
-      local SHM_DEPENDENCY_CHART_VALUES_FILE="$CHART_OUTPUT_VALUES_DIR/$DEPENDENCY_CHART_ALIAS.yml"
-      if ! command::echo_debug_eval "helm show values $DEPENDENCY_CHART_REPOSITORY >| $SHM_DEPENDENCY_CHART_VALUES_FILE"; then
+      local SHM_DEPENDENCY_CHART_VALUES_FILE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default_non_scoped.yml"
+      # 2>FD_STDOUT_COMMAND to silence: walk.go:75: found symbolic link in path
+      if ! command::echo_debug_eval "helm show values $DEPENDENCY_CHART_REPOSITORY >| $SHM_DEPENDENCY_CHART_VALUES_FILE 2>$FD_STDOUT_COMMAND"; then
         echo::err "Error while trying to the get values for the Chart $DEPENDENCY_CHART_ALIAS"
         return 1
       fi
-      local SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE="$CHART_OUTPUT_VALUES_DIR/$DEPENDENCY_CHART_ALIAS-with_scope.yml"
+      # The default value should be under the alias key (ie scoped)
+      local SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default.yml"
       # --null-input flag: does not have any input as we create a new file
       if ! command::echo_debug_eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$SHM_DEPENDENCY_CHART_VALUES_FILE\"))' >| $SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE"; then
         echo::err "Error while processing the chart values file $SHM_DEPENDENCY_CHART_VALUES_FILE"
         return 1
       fi
+      rm "$SHM_DEPENDENCY_CHART_VALUES_FILE"
       CHART_VALUES_FILES+=("$SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE")
       echo::debug "Values file generated: ${SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE}"
   done
@@ -454,6 +458,7 @@ KUBE_X_DEFAULT_CLUSTER_NAME=${KUBE_X_DEFAULT_CLUSTER_NAME:-}
 KUBE_X_CLUSTER_NAME=${KUBE_X_CLUSTER_NAME:-$KUBE_X_DEFAULT_CLUSTER_NAME}
 HELM_EXTRA_FLAGS=()
 OPTION_OUTPUT_DIR=""
+export FD_STDOUT_COMMAND="/dev/null" # where the stdout, stderr of command should go, exported because it's used also in the helm post-renderer
 while [[ $# -gt 0 ]]
 do
    case "$1" in
@@ -476,8 +481,9 @@ do
         HELM_EXTRA_FLAGS+=("--skip-schema-validation")
         ;;
       "--debug")
-        export BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_DEBUG_LEVEL"
-        HELM_EXTRA_FLAGS+=("--debug")
+        export BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_DEBUG_LEVEL";
+        HELM_EXTRA_FLAGS+=("--debug");
+        FD_STDOUT_COMMAND=$(echo::get_file_descriptor);
         shift
       ;;
       "--")
@@ -562,11 +568,12 @@ CLEAN_OUT_COMMAND="rm -rf $CHART_OUTPUT_DIR"
 # In debug mode, we don't delete it to be able to check each file
 if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ] && [ "$OPTION_OUTPUT_DIR" == "" ]; then
   # cleaning on exit because we may have secret in their
-  bash::trap "$CLEAN_OUT_COMMAND" EXIT
+  bash::trap "echo 'Cleaning' > $(echo::get_file_descriptor);$CLEAN_OUT_COMMAND" EXIT
 else
   # To not kept old manifests, we clean
   command::echo_eval "$CLEAN_OUT_COMMAND"
 fi
+
 # Create the output directory as it's mandatory by Jsonnet
 # Should happen after the cleaning above
 if [ ! -d "$CHART_OUTPUT_DIR" ]; then
@@ -629,3 +636,5 @@ case "$COMMAND" in
     echo::err  "Command $COMMAND is unknown"
     exit 1
 esac
+
+echo::debug "End of command $COMMAND"

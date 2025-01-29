@@ -28,7 +28,7 @@ function(params)
 
   // Return obejct
   {
-    'prometheus-rules': {
+    [values.mixin_name+'-prometheus-rules']: {
       apiVersion: 'monitoring.coreos.com/v1',
       kind: 'PrometheusRule',
       metadata: {

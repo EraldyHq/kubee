@@ -106,10 +106,10 @@ kustomize_processing(){
     # Output templates
     # helm template --output-dir /tmp
     # will output all templates one by one at: $KUSTOMIZE_OUT_DIR/chart-name/templates/argocd-service-monitor-metrics.yml
-    command::echo_eval "helm template --output-dir $(dirname "$KUBE_X_OUTPUT_DIR") -f $KUBE_X_VALUES_FILE $KUBE_X_CHART_DIRECTORY 1>&2"
+    command::echo_eval "helm template --output-dir $(dirname "$KUBE_X_OUTPUT_DIR") -f $KUBE_X_VALUES_FILE $KUBE_X_CHART_DIRECTORY 2>$FD_STDOUT_COMMAND 1>&2"
 
     # Sync
-    echo::info "Create empty template files"
+    echo::debug "Create empty template files"
     handle_empty_templates_output "$KUBE_X_CHART_DIRECTORY" "$KUBE_X_OUTPUT_DIR"
 
     # The argument must be:
@@ -209,7 +209,7 @@ jsonnet_processing(){
           if command::exists "$GO_JSON_TO_YAML"; then
             POST_PROCESSING="$POST_PROCESSING.yaml"
           fi
-          POST_PROCESSING="$POST_PROCESSING > $(echo::get_file_descriptor))"
+          POST_PROCESSING="$POST_PROCESSING > $FD_STDOUT_COMMAND)"
           # Closing
           POST_PROCESSING="$POST_PROCESSING'"
 
@@ -301,6 +301,9 @@ if [ "$KUBE_X_OUTPUT_DIR" == "" ]; then
   exit 1
 fi
 
+# FD_STDOUT_COMMAND is exported from helm_x
+# where the output of stdout and stderr from external command should go
+FD_STDOUT_COMMAND=${FD_STDOUT_COMMAND:-"/dev/null"}
 
 # The whole script run in the app directory
 pushd "$KUBE_X_CHART_DIRECTORY" > /dev/null

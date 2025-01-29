@@ -197,7 +197,9 @@ if [ "${KUBECONFIG:-}" == "" ]; then
   # https://stackoverflow.com/questions/69614179/bash-trap-not-working-when-script-is-sourced
   # As what we want is to delete it after the main script
   # We just output the trap statement
-  echo 'trap "rm /dev/shm/kube-x-config" EXIT'
+  # Note: On kubectl, we could also just pass the data but we should
+  # do that for all kubernetes clients (promtool, ...) and this is pretty hard
+  echo 'bash::trap "rm /dev/shm/kube-x-config" EXIT'
   chmod 0600 /dev/shm/kube-x-config
   source kube-x-config.sh >| /dev/shm/kube-x-config
   KUBECONFIG="/dev/shm/kube-x-config" # we test the presence of the file
