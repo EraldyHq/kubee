@@ -1,6 +1,6 @@
 // https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/customizing.md
 
-local validation = import './kube_x/validation.libsonnet';
+local validation = import './kube-x/validation.libsonnet';
 
 // Get the version from the Chart.yaml
 local chart = {
@@ -82,7 +82,7 @@ local kp =
           limits: { memory: kxValues.prometheus_operator_memory },
         },
       },
-      // for prometheus, we overwrite also the config in kube_x/prometheus.libsonnet
+      // for prometheus, we overwrite also the config in kube-x/prometheus.libsonnet
       prometheus+: {
         name: kxValues.prometheus_name,
         version: kxValues.prometheus_version
@@ -93,13 +93,13 @@ local kp =
 // Prometheus Operator without Rbac Configuration (ie with original manifest)
 local prometheusOperator = (
   if kxValues.noRbacProxy then
-    (import './kube_x/prometheus-operator-rbac-free.libsonnet')(kp.values.prometheusOperator)
+    (import './kube-x/prometheus-operator-rbac-free.libsonnet')(kp.values.prometheusOperator)
   else
     kp.prometheusOperator
 );
 
 // Prometheus Custom
-local customPrometheus = (import './kube_x/prometheus.libsonnet')(kp.values.prometheus, kxValues);
+local customPrometheus = (import './kube-x/prometheus.libsonnet')(kp.values.prometheus, kxValues);
 
 {
   ['prometheus-operator-' + name]: prometheusOperator[name]

@@ -21,7 +21,7 @@ local argoCdMixin = (import 'argo-cd-mixin/mixin.libsonnet') + {
 };
 
 
-(import 'kube_x/mixin.libsonnet')(
+(import 'kube-x/mixin.libsonnet')(
   values {
     mixin: argoCdMixin,
     mixin_name: 'argocd',

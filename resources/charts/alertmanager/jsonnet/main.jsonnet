@@ -4,7 +4,7 @@
 local extValues = std.extVar('values');
 
 // Validation Library
-local validation = import './kube_x/validation.libsonnet';
+local validation = import './kube-x/validation.libsonnet';
 
 local values = {
 
@@ -83,10 +83,10 @@ local smtpGolbalConfigObject = (if values.smtp_host == '' then {} else
                                   });
 
 // Ops Genie
-local opsGenieGlobalConfigObject = (if values.alert_manager_opsgenie_apikey == '' then null else (import 'kube_x/ops-genie.libsonnet')(values));
+local opsGenieGlobalConfigObject = (if values.alert_manager_opsgenie_apikey == '' then null else (import 'kube-x/ops-genie.libsonnet')(values));
 
 // Kube Prometheus Alert Manager Object
-local alertmanager = (import './kube_prometheus/components/alertmanager.libsonnet')(
+local alertmanager = (import './kube-prometheus/components/alertmanager.libsonnet')(
   {
     name: values.alert_manager_name,  // main by default, mandatory for installation
     version: values.alert_manager_version,
@@ -136,17 +136,17 @@ local serviceMonitorPatch = {
   // Ops Genie Config Object
   [if opsGenieGlobalConfigObject != null then 'alertmanager-config-ops-genie']: opsGenieGlobalConfigObject.AlertmanagerConfig,
   // Ingress
-  [if values.alert_manager_hostname != '' then 'alertmanager-ingress']: (import 'kube_x/ingress.libsonnet')(values),
+  [if values.alert_manager_hostname != '' then 'alertmanager-ingress']: (import 'kube-x/ingress.libsonnet')(values),
   // AlertManager Config (is in a secret)
   'alertmanager-secret-config': if std.asciiLower(values.secret_kind) == 'externalsecret' then
-    (import 'kube_x/external-secret-config.libsonnet')(values {
+    (import 'kube-x/external-secret-config.libsonnet')(values {
       alert_manager_config: std.parseYaml(alertmanager.secret.stringData['alertmanager.yaml']),
     })
   else
     alertmanager.secret,
   // Default Config to send an email
-  'alertmanager-config-default' : (import 'kube_x/alertmanager-config-default.libsonnet')(values),
-} +  (import 'kube_x/mixin-grafana.libsonnet')(values{
+  'alertmanager-config-default' : (import 'kube-x/alertmanager-config-default.libsonnet')(values),
+} +  (import 'kube-x/mixin-grafana.libsonnet')(values{
           mixin: alertmanager.mixin,
           mixin_name: 'alertmanager',
           grafana_name: values.grafana_name,

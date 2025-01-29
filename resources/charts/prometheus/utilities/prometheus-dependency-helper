@@ -102,7 +102,7 @@ done
 
 # Mixin
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-KUBE_X_TARGET_DIR="$JSONNET_DIR/kube_x"
+KUBE_X_TARGET_DIR="$JSONNET_DIR/kube-x"
 mkdir -p "$KUBE_X_TARGET_DIR"
 cp --force "$SCRIPT_DIR"/mixin-grafana.libsonnet "$KUBE_X_TARGET_DIR"
 echo::success "The mixin-grafana.libsonnet was copied to $KUBE_X_TARGET_DIR"

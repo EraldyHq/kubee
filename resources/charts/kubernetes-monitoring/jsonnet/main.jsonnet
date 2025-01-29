@@ -14,11 +14,12 @@ local kxValues = {
 };
 
 local k3sConfigPatch = {
-  // Kubernetes Scheduler and Controller manager metrics comes from the api server endpoint
+  // Kubernetes Scheduler, Controller manager and proxy metrics comes from the api server endpoint
   // in k3s
   kubeApiserverSelector: 'job="apiserver"',  // the default value
   kubeSchedulerSelector: self.kubeApiserverSelector,
   kubeControllerManagerSelector: self.kubeApiserverSelector,
+  kubeProxySelector: self.kubeApiserverSelector,
   kubeletSelector: 'job="kubelet"',
   cadvisorSelector: self.kubeletSelector // the default is 'job="cadvisor"'
 };
@@ -84,14 +85,15 @@ local custom = (import './kube-prometheus/components/mixin/custom.libsonnet')({
 local kubeStateMetrics = (import './kube-x/kube-state-metrics.libsonnet')(kpValues.kubeStateMetrics);
 
 // mixin is not a function but an object
-local dashboards = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.libsonnet') {
+local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.libsonnet') {
   _config+:: k3sConfigPatch {
     // the name of the data source (in place of default)
     datasourceName: kxValues.grafana_data_source,
   },
-}.grafanaDashboards;
+};
 
-{ 'kube-custom-prometheusRule': custom.prometheusRule } +
+// Returned Object
+{ 'kubernetes-monitoring-custom-prometheusRule': custom.prometheusRule } +
 {
   ['kubernetes-monitoring-' + name]:
     (
@@ -130,61 +132,18 @@ local dashboards = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mi
       else kubernetesControlPlane[name]
     )
   for name in std.objectFields(kubernetesControlPlane)
-  // k3s is only one binary and does not have KubeScheduler and KubeControllerManager
+  // k3s is only one binary
+  // and does not need to scrape KubeScheduler and KubeControllerManager
+  // The metrics are gathered with the api server scrape
   if !std.member(['serviceMonitorKubeScheduler', 'serviceMonitorKubeControllerManager'], name)
-} +
-// Dashboard Folder
-{
-  'kubernetes-monitoring-grafana-folder': {
-    apiVersion: 'grafana.integreatly.org/v1beta1',
-    kind: 'GrafanaFolder',
-    metadata: {
-      name: kxValues.grafana_folder,
-    },
-    spec: {
-      instanceSelector: {
-        matchLabels: {
-          dashboards: 'grafana',
-        },
-      },
-      // If title is not defined, the value will be taken from metadata.name
-      title: 'kubernetes-monitoring',
-    },
-  },
-} +
-// Dashboard
-{
-  ['kubernetes-monitoring-grafana-dashboard-' + stripJson(name)]: {
-    apiVersion: 'grafana.integreatly.org/v1beta1',
-    kind: 'GrafanaDashboard',
-    metadata: {
-      name: 'kubernetes-monitoring-' + stripJson(name),
-    },
-    spec:
-      {
-        // Allow import from grafana instance in another namespace
-        // https://github.com/grafana/grafana-operator/tree/master/examples/crossnamespace
-        // https://grafana.github.io/grafana-operator/docs/examples/crossnamespace/readme/
-        allowCrossNamespaceImport: true,
-        // https://grafana.github.io/grafana-operator/docs/overview/#resyncperiod
-        // 10m by default
-        // 0m: never poll for changes in the dashboards
-        resyncPeriod: '0m',
-        folder: kxValues.grafana_folder,
-        // https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
-        instanceSelector: {
-          matchLabels: {
-            dashboards: kxValues.grafana_name,
-          },
-        },
-        // std.manifestJson to output a Json string
-        json: std.manifestJson(dashboards[name]),
-      },
-  }
-  for name in std.objectFields(dashboards)
 } +
 // Kube-State Metrics
 {
   ['kubernetes-monitoring-state-metrics-' + name]: kubeStateMetrics[name]
   for name in std.objectFields(kubeStateMetrics)
-}
+} +  (import 'kube-x/mixin-grafana.libsonnet')(kxValues{
+      mixin: mixin,
+      mixin_name: 'kubernetes-monitoring',
+      grafana_name: values.grafana_name,
+      grafana_folder_label: 'Kubernetes Monitoring',
+ })

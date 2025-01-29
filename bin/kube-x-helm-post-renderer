@@ -161,7 +161,7 @@ jsonnet_processing(){
   # we can't use bash::trap on return because it's a signal processing meaning
   trap "popd > /dev/null" EXIT
 
-  echo::info "Jsonnet processing into the Jsonnet directory $JSONNET_DIR"
+  echo::debug "Jsonnet processing into the Jsonnet directory $JSONNET_DIR"
 
   # Update the dependencies (vendor directory)
   # Mandatory when using jsonnet bundler
@@ -204,7 +204,7 @@ jsonnet_processing(){
   # Processing
   while read -r JSONNET_FILE; do
 
-      echo::info "Processing: $JSONNET_FILE"
+      echo::debug "Processing: $JSONNET_FILE"
 
       JSONNET_SCRIPT_BASENAME=$(basename "$JSONNET_FILE")
 
@@ -224,7 +224,7 @@ jsonnet_processing(){
         *)
 
           echo::debug "The file $JSONNET_FILE does not contain mono in its name, processing in multi mode"
-          echo::info "Processing in multi mode the jsonnet file: $JSONNET_FILE"
+          echo::debug "Processing in multi mode the jsonnet file: $JSONNET_FILE"
 
           # xargs post processing command
           # We get the list of generated file from jsonnet net

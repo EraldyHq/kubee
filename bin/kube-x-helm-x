@@ -171,7 +171,7 @@ apply(){
         ;;
       "template")
         HELM_COMMAND+=( "template" )
-        echo::info "Templating package $CHART_NAME "
+        echo::debug "Templating package $CHART_NAME "
         ;;
       *)
         echo::err "The command $COMMAND is unknown"
@@ -241,9 +241,9 @@ apply(){
   # Working directory is the cluster directory
   # Why? To be able to set relative path to the cluster object such as certificate
   # example: "--set-file kube_x.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem"
-  pushd "$KUBE_X_CLUSTER_DIR" 1>&2
+  command::echo_debug_eval "pushd $KUBE_X_CLUSTER_DIR 1>/dev/null"
   command::echo_eval "${HELM_COMMAND[*]}"
-  popd 1>&2
+  command::echo_debug_eval "popd 1>/dev/null"
 
   # Can we Wait with that?
   # kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator
@@ -426,11 +426,11 @@ print_values(){
   fi
 
 
-
-  if ! CLUSTER_VALUE_FILES=$(get_cluster_values_files); then
-    echo::err "Error while trying to retrieve the cluster values"
-    return 1
-  fi
+  # The function get_cluster_values_files has trap to delete
+  # the files at exit, we can't use a subshell
+  get_cluster_values_files >| /dev/shm/kube-x-cluster-values-files.txt
+  local CLUSTER_VALUE_FILES;
+  CLUSTER_VALUE_FILES=$(cat cluster_values_files.txt)
   echo::debug "Adding cluster files: $CLUSTER_VALUE_FILES"
   IFS=" " read -ra CLUSTER_VALUE_FILES_ARRAY <<< "${CLUSTER_VALUE_FILES}"
   SHM_VALUES_FILE+=("${CLUSTER_VALUE_FILES_ARRAY[@]}")

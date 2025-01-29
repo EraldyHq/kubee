@@ -5,11 +5,11 @@
 
 This [kube-x jsonnet chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-jsonnet-kube-x-chart) installs monitoring for the core systems Kubernetes components:
 * Api Server
-* Core Dns
 * Controller Manager
-* Kubelet: 
+* Core Dns
+* Kubelet
+* Proxy
 * Scheduler
-
 
 
 The dashboards are using metrics from:
@@ -40,19 +40,13 @@ where:
 
 ## Alerts / Rules and Dashboard
 * https://kubernetes.io/docs/reference/instrumentation/metrics/
-## Doc
 
-* [Metrics For Kubernetes System Components](https://kubernetes.io/docs/concepts/cluster-administration/system-metrics/)
-
-They all exposes at /metrics.
-kubelet also exposes metrics in /metrics/cadvisor, /metrics/resource and /metrics/probes endpoints. 
 
 ## Optional Prerequisites: Kube-x Chart Dependency
 
 This `kube-x` charts should have been enabled and installed:
   * [Grafana](../grafana/README.md) for the dashboards
   * [Prometheus](../prometheus/README.md) for the prometheus scrape, alert and rules
-
 
 
 ## Dev/Contrib
@@ -65,11 +59,12 @@ See [Dev/Contrib](contrib.md)
 Because k3s disables it by [default](https://docs.k3s.io/cli/server#database)
 The following server flag needs to be set`--etcd-expose-metrics=true`.
 
-### Why does tne scheduler dashboard check the api server job
+### Why does the scheduler dashboard check the api server job and not the scheduler job ?
 
 With k3s, there is only one binary.
 The api server endpoint gives you metrics from:
 * the `controller manager`
-* and `scheduler`
+* `scheduler`
+* and `proxy`
 The kubelet endpoint gives you metrics from:
 * the `cadvisor`
