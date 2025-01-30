@@ -4,8 +4,6 @@ local extValues = std.extVar('values');
 local values = {
   grafana_hostname: extValues.grafana.hostname,
   grafana_name: extValues.grafana.name,
-  // Manifest name, does not allow Uppercase
-  grafana_folder_name: 'argocd',
   grafana_folder_label: 'ArgoCd',
   grafana_enabled: extValues.grafana.enabled,
   argocd_hostname: extValues.hostname,

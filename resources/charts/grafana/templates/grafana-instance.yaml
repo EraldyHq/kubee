@@ -1,6 +1,8 @@
 {{/*
   Grafana Instance (Cloud (External) or Cluster (Internal)
-  See CRD doc:   https://grafana.github.io/grafana-operator/docs/grafana/
+  See CRD doc:
+  https://grafana.github.io/grafana-operator/docs/api/#grafanaspec
+  https://grafana.github.io/grafana-operator/docs/grafana/
 */}}
 apiVersion: grafana.integreatly.org/v1beta1
 kind: Grafana
@@ -57,6 +59,12 @@ Test:
     Nonte: it seems that they use the Helm Chart ???
     https://github.com/grafana/helm-charts/blob/main/charts/grafana/templates/ingress.yaml
    */}}
+  deployment:
+    metadata:
+      labels:
+        # To be able to restart it with kube-x-restart
+        app.kubernetes.io/name: {{ .Values.name }}
+        app.kubernetes.io/instance: {{ .Values.name }}
   {{- if ne .Values.hostname "" }}
   ingress:
     metadata:

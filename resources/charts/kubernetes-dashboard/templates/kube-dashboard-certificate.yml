@@ -1,18 +1,19 @@
-# If not enabled=false
-{{- if ne .Values.cert_manager.enabled false -}}
-# The certificate
-# (Because we use IngressRoute, it needs to be created manually)
+{{- if and (ne .Values.cert_manager.enabled false ) (ne .Values.hostname "") }}
+{{- /*
+  # The certificate
+  # Because we use IngressRoute, it needs to be created manually)
+*/}}
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: '{{ include "kubernetes-dashboard-name" . }}'
   namespace: '{{.Values.namespace}}'
 spec:
-  commonName: '{{ .Values.kube_x.kubernetes_dashboard.hostname }}'
+  commonName: '{{ required "hostname should not be null" .Values.hostname }}'
   secretName: '{{ include "kubernetes-dashboard-name" .}}'
   dnsNames:
-    - '{{ .Values.kube_x.kubernetes_dashboard.hostname }}'
+    - '{{ required "hostname should not be null" .Values.hostname }}'
   issuerRef:
     kind: ClusterIssuer
-    name: '{{ .Values.cert_manager.issuer_name }}'
+    name: '{{ required "cert_manager.issuer_name should not be null" .Values.cert_manager.issuer_name }}'
 {{- end}}

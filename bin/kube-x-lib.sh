@@ -62,6 +62,7 @@ kube::get_app_label(){
   echo "app.kubernetes.io/name=$APP_NAME"
 }
 
+
 # @description
 #     Function to search for resources across all namespaces by app name
 #     and returns data about them

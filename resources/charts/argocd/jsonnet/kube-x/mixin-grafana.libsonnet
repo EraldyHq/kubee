@@ -27,22 +27,32 @@ function(params)
 
   local values = defaultValues + params;
 
+  local folderName = std.asciiLower(values.mixin_name);
+
+  // folderRef on Dashboard was not working
+  // we used folderUid
+  local folderUid = std.md5('folder' + folderName);
+
+  // Resync: Reload if the dashboard or folder was deleted from grafana
+  // https://grafana.github.io/grafana-operator/docs/overview/#resyncperiod
+  // 10m by default
+  // 0m: never poll for changes in the dashboards
+  local syncPeriod = '10m';
+
   // Dashboard Folder
+  // https://grafana.github.io/grafana-operator/docs/api/#grafanafolderspec
   local grafanaFolder = {
     apiVersion: 'grafana.integreatly.org/v1beta1',
     kind: 'GrafanaFolder',
     metadata: {
-      name: values.mixin_name,  // Does not allow Uppercase
+      name: folderName,  // Does not allow Uppercase
     },
     spec: {
       // Allow import from grafana instance in another namespace
       // https://github.com/grafana/grafana-operator/tree/master/examples/crossnamespace
       // https://grafana.github.io/grafana-operator/docs/examples/crossnamespace/readme/
       allowCrossNamespaceImport: true,
-      // https://grafana.github.io/grafana-operator/docs/overview/#resyncperiod
-      // 10m by default
-      // 0m: never poll for changes in the dashboards
-      resyncPeriod: '0m',
+      resyncPeriod: syncPeriod,
       instanceSelector: {
         matchLabels: {
           dashboards: values.grafana_name,
@@ -51,11 +61,14 @@ function(params)
       // If title is not defined, the value will be taken from metadata.name
       // Allow uppercase
       title: values.grafana_folder_label,
+      // The Uid
+      uid: folderUid,
     },
   };
 
 
   // Dashboard
+  // https://grafana.github.io/grafana-operator/docs/api/#grafanadashboardspec
   local dashboards = if !std.objectHasAll(values.mixin, 'grafanaDashboards') then {} else {
     [values.mixin_name + '-grafana-dashboard-' + stripJsonLowerCase(name)]: {
       apiVersion: 'grafana.integreatly.org/v1beta1',
@@ -72,8 +85,11 @@ function(params)
           // https://grafana.github.io/grafana-operator/docs/overview/#resyncperiod
           // 10m by default
           // 0m: never poll for changes in the dashboards
-          resyncPeriod: '0m',
-          folder: values.mixin_name,
+          resyncPeriod: syncPeriod,
+          // Ref: https://grafana.github.io/grafana-operator/docs/dashboards/#select-the-folder-where-the-dashboard-will-be-deployed
+          // Not folderRef was not working
+          // folderRef: values.mixin_name, # Name of a `GrafanaFolder` resource in the same namespace
+          folderUID: folderUid,
           // https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
           instanceSelector: {
             matchLabels: {

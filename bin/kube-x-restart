@@ -88,5 +88,5 @@ if [ "$STATEFULSET_NAME" != "" ]; then
     exit 0
 fi
 
-echo::err "No deployment or statefulset found for the app $"$KUBE_X_APP_NAME" (with the label $(kube::get_app_label "$KUBE_X_APP_NAME")"
+echo::err "No deployment or statefulset found for the app $KUBE_X_APP_NAME (with the label $(kube::get_app_label "$KUBE_X_APP_NAME")"
 exit 1

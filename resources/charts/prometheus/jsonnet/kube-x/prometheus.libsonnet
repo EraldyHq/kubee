@@ -174,14 +174,6 @@ local grafanaCloudSecret = function(username, password, secretType, externalStor
       }
   );
 
-// mixin is not a function but an object
-local dashboards = (import 'github.com/prometheus/prometheus/documentation/prometheus-mixin/mixin.libsonnet') {
-  _config+:: {
-    // Optout of multicluster
-    showMultiCluster: false,
-  },
-}.grafanaDashboards;
-local stripJson = function(name) std.substr(name, 0, std.length(name) - std.length('.json'));
 
 // kpValues = values for kubernetes-prometheus
 // kxValues = values for kube-x
@@ -425,55 +417,17 @@ function(kpValues, kxValues)
       kxConfig.external_secret_store_name,
       p
     ),
-    // Dashboard Folder
-    [if kxConfig.grafana_enabled then 'grafanaFolder']: {
-      apiVersion: 'grafana.integreatly.org/v1beta1',
-      kind: 'GrafanaFolder',
-      metadata: {
-        name: 'prometheus-grafana-folder',  // Does not allow Uppercase
-      },
-      spec: {
-        instanceSelector: {
-          matchLabels: {
-            dashboards: kxConfig.grafana_name,
-          },
-        },
-        // If title is not defined, the value will be taken from metadata.name
-        // Allow uppercase
-        title: kxConfig.grafana_folder,
-      },
-    },
-
   } +
   // Dashboard
-  (if !kxConfig.grafana_enabled then {} else
-     {
-       ['grafana-dashboard-' + stripJson(name)]: {
-         apiVersion: 'grafana.integreatly.org/v1beta1',
-         kind: 'GrafanaDashboard',
-         metadata: {
-           name: 'prometheus-grafana-' + stripJson(name),
-         },
-         spec:
-           {
-             // Allow import from grafana instance in another namespace
-             // https://github.com/grafana/grafana-operator/tree/master/examples/crossnamespace
-             // https://grafana.github.io/grafana-operator/docs/examples/crossnamespace/readme/
-             allowCrossNamespaceImport: true,
-             // https://grafana.github.io/grafana-operator/docs/overview/#resyncperiod
-             // 10m by default
-             // 0m: never poll for changes in the dashboards
-             resyncPeriod: '0m',
-             folder: kxConfig.grafana_folder,
-             // https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
-             instanceSelector: {
-               matchLabels: {
-                 dashboards: kxValues.grafana_name,
-               },
-             },
-             // std.manifestJson to output a Json string
-             json: std.manifestJson(dashboards[name]),
-           },
-       }
-       for name in std.objectFields(dashboards)
-     })
+  (
+    if !kxConfig.grafana_enabled then {} else (import 'mixin-grafana.libsonnet')(kxConfig {
+      mixin_name: 'prometheus',
+      mixin: (import 'github.com/prometheus/prometheus/documentation/prometheus-mixin/mixin.libsonnet') {
+        _config+:: {
+          // Optout of multicluster
+          showMultiCluster: false,
+        },
+      },
+      grafana_folder_label: 'Prometheus'
+    })
+  )

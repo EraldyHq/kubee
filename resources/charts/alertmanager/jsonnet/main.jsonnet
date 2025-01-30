@@ -150,5 +150,5 @@ local serviceMonitorPatch = {
           mixin: alertmanager.mixin,
           mixin_name: 'alertmanager',
           grafana_name: values.grafana_name,
-          grafana_folder_label: 'Alertmanager',
+          grafana_folder_label: 'Alert Manager',
       })
