@@ -2,9 +2,9 @@
 
 Test:
 helm template -s templates/cluster-issuer-acme.yaml \
-  --set 'kube_x.cert_manager.dns01.cloudflare.cloudflareApiToken=xxxx' \
+  --set 'dns01.cloudflare.cloudflareApiToken=xxxx' \
   --set 'kube_x.auth.admin_user.email=foo@bar.com' \
-  --set 'kube_x.cert_manager.dns01.cloudflare.dnsZones[0]=yolo' \
+  --set 'dns01.cloudflare.dnsZones[0]=yolo' \
   . | yq
 
 
@@ -13,7 +13,7 @@ helm template -s templates/cluster-issuer-acme.yaml \
 Range:
 https://helm.sh/docs/chart_template_guide/control_structures/#looping-with-the-range-actionhttps://helm.sh/docs/chart_template_guide/control_structures/#looping-with-the-range-action
 */}}
-{{- range .Values.kube_x.cert_manager.acmeIssuers }}
+{{- range .Values.acme_issuers}}
 ---
 {{/*# Create a ClusterIssuer (can issue cert for the whole cluster)*/}}
 apiVersion: cert-manager.io/v1
@@ -33,7 +33,7 @@ spec:
       name: '{{ .name }}'
     {{- /* Enable the HTTP-01 challenge provider*/}}
     solvers:
-      {{- if ne $.Values.kube_x.cert_manager.http01.ingressClassName "" -}}
+      {{- if ne $.Values.http01.ingress_class_name "" -}}
       {{- /* empty 'selector' means that this solver matches all domains*/}}
       - selector: { }
         {{- /*
@@ -52,13 +52,13 @@ spec:
             # Value: nginx or traefik
             # See Traefik example: https://doc.traefik.io/traefik/user-guides/cert-manager/#example-with-acme-and-http-challenge
            */}}
-            ingressClassName: '{{ $.Values.kube_x.cert_manager.http01.ingressClassName }}'
+            ingressClassName: '{{ $.Values.http01.ingress_class_name }}'
       {{- /*
         Selector: 'DnsName', `DnsZone`, `matchLabels` can be specified
         https://cert-manager.io/docs/configuration/acme/#adding-multiple-solver-types
       */}}
       {{- end }}
-      {{- if ne $.Values.kube_x.cert_manager.dns01.cloudflare.secret.cloudflareApiToken "" }}
+      {{- if ne $.Values.dns01.cloudflare.secret.cloudflare_api_token "" }}
       - selector:
           {{- /*
           # The selector is a DNS Zone
@@ -67,10 +67,10 @@ spec:
           # * a matchLabel because it is not possible to set a label/annotation for cert-manager in an ingress spec
           # * a DNSName because it must be exact and is obviously unknown in advance
           */}}
-          {{- if not $.Values.kube_x.cert_manager.dns01.cloudflare.dnsZones }}
-            {{- fail "kube_x.cert_manager.dns01.cloudflare.dnsZones should not be empty" }}
+          {{- if not $.Values.dns01.cloudflare.dns_zones }}
+            {{- fail "dns01.cloudflare.dns_zones should not be empty" }}
           {{- end }}
-          dnsZones: {{ $.Values.kube_x.cert_manager.dns01.cloudflare.dnsZones | toYaml | nindent 12 }}
+          dnsZones: {{ $.Values.dns01.cloudflare.dns_zones | toYaml | nindent 12 }}
         {{- /* https://cert-manager.io/docs/configuration/acme/dns01/*/}}
         dns01:
           {{- /*

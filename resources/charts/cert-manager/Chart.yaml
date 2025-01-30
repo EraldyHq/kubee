@@ -34,3 +34,15 @@ dependencies:
     version: 0.0.1
     repository: file://../kube-x
     alias: kube_x
+  # For the dashboard
+  - name: kube-x-grafana
+    version: 0.0.1
+    repository: file://../grafana
+    alias: grafana
+    condition: kube_x_internal.install_cross_dependency
+  # For the scrape
+  - name: kube-x-prometheus
+    version: 0.0.1
+    repository: file://../prometheus
+    alias: prometheus
+    condition: kube_x_internal.install_cross_dependency

@@ -9,7 +9,7 @@ name: 'kube-x'
 # The prometheus version
 # https://github.com/prometheus/prometheus/releases
 version: '3.1.0'
-# Prometheus with Prometheus Operator
+# Hostname
 # If not null, an ingress is added
 hostname: ''
 # Memory Limit
@@ -26,11 +26,30 @@ retention: '2h'
 # The duration that Prometheus keeps the data in memory
 # The default is 2h. If the value is 2h, no arguments is applied.
 # It's the prometheus tsdb server argument --storage.tsdb.max-block-duration=2h)
-max_block_duration: '1h'
+max_block_duration: '30m'
 # The default scrape interval for target
 # It does influence memory as Prometheus keeps by default 2 hours of scraping in memory (max_block_duration)
 # Default is 30s
 scrape_interval: '1m'
+
+# Exporter authentication
+# This is a global authentication configuration for all exporters
+exporter_auth:
+  # Network Policy
+  # They allow only ingress communication from a prometheus server
+  network_policy:
+    enabled: true
+  # Rbac Proxy
+  # # https://github.com/brancz/kube-rbac-proxy
+  # Kube Prometheus uses rbac-proxy to add an authorization layer on exporter
+  # We disable it by default:
+  # - to minimize memory (20M by exporters) and the head-heck of authorization problem.
+  # - because there is also network policy
+  # If enabled, the exporter (node and state metrics) will get an extra containers
+  # that handle RBAC authorization
+  kube_rbac_proxy:
+    enabled: false
+    version: 0.18.2
 
 # grafana cloud remote write prometheus integration
 grafana_cloud:

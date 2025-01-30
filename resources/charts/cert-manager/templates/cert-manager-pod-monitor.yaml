@@ -1,0 +1,42 @@
+{{/*
+  # No service is available, this is therefore a pod monitor
+  # as specified here https://cert-manager.io/docs/devops-tips/prometheus-metrics/#regular-manifests
+  #
+  # Note that the cert manager chart has also a promtheus configuration
+  # https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/README.template.md#prometheus
+*/}}
+{{- if eq .Values.prometheus.enabled true }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: cert-manager
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: cert-manager
+    app.kubernetes.io/name: cert-manager
+    app.kubernetes.io/instance: cert-manager
+spec:
+  jobLabel: app.kubernetes.io/name
+  selector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - cainjector
+          - cert-manager
+          - webhook
+      - key: app.kubernetes.io/instance
+        operator: In
+        values:
+          - {{ .Release.Name }}
+      - key: app.kubernetes.io/component
+        operator: In
+        values:
+          - cainjector
+          - controller
+          - webhook
+  podMetricsEndpoints:
+    - port: http-metrics
+      interval: 60s
+      honorLabels: true
+{{- end }}

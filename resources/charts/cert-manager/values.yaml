@@ -68,9 +68,10 @@ cert-manager:
   # https://cert-manager.io/docs/devops-tips/prometheus-metrics/
   # https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/README.template.md#prometheus
   prometheus:
-    enabled: true
+    # We don't create it ourselves because it's pretty hard.
+    enabled: false
     servicemonitor:
-      enabled: true
+      enabled: false
   # cluster resource namespace
   # The namespace used to store cluster wide data (such as DNS provider credentials, certificate, ...)
   # Set the default namespace to search for a resource on the cert-manager controller
@@ -80,3 +81,8 @@ cert-manager:
   # A ClusterIssuer CA will create the certificate in this namespace
   # https://cert-manager.io/docs/configuration/ca/#deployment
   clusterResourceNamespace: ""
+
+
+# Don't touch, used to block template output of cross dependency
+kube_x_internal:
+  install_cross_dependency: false

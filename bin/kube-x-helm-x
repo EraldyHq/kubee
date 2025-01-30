@@ -138,7 +138,7 @@ install_crd_first(){
 
   # The recursion overwrite the chart values files
   # We regenerate it
-  if ! print_values >| $CHART_VALUES_PATH; then
+  if ! print_values >| "$CHART_VALUES_PATH"; then
     echo::err "An error has happened while generating the values file for the chart"
     return 1
   fi
@@ -172,6 +172,10 @@ apply(){
       "template")
         HELM_COMMAND+=( "template" )
         echo::debug "Templating package $CHART_NAME "
+        # Output
+        if [ "$OPTION_OUTPUT_DIR" != "" ]; then
+          HELM_COMMAND+=("--output-dir" "$(dirname "$CHART_OUTPUT_DIR")")
+        fi
         ;;
       *)
         echo::err "The command $COMMAND is unknown"
@@ -236,8 +240,11 @@ apply(){
   # Why? To be able to set relative path to the cluster object such as certificate
   # example: "--set-file kube_x.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem"
   command::echo_debug_eval "pushd $KUBE_X_CLUSTER_DIR 1>$FD_STDOUT_COMMAND"
-  command::echo_eval "${HELM_COMMAND[*]}"
-  command::echo_debug_eval "popd 1>$FD_STDOUT_COMMAND"
+  bash::trap "popd 1>$FD_STDOUT_COMMAND" EXIT
+  if ! command::echo_eval "${HELM_COMMAND[*]}"; then
+    echo::err "An error occurs during the command $COMMAND"
+    exit 1
+  fi
 
   # Can we Wait with that?
   # kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator
@@ -300,7 +307,10 @@ get_cluster_values_files(){
     local CHART_VALUES;
     CHART_VALUES=$(command::echo_debug_eval "yq '.$ACTUAL_CHART_ALIAS' $SHM_CLUSTER_VALUES")
     if [ "$CHART_VALUES" == "null" ]; then
-      echo::warn "No values found for the actual chart $ACTUAL_CHART_ALIAS in the cluster value file $KUBE_X_CLUSTER_VALUES"
+      # CRD chart does not have any value in the cluster values files
+      if [ "$IS_CRD_CHART" != "1" ]; then
+        echo::warn "No values found for the actual chart $ACTUAL_CHART_ALIAS in the cluster value file $KUBE_X_CLUSTER_VALUES"
+      fi
       echo "${CLUSTER_FILES[@]}"
       return
     fi
@@ -310,7 +320,7 @@ get_cluster_values_files(){
     echo::debug "Returned the cluster chart values files $SHM_CLUSTER_CHART_VALUES"
 
     echo::debug "Delete the property $ACTUAL_CHART_ALIAS of the cluster values files for cleanness"
-    yq -i "del(.$ACTUAL_CHART_ALIAS)" $SHM_CLUSTER_VALUES
+    yq -i "del(.$ACTUAL_CHART_ALIAS)" "$SHM_CLUSTER_VALUES"
 
     # return
     echo "${CLUSTER_FILES[@]}"
@@ -409,7 +419,7 @@ print_values(){
   local CHART_VALUES_FILE="$CHART_DIRECTORY/values.yaml"
   if [[ "$CHART_NAME" == *"$CRD_SUFFIX" ]]; then
       local PARENT_CHART_NAME;
-      PARENT_CHART_NAME=${CHART_NAME#CRD_SUFFIX};
+      PARENT_CHART_NAME=${CHART_NAME%"$CRD_SUFFIX"};
       if ! PARENT_CHART_DIRECTORY=$(get_chart_directory "$PARENT_CHART_NAME"); then
         echo::err "The parent chart ($PARENT_CHART_NAME) of the CRD chart ($PARENT_CHART_NAME) was not found"
         echo::err "  * the cluster resources directory (${KUBE_X_RESOURCE_CHARTS_DIR}) " # the /resources/charts dir
@@ -525,8 +535,12 @@ CRD_SUFFIX="-crds"
 IS_CRD_CHART=0
 # glob match
 if [[ $CHART_NAME == *"$CRD_SUFFIX" ]]; then
+  echo::debug "This is a CRD chart"
   IS_CRD_CHART=1
+else
+  echo::debug "This is not a CRD chart"
 fi
+
 
 # Chart Directory
 if ! CHART_DIRECTORY=$(get_chart_directory "$CHART_NAME"); then

@@ -5,5 +5,11 @@ dependencies:
 - name: kube-x
   repository: file://../kube-x
   version: 0.0.1
-digest: sha256:4a31aad4a93afe6c75d670bb401a4ebead254c4a24aa2972f184ff8c91ec6f42
-generated: "2024-12-15T23:37:58.115882358+01:00"
+- name: kube-x-grafana
+  repository: file://../grafana
+  version: 0.0.1
+- name: kube-x-prometheus
+  repository: file://../prometheus
+  version: 0.0.1
+digest: sha256:65e3a6f4ef7bfbff4dcb2ef40257c2474c87c95e254eee00df0c90369aafd69d
+generated: "2025-01-30T10:13:09.636519942+01:00"

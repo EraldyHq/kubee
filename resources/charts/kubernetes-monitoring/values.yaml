@@ -60,15 +60,6 @@ node_exporter:
   enabled: false
   version:
 
-# Rbac Proxy
-# if enabled, every exporter (node and state metrics) will get an extra containers
-# that handle RBAC authorization
-# The drawback is authorization problem and memory shortage (20M by exporters)
-# https://github.com/brancz/kube-rbac-proxy
-kube_rbac_proxy:
-  enabled: false
-  version: 0.18.2
-
 
 # Don't change, don't touch
 # Used to not output template for cross dependency in Chart.yaml
