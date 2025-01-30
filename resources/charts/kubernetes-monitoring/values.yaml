@@ -3,7 +3,7 @@
 
 # Not a string, a boolean so no quote
 enabled: false
-# namespace. This is a prometheus component
+# namespace. This is a monitoring component
 namespace: 'monitoring'
 
 # The mixin
@@ -49,19 +49,19 @@ kube_mixin:
 
 # Scrape of the kubelet (CPU and Memory Resources)
 kubelet:
-  enabled: false
+  enabled: true
   # Default 30s
   scrape_interval: '60s'
 
 # Scrape of the api server
 api_server:
-  enabled: false
+  enabled: true
   # Default 30s (and 5s for sli)
   scrape_interval: '60s'
 
 # Scrape of the Core Dns server
 core_dns:
-  enabled: false
+  enabled: true
   # Default 15s
   scrape_interval: '30s'
 
@@ -69,7 +69,7 @@ core_dns:
 # It exports apps/functional state metrics
 # https://github.com/kubernetes/kube-state-metrics
 kube_state_metrics:
-  enabled: false
+  enabled: true
   # https://github.com/kubernetes/kube-state-metrics/releases
   version: 'v2.14.0'
   # The scrape interval
@@ -85,6 +85,6 @@ node_exporter:
 
 
 # Don't change, don't touch
-# Used to not output template for cross dependency in Chart.yaml
+# Used to not output template from cross dependency in Chart.yaml
 kube_x_internal:
   install_cross_dependency: false

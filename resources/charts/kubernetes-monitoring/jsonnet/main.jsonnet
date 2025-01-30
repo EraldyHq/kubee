@@ -15,6 +15,12 @@ local kxValues = {
   kube_state_metrics_scrape_interval: validation.notNullOrEmpty(kxExtValues, 'kube_state_metrics.scrape_interval'),
   kube_state_metrics_memory: validation.notNullOrEmpty(kxExtValues, 'kube_state_metrics.memory'),
   kube_state_metrics_version: validation.notNullOrEmpty(kxExtValues, 'kube_state_metrics.version'),
+  kubelet_enabled: validation.notNullOrEmpty(kxExtValues, 'kubelet.enabled'),
+  kubelet_scrape_interval: validation.notNullOrEmpty(kxExtValues, 'kubelet.scrape_interval'),
+  api_server_enabled: validation.notNullOrEmpty(kxExtValues, 'api_server.enabled'),
+  api_server_scrape_interval: validation.notNullOrEmpty(kxExtValues, 'api_server.scrape_interval'),
+  core_dns_enabled: validation.notNullOrEmpty(kxExtValues, 'core_dns.enabled'),
+  core_dns_scrape_interval: validation.notNullOrEmpty(kxExtValues, 'core_dns.scrape_interval'),
 
 };
 
@@ -118,13 +124,7 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
               group
               for group in prometheusRule.spec.groups
               // We filter out the following groups
-              if !std.member([
-                    // The api server endpoint gives you metrics from controller manager and scheduler as well.
-                    // You have all the metrics but rules and dashboard don't expect them to be tagged with job=apiserver.
-                    // Ref: https://github.com/k3s-io/k3s/issues/425#issuecomment-813017614
-                    'kubernetes-system-controller-manager',  // k3s does not have any controller-manager, no need to alert
-                    'kubernetes-system-scheduler',  // k3s does not have any scheduler, no need to alert
-                    ], group.name)
+              if !std.member([], group.name)
             ],
           },
         }
@@ -133,7 +133,9 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
         serviceMonitorKubelet {
           spec+: {
             endpoints: [
-              endpoint
+              endpoint {
+                interval: kxValues.kubelet_scrape_interval,
+              }
               for endpoint in serviceMonitorKubelet.spec.endpoints
               // We filter out the /metrics/slis target
               // https://github.com/k3s-io/k3s/discussions/11637
@@ -141,13 +143,42 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
             ],
           },
         }
-      else kubernetesControlPlane[name]
+      else if name == 'serviceMonitorApiserver' then
+        local serviceMonitorApiServer = kubernetesControlPlane[name];
+        serviceMonitorApiServer {
+          spec+: {
+            endpoints: [
+              endpoint {
+                interval: kxValues.api_server_scrape_interval,
+              }
+              for endpoint in serviceMonitorApiServer.spec.endpoints
+            ],
+          },
+        }
+      else if name == 'serviceMonitorCoreDNS' then
+        local serviceMonitorCoreDNS = kubernetesControlPlane[name];
+        serviceMonitorCoreDNS {
+          spec+: {
+            endpoints: [
+              endpoint {
+                interval: kxValues.api_server_scrape_interval,
+              }
+              for endpoint in serviceMonitorCoreDNS.spec.endpoints
+            ],
+          },
+        }
+      // We fail as normally, there is no more components or this is a typing error
+      else error 'Internal Error: Controle Plane component ' + name + ' was unexpected'
     )
   for name in std.objectFields(kubernetesControlPlane)
   // k3s is only one binary
   // and does not need to scrape KubeScheduler and KubeControllerManager
   // The metrics are gathered with the api server scrape
   if !std.member(['serviceMonitorKubeScheduler', 'serviceMonitorKubeControllerManager'], name)
+  // Enable/Disabled Monitor
+  && !(name == 'serviceMonitorKubelet' && !kxValues.kubelet_enabled)
+  && !(name == 'serviceMonitorApiserver' && !kxValues.api_server_enabled)
+  && !(name == 'serviceMonitorCoreDNS' && !kxValues.core_dns_enabled)
 } +
 // kube-state metrics
 (

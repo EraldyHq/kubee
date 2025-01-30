@@ -33,9 +33,7 @@ jb install github.com/kubernetes/kube-state-metrics/jsonnet/kube-state-metrics-m
 * Try it out with
 * Helm X
 ```bash
-# set debug (to not delete the created manifests in the jsonnet/out directory)
-export BASHLIB_ECHO_LEVEL=4
-kube-x-helm-x template kubernetes-monitoring > /tmp/all.yaml
+kube-x-helm-x template kubernetes-monitoring --out > /tmp/all.yaml
 ```
 * or Raw Jsonnet command
 ```bash

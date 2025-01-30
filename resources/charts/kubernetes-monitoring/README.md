@@ -1,4 +1,4 @@
-# Monitoring of the Kubernetes Component
+# Kubernetes Monitoring
 
 
 ## About
@@ -13,7 +13,7 @@ This [kube-x jsonnet chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-jsonnet
 
 
 The dashboards are using metrics from:
-* Kubernetes components
+* Kubernetes System components
 * `Kube-State-Metrics` exporter
 * and `node-exporter`
 
