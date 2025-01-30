@@ -1,5 +1,5 @@
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// Don't modify this script if you are not in the Kube-X Utilities Promtheus Chart directory
+// Don't modify this script if you are not in the Kube-X `prometheus/utilities` chart
 // Otherwise this file will be overwritten
 // as this is not the source
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -26,13 +26,13 @@ function(params)
   local values = defaultValues + params;
 
 
-  // Return obejct
+  // Returned object
   {
-    'prometheus-rules': {
+    [values.mixin_name+'-prometheus-rules']: {
       apiVersion: 'monitoring.coreos.com/v1',
       kind: 'PrometheusRule',
       metadata: {
-        name: values.grafana_folder_name + '-monitoring-rules',
+        name: values.mixin_name + '-monitoring-rules',
       },
       spec: {
         local r = if std.objectHasAll(values.mixin, 'prometheusRules') then values.mixin.prometheusRules.groups else [],

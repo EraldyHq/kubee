@@ -1,15 +1,22 @@
 // Kube-state metrics customization
 // that delete Rbac
+
+
+
 function(params)
-  // The default mixin
+
+
+  // The kube-prometheus lib
+  local kpStateMetrics = (import '../kube-prometheus/components/kube-state-metrics.libsonnet')(params);
+
+  // The base default mixin
   local kubeStateMetrics = (import 'github.com/kubernetes/kube-state-metrics/jsonnet/kube-state-metrics/kube-state-metrics.libsonnet') {
     name:: 'kube-state-metrics',  // name taken from https://github.com/prometheus-operator/kube-prometheus/blob/main/jsonnet/kube-prometheus/components/kube-state-metrics.libsonnet#L7
     namespace:: params.namespace,
     version:: params.version,
     image:: params.image,
   };
-  // The kube-prometheus lib
-  local kpStateMetrics = (import '../kube-prometheus/components/kube-state-metrics.libsonnet')(params);
+
 
   // Our custom values
   local kxStateMetrics = kpStateMetrics
@@ -37,6 +44,8 @@ function(params)
                                    // example metrics: kube_namespace_status_phase
                                    // example dashboard: kubernetes-compute-resources-namespace-pods
                                    honorLabels: true,
+                                   // Not overwridden but we can see where the data comes from
+                                   interval: params.scrapeInterval
                                  }
                                  for endpoint in kpStateMetrics.serviceMonitor.spec.endpoints
                                ],

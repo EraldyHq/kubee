@@ -47,12 +47,35 @@ kube_mixin:
 #  kubelet.rules
 
 
+# Scrape of the kubelet (CPU and Memory Resources)
+kubelet:
+  enabled: false
+  # Default 30s
+  scrape_interval: '60s'
+
+# Scrape of the api server
+api_server:
+  enabled: false
+  # Default 30s (and 5s for sli)
+  scrape_interval: '60s'
+
+# Scrape of the Core Dns server
+core_dns:
+  enabled: false
+  # Default 15s
+  scrape_interval: '30s'
+
 # Kube State Metrics Exporter
 # It exports apps/functional state metrics
 # https://github.com/kubernetes/kube-state-metrics
 kube_state_metrics:
   enabled: false
+  # https://github.com/kubernetes/kube-state-metrics/releases
   version: 'v2.14.0'
+  # The scrape interval
+  scrape_interval: '60s'
+  # The memory of the exporter
+  memory: '50Mi'
 
 # Node Exporter to gather server resources metrics
 # https://github.com/prometheus/node_exporter
