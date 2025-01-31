@@ -22,15 +22,18 @@ resources:
 # How long to retain data (it's the prometheus server argument --storage.tsdb.retention.time=24h)
 # Data in memory is 2 hour old, by setting retention to 2h, we don't allow to query data over 2 hours and to load data in memory
 # The default is 24h
+# Why 1h? We are sure that we will not increase memory of the prometheus pod
 retention: '1h'
 # The duration that Prometheus keeps the data in memory
 # The default is 2h. If the value is 2h, no arguments is applied.
 # It's the prometheus tsdb server argument --storage.tsdb.max-block-duration=2h)
-# Why 1h, because this is the default of prometheus query
+# Why 1h, because this is the default of:
+# * the prometheus query ui
+# * the grafana explore panel (ie last hour)
 max_block_duration: '1h'
 # The default scrape interval for target
 # It does influence memory as Prometheus keeps by default 2 hours of scraping in memory (max_block_duration)
-# Default is 30s
+# Default was 30s
 scrape_interval: '1m'
 
 # Exporter authentication
