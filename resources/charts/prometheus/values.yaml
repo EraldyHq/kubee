@@ -17,16 +17,17 @@ resources:
   # Depend on scrape interval, max_block_duration, number of metrics scraped, number of recording rules
   # Dynamically, if you query data above the max_block_duration, data is loaded in memory
   # 400Mi is the default of Kube-Prometheus with default memory setting.
-  memory: '200Mi'
+  memory: '400Mi'
 # Retention
 # How long to retain data (it's the prometheus server argument --storage.tsdb.retention.time=24h)
 # Data in memory is 2 hour old, by setting retention to 2h, we don't allow to query data over 2 hours and to load data in memory
 # The default is 24h
-retention: '2h'
+retention: '1h'
 # The duration that Prometheus keeps the data in memory
 # The default is 2h. If the value is 2h, no arguments is applied.
 # It's the prometheus tsdb server argument --storage.tsdb.max-block-duration=2h)
-max_block_duration: '30m'
+# Why 1h, because this is the default of prometheus query
+max_block_duration: '1h'
 # The default scrape interval for target
 # It does influence memory as Prometheus keeps by default 2 hours of scraping in memory (max_block_duration)
 # Default is 30s
