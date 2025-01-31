@@ -51,7 +51,9 @@ kube_mixin:
 kubelet:
   enabled: true
   # Default 30s
-  scrape_interval: '60s'
+  # Headlamp uses a CPU rate functon over 1 minutes
+  # If the scrape interval is above 1m, there is no data returned
+  scrape_interval: '45s'
 
 # Scrape of the api server
 api_server:

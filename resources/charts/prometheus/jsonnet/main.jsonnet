@@ -4,7 +4,7 @@ local validation = import './kube-x/validation.libsonnet';
 
 // Get the version from the Chart.yaml
 local chart = {
-    appVersion: error "Chart appVersion is required (ie should be prometheusOperator)"
+  appVersion: error 'Chart appVersion is required (ie should be prometheusOperator)',
 } + std.parseYaml(importstr '../../Chart.yaml');
 
 local kxExtValues = std.extVar('values');
@@ -13,13 +13,13 @@ local kxExtValues = std.extVar('values');
 // * we can easily rename
 local kxValues = {
 
-  # Cluster
+  // Cluster
   cluster_name: validation.notNullOrEmpty(kxExtValues, 'kube_x.cluster.name'),
 
-  # Secret Kind
+  // Secret Kind
   secret_type: validation.notNullOrEmpty(kxExtValues, 'secret.kind'),
 
-  # External Secret
+  // External Secret
   external_secret_enabled: validation.notNullOrEmpty(kxExtValues, 'external_secrets.enabled'),
   external_secret_store_name: validation.notNullOrEmpty(kxExtValues, 'external_secrets.store.name'),
 
@@ -41,6 +41,7 @@ local kxValues = {
   prometheus_version: validation.getNestedPropertyOrThrow(kxExtValues, 'version'),
   prometheus_operator_memory: validation.getNestedPropertyOrThrow(kxExtValues, 'operator.resources.memory'),
   prometheus_operator_version: std.substr(chart.appVersion, 1, std.length(chart.appVersion) - 1),
+  prometheus_operator_config_reloader_memory: '50mi',
   // No Rbac Proxy Sidecar or Network Policies
   // Why? Takes 20Mb memory by exporter
   noRbacProxy: true,
@@ -58,7 +59,6 @@ local kxValues = {
   grafana_name: validation.notNullOrEmpty(kxExtValues, 'grafana.name'),
 
 };
-
 
 
 local kp =
@@ -81,12 +81,25 @@ local kp =
           requests: { memory: kxValues.prometheus_operator_memory },
           limits: { memory: kxValues.prometheus_operator_memory },
         },
+        // The configReloaderResources comes from the prometheus-operator.libsonnet
+        // https://github.com/prometheus-operator/prometheus-operator/blob/dff3575c55ee9e6423907e4bfdcb5ac4b8fe9c89/jsonnet/prometheus-operator/prometheus-operator.libsonnet#L8
+        configReloaderResources+: {
+          limits+: {
+            // The -config-reloader-cpu-limit arguments ( https://prometheus-operator.dev/docs/platform/operator/)
+            // Cpu Limit is bad practice
+            // A value of 0 disables it  https://prometheus-operator.dev/docs/platform/operator/
+            // To resolve a "CPUThrottlingHigh" alert
+            // 71.05% throttling of CPU in namespace monitoring for container config-reloader in pod alertmanager-kube-x-0 on cluster
+            // https://runbooks.prometheus-operator.dev/runbooks/kubernetes/cputhrottlinghigh
+            cpu: '0',
+          },
+        },
       },
       // for prometheus, we overwrite also the config in kube-x/prometheus.libsonnet
       prometheus+: {
         name: kxValues.prometheus_name,
-        version: kxValues.prometheus_version
-      }
+        version: kxValues.prometheus_version,
+      },
     },
   };
 

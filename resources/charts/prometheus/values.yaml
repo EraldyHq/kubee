@@ -86,6 +86,7 @@ operator:
     memory: '50Mi'
 
 
+
 # The kind of secret created
 secret:
   # The kind of manifest created
