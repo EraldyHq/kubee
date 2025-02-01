@@ -17,6 +17,13 @@ hostname: ''
 # Enabled if the api key is not empty
 opsgenie:
   api_key: ''
+# Pager Duty
+# https://prometheus.io/docs/alerting/latest/configuration/#pagerduty_config
+pagerduty:
+  # The service key is known as integration key in pagerduty documentation
+  service_key: ''
+  # The url is known as integration url in pager duty documentation
+  url: https://events.eu.pagerduty.com/generic/2010-04-15/create_event.json
 # Memory
 resources:
   memory: '50Mi'
