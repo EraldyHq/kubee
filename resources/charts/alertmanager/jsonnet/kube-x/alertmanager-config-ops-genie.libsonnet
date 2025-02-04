@@ -33,20 +33,17 @@ function(params) {
         https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1alpha1.Route
       */
       route: {
-        receiver: 'opsgenie',
-
+        // The default
+        receiver: 'opsgenie-critical',
+        // Only warning and critical alert can enter here
+        matchers: [{
+          name: 'severity',
+          value: 'critical|warning',
+          matchType: '=~',
+        }],
         routes: [
           {
-            receiver: 'opsgenie-critical',
-            // !!! Match properties does not work !!!
-            // Matcher: https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1alpha1.Matcher
-            matchers: [{
-              name: 'severity',
-              value: 'critical',
-              matchType: '=',
-            }],
-          },
-          {
+            // We send to the opsgenie-warning to set the correct priority
             receiver: 'opsgenie-warning',
             matchers: [{
               name: 'severity',
@@ -66,7 +63,8 @@ function(params) {
           opsgenieConfigs: [{ priority: 'P2' }],
         },
         {
-          name: 'opsgenie',
+          //  Not used for info
+          name: 'opsgenie-info',
           opsgenieConfigs: [{ priority: 'P3' }],
         },
       ],

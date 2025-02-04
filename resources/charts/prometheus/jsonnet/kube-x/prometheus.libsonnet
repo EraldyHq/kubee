@@ -301,7 +301,7 @@ function(kpValues, kxValues)
         retention: kxConfig.prometheus_retention,
         // The external URL under which the Prometheus service is externally available.
         // Implements the --web.external-url flag: https://prometheus.io/docs/prometheus/latest/command-line/prometheus/
-        [if kxConfig.prometheus_hostname == '' then 'externalUrl']: 'https://' + kxConfig.prometheus_hostname,
+        [if kxConfig.prometheus_hostname != '' then 'externalUrl']: 'https://' + kxConfig.prometheus_hostname,
         // Rules selector
         // https://prometheus-operator.dev/docs/developer/alerting/#deploying-prometheus-rules
         ruleSelector: {},  // All rules objects, an empty label selector matches all objects

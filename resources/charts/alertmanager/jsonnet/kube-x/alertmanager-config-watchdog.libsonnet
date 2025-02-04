@@ -14,6 +14,7 @@ local defaultValues = {
 
 local receiverNameWebHook = 'WatchdogWebHook';
 local receiverNameEmail = 'WatchdogEmail';
+local nullReceiverName = 'null';
 
 // Opsgenie
 function(params) {
@@ -30,28 +31,32 @@ function(params) {
     },
     spec: {
       /*
-        Route 
+        Route
         https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1alpha1.Route
       */
       route: {
-        # One route by receiver
+        // A top receiver is mandatory
+        receiver: nullReceiverName,
+        // Only watch dog enter this route
+        matchers: [{ name: 'alertname', value: 'Watchdog' }],
+        // One route by receiver
         routes: []
                 + (if values.watchdog_webhook_url == '' then [] else
                      [{
                        receiver: receiverNameWebHook,
-                       matchers: [{ name: 'alertname', value: 'Watchdog' }],
                        continue: true,
                        repeatInterval: values.watchdog_webhook_repeat_interval,
                      }])
                 + (if values.watchdog_email_to == '' then [] else
                      [{
                        receiver: receiverNameEmail,
-                       matchers: [{ name: 'alertname', value: 'Watchdog' }],
                        continue: true,
                        repeatInterval: values.watchdog_email_repeat_interval,
                      }]),
       },
-      receivers: []
+      receivers: [{
+                   name: nullReceiverName,
+                 }]
                  + (if values.watchdog_webhook_url == '' then [] else [
                       {
                         name: receiverNameWebHook,

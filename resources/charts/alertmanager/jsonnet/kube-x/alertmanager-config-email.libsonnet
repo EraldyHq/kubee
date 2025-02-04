@@ -10,7 +10,7 @@ local defaultValues = {
   smtp_port: error 'smtp_port Key should be provided',
   smtp_hello: error 'smtp_hello Key should be provided',
   admin_user_email: error 'admin_user_email Key should be provided',
-  
+
 };
 
 // Get the smtpFromEmail
@@ -73,6 +73,12 @@ function(params) {
         groupInterval: '5m',
         // If an alert has successfully been sent, wait 'repeat_interval' to resend them (default = 4h)
         repeatInterval: '1h',
+        // No none severity (ie watchdog)
+        matchers: [{
+          name: 'severity',
+          value: 'none',
+          matchType: '!=',
+        }],
       },
       receivers: [
         {
