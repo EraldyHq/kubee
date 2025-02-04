@@ -13,8 +13,33 @@ namespace: 'monitoring'
 name: 'kube-x'
 # hostname (install an ingress if not empty)
 hostname: ''
+
+# Memory
+resources:
+  memory: '50Mi'
+
+
+# Watchdog is the receiver of the watchdog alert
+# https://runbooks.prometheus-operator.dev/runbooks/general/watchdog
+# The Watchdog alert pings a cron monitoring system at fix interval via http or email.
+# The cron monitoring system should alert you if it does not receive this alert.
+# This monitoring system is also known as the `DeadMansSnitch`
+# Example of cron monitoring system: https://healthchecks.io/
+watchdog:
+  # Email address (to check if we can send email)
+  email:
+    to: ''
+    # The interval of notification (By default, one email every 12 hours)
+    repeat_interval: '12h'
+  # WebHook Url (to check if prometheus is still up)
+  webhook:
+    url: ''
+    # The interval of notification (By default, one http request every 10 min)
+    repeat_interval: '10m'
+
 # Opsgenie integration to send alert
 # Enabled if the api key is not empty
+# critical and warning alert are sent to opsgenie
 opsgenie:
   api_key: ''
 # Pager Duty
@@ -23,10 +48,8 @@ pagerduty:
   # The service key is known as integration key in pagerduty documentation
   service_key: ''
   # The url is known as integration url in pager duty documentation
-  url: https://events.eu.pagerduty.com/generic/2010-04-15/create_event.json
-# Memory
-resources:
-  memory: '50Mi'
+  url: 'https://events.eu.pagerduty.com/generic/2010-04-15/create_event.json'
+
 
 # Secret
 secret:

@@ -13,7 +13,7 @@ local defaultValues = {
 function(params) {
   local values = defaultValues + params,
   // Alert manager Global
-  Alertmanager: {
+  AlertmanagerGlobal: {
     opsgenie_api_key: values.alert_manager_opsgenie_apikey,
     opsgenie_api_url: 'https://api.opsgenie.com/',
   },

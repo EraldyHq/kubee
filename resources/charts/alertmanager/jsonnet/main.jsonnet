@@ -27,6 +27,10 @@ local values = {
   secret_kind: validation.getNestedPropertyOrThrow(extValues, 'secret.kind'),
   external_secrets_store_name: validation.getNestedPropertyOrThrow(extValues, 'external_secrets.store.name'),
   grafana_name: validation.getNestedPropertyOrThrow(extValues, 'grafana.name'),
+  watchdog_webhook_url: validation.getNestedPropertyOrThrow(extValues, 'watchdog.webhook.url'),
+  watchdog_webhook_repeat_interval: validation.getNestedPropertyOrThrow(extValues, 'watchdog.webhook.repeat_interval'),
+  watchdog_email_to: validation.getNestedPropertyOrThrow(extValues, 'watchdog.email.to'),
+  watchdog_email_repeat_interval: validation.getNestedPropertyOrThrow(extValues, 'watchdog.email.repeat_interval'),
 
 };
 
@@ -59,31 +63,12 @@ local alertManagerPatch = {
 ;
 
 
-// Get the smtpFromEmail
-local smtpFromEmail = (
-  if values.smtp_from != '' then
-    values.smtp_from else if values.admin_user_email != '' then
-    values.admin_user_email else
-    error 'No email could be determined for the `for` email header. Set at least: kube_x.auth.admin_user.email'
-);
-
-// Helper function that returns null for empty strings
-local nonEmpty(str) = if std.length(str) > 0 then str;
+// Ops Genie
+local opsGenieConfigObject = (if values.alert_manager_opsgenie_apikey == '' then null else (import 'kube-x/alertmanager-config-ops-genie.libsonnet')(values));
 
 // Email
-// https://prometheus.io/docs/alerting/latest/configuration/#file-layout-and-global-settings
-local smtpGolbalConfigObject = (if values.smtp_host == '' then {} else
-                                  {
-                                    smtp_smarthost: values.smtp_host + ':' + values.smtp_port,
-                                    smtp_require_tls: true,
-                                    smtp_from: smtpFromEmail,
-                                    [if values.smtp_hello != null then 'smtp_hello']: values.smtp_hello,
-                                    smtp_auth_username: nonEmpty(values.smtp_username),
-                                    smtp_auth_password: nonEmpty(values.smtp_password),
-                                  });
+local emailConfigObject = (if values.smtp_host == '' then null else (import 'kube-x/alertmanager-config-email.libsonnet')(values));
 
-// Ops Genie
-local opsGenieGlobalConfigObject = (if values.alert_manager_opsgenie_apikey == '' then null else (import 'kube-x/ops-genie.libsonnet')(values));
 
 // Kube Prometheus Alert Manager Object
 local alertmanager = (import './kube-prometheus/components/alertmanager.libsonnet')(
@@ -106,8 +91,8 @@ local alertmanager = (import './kube-prometheus/components/alertmanager.libsonne
                  // An alert is considered as resolved if it has not been resend after the resolve_timeout configuration.
                  resolve_timeout: '5m',
                }
-               + smtpGolbalConfigObject
-               + (if opsGenieGlobalConfigObject == null then {} else opsGenieGlobalConfigObject.Alertmanager),
+               + (if emailConfigObject == null then {} else emailConfigObject.AlertmanagerGlobal)
+               + (if opsGenieConfigObject == null then {} else opsGenieConfigObject.AlertmanagerGlobal),
     },
   }
 );
@@ -134,21 +119,23 @@ local serviceMonitorPatch = {
   if !std.member(['NetworkPolicy', 'Secret'], alertmanager[name].kind)
 } + {
   // Ops Genie Config Object
-  [if opsGenieGlobalConfigObject != null then 'alertmanager-config-ops-genie']: opsGenieGlobalConfigObject.AlertmanagerConfig,
+  [if opsGenieConfigObject != null then 'alertmanager-config-ops-genie']: opsGenieConfigObject.AlertmanagerConfig,
+  // Email Config Object
+  [if emailConfigObject != null then 'alertmanager-config-email']: emailConfigObject.AlertmanagerConfig,
+  // Watchdog Config Object
+  'alertmanager-config-watchdog': (import 'kube-x/alertmanager-config-watchdog.libsonnet')(values).AlertmanagerConfig,
   // Ingress
   [if values.alert_manager_hostname != '' then 'alertmanager-ingress']: (import 'kube-x/ingress.libsonnet')(values),
-  // AlertManager Config (is in a secret)
+  // AlertManager Initial Config (is in a secret)
   'alertmanager-secret-config': if std.asciiLower(values.secret_kind) == 'externalsecret' then
     (import 'kube-x/external-secret-config.libsonnet')(values {
       alert_manager_config: std.parseYaml(alertmanager.secret.stringData['alertmanager.yaml']),
     })
   else
     alertmanager.secret,
-  // Default Config to send an email
-  'alertmanager-config-default' : (import 'kube-x/alertmanager-config-default.libsonnet')(values),
-} +  (import 'kube-x/mixin-grafana.libsonnet')(values{
-          mixin: alertmanager.mixin,
-          mixin_name: 'alertmanager',
-          grafana_name: values.grafana_name,
-          grafana_folder_label: 'Alert Manager',
-      })
+} + (import 'kube-x/mixin-grafana.libsonnet')(values {
+  mixin: alertmanager.mixin,
+  mixin_name: 'alertmanager',
+  grafana_name: values.grafana_name,
+  grafana_folder_label: 'Alert Manager',
+})
