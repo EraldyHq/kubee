@@ -21,12 +21,13 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "7.10.1" # The version of the app packaged
+appVersion: "7.10.3" # The version of the app packaged
 
 # https://artifacthub.io/packages/helm/k8s-dashboard/kubernetes-dashboard
 dependencies:
   - name: kubernetes-dashboard
-    version: 7.10.1
+    # https://github.com/kubernetes/dashboard/releases
+    version: 7.10.3
     repository: https://kubernetes.github.io/dashboard/
     # for some reason, the helm use the alias in the name
     # As it's not a valid DNS name, due to the underscore, we get:

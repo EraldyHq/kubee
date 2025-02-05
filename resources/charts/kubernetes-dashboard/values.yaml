@@ -62,7 +62,7 @@ kubernetes-dashboard:
           cpu: 100m
           # was set to 200Mi and was taking 140Mi
           # https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L218C8-L218C22
-          # works with 50 only, takes 23Mi
+          # works with 50 only, takes 23Mi at start
           memory: 50Mi
         limits:
           memory: 50Mi
@@ -84,14 +84,18 @@ kubernetes-dashboard:
     # See the values set by kubernetes-dashboard at: https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L371
     resources:
        limits:
-        # 130Mi is the minimum to forward request ....
-        # pfff start with 75, but go into crashLoop after a couple of minute and does not reload as it should weird
-        # We need to restart
-        # Otherwise we get:
-        # nginx: [emerg] bind() to unix:/kong_prefix/sockets/we failed (98: Address already in use)
-        memory: 130Mi
+        # start at 75
+        memory: 100Mi
        requests:
-        memory: 130Mi
+        memory: 100Mi
+    image:
+      # 3.9 and not 3.8 to solve this issue https://github.com/Kong/kong/issues/13730
+      # pfff start with 75, but go into crashLoop after a couple of minute and does not reload as it should weird
+      # We need to restart
+      # Otherwise we get:
+      # nginx: [emerg] bind() to unix:/kong_prefix/sockets/we failed (98: Address already in use)
+      # https://github.com/Kong/kong/releases/
+      tag: "3.9"
 
 # Internal, don't change
 kube_x_internal:
