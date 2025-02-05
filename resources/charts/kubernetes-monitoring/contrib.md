@@ -2,7 +2,7 @@
 
 ## About
 
-This chart is a [kubee jsonnet chart](../../../docs/bin/kubee-helm-x.md#what-is-a-jsonnet-kubee-chart)
+This chart is a [kubee jsonnet chart](../../../docs/bin/kubee-chart.md#what-is-a-jsonnet-kubee-chart)
 
 ## Dependency
 
@@ -33,7 +33,7 @@ jb install github.com/kubernetes/kube-state-metrics/jsonnet/kube-state-metrics-m
 * Try it out with
 * Helm X
 ```bash
-kubee-helm-x template kubernetes-monitoring --out > /tmp/all.yaml
+kubee-chart template kubernetes-monitoring --out > /tmp/all.yaml
 ```
 * or Raw Jsonnet command
 ```bash

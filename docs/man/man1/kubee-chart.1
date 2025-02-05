@@ -14,11 +14,11 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "kubee-helm-x" "1" "" "Version Latest" "Helm with Extra\[cq]s"
+.TH "kubee-chart" "1" "" "Version Latest" "Helm with Extra\[cq]s"
 .hy
 .SH NAME
 .PP
-\f[V]kubee-helm-x\f[R] (aka \f[V]helx\f[R]) is the \f[V]kube-x\f[R]
+\f[V]kubee-chart\f[R] (aka \f[V]helx\f[R]) is the \f[V]kubee\f[R]
 package manager.
 .SH Features
 .SS Familiar
@@ -30,7 +30,7 @@ manifest customization tool * Jsonnet
 Kubernetes (https://jsonnet.org/articles/kubernetes.html), the Google
 configuration language
 .PP
-At its core, \f[V]helm-x\f[R] is a \f[V]Helm\f[R] wrapper.
+At its core, \f[V]Kubee chart\f[R] is a \f[V]Helm\f[R] wrapper.
 .PP
 It just executes Helm commands (https://helm.sh/docs/helm/helm/) and
 therefore installs Charts (https://helm.sh/docs/topics/charts/)
@@ -45,24 +45,24 @@ All commands are: * bash command, * printed to the shell (visible) * and
 can be re-executed at wil
 .SS New
 .PP
-\f[V]Helx\f[R] adds support for: * \f[V]Jsonnet\f[R] - to add Prometheus
-Mixin (https://monitoring.mixins.dev/)) support * \f[V]kustomize\f[R] -
-to add support for application without Helm Chart such as ArgoCd) *
-cluster based installation through the use of the kube-x library chart
-the same values are used accros multiple app/charts * with environment
-variables processing * with configurable namespace
+\f[V]Kubee chart\f[R] adds support for: * \f[V]Jsonnet\f[R] - to add
+Prometheus Mixin (https://monitoring.mixins.dev/)) support *
+\f[V]kustomize\f[R] - to add support for application without Helm Chart
+such as ArgoCd) * cluster based installation through the use of the
+kubee library chart the same values are used accros multiple app/charts
+* with environment variables processing * with configurable namespace
 .SH Synopsis
 .IP
 .nf
 \f[C]
-kubee-helx [-c|--cluster clusterName] [--debug] command options
+kubee-chart [-c|--cluster clusterName] [--debug] command options
 \f[R]
 .fi
 .PP
 where: * \f[V]command\f[R] can be: * \f[V]play packageName\f[R] -
-Upgrade or install a Helx Chart if not present *
-\f[V]upgrade packageName\f[R] - Upgrade a Helx Chart *
-\f[V]install packageName\f[R] - Install a Helx Chart *
+Upgrade or install a Kubee Chart if not present *
+\f[V]upgrade packageName\f[R] - Upgrade a Kubee Chart *
+\f[V]install packageName\f[R] - Install a Kubee Chart *
 \f[V]template packageName\f[R] - Output the manifests for a Chart (used
 for ArgoCd Integration and debugging) * \f[V]values\f[R] - Shows the
 values * \f[V]-c|--cluster clusterName\f[R] - Defines the cluster *
@@ -82,7 +82,7 @@ A \f[V]Kubee Chart\f[R]: * is a
 sub-chart (https://helm.sh/docs/chart_template_guide/subcharts_and_globals/)
 * that installed only one application * with the name of the app
 installed (ie grafana, not grafana operator) * that depends on: * the
-kube-x Chart to share cluster and installation wide *
+kubee Chart to share cluster and installation wide *
 \f[V]values.yaml\f[R] file * and \f[V]library\f[R] * and optionally: *
 cross dependency Charts: * to bring cross values to create cross
 conditional expression.
@@ -91,13 +91,12 @@ Example: * conditional:
 cross:
 \f[V]if prometheus.enabled then create_grafana_data_source with promtheus.name\f[R]
 * with a mandatory false condition
-\f[V]kubee_internal.dont_install_dependency: false\f[R] *
-direct/wrapped dependency Chart (for instance,
-\f[V]kubee-external-secrets\f[R] wraps the \f[V]external-secret\f[R]
-Chart) * with optional \f[V]Jsonnet\f[R] and \f[V]kustomize\f[R]
-processing through the kube-x helm post-renderer
+\f[V]kubee_internal.dont_install_dependency: false\f[R] * direct/wrapped
+dependency Chart (for instance, \f[V]kubee-external-secrets\f[R] wraps
+the \f[V]external-secret\f[R] Chart) * with optional \f[V]Jsonnet\f[R]
+and \f[V]kustomize\f[R] processing through the kubee helm post-renderer
 .IP \[bu] 2
-installs only one application as \f[V]kube-x\f[R] is a platform.
+installs only one application as \f[V]kubee\f[R] is a platform.
 .RS 2
 .IP \[bu] 2
 For instance, installing an application such as grafana can be done via:
@@ -112,10 +111,10 @@ Only one chart is going to supports this 2 methods.
 .RE
 .SH What is the Kubee Chart?
 .PP
-The kube-x Chart is a shared chart dependency with: * a shared library *
+The kubee Chart is a shared chart dependency with: * a shared library *
 a values.yaml
 .PP
-The values files has one top node for each kube-x chart.
+The values files has one top node for each kubee chart.
 Each node contains all configurations for: * the chart * the external
 services (opsgenie, new relic, grafana cloud, \&...)
 - making clear what the parameters are for.

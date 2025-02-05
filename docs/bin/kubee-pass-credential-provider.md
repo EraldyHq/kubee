@@ -29,7 +29,7 @@ users:
         - name: "KUBEE_USER"
           value: "default"
       installHint: |
-        kube-x should be installed
+        kubee should be installed
       provideClusterInfo: true
       interactiveMode: Never
 clusters:

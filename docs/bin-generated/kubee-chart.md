@@ -1,7 +1,7 @@
-% kubee-helm-x(1) Version Latest | Helm with Extra's
+% kubee-chart(1) Version Latest | Helm with Extra's
 # NAME
 
-`kubee-helm-x` (aka `helx`) is the `kube-x` package manager.
+`kubee-chart` (aka `helx`) is the `kubee` package manager.
 
 
 # Features
@@ -13,7 +13,7 @@ It's based on the following well-supported Kubernetes tools.
 * [Kustomize](https://github.com/kubernetes-sigs/kustomize), the official manifest customization tool 
 * [Jsonnet Kubernetes](https://jsonnet.org/articles/kubernetes.html), the Google configuration language
 
-At its core, `helm-x` is a `Helm` wrapper.
+At its core, `Kubee chart` is a `Helm` wrapper.
 
 It just executes [Helm commands](https://helm.sh/docs/helm/helm/) and therefore installs [Charts](https://helm.sh/docs/topics/charts/)
 
@@ -29,24 +29,24 @@ There is no magic. All commands are:
 
 ## New
 
-`Helx` adds support for:
+`Kubee chart` adds support for:
 * `Jsonnet` - to add [Prometheus Mixin](https://monitoring.mixins.dev/)) support
 * `kustomize` - to add support for application without Helm Chart such as ArgoCd)
-* cluster based installation through the use of the [kube-x library chart](../../resources/charts/kube-x/) the same values are used accros multiple app/charts
+* cluster based installation through the use of the [kubee library chart](../../resources/charts/kubee/) the same values are used accros multiple app/charts
   * with environment variables processing
   * with configurable namespace
 
 # Synopsis
 
 ```bash
-kubee-helx [-c|--cluster clusterName] [--debug] command options
+kubee-chart [-c|--cluster clusterName] [--debug] command options
 ```
 
 where:
 * `command` can be:
-  * `play packageName`     - Upgrade or install a Helx Chart if not present
-  * `upgrade packageName`  - Upgrade a Helx Chart
-  * `install packageName`  - Install a Helx Chart
+  * `play packageName`     - Upgrade or install a Kubee Chart if not present
+  * `upgrade packageName`  - Upgrade a Kubee Chart
+  * `install packageName`  - Install a Kubee Chart
   * `template packageName` - Output the manifests for a Chart (used for ArgoCd Integration and debugging)
   * `values` - Shows the values
 * `-c|--cluster clusterName` - Defines the cluster
@@ -67,7 +67,7 @@ A `Kubee Chart`:
   * that installed only one application 
   * with the name of the app installed (ie grafana, not grafana operator) 
   * that depends on:
-    * the [kube-x Chart](../../resources/charts/kube-x/README.md) to share cluster and installation wide
+    * the [kubee Chart](../../resources/charts/kubee/README.md) to share cluster and installation wide
       * `values.yaml` file 
       * and `library` 
     * and optionally: 
@@ -77,9 +77,9 @@ A `Kubee Chart`:
           * cross: `if prometheus.enabled then create_grafana_data_source with promtheus.name`
         * with a mandatory false condition `kubee_internal.dont_install_dependency: false`
       * direct/wrapped dependency Chart (for instance, `kubee-external-secrets` wraps the `external-secret` Chart)
-  * with optional `Jsonnet` and `kustomize` processing through [the kube-x helm post-renderer](kubee-helm-post-renderer.md)
+  * with optional `Jsonnet` and `kustomize` processing through [the kubee helm post-renderer](kubee-helm-post-renderer.md)
     
-* installs only one application as `kube-x` is a platform. 
+* installs only one application as `kubee` is a platform. 
   * For instance, installing an application such as grafana can be done via:
     * a raw deployment manifest
     * or the grafana operator
@@ -87,11 +87,11 @@ A `Kubee Chart`:
 
 # What is the Kubee Chart?
 
-The [kube-x Chart](../../resources/charts/kube-x/README.md) is a shared chart dependency with:
-* a [shared library](../../resources/charts/kube-x/templates/_helpers.tpl)
-* a [values.yaml](../../resources/charts/kube-x/values.yaml)
+The [kubee Chart](../../resources/charts/kubee/README.md) is a shared chart dependency with:
+* a [shared library](../../resources/charts/kubee/templates/_helpers.tpl)
+* a [values.yaml](../../resources/charts/kubee/values.yaml)
 
-The values files has one top node for each [kube-x chart](#what-is-a-kubee-chart).
+The values files has one top node for each [kubee chart](#what-is-a-kubee-chart).
 Each node contains all configurations for:
   * the chart 
   * the external services (opsgenie, new relic, grafana cloud, ...) - making clear what the parameters are for.

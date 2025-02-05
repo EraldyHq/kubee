@@ -10,16 +10,16 @@ and optionally configure [vault](../vault/README.md) as secret store if
 ## Install
 
 ```bash
-kubee-helx --cluster clusterName install external-secrets
+kubee- --cluster clusterName install external-secrets
 # example with a cluster name of kubee-ssh
-kubee-helx --cluster kubee-ssh install external-secrets
+kubee- --cluster kubee-ssh install external-secrets
 ```
 
 ## Test/Check values before installation
 
 To check the [vault cluster store creation](templates/cluster-secret-store-vault.yaml)
 ```bash
-kubee-helx -c kubee-ssh template external-secrets | grep 'cluster-secret-store-vault.yaml' -A 30
+kubee- -c kubee-ssh template external-secrets | grep 'cluster-secret-store-vault.yaml' -A 30
 ```
 
 ## Test/Check after installation

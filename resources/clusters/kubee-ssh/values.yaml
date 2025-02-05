@@ -37,23 +37,23 @@ kubee:
       # The PEM content file
       # Not a path to the cert file relatif to the working directory (ie cluster directory)
       # Set with `KUBEE_HELM_INSTALL_OPTIONS`
-      # --set-file kubee.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem
+      # --set-file kubee.traefik.defaultCertificate.cert=cert/kubee.dev+1.pem
       cert: ''
       # The PEM content file
       # Not a path to the key file relatif to the working directory (ie cluster directory)
       # Set with `KUBEE_HELM_INSTALL_OPTIONS`
-      # --set-file kubee.traefik.defaultCertificate.key=cert/kube-x.dev+1-key.pem
+      # --set-file kubee.traefik.defaultCertificate.key=cert/kubee.dev+1-key.pem
       key: ''
     dashboard:
       # The FQDN for the traefik dashboard
       hostname: 'traefik.i.eraldy.com'
   cert_manager:
     # Not enabled by default
-    # This is the kube-x template condition used to create certificate for ingress route
+    # This is the kubee template condition used to create certificate for ingress route
     # when disabled, the default traefik certificate is used
     enabled: true
 
-    # The issuer used in all certificate request of kube-x.
+    # The issuer used in all certificate request of kubee.
     defaultIssuerName: 'letsencrypt-prod'
 
     # Dns01 challenge

@@ -3,5 +3,5 @@
 
 ## About
 
-This directory contains `kube-x` charts archived. No more used.
+This directory contains `kubee` charts archived. No more used.
 

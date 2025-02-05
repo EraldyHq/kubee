@@ -2,7 +2,7 @@
 
 
 ## About
-`kube-x` is the main entry of the `kube-x platform`
+`kubee` is the main entry of the `kubee platform`
 
 
 

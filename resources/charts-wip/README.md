@@ -3,5 +3,5 @@
 
 ## About
 
-This directory contains `kube-x` charts not finished (ie in Progress).
+This directory contains `kubee` charts not finished (ie in Progress).
 

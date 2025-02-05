@@ -14,7 +14,7 @@ This `Kubee` chart installs and configures:
 ### Install
 
 ```bash
-kubee-helm-x --cluster clusterName play prometheus
+kubee-chart --cluster clusterName play prometheus
 ```
 
 
@@ -24,7 +24,7 @@ The output of this chart can be inspected with:
 ```bash
 # set debug (to not delete the created manifests in the jsonnet/out directory)
 export BASHLIB_ECHO_LEVEL=4
-kubee-helm-x -n prometheus -c clusterName template prometheus > /tmp/all.yaml
+kubee-chart -n prometheus -c clusterName template prometheus > /tmp/all.yaml
 ```
 
 ### Get Access

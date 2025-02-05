@@ -1,4 +1,4 @@
-% kube-xshell(1) Version Latest | Start a shell in a pod
+% kubeeshell(1) Version Latest | Start a shell in a pod
 
 
 # DESCRIPTION

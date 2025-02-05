@@ -23,7 +23,7 @@ kubee-cluster play
 ### App/Chart Installation
 
 ```bash
-kubee-helm-x -c cluster-name install chart-name
+kubee-chart -c cluster-name install chart-name
 ```
 
 

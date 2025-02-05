@@ -332,14 +332,14 @@ synopsis(){
 
   cat << EOF
 \`\`\`bash
-kubee-helx [-c|--cluster clusterName] [--debug] command options
+kubee-chart [-c|--cluster clusterName] [--debug] command options
 \`\`\`
 
 where:
 * \`command\` can be:
-  * \`play packageName\`     - Upgrade or install a Helx Chart if not present
-  * \`upgrade packageName\`  - Upgrade a Helx Chart
-  * \`install packageName\`  - Install a Helx Chart
+  * \`play packageName\`     - Upgrade or install a Kubee Chart if not present
+  * \`upgrade packageName\`  - Upgrade a Kubee Chart
+  * \`install packageName\`  - Install a Kubee Chart
   * \`template packageName\` - Output the manifests for a Chart (used for ArgoCd Integration and debugging)
   * \`values\` - Shows the values
 * \`-c|--cluster clusterName\` - Defines the cluster
@@ -532,7 +532,7 @@ fi
 # Come first because we use it in the log, we use it in all command
 CHART_NAME="${1:-}"
 if [ "$CHART_NAME" == "" ]; then
-  echo::err "A package name is mandatory as second argument"
+  echo::err "A chart name is mandatory as second argument"
   exit 1
 fi
 echo::debug "Chart Name: $CHART_NAME"

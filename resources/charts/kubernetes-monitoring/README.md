@@ -3,7 +3,7 @@
 
 ## About
 
-This [kubee jsonnet chart](../../../docs/bin/kubee-helm-x.md#what-is-a-jsonnet-kubee-chart) installs monitoring for the core systems Kubernetes components:
+This [kubee jsonnet chart](../../../docs/bin/kubee-chart.md#what-is-a-jsonnet-kubee-chart) installs monitoring for the core systems Kubernetes components:
 * Api Server
 * Controller Manager
 * Core Dns

@@ -16,8 +16,8 @@ This is a [known issue with helm and subcharts](https://github.com/helm/helm/iss
 
 That's why:
 * the unit of execution is one sub-chart by umbrella chart
-* `kube-x` is a common sub-chart of all umbrella chart
-* this is not one `kube-x` umbrella chart with multiple sub-charts 
+* `kubee` is a common sub-chart of all umbrella chart
+* this is not one `kubee` umbrella chart with multiple sub-charts 
 
 
 

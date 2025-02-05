@@ -148,7 +148,7 @@ case $COMMAND in
     cat "$INVENTORY_FILE"
     ;;
 "app")
-    kubee-helx "${ARGS[@]}" || error::exit $?
+    kubee- "${ARGS[@]}" || error::exit $?
     ;;
 *)
   doc::help synopsis

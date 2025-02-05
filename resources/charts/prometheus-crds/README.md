@@ -13,7 +13,7 @@ This chart is automatically installed when the [prometheus chart](../prometheus)
 You can also install it individually with:
 
 ```bash
-kubee-helm-x -n prometheus play prometheus-crds
+kubee-chart -n prometheus play prometheus-crds
 ```
 
 ## Inspect
@@ -22,7 +22,7 @@ The output of this chart can be inspected with:
 ```bash
 # set debug (to not delete the created manifests in the jsonnet/out directory)
 export BASHLIB_ECHO_LEVEL=4
-kubee-helm-x -n prometheus template prometheus-crds > /tmp/all.yaml
+kubee-chart -n prometheus template prometheus-crds > /tmp/all.yaml
 ```
 
 ## List

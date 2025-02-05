@@ -11,7 +11,7 @@ This app:
 ## Install
 
 ```bash
-kubee-helx --cluster clusterName install grafana
+kubee- --cluster clusterName install grafana
 ```
 
 ## Values

@@ -32,7 +32,7 @@ kubee:
 ### Install
 
 ```bash
-kubee-helm-x -c clusterName play kubernetes-dashboard
+kubee-chart -c clusterName play kubernetes-dashboard
 ```
 
 ### Create token

@@ -12,7 +12,7 @@ This directory contains the following files:
 * [rootCA.pem](rootCA.pem) - the RootCA certificate (Should be installed in the browser as trusted Root CA)
 * [rootCA-key.pem](rootCA-key.pem) - the RootCA key (Used to sign self-signed domain certificate)
 * [kubee.dev+1.pem](kubee.dev+1.pem) - the `kubee.dev` certificate (served by traefik)
-* [kube-x.dev+1-dev.pem](kube-x.dev+1-key.pem) - the `kube-x.dev` key (used to encrypt the SSL connection)
+* [kubee.dev+1-dev.pem](kubee.dev+1-key.pem) - the `kubee.dev` key (used to encrypt the SSL connection)
 
 ## How the rootCA and certificate were made
 
@@ -20,7 +20,7 @@ This directory contains the following files:
 export CAROOT=$(realpath .)
 mkdir -p $CAROOT
 mkcert -install
-mkcert "kube-x.dev" "*.kube-x.dev"
+mkcert "kubee.dev" "*.kubee.dev"
 ```
 
 ## FAQ

@@ -1,4 +1,4 @@
-# Because the kube-x scripts except this label
+# Because the kubee scripts except this label
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:

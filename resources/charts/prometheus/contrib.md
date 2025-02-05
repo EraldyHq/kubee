@@ -24,7 +24,7 @@ jb install github.com/prometheus/prometheus/documentation/prometheus-mixin@v3.1.
 ```bash
 # set debug (to not delete the created manifests in the jsonnet/out directory)
 export BASHLIB_ECHO_LEVEL=4
-kubee-helm-x -n prometheus template prometheus > /tmp/all.yaml
+kubee-chart -n prometheus template prometheus > /tmp/all.yaml
 ```
 * or Raw Jsonnet command
 ```bash

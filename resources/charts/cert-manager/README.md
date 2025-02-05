@@ -201,7 +201,7 @@ jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/grafanaDashboard.j
 
 End-to-end Test:
 ```bash
-kubee-helx \
+kubee- \
   --cluster kubee-ssh \
   template \
   cert-manager \

@@ -2,7 +2,7 @@
 
 
 ## About
-This chart is a [Helm-x Chart](../../../docs/bin/kubee-helm-x.md) that:
+This chart is a [Helm-x Chart](../../../docs/bin/kubee-chart.md) that:
 * executes [a standard installation with cluster-admin access](https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#non-high-availability)
 * and configure optionally:
   * an [Ingress](templates/resources/argocd-ingress.yaml)
@@ -20,7 +20,7 @@ This chart is a [Helm-x Chart](../../../docs/bin/kubee-helm-x.md) that:
 With Helm-x For instance, to check the [repo creation](templates/resources/argocd-secret-repo.yaml)
 ```bash
 export BASHLIB_ECHO_LEVEL=4;
-kubee-helm-x -c clusterName template argocd | grep 'name: argocd-secret-repo' -A 2 -B 11
+kubee-chart -c clusterName template argocd | grep 'name: argocd-secret-repo' -A 2 -B 11
 ```
 
 

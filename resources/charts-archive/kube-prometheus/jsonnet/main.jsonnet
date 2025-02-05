@@ -1,7 +1,7 @@
 // To execute
 //
 // -m / --multi <dir>   Write multiple files to the directory and output a relative list files to stdout
-// rm -rf out && mkdir -p out && jsonnet -J vendor --multi out "main.jsonnet" --ext-code "values={ kubee: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
+// rm -rf out && mkdir -p out && jsonnet -J vendor --multi out "main.jsonnet" --ext-code "values={ kubee: std.parseYaml(importstr \"../../kubee/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
 
 
 local values =  {

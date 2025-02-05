@@ -1,4 +1,4 @@
-% kube-xservice(1) Version Latest | Show service data
+% kubeeservice(1) Version Latest | Show service data
 # DESCRIPTION
 
 Shows the service data:

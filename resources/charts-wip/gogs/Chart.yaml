@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-gogs
-description: A kube-x gogs chart
+description: A kubee gogs chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -27,7 +27,7 @@ appVersion: "0.13" # The version of the app packaged
 # https://github.com/cert-manager/cert-manager/releases
 # https://cert-manager.io/docs/installation/helm/#example-usage
 dependencies:
-  - name: kube-x
+  - name: kubee
     version: 0.0.1
-    repository: file://../kube-x
+    repository: file://../kubee
     alias: kubee

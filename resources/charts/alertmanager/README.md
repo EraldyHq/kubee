@@ -16,7 +16,7 @@ and manage them, ie:
 ## Install
 
 ```bash
-kubee-helm-x --cluster clusterName play alertmanager
+kubee-chart --cluster clusterName play alertmanager
 ```
 
 ## Inspect
@@ -25,7 +25,7 @@ The output of this chart can be inspected with:
 ```bash
 # set debug (to not delete the created manifests in the jsonnet/out directory)
 export BASHLIB_ECHO_LEVEL=4
-kubee-helm-x -c clusterName template alertmanager > /tmp/all.yaml
+kubee-chart -c clusterName template alertmanager > /tmp/all.yaml
 ```
 
 ## Chart Features
@@ -41,7 +41,7 @@ kubee-helm-x -c clusterName template alertmanager > /tmp/all.yaml
 
 ## How to adapt 
 
-This `Kubee Chart` is a [Jsonnet Chart](../../../docs/bin/kubee-helm-x.md#what-is-a-jsonnet-kubee-chart). 
+This `Kubee Chart` is a [Jsonnet Chart](../../../docs/bin/kubee-chart.md#what-is-a-jsonnet-kubee-chart). 
 You can use it as Jsonnet dependency in your projects.
 
 ## Contrib

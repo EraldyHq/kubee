@@ -1,10 +1,13 @@
-# Kubee - Kubernetes the Easy Way - Single Node self-hosting and beyond 
+# Kubee - Kubernetes, the Easy Way 
+
+A One-Clik, Single VPS, Self-Hosted Kubernetes Platform
 
 
-## About
-
-A library of Kubernetes Utilities eXtension
-
+`E` stands for:
+* Easy
+* Express
+* Extra
+* Extensible
 
 ## Extras
 
@@ -38,8 +41,8 @@ Generate a Ephemere Kubeconfig from pass with [kubee-config](docs/lib/kubee-conf
 * [kubectl-xlogs](docs/bin/kubee-logs) - print the logs of pods by app name
 * [kubectl-xpods](docs/bin/kubectl-xpod) - watch/list the pods of an app
 * [kubectl-xrestart](docs/bin/kubectl-xrestart) - execute a rollout restart
-* [kube-xtop](docs/bin/kubectl-xtop) - shows the top processes of an app
-* [kube-xcert](docs/bin-generated/kubectl-xcert.md) - print the kubeconfig cert in plain text
+* [kubeetop](docs/bin/kubectl-xtop) - shows the top processes of an app
+* [kubeecert](docs/bin-generated/kubectl-xcert.md) - print the kubeconfig cert in plain text
 * [kube-cidr](docs/bin/kubee-pods-cidr) - print the cidr by pods
 * [kube-k3s](docs/bin/kubee-pods-cidr) - collection of k3s utilities
 * [kube-memory](docs/bin/kubee-memory) - print the cpu and memory used by pods

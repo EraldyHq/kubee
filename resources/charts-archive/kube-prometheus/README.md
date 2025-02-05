@@ -2,7 +2,7 @@
 
 ## About
 
-This `kube-x` chart is a [customization of Kube Prometheus](https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/customizing.md).
+This `kubee` chart is a [customization of Kube Prometheus](https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/customizing.md).
 
 
 It installs and configure:
@@ -91,8 +91,8 @@ We prefer the grafana operator because:
 jb init
 jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@v0.14.0
 # then to get the manifest into jsonnet/multi/manifests
-rm -rf jsonnet/multi/manifests && mkdir -p jsonnet/multi/manifests/setup && jsonnet -J vendor --multi jsonnet/multi/manifests "jsonnet/multi/kube-prometheus.jsonnet" --ext-code "values={ kubee: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
-# or set debug (to not delete the created manifests) and use the template command of helm-x
+rm -rf jsonnet/multi/manifests && mkdir -p jsonnet/multi/manifests/setup && jsonnet -J vendor --multi jsonnet/multi/manifests "jsonnet/multi/kube-prometheus.jsonnet" --ext-code "values={ kubee: std.parseYaml(importstr \"../../kubee/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
+# or set debug (to not delete the created manifests) and use the template command of chart
 export BASHLIB_ECHO_LEVEL=4
-kubee-helm-x template prometheus
+kubee-chart template prometheus
 ```
