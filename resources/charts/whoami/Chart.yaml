@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kube-x-whoami
+name: kubee-whoami
 description: A whoami app
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -22,7 +22,7 @@ appVersion: "v1.10.3" # Whoami version
 
 
 dependencies:
-  - name: kube-x
+  - name: kubee
     version: 0.0.1
-    repository: file://../kube-x
-    alias: kube_x
+    repository: file://../kubee
+    alias: kubee

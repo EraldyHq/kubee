@@ -1,0 +1,157 @@
+#!/usr/bin/env bash
+
+# shellcheck source=../..//bash-lib/lib/bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+error::set_strict_mode
+error::set_trap
+# shellcheck source=../../bash-lib/lib/bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-command.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-template.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
+
+
+
+
+inventory_file(){
+
+   SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+   KUBEE_CLUSTER_DIR="${SCRIPT_DIR}/../resources/cluster/$KUBEE_CLUSTER_NAME"
+   # Envrc
+   local KUBEE_ENV_FILE="${KUBEE_CLUSTER_ENV_FILE:-"$KUBEE_CLUSTER_DIR/.envrc"}"
+   if [ -f "$KUBEE_ENV_FILE" ]; then
+      echo::debug "Sourcing env file $KUBEE_ENV_FILE"
+      source "$KUBEE_ENV_FILE"
+   fi
+
+   # Connection type to the host. This can be the name of any Ansible connection plugin.
+   # The default is ssh
+   # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#connecting-to-hosts-behavioral-inventory-parameters
+   # See connection: ansible-doc -t connection -l
+   export KUBEE_CLUSTER_CONNECTION=${KUBEE_CLUSTER_CONNECTION:-ssh}
+
+   # FQDN
+   export KUBEE_CLUSTER_SERVER_01_FQDN="$KUBEE_CLUSTER_SERVER_01_NAME.$KUBEE_CLUSTER_APEX_DOMAIN"
+
+   # The host
+   export KUBEE_CLUSTER_SERVER_01_ANSIBLE_HOST;
+   case $KUBEE_CLUSTER_CONNECTION in
+      "ssh"|"ansible.builtin.ssh")
+        KUBEE_CLUSTER_SERVER_01_ANSIBLE_HOST=$KUBEE_CLUSTER_SERVER_01_IP
+        ;;
+      "docker"|"community.docker.docker")
+        KUBEE_CLUSTER_SERVER_01_ANSIBLE_HOST=$KUBEE_CLUSTER_SERVER_01_NAME
+        ;;
+      *)
+        ;;
+   esac
+
+   # Inventory
+   local KUBEE_INVENTORY_FILE="${KUBEE_CLUSTER_INVENTORY_FILE:-"$KUBEE_CLUSTER_DIR/ansible-inventory.yml"}"
+   if [ ! -f "$KUBEE_INVENTORY_FILE" ]; then
+     echo::err "The ansible inventory file $KUBEE_INVENTORY_FILE does not exist"
+     exit 1
+   fi
+
+
+
+   # Check the variables
+   if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBEE_INVENTORY_FILE"); then
+     # Should exit because of the strict mode
+     # but it was not working
+     echo::err "Inventory variables missing: ${UNDEFINED_VARS[*]}"
+     return 1
+   fi
+   local SHM_INVENTORY_FILE="/dev/shm/kubee-ansible-inventory.yml"
+
+   envsubst < "$KUBEE_INVENTORY_FILE" >| "$SHM_INVENTORY_FILE"
+   echo "$SHM_INVENTORY_FILE"
+
+}
+
+play(){
+
+   if ! SHM_INVENTORY_FILE=$(inventory_file); then
+     echo::err "Inventory file has errors"
+     return 1
+   fi
+   ansible-playbook -i "$SHM_INVENTORY_FILE" ans_x.ans_x_base.kubee_site.yml
+
+}
+
+
+
+# @internal
+synopsis(){
+
+cat << EOT
+
+$(basename "$0") - One-Clik Self-Hosted Kubernetes on a single VPS
+
+Usage:
+\`\`\`bash
+$(basename "$0") command opts
+\`\`\`
+
+Commands:
+
+* play             Provision a cluster
+* inventory        Print the Ansible inventory file
+
+Global Options:
+
+* -h --help                       Show this help message
+
+
+EOT
+}
+
+
+# Assign the first argument to a string
+COMMAND="${1:-}"
+if [ "$COMMAND" = "" ]; then
+    synopsis
+    echo::err "A command is mandatory"
+    exit 1
+fi
+shift  # Remove the first argument from the argument list
+
+# Help Asked should not fail for the doc
+# We test if before the error warning
+if [[ $COMMAND =~ help|-h|--help ]]; then
+  doc::help synopsis
+  exit
+fi
+
+if [[ $COMMAND == "synopsis" ]]; then
+  synopsis
+  exit
+fi
+
+
+
+
+# Assign the rest of the arguments to an array
+declare -a ARGS=()
+ARGS=("$@")
+
+
+case $COMMAND in
+"play")
+    play "${ARGS[@]}" || error::exit $?
+    ;;
+"inventory"|"inv")
+    INVENTORY_FILE=$(inventory_file) || error::exit $?
+    cat "$INVENTORY_FILE"
+    ;;
+"app")
+    kubee-helx "${ARGS[@]}" || error::exit $?
+    ;;
+*)
+  doc::help synopsis
+  echo::err "Command $COMMAND is unknown"
+  exit 1
+esac

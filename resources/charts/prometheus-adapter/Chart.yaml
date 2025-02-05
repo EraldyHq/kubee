@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kube-x-prometheus-adapter
+name: kubee-prometheus-adapter
 description: Kube-X Prometheus Adapter Chart
 
 # A chart can be either an 'application' or a 'library' chart.
@@ -24,7 +24,7 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 appVersion: "v0.14.0" # The version of kube-prometheus operator
 
 dependencies:
-  - name: kube-x
+  - name: kubee
     version: 0.0.1
-    repository: file://../kube-x
-    alias: kube_x
+    repository: file://../kubee
+    alias: kubee

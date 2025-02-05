@@ -1,7 +1,7 @@
 {{/*#
 
 Test:
-helm template -s templates/traefik-dashboard-certificate.yml --set 'kube_x.cert_manager.enabled=true' .
+helm template -s templates/traefik-dashboard-certificate.yml --set 'kubee.cert_manager.enabled=true' .
 
 The certificate
 Because Traefik dashboard needs to use the Traefik IngressRoute CRD
@@ -10,7 +10,7 @@ The certificate needs to be created manually
 
 If not enabled=false
 */}}
-{{- if ne (((.Values.kube_x).cert_manager).enabled) false -}}
+{{- if ne (((.Values.kubee).cert_manager).enabled) false -}}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -23,9 +23,9 @@ metadata:
 spec:
   secretName: '{{ include "traefik-name-dashboard-cert" . }}'
   dnsNames:
-    - '{{ .Values.kube_x.traefik.dashboard.hostname }}'
+    - '{{ .Values.kubee.traefik.dashboard.hostname }}'
   issuerRef:
     kind: ClusterIssuer
-    name: '{{ .Values.kube_x.cert_manager.defaultIssuerName }}'
+    name: '{{ .Values.kubee.cert_manager.defaultIssuerName }}'
 
 {{- end -}}

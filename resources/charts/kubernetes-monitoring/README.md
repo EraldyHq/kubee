@@ -3,7 +3,7 @@
 
 ## About
 
-This [kube-x jsonnet chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-jsonnet-kube-x-chart) installs monitoring for the core systems Kubernetes components:
+This [kubee jsonnet chart](../../../docs/bin/kubee-helm-x.md#what-is-a-jsonnet-kubee-chart) installs monitoring for the core systems Kubernetes components:
 * Api Server
 * Controller Manager
 * Core Dns
@@ -36,15 +36,15 @@ The following monitoring elements are installed for each:
 https://monitoring.mixins.dev/kubernetes/
 where:
 * `apiserver_xxx`: Api server metrics
-* `kube_xxx`: Kubelet metrics:
+* `kubeexx`: Kubelet metrics:
 
 ## Alerts / Rules and Dashboard
 * https://kubernetes.io/docs/reference/instrumentation/metrics/
 
 
-## Optional Prerequisites: Kube-x Chart Dependency
+## Optional Prerequisites: Kubee Chart Dependency
 
-This `kube-x` charts should have been enabled and installed:
+This `kubee` charts should have been enabled and installed:
   * [Grafana](../grafana/README.md) for the dashboards
   * [Prometheus](../prometheus/README.md) for the prometheus scrape, alert and rules
 

@@ -1,5 +1,5 @@
 # If not enabled=false
-{{- if ne ( ((.Values.kube_x).prometheus).enabled) false -}}
+{{- if ne ( ((.Values.kubee).prometheus).enabled) false -}}
 
 # https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#use-prometheus-operator
 apiVersion: monitoring.coreos.com/v1

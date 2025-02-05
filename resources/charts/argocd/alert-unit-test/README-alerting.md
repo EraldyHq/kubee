@@ -7,9 +7,9 @@
 ```bash
 # go to the parent directory
 cd ..
-# kube-x-promtool will scan all file to search prometheusRules crd file 
-kube-x-promtool test prometheusRules alert-unit-test/argocd-test.yml
+# kubee-promtool will scan all file to search prometheusRules crd file 
+kubee-promtool test prometheusRules alert-unit-test/argocd-test.yml
 # debug
-kube-x-promtool test prometheusRules --debug alert-unit-test/argocd-test.yml
+kubee-promtool test prometheusRules --debug alert-unit-test/argocd-test.yml
 ```
 

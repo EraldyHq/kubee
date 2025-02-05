@@ -1,8 +1,8 @@
 dependencies:
-- name: kube-x
-  repository: file://../kube-x
+- name: kubee
+  repository: file://../kubee
   version: 0.0.1
-- name: kube-x-prometheus
+- name: kubee-prometheus
   repository: file://../prometheus
   version: 0.0.1
 digest: sha256:ff4d0daba44f3bda5852e057e5041f2b3bb0e61d53cb4f4f11e4126032292ae4

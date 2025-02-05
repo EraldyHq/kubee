@@ -13,7 +13,7 @@
 set -Eeuo pipefail
 source bashlib-error.sh
 error::set_trap
-source kube-x-lib.sh
+source kubee-lib.sh
 source bashlib-command.sh
 source bashlib-path.sh
 

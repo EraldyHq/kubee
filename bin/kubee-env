@@ -1,0 +1,210 @@
+#!/bin/bash
+# @name kube-app-env
+# @description
+#   Print the export environment statement for the app
+#
+#   Used in a direnv setup
+
+
+# shellcheck source=./bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+error::set_strict_mode
+error::set_trap
+# shellcheck source=./bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=./bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+# shellcheck source=./bashlib-path.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-path.sh"
+# shellcheck source=./bashlib-bash.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
+# shellcheck source=./bashlib-command.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
+
+
+
+synopsis(){
+
+cat <<EOF
+Print the kubernetes and kubee environment variables in a export format
+\`\`\`bash
+$(basename "$0") [<chart name>]
+\`\`\`
+
+where \`chart name\` is optional if the current directory is below a \`KUBEE_CHARTS_PATH\`.
+
+EOF
+
+}
+
+
+######################
+# Main
+######################
+
+KUBEE_APP_NAME=${1:-}
+
+
+# Synopsis
+if [[ "$KUBEE_APP_NAME" = "synopsis" ]]; then
+  synopsis
+  exit 0
+fi
+
+# Help ?
+if [[ "$KUBEE_APP_NAME" =~ -h|--help|help ]]; then
+  doc::help synopsis
+  exit 0
+fi
+
+
+###########################
+# App Name
+###########################
+#if [ "$KUBEE_APP_NAME" == "" ]; then
+#  # Check if we are under a $KUBEE_CHARTS_PATH
+#  IFS=":"; for KUBEE_HOME in $KUBEE_CHARTS_PATH; do
+#      if [ ! -d "$KUBEE_HOME" ]; then
+#        echo::warn "The HOME path ($KUBEE_HOME) set in KUBEE_APP_HOME does not exist or is not a directory"
+#        continue
+#      fi
+#      KUBEE_APP_NAME=$(path::relative_to "$PWD" "$KUBEE_HOME") || continue
+#      break
+#  done
+##  if [ "$KUBEE_APP_NAME" == "" ]; then
+##      echo::err "App name could not be determined."
+##      echo::err "* No app name was passed as parameter"
+##      echo::err "* The working directory ($PWD) is not under a KUBEE_APP_HOME path ($KUBEE_APP_HOME)"
+##  fi
+#fi
+#echo ""
+#echo "# The name of the app"
+#echo "KUBEE_APP_NAME=$KUBEE_APP_NAME"
+
+
+###########################
+# App dir and envrc: Load the user env
+###########################
+#KUBEE_APP_DIR=""
+#if [ "$KUBEE_APP_NAME" != "" ]; then
+#
+#  # Set the internal field separator to a colon, but only for the command
+#  IFS=':' read -r -a KUBEE_HOMES <<< "$KUBEE_APP_HOME"
+#  for KUBEE_HOME in "${KUBEE_HOMES[@]}"; do
+#    APP_DIR=$KUBEE_HOME/$KUBEE_APP_NAME
+#    if [ -d "$APP_DIR" ]; then
+#      KUBEE_APP_DIR="$APP_DIR"
+#      break
+#    fi
+#  done
+#
+#  if [ "$KUBEE_APP_DIR" == "" ]; then
+#    # App Name may be a component (example: alert manager)
+#    echo::warn "No sub-directory with the name $KUBEE_APP_NAME was found under the KUBEE_APP_HOME paths (${KUBEE_HOMES[@]})"
+#  else
+#    # App specific env
+#    # Should be first
+#    # Go to the app dir and pop at err and exit
+#    pushd "$KUBEE_APP_DIR" >/dev/null || return 1
+#    bash::trap 'popd >/dev/null' EXIT # EXIT execute also on error
+#
+#    # Load the env
+#    if command::exists "direnv"; then
+#        # Direnv should be explicitly called in non-interactive mode
+#        # https://github.com/direnv/direnv/issues/262
+#        if ! bash::is_interactive; then
+#          eval "$(direnv export bash)"
+#        fi
+#    else
+#      echo::warn "Direnv not found on path"
+#      ENVRC_FILE="$KUBEE_APP_DIR/.envrc"
+#      if [ -f "$ENVRC_FILE" ]; then
+#        # shellcheck disable=SC1090
+#        source "$ENVRC_FILE"
+#      else
+#        echo::warn "File $ENVRC_FILE not found"
+#      fi
+#    fi
+#
+#  fi
+#
+#fi
+#echo ""
+#echo "# The directory of the app"
+#echo "KUBEE_APP_DIR=$KUBEE_APP_DIR"
+
+
+
+#############################
+# All env with default value
+# Should be after app envrc call
+#############################
+
+# App Namespace
+echo ""
+echo "# The namespace of the app"
+KUBEE_APP_NAMESPACE=${KUBEE_APP_NAMESPACE:-"$KUBEE_APP_NAME"}
+echo "KUBEE_APP_NAMESPACE=$KUBEE_APP_NAMESPACE"
+
+
+## Default namespace
+echo ""
+echo "# The default namespace for the connection"
+KUBEE_DEFAULT_NAMESPACE=${KUBEE_DEFAULT_NAMESPACE:-default}
+echo "KUBEE_DEFAULT_NAMESPACE=${KUBEE_DEFAULT_NAMESPACE}"
+
+## Derived
+echo ""
+echo "# The namespace for the connection (in the kubectx kubeconfig context)"
+KUBEE_CONNECTION_NAMESPACE=${KUBEE_APP_NAMESPACE:-$KUBEE_DEFAULT_NAMESPACE}
+echo "KUBEE_CONNECTION_NAMESPACE=${KUBEE_CONNECTION_NAMESPACE}"
+
+# The user
+echo ""
+echo "# The username for the connection (in the kubeconfig context)"
+KUBEE_USER_NAME=${KUBEE_USER_NAME:-"default"}
+echo "KUBEE_USER_NAME=$KUBEE_USER_NAME"
+
+# The cluster
+echo ""
+echo "# The cluster name for connection (in the kubeconfig context or ansible inventory)"
+KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-"default"}
+echo "KUBEE_CLUSTER_NAME=KUBEE_CLUSTER_NAME"
+
+# The context name
+echo ""
+echo "# The name of the context (in kubectx kubeconfig)"
+KUBEE_CONTEXT_NAME=${KUBEE_CONTEXT_NAME:-"$KUBEE_USER_NAME@$KUBEE_CLUSTER_NAME/$KUBEE_CONNECTION_NAMESPACE"}
+echo "KUBEE_CONTEXT_NAME=$KUBEE_CONTEXT_NAME"
+
+# The pass home
+echo ""
+echo "# The directory for the kubeconfig data in the pass store manager"
+KUBEE_PASS_HOME=${KUBEE_PASS_HOME:-"kubee"}
+echo "KUBEE_PASS_HOME=$KUBEE_PASS_HOME"
+
+# Busybox
+echo ""
+echo "# The busybox image to use for a shell in a busybox or ephemeral container"
+KUBEE_BUSYBOX_IMAGE=${KUBEE_BUSYBOX_IMAGE:-ghcr.io/gerardnico/busybox:latest}
+echo "KUBEE_BUSYBOX_IMAGE=$KUBEE_BUSYBOX_IMAGE"
+
+if [ "${KUBECONFIG:-}" == "" ]; then
+  # Config does not work with process substitution (ie /dev/
+  # It seems that it starts another process deleting/closing the file descriptor
+  touch /dev/shm/kubee-config
+  # Trap work exit  also on source
+  # https://stackoverflow.com/questions/69614179/bash-trap-not-working-when-script-is-sourced
+  # As what we want is to delete it after the main script
+  # We just output the trap statement
+  # Note: On kubectl, we could also just pass the data but we should
+  # do that for all kubernetes clients (promtool, ...) and this is pretty hard
+  echo 'bash::trap "rm /dev/shm/kubee-config" EXIT'
+  chmod 0600 /dev/shm/kubee-config
+  source kubee-config.sh >| /dev/shm/kubee-config
+  KUBECONFIG="/dev/shm/kubee-config" # we test the presence of the file
+  echo "export KUBECONFIG=$KUBECONFIG"
+fi
+if [ ! -f "$KUBECONFIG" ]; then
+  echo::warn "The \$KUBECONFIG variable points to the file $KUBECONFIG that does not exist"
+fi

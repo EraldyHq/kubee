@@ -8,7 +8,7 @@ enabled: false
 namespace: 'cert-manager'
 
 # The issuer used in all certificate request
-# of kube-x by default
+# of kubee by default
 # Should be changed to 'letsencrypt-prod'
 # when validated
 issuer_name: 'letsencrypt-staging'
@@ -84,5 +84,5 @@ cert-manager:
 
 
 # Don't touch, used to block template output of cross dependency
-kube_x_internal:
+kubee_internal:
   install_cross_dependency: false

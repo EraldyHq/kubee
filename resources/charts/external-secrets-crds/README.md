@@ -12,8 +12,8 @@ This chart installs the External Secret CRDs.
 * Helm Install are namespaced. A namespace is needed
 ```bash
 helm upgrade --install -n external-secrets-crds .
-# with kube-x
-kube-x-helm upgrade --install -n external-secrets external-secrets-crds .
+# with kubee
+kubee-helm upgrade --install -n external-secrets external-secrets-crds .
 ```
 
 

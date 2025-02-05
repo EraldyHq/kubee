@@ -24,10 +24,10 @@ The issuers solve the challenge:
 * By default, `cert-manager` is disabled, it needs to be enabled.
 * The email is used as account id by Letsencrypt and is mandatory.
 
-In your helm values file, set the following [kube-x values](../kube-x/values.yaml)
+In your helm values file, set the following [kubee values](../kubee/values.yaml)
 
 ```yaml
-kube_x:
+kubee:
   cluster:
     adminUser:
       email: 'foo@bar.com'
@@ -47,9 +47,9 @@ kube_x:
     * Zone Resources :
         * Include - All Zones
 
-Set it cloudflare properties in your [values file](../kube-x/values.yaml)
+Set it cloudflare properties in your [values file](../kubee/values.yaml)
 ```yaml
-kube_x:
+kubee:
   cert_manager:
     dns01:
         cloudflare:
@@ -64,7 +64,7 @@ kube_x:
 ### Deploy
 
 ```bash
-kube-x-cluster install cert-manager
+kubee-cluster install cert-manager
 ```
 
 ### Create a certificate
@@ -88,10 +88,10 @@ spec:
 ### Change the default
 
 If a certificate was issued with `letsencrypt-staging`, you should change the default issuer to `letsencrypt-prod`
-in the [kube-x values](../kube-x/values.yaml)
+in the [kubee values](../kubee/values.yaml)
 
 ```yaml
-kube_x:
+kubee:
   cert_manager:
     defaultIssuerName: 'letsencrypt-prod'
 ```
@@ -182,10 +182,10 @@ helm template . --values=myvalues.yaml --show-only charts/(chart alias)/template
 * Install
 ```bash
 # namespace is hardcoded in the value.yaml
-# KUBE_X_APP_NAMESPACE=cert-manager
-helm upgrade --install -n $KUBE_X_APP_NAMESPACE --create-namespace cert-manager .
-# with kube-x
-kube-x-helm upgrade --install --create-namespace cert-manager .
+# KUBEE_APP_NAMESPACE=cert-manager
+helm upgrade --install -n $KUBEE_APP_NAMESPACE --create-namespace cert-manager .
+# with kubee
+kubee-helm upgrade --install --create-namespace cert-manager .
 ```
 
 
@@ -201,8 +201,8 @@ jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/grafanaDashboard.j
 
 End-to-end Test:
 ```bash
-kube-x-helx \
-  --cluster kube-x-ssh \
+kubee-helx \
+  --cluster kubee-ssh \
   template \
   cert-manager \
   | grep "cert-manager-mixin-alert-rules" -B 3 -A 30

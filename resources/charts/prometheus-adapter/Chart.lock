@@ -1,6 +1,6 @@
 dependencies:
-- name: kube-x
-  repository: file://../kube-x
+- name: kubee
+  repository: file://../kubee
   version: 0.0.1
 digest: sha256:9d5e1dd5498ccd47afcd7bcf05f66553c5498deb9260440523f8874bb3e874a2
 generated: "2025-01-17T18:26:19.85740942+01:00"

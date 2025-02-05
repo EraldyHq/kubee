@@ -1,0 +1,104 @@
+# Common Kubee values used in sub-charts
+kubee:
+  # Cluster Wide Variables
+  cluster:
+    # The admin user of the cluster
+    adminUser:
+      username: "nico"
+      password: "${KUBEE_CLUSTER_ADMIN_PASSWORD}"
+      email: "nico@eraldy.com"
+    private_networks:
+      - '143.176.206.82/32'
+    # Default email
+    email:
+      smtp:
+        host: 'smtp.gmail.com'
+        port: '587'
+        from: 'nico@eraldy.com'
+        username: 'nico@eraldy.com'
+        password: "${KUBEE_CLUSTER_EMAIL_SMTP_PASSWORD}"
+  # Kubee Prometheus
+  prometheus:
+    # Not a string, a boolean so no quote
+    enabled: false
+    # Installation namespace
+    namespace: 'kube-prometheus'
+  # Kube-X Dashboard Variables
+  kubernetes_dashboard:
+    # The external DNS
+    hostname: 'kube.i.eraldy.com'
+  # Whoami
+  whoami:
+    hostname: 'whoami.eraldy.com'
+  # Kube-X Traefik Variables
+  traefik:
+    namespace: 'kube-system'
+    defaultCertificate:
+      # The PEM content file
+      # Not a path to the cert file relatif to the working directory (ie cluster directory)
+      # Set with `KUBEE_HELM_INSTALL_OPTIONS`
+      # --set-file kubee.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem
+      cert: ''
+      # The PEM content file
+      # Not a path to the key file relatif to the working directory (ie cluster directory)
+      # Set with `KUBEE_HELM_INSTALL_OPTIONS`
+      # --set-file kubee.traefik.defaultCertificate.key=cert/kube-x.dev+1-key.pem
+      key: ''
+    dashboard:
+      # The FQDN for the traefik dashboard
+      hostname: 'traefik.i.eraldy.com'
+  cert_manager:
+    # Not enabled by default
+    # This is the kube-x template condition used to create certificate for ingress route
+    # when disabled, the default traefik certificate is used
+    enabled: true
+
+    # The issuer used in all certificate request of kube-x.
+    defaultIssuerName: 'letsencrypt-prod'
+
+    # Dns01 challenge
+    dns01:
+      cloudflare:
+        # See cert-manager/README.md on how to get cloudflare api key
+        # A secret or external secret can be created
+        secret:
+          # A Kubernetes secret will be created if not empty
+          cloudflareApiToken: '${KUBEE_CERT_MANAGER_API_TOKEN}'
+        # The dns Zones that are managed by cloudflare, mandatory
+        dnsZones:
+          - tabulify.com
+          - eraldy.com
+          - datacadamia.com
+          - combostrap.com
+          - gerardnico.com
+          - bytle.net
+  grafana:
+    instance:
+      target: cluster
+      hostname: grafana.eraldy.com
+  vault:
+    enabled: true
+  external_secrets:
+    store:
+      name: 'vault-external-secret-store'
+      vault:
+        apiToken: '${KUBEE_EXTERNAL_SECRETS_VAULT_API_TOKEN}'
+  argocd:
+    hostname: 'argocd.i.eraldy.com'
+    git:
+      repo:
+        url: 'https://github.com/gerardnico/kube-argocd.git'
+        username: 'whatever'
+        password: '${KUBEE_ARGOCD_GITHUB_TOKEN}'
+      webhook:
+        service: 'github'
+        secret: '${KUBEE_ARGOCD_WEBHOOK_SECRET}'
+
+# Helm Traefik Chart Values
+# https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
+traefik:
+  additionalArguments:
+  # Debug
+  # - '--log.level=DEBUG'
+  # Logs just add too much noise on what is going on
+  # - '--accesslog=false'

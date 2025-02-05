@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kube-x-traefik
+name: kubee-traefik
 description: A sub-chart of Traefik
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -29,7 +29,7 @@ dependencies:
     repository: https://traefik.github.io/charts
     alias: traefik
     #condition: certManager.enabled
-  - name: kube-x
+  - name: kubee
     version: 0.0.1
-    repository: file://../kube-x
-    alias: kube_x
+    repository: file://../kubee
+    alias: kubee

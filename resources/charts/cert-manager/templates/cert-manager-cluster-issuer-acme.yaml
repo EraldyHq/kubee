@@ -3,7 +3,7 @@
 Test:
 helm template -s templates/cluster-issuer-acme.yaml \
   --set 'dns01.cloudflare.cloudflareApiToken=xxxx' \
-  --set 'kube_x.auth.admin_user.email=foo@bar.com' \
+  --set 'kubee.auth.admin_user.email=foo@bar.com' \
   --set 'dns01.cloudflare.dnsZones[0]=yolo' \
   . | yq
 
@@ -27,7 +27,7 @@ spec:
     {{- /* The ACME server URL*/}}
     server: '{{ .url }}'
     {{- /* Email address used for ACME registration*/}}
-    email: '{{ $.Values.kube_x.auth.admin_user.email | required "kube_x.auth.admin_user.email is required." }}'
+    email: '{{ $.Values.kubee.auth.admin_user.email | required "kubee.auth.admin_user.email is required." }}'
     {{- /* Name of a secret used to store the ACME account private key*/}}
     privateKeySecretRef:
       name: '{{ .name }}'

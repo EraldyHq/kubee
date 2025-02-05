@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kube-x-kube-prometheus
+name: kubee-kube-prometheus
 description: Kube-X Kube Prometheus Chart
 
 # A chart can be either an 'application' or a 'library' chart.
@@ -27,4 +27,4 @@ dependencies:
   - name: kube-x
     version: 0.0.1
     repository: file://../kube-x
-    alias: kube_x
+    alias: kubee

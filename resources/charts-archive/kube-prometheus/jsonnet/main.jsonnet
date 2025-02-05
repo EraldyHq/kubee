@@ -1,11 +1,11 @@
 // To execute
 //
 // -m / --multi <dir>   Write multiple files to the directory and output a relative list files to stdout
-// rm -rf out && mkdir -p out && jsonnet -J vendor --multi out "main.jsonnet" --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
+// rm -rf out && mkdir -p out && jsonnet -J vendor --multi out "main.jsonnet" --ext-code "values={ kubee: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
 
 
 local values =  {
-    kube_x: {
+    kubee: {
         prometheus: {
             // The error is triggered as access time, not build time
             namespace: error 'must provide namespace',
@@ -39,7 +39,7 @@ local kp =
     // kube-prometheus use `values` as this is similar to helm
     values+:: {
       common+: {
-        namespace: values.kube_x.prometheus.namespace,
+        namespace: values.kubee.prometheus.namespace,
       },
       alertmanager+: {
         name: 'alertmanager', # main by default
@@ -83,10 +83,10 @@ local kp =
   };
 
 // Function that create an alertmanager patch
-local alertManagerPatch = ( if values.kube_x.prometheus.alertmanager.hostname != '' then
+local alertManagerPatch = ( if values.kubee.prometheus.alertmanager.hostname != '' then
             {
                 spec+: {
-                    externalUrl: 'https://'+ values.kube_x.prometheus.alertmanager.hostname
+                    externalUrl: 'https://'+ values.kubee.prometheus.alertmanager.hostname
                 }
             }
             else
@@ -116,13 +116,13 @@ local alertManagerPatch = ( if values.kube_x.prometheus.alertmanager.hostname !=
   for name in std.filter((function(name) kp.prometheusOperator[name].kind != 'CustomResourceDefinition'), std.objectFields(kp.prometheusOperator))
 } +
 { 'kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule } +
-(if values.kube_x.prometheus.alertmanager.enabled then {
+(if values.kubee.prometheus.alertmanager.enabled then {
     ['alertmanager-' + name]: kp.alertmanager[name] + (if kp.alertmanager[name].kind == 'Alertmanager' then alertManagerPatch else {} )
     for name in std.objectFields(kp.alertmanager)
 } else {}) +
 // Black box exporter for probing (black box monitoring)
 // https://prometheus-operator.dev/kube-prometheus/kube/blackbox-exporter/
-(if values.kube_x.prometheus.blackbox_exporter.enabled then {
+(if values.kubee.prometheus.blackbox_exporter.enabled then {
     ['blackbox-exporter-' + name]: kp.blackboxExporter[name]
     for name in std.objectFields(kp.blackboxExporter)
 } else {}) +
@@ -132,7 +132,7 @@ local alertManagerPatch = ( if values.kube_x.prometheus.alertmanager.hostname !=
 // Kubernetes metrics
 { ['kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) } +
 // Node exporter
-(if values.kube_x.prometheus.node_exporter.enabled then {
+(if values.kubee.prometheus.node_exporter.enabled then {
     ['node-exporter-' + name]: kp.nodeExporter[name]
     for name in std.objectFields(kp.nodeExporter)
    } else {}) +

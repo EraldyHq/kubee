@@ -2,7 +2,7 @@
 Return the name of the grafana secret
 */}}
 {{- define "grafana-instance-api-token-secret-name" }}
-{{- printf "%s-grafana-api-token" (include "kube-x-name-prefix" (dict "Release" $.Release "Values" $.Values.kube_x ))}}
+{{- printf "%s-grafana-api-token" (include "kubee-name-prefix" (dict "Release" $.Release "Values" $.Values.kubee ))}}
 {{- end }}
 
 {{/*
@@ -18,7 +18,7 @@ Helper to print the basic auth name for consitency
 */}}
 {{- define "grafana-name" }}
 {{- printf "%s-%s"
-    (include "kube-x-name-prefix" (dict "Release" .Release "Values" .Values.kube_x ))
+    (include "kubee-name-prefix" (dict "Release" .Release "Values" .Values.kubee ))
     "grafana"
     }}
 {{- end }}

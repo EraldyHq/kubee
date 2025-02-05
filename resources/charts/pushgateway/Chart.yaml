@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kube-x-pushgateway
+name: kubee-pushgateway
 description: Kube-X PushGateway Chart
 
 # A chart can be either an 'application' or a 'library' chart.
@@ -24,12 +24,12 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 appVersion: "v1.10.0" # The version of pushgateway
 
 dependencies:
-  - name: kube-x
+  - name: kubee
     version: 0.0.1
-    repository: file://../kube-x
-    alias: kube_x
-  - name: kube-x-cert-manager
+    repository: file://../kubee
+    alias: kubee
+  - name: kubee-cert-manager
     version: 0.0.1
     repository: file://../cert-manager
     alias: cert_manager
-    condition: kube_x_internal.dont_install_dependency
+    condition: kubee_internal.dont_install_dependency

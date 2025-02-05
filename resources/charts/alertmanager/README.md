@@ -2,7 +2,7 @@
 
 
 ## About
-This is a `Kube-x Chart` that installs `Prometheus Alert manager`.
+This is a `Kubee Chart` that installs `Prometheus Alert manager`.
 
 `Prometheus Alert manager` receives alerts from Prometheus
 and manage them, ie:
@@ -16,7 +16,7 @@ and manage them, ie:
 ## Install
 
 ```bash
-kube-x-helm-x --cluster clusterName play alertmanager
+kubee-helm-x --cluster clusterName play alertmanager
 ```
 
 ## Inspect
@@ -25,7 +25,7 @@ The output of this chart can be inspected with:
 ```bash
 # set debug (to not delete the created manifests in the jsonnet/out directory)
 export BASHLIB_ECHO_LEVEL=4
-kube-x-helm-x -c clusterName template alertmanager > /tmp/all.yaml
+kubee-helm-x -c clusterName template alertmanager > /tmp/all.yaml
 ```
 
 ## Chart Features
@@ -41,7 +41,7 @@ kube-x-helm-x -c clusterName template alertmanager > /tmp/all.yaml
 
 ## How to adapt 
 
-This `Kube-x Chart` is a [Jsonnet Chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-jsonnet-kube-x-chart). 
+This `Kubee Chart` is a [Jsonnet Chart](../../../docs/bin/kubee-helm-x.md#what-is-a-jsonnet-kubee-chart). 
 You can use it as Jsonnet dependency in your projects.
 
 ## Contrib

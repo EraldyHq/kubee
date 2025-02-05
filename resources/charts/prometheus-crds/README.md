@@ -3,7 +3,7 @@
 
 ## About
 
-This is a `kube-x` chart that installs the CRDS of the Prometheus Operator.
+This is a `kubee` chart that installs the CRDS of the Prometheus Operator.
 
 
 ## Install
@@ -13,7 +13,7 @@ This chart is automatically installed when the [prometheus chart](../prometheus)
 You can also install it individually with:
 
 ```bash
-kube-x-helm-x -n prometheus play prometheus-crds
+kubee-helm-x -n prometheus play prometheus-crds
 ```
 
 ## Inspect
@@ -22,7 +22,7 @@ The output of this chart can be inspected with:
 ```bash
 # set debug (to not delete the created manifests in the jsonnet/out directory)
 export BASHLIB_ECHO_LEVEL=4
-kube-x-helm-x -n prometheus template prometheus-crds > /tmp/all.yaml
+kubee-helm-x -n prometheus template prometheus-crds > /tmp/all.yaml
 ```
 
 ## List

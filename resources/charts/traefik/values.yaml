@@ -84,7 +84,7 @@ traefik:
   # ref: http://kubernetes.io/docs/user-guide/persistent-volumes/.
   # It can be used to store TLS certificates along with `certificatesResolvers.<name>.acme.storage`  option
 
-# The chart properties (used by kube-x)
+# The chart properties (used by kubee)
 chart:
   # The crd dependencies of this sub-chart (for crd installation)
   crdDependencies:

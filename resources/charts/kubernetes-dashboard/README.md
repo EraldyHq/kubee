@@ -9,7 +9,7 @@ A Kube-X Chart of the [kubernetes-dashboard](https://github.com/kubernetes/dashb
 
 All configurations can be seen in their respectives `values file`
 * [kubernetes_dashboard values file](values.yaml)
-* [kube_x values file](../kube-x/values.yaml)
+* [kubee values file](../kubee/values.yaml)
 
 ```yaml
 kubernetes_dashboard:
@@ -17,7 +17,7 @@ kubernetes_dashboard:
   # We recommend to use a DNS name based lookup server such as sslip.io or sslip.io
   # to not advertise it in your DNS
   hostname: ''
-kube_x:
+kubee:
   admin_user:
     # This chart creates a k8s service account
     # for this user, Change it if you want another name
@@ -32,16 +32,16 @@ kube_x:
 ### Install
 
 ```bash
-kube-x-helm-x -c clusterName play kubernetes-dashboard
+kubee-helm-x -c clusterName play kubernetes-dashboard
 ```
 
 ### Create token
 
 To access your dashboard, you need a `token`.
 
-This chart creates an account for your admin user defined in the [kube-x values](../kube-x/values.yaml)
+This chart creates an account for your admin user defined in the [kubee values](../kubee/values.yaml)
 
-* Get the `kube_x.auth.admin_user` value in your cluster file. If empty, the default is [admin](../kube-x/values.yaml))
+* Get the `kubee.auth.admin_user` value in your cluster file. If empty, the default is [admin](../kubee/values.yaml))
 ```bash
 kubectl -n kubernetes-dashboard create token ACCOUNT_NAME --duration=8400h
 # with admin

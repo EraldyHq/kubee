@@ -2,7 +2,7 @@
 
 ## About
 
-This chart is a [kube-x jsonnet chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-jsonnet-kube-x-chart)
+This chart is a [kubee jsonnet chart](../../../docs/bin/kubee-helm-x.md#what-is-a-jsonnet-kubee-chart)
 
 ## Dependency
 
@@ -33,7 +33,7 @@ jb install github.com/kubernetes/kube-state-metrics/jsonnet/kube-state-metrics-m
 * Try it out with
 * Helm X
 ```bash
-kube-x-helm-x template kubernetes-monitoring --out > /tmp/all.yaml
+kubee-helm-x template kubernetes-monitoring --out > /tmp/all.yaml
 ```
 * or Raw Jsonnet command
 ```bash
@@ -41,7 +41,7 @@ cd jsonnet
 rm -rf out && mkdir -p out && jsonnet -J vendor \
   --multi out \
   "main.jsonnet"  \
-  --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" \
+  --ext-code "values={ kubee: std.parseYaml(importstr \"../../kubee/values.yaml\") }" \
   | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
 ```
 

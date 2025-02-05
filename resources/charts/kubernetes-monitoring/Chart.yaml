@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kube-x-kubernetes-monitoring
+name: kubee-kubernetes-monitoring
 description: Kube-X Kubernetes Monitoring Chart
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -22,19 +22,19 @@ appVersion: "v5.16.0" # The hash version of kubernetes mixin
 
 
 dependencies:
-  - name: kube-x
+  - name: kubee
     version: 0.0.1
-    repository: file://../kube-x
-    alias: kube_x
+    repository: file://../kubee
+    alias: kubee
   # For the dashboard
-  - name: kube-x-grafana
+  - name: kubee-grafana
     version: 0.0.1
     repository: file://../grafana
     alias: grafana
-    condition: kube_x_internal.install_cross_dependency
+    condition: kubee_internal.install_cross_dependency
   # For the scrape
-  - name: kube-x-prometheus
+  - name: kubee-prometheus
     version: 0.0.1
     repository: file://../prometheus
     alias: prometheus
-    condition: kube_x_internal.install_cross_dependency
+    condition: kubee_internal.install_cross_dependency

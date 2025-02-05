@@ -1,0 +1,124 @@
+#!/bin/bash
+# @name kube-service-monitor-check
+# @brief Check a prometheus service-monitor for any misconfiguration
+# @description
+#     Shows any misconfiguration of a prometheus service-monitor.
+#
+#     The service monitor should have the label `app.kubernetes.io/name=<app name>`
+#
+#     Based on [Prometheus Operator troubleshooting](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/troubleshooting.md)
+#
+
+set -Eeuo pipefail
+source bashlib-echo.sh
+source bashlib-error.sh
+source kubee-lib.sh
+error::set_trap
+
+######################
+# Main
+######################
+
+usage(){
+  echo "Usage:"
+  echo ""
+  echo "Shows the service monitor of an app"
+  echo ""
+  echo '```bash'
+  echo "$(basename "$0") <app name>"
+  echo '```'
+  # shellcheck disable=SC2016
+  echo 'Note: the service monitor should have the label `app.kubernetes.io/name=<app name>`'
+
+}
+
+if [[ "${1:-}" == "synopsis" ]]; then
+  usage
+  exit
+fi
+
+# Help ?
+APP_NAME=${1:-}
+if [[ $APP_NAME =~ -h|help ]]; then
+  usage
+  exit
+fi
+
+
+# Check if URL is provided
+if [ "$APP_NAME" == "" ]; then
+    usage
+    echo::err "An app name should be given"
+    exit 1
+fi
+
+# Get env
+KUBEE_ENV=$(source kubee-env) || error::exit $?
+eval "$KUBEE_ENV"
+
+################################################################################
+# Check if the Service Monitor selects a service
+################################################################################
+echo::info "Getting Service Monitor Namespace for the App $APP_NAME"
+read -r SERVICE_MONITOR_NAME SERVICE_MONITOR_NAMESPACE <<< "$(kube::get_resource_by_app_name "$APP_NAME" servicemonitor)"
+if [ "$SERVICE_MONITOR_NAME" == "" ]; then
+    echo::err "Error: No service monitor found for app label: $(kube::get_app_label "$APP_NAME")"
+    echo::err "  Is the app name correct?: $APP_NAME"
+    exit 1
+fi
+echo::info "Service monitor found: $SERVICE_MONITOR_NAMESPACE/$SERVICE_MONITOR_NAME"
+
+# shellcheck disable=SC2016
+SERVICE_MONITOR_LABEL_SELECTOR=$(kubectl get servicemonitors -n "$SERVICE_MONITOR_NAMESPACE" "$SERVICE_MONITOR_NAME" -o template='{{ $first := 1 }}{{ range $key, $value := .spec.selector.matchLabels }}{{ if eq $first 0 }},{{end}}{{ $key }}={{ $value }}{{ $first = 0 }}{{end}}')
+if [ -z "$SERVICE_MONITOR_LABEL_SELECTOR" ]; then
+    echo::err "Error: No service monitor label selector found on the service monitor: $SERVICE_MONITOR_NAMESPACE/$SERVICE_MONITOR_NAME"
+    exit 1
+fi
+echo::info "Service monitor label selector found: $SERVICE_MONITOR_LABEL_SELECTOR"
+TARGET_SERVICE=$(kubectl get services -l "$SERVICE_MONITOR_LABEL_SELECTOR" -A)
+if [ -z "$TARGET_SERVICE" ]; then
+    echo::err "Error: No service could be found with the label selector $SERVICE_MONITOR_LABEL_SELECTOR found on the service monitor: $SERVICE_MONITOR_NAMESPACE/$SERVICE_MONITOR_NAME"
+    exit 1
+fi
+
+################################################################################
+# Prometheus Server Info
+################################################################################
+# The name of the Prometheus object in the Prometheus CRD
+PROMETHEUS_OBJECT_NAME=prometheus
+# Where is the Prometheus object located?
+PROMETHEUS_OBJECT_NAMESPACE=kube-prometheus
+# The secret name where the configuration of the Prometheus Server is stored
+PROMETHEUS_SECRET_NAME="prometheus-$PROMETHEUS_OBJECT_NAME"
+
+################################################################################
+# Has my Service Monitor been seen by Prometheus?
+################################################################################
+# https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/troubleshooting.md#has-my-servicemonitor-been-picked-up-by-prometheus
+# ServiceMonitor objects and the namespace where they belong are selected by the serviceMonitorSelector and serviceMonitorNamespaceSelector of a Prometheus object.
+# The name of a ServiceMonitor is encoded in the Prometheus configuration, so you can simply grep whether it is present there.
+CONFIG=$(kubectl -n "$PROMETHEUS_OBJECT_NAMESPACE"  get secret "$PROMETHEUS_SECRET_NAME" -o json | jq -r '.data["prometheus.yaml.gz"]' | base64 -d | gunzip)
+if ! echo "$CONFIG" | grep "$SERVICE_MONITOR_NAME" >/dev/null; then
+  echo::err "Service Monitor not picked by the Prometheus Server"
+  echo::err ""
+  echo::err "Actions:"
+  echo::err "  * Check the config reload status at the https://prometheus-server/status"
+  echo::err "     * The Configuration reload"
+  echo::err "     * Last successful configuration reload"
+  echo::err "  * check the Prometheus Operator log"
+  echo::err "     The prometheus operator may have problem creating the configuration file"
+  echo::err "     Example: prometheus/prometheus failed: creating config failed: remote write 1: failed to get authorization token of type \"bearer\": unable to get secret \"prometheus-bearer\": secrets \"prometheus-bearer\" not found"
+  echo::err "  * Check the serviceMonitorSelector and serviceMonitorNamespaceSelector of the Prometheus object"
+  echo::err "     Why? The selector are too restrictive"
+  echo::err "     ServiceMonitor objects and the namespace are selected by the serviceMonitorSelector and serviceMonitorNamespaceSelector"
+  exit 1
+fi
+
+echo::success "Service Monitor $SERVICE_MONITOR_NAME found in the Prometheus Config file"
+echo::success "Service Monitor should work."
+echo::success ""
+echo::success " If not check the logs for any configuration/scrape problem"
+echo::success "   kubectl-xlogs $PROMETHEUS_OBJECT_NAME"
+
+
+

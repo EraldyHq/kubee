@@ -1,4 +1,4 @@
-local validation = import './kube-x/validation.libsonnet';
+local validation = import './kubee/validation.libsonnet';
 
 local kxExtValues = std.extVar('values');
 // Values are flatten, so that we can:
@@ -95,11 +95,7 @@ local kpValues = {
 };
 // k8s-control-plane.libsonnet is a function
 local kubernetesControlPlane = (import './kube-prometheus/components/k8s-control-plane.libsonnet')(kpValues.kubernetesControlPlane);
-// custom.libsonnet is a function that does not have its node
-local custom = (import './kube-prometheus/components/mixin/custom.libsonnet')({
-  namespace: kpValues.common.namespace,
-  mixin+: { _config+:: k3sConfigPatch },
-});
+
 
 
 // mixin is not a function but an object
@@ -111,7 +107,6 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
 };
 
 // Returned Object
-{ 'kubernetes-monitoring-custom-prometheusRule': custom.prometheusRule } +
 {
   ['kubernetes-monitoring-' + name]:
     (
@@ -183,7 +178,7 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
 // kube-state metrics
 (
   if !kxValues.kube_state_metrics_enabled then {} else
-    local kubeStateMetrics = (import './kube-x/kube-state-metrics.libsonnet')(kpValues.kubeStateMetrics);
+    local kubeStateMetrics = (import './kubee/kube-state-metrics.libsonnet')(kpValues.kubeStateMetrics);
     {
       ['kubernetes-monitoring-state-metrics-' + name]: kubeStateMetrics[name]
       for name in std.objectFields(kubeStateMetrics)
@@ -192,7 +187,7 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
 +
 // Dashboard and Folder
 (
-  if !kxValues.grafana_enabled then {} else (import 'kube-x/mixin-grafana.libsonnet')(kxValues {
+  if !kxValues.grafana_enabled then {} else (import 'kubee/mixin-grafana.libsonnet')(kxValues {
     mixin: mixin,
     mixin_name: 'kubernetes-monitoring',
     grafana_folder_label: 'Kubernetes Monitoring',

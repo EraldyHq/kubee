@@ -75,7 +75,7 @@ if [ ! -f "$PROMETHEUS_CHART_FILE" ]; then
 fi
 
 # Get the Kube-Prometheus version
-KUBE_PROMETHEUS_VERSION=$(yq '.kube_x.versions.kube-prometheus' "$PROMETHEUS_CHART_FILE" | tr -d '~')
+KUBE_PROMETHEUS_VERSION=$(yq '.kubee.versions.kube-prometheus' "$PROMETHEUS_CHART_FILE" | tr -d '~')
 
 if [ "$KUBE_PROMETHEUS_VERSION" == "" ] || [ "$KUBE_PROMETHEUS_VERSION" == "null" ]; then
   echo::err "Unable to retrieve the kube prometheus version (the value was empty) in $PROMETHEUS_CHART_FILE"
@@ -102,9 +102,9 @@ done
 
 # Mixin
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-KUBE_X_TARGET_DIR="$JSONNET_DIR/kube-x"
-mkdir -p "$KUBE_X_TARGET_DIR"
-cp --force "$SCRIPT_DIR"/mixin-grafana.libsonnet "$KUBE_X_TARGET_DIR"
-echo::success "The mixin-grafana.libsonnet was copied to $KUBE_X_TARGET_DIR"
-cp --force "$SCRIPT_DIR"/mixin.libsonnet "$KUBE_X_TARGET_DIR"
-echo::success "The mixin.libsonnet was copied to $KUBE_X_TARGET_DIR"
+KUBEE_TARGET_DIR="$JSONNET_DIR/kubee"
+mkdir -p "$KUBEE_TARGET_DIR"
+cp --force "$SCRIPT_DIR"/mixin-grafana.libsonnet "$KUBEE_TARGET_DIR"
+echo::success "The mixin-grafana.libsonnet was copied to $KUBEE_TARGET_DIR"
+cp --force "$SCRIPT_DIR"/mixin.libsonnet "$KUBEE_TARGET_DIR"
+echo::success "The mixin.libsonnet was copied to $KUBEE_TARGET_DIR"

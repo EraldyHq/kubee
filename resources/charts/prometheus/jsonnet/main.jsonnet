@@ -1,6 +1,6 @@
 // https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/customizing.md
 
-local validation = import './kube-x/validation.libsonnet';
+local validation = import './kubee/validation.libsonnet';
 
 // Get the version from the Chart.yaml
 local chart = {
@@ -14,7 +14,7 @@ local kxExtValues = std.extVar('values');
 local kxValues = {
 
   // Cluster
-  cluster_name: validation.notNullOrEmpty(kxExtValues, 'kube_x.cluster.name'),
+  cluster_name: validation.notNullOrEmpty(kxExtValues, 'kubee.cluster.name'),
 
   // Secret Kind
   secret_type: validation.notNullOrEmpty(kxExtValues, 'secret.kind'),
@@ -61,6 +61,7 @@ local kxValues = {
 };
 
 
+
 local kp =
   (import 'kube-prometheus/main.libsonnet') +
   {
@@ -89,13 +90,13 @@ local kp =
             // Cpu Limit is bad practice
             // A value of 0 disables it  https://prometheus-operator.dev/docs/platform/operator/
             // To resolve a "CPUThrottlingHigh" alert
-            // 71.05% throttling of CPU in namespace monitoring for container config-reloader in pod alertmanager-kube-x-0 on cluster
+            // 71.05% throttling of CPU in namespace monitoring for container config-reloader in pod alertmanager-kubee-0 on cluster
             // https://runbooks.prometheus-operator.dev/runbooks/kubernetes/cputhrottlinghigh
             cpu: '0',
           },
         },
       },
-      // for prometheus, we overwrite also the config in kube-x/prometheus.libsonnet
+      // for prometheus, we overwrite also the config in kubee/prometheus.libsonnet
       prometheus+: {
         name: kxValues.prometheus_name,
         version: kxValues.prometheus_version,
@@ -106,14 +107,20 @@ local kp =
 // Prometheus Operator without Rbac Configuration (ie with original manifest)
 local prometheusOperator = (
   if kxValues.noRbacProxy then
-    (import './kube-x/prometheus-operator-rbac-free.libsonnet')(kp.values.prometheusOperator)
+    (import './kubee/prometheus-operator-rbac-free.libsonnet')(kp.values.prometheusOperator)
   else
     kp.prometheusOperator
 );
 
 // Prometheus Custom
-local customPrometheus = (import './kube-x/prometheus.libsonnet')(kp.values.prometheus, kxValues);
+local customPrometheus = (import './kubee/prometheus.libsonnet')(kp.values.prometheus, kxValues);
 
+// Returned object
+// custom.libsonnet is the general rules explained here: https://runbooks.prometheus-operator.dev/runbooks/general/
+{ 'kubernetes-mixin-general-prometheusRule': (import './kube-prometheus/components/mixin/custom.libsonnet')({
+                                               namespace: kxValues.prometheus_namespace,
+                                             }).prometheusRule
+ } +
 {
   ['prometheus-operator-' + name]: prometheusOperator[name]
   // CRD are in the prometheus-crd charts

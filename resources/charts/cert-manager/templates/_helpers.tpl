@@ -2,7 +2,7 @@
 Return the name of the cloudflare secret
 */}}
 {{- define "cert-manager-cloudflare-secret-name" }}
-{{- printf "%s-cloudflare-dns-api-token" (include "kube-x-name-prefix" (dict "Release" $.Release "Values" $.Values.kube_x ))}}
+{{- printf "%s-cloudflare-dns-api-token" (include "kubee-name-prefix" (dict "Release" $.Release "Values" $.Values.kubee ))}}
 {{- end }}
 
 {{/*

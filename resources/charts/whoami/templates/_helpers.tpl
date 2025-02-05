@@ -10,7 +10,7 @@ Helper to print the basic auth name for consitency
 */}}
 {{- define "whoami-name" }}
 {{- printf "%s-%s"
-    (include "kube-x-name-prefix" (dict "Release" .Release "Values" .Values.kube_x ))
+    (include "kubee-name-prefix" (dict "Release" .Release "Values" .Values.kubee ))
     "whoami"
     }}
 {{- end }}

@@ -1,4 +1,4 @@
-{{- if eq .Values.kube_x.prometheus.node_exporter.enabled true }}
+{{- if eq .Values.kubee.prometheus.node_exporter.enabled true }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:

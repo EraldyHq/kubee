@@ -9,11 +9,11 @@
 
 Test:
 helm template -s templates/argocd-notifications-config-map-patch.yml \
-  --set 'kube_x.email.smtp.host=smtp.gmail.com'  \
-  --set 'kube_x.email.smtp.port=587'  \
-  --set 'kube_x.email.smtp.username=nico'  \
-  --set 'kube_x.email.smtp.password=welcome'  \
-  --set 'kube_x.auth.admin_user.email=foo@gmail.com' \
+  --set 'kubee.email.smtp.host=smtp.gmail.com'  \
+  --set 'kubee.email.smtp.port=587'  \
+  --set 'kubee.email.smtp.username=nico'  \
+  --set 'kubee.email.smtp.password=welcome'  \
+  --set 'kubee.auth.admin_user.email=foo@gmail.com' \
   . | yq
 
 */}}
@@ -36,13 +36,13 @@ data:
   # Email
   # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/email/
 */}}
-  {{- if ne .Values.kube_x.email.smtp.host ""}}
+  {{- if ne .Values.kubee.email.smtp.host ""}}
   service.email: |
-    host: {{ .Values.kube_x.email.smtp.host }}
-    port: {{ required ".Values.kube_x.email.smtp.port is required" .Values.kube_x.email.smtp.port }}
-    from: {{ required "kube_x.auth.admin_user.email or kube_x.email.smtp.from is requried" (default .Values.kube_x.auth.admin_user.email .Values.kube_x.email.smtp.from) }}
-    username: ${{ template "kube-x-argocd-email-username-variable-name" }}
-    password: ${{ template "kube-x-argocd-email-password-variable-name" }}
+    host: {{ .Values.kubee.email.smtp.host }}
+    port: {{ required ".Values.kubee.email.smtp.port is required" .Values.kubee.email.smtp.port }}
+    from: {{ required "kubee.auth.admin_user.email or kubee.email.smtp.from is requried" (default .Values.kubee.auth.admin_user.email .Values.kubee.email.smtp.from) }}
+    username: ${{ template "kubee-argocd-email-username-variable-name" }}
+    password: ${{ template "kubee-argocd-email-password-variable-name" }}
     html: true
   {{- end }}
 {{- /*
@@ -83,12 +83,12 @@ data:
     # Global Subscriptions
     ##############################
   */}}
-  {{- if ne .Values.kube_x.auth.admin_user.email "" }}
+  {{- if ne .Values.kubee.auth.admin_user.email "" }}
   subscriptions: |
-    {{- if ne .Values.kube_x.auth.admin_user.email "" }}
+    {{- if ne .Values.kubee.auth.admin_user.email "" }}
     # Global Subscription for on-deployed trigger notifications
     - recipients:
-        - "email:{{ .Values.kube_x.auth.admin_user.email }}"
+        - "email:{{ .Values.kubee.auth.admin_user.email }}"
       triggers:
         - on-deployed
     {{- end }}

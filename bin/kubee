@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+# shellcheck source=../..//bash-lib/lib/bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+error::set_strict_mode
+error::set_trap
+# shellcheck source=../..//bash-lib/lib/bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=../..//bash-lib/lib/bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+
+
+
+# The synopsis function is required by the doc::usage
+synopsis(){
+
+  cat << 'EOF'
+```bash
+kubee command options
+```
+
+where `command` can be:
+
+* [cluster](kubee-cluster.md) - Cluster operations
+
+
+EOF
+
+}
+
+
+# Assign the first argument to a string
+COMMAND=${1:-}
+if [ "$COMMAND" = "" ]; then
+    doc::help
+    echo::err "A command is mandatory"
+    exit 1
+fi
+# Help
+if [[ "$COMMAND" =~ "-h"|"--help"|"help" ]]; then
+  doc::help
+  exit
+fi
+shift  # Remove the first argument from the argument list
+
+case "$COMMAND" in
+  "cluster")
+     kubee-cluster "$@" || error::exit $?
+    ;;
+  "synopsis")
+    synopsis
+    ;;
+  *)
+    doc::help synopsis
+    echo::err  "Command $COMMAND is unknown"
+    exit 1
+esac

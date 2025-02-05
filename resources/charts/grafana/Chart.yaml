@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kube-x-grafana
+name: kubee-grafana
 description: A sub-chart of the Grafana Operator
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -28,17 +28,17 @@ dependencies:
     version: "v5.16.0"
     repository: "oci://ghcr.io/grafana/helm-charts"
     #condition: xxx.enabled
-  - name: kube-x
+  - name: kubee
     version: 0.0.1
-    repository: file://../kube-x
-    alias: kube_x
-  - name: kube-x-prometheus
+    repository: file://../kubee
+    alias: kubee
+  - name: kubee-prometheus
     version: 0.0.1
     repository: file://../prometheus
     alias: prometheus
-    condition: kube_x_internal.dont_install_dependency
-  - name: kube-x-cert-manager
+    condition: kubee_internal.dont_install_dependency
+  - name: kubee-cert-manager
     version: 0.0.1
     repository: file://../cert-manager
     alias: cert_manager
-    condition: kube_x_internal.dont_install_dependency
+    condition: kubee_internal.dont_install_dependency

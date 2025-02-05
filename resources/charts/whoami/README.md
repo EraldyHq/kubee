@@ -8,7 +8,7 @@
 
 * Download dependency:
 ```bash
-helm dependency update # update the dependencies (ie kube-x if changed version or not)
+helm dependency update # update the dependencies (ie kubee if changed version or not)
 ```
 * Test
 ```bash

@@ -15,7 +15,7 @@ local mixin = (import 'cert-manager-mixin/mixin.libsonnet') {
 };
 
 
-(import 'kube-x/mixin.libsonnet')(values{
+(import 'kubee/mixin.libsonnet')(values{
     mixin: mixin,
     mixin_name: 'cert-manager',
     grafana_folder_label: 'Cert Manager',

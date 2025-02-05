@@ -28,5 +28,5 @@ data_sources:
 # Don't install cross-dependency
 # used in dependency condition in chart.yaml
 # Don't touch
-kube_x_internal:
+kubee_internal:
   dont_install_dependency: false

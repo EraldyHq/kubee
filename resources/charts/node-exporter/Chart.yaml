@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kube-x-node-exporter
+name: kubee-node-exporter
 description: Kube-X Node Exporter Chart
 
 # A chart can be either an 'application' or a 'library' chart.
@@ -24,7 +24,7 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 appVersion: "0.76.2" # The version of prometheus operator
 
 dependencies:
-  - name: kube-x
+  - name: kubee
     version: 0.0.1
-    repository: file://../../charts/kube-x
-    alias: kube_x
+    repository: file://../../charts/kubee
+    alias: kubee

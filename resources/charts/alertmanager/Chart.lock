@@ -1,17 +1,17 @@
 dependencies:
-- name: kube-x
-  repository: file://../../charts/kube-x
+- name: kubee
+  repository: file://../../charts/kubee
   version: 0.0.1
-- name: kube-x-cert-manager
+- name: kubee-cert-manager
   repository: file://../cert-manager
   version: 0.0.1
-- name: kube-x-grafana
+- name: kubee-grafana
   repository: file://../grafana
   version: 0.0.1
-- name: kube-x-external-secrets
+- name: kubee-external-secrets
   repository: file://../external-secrets
   version: 0.0.1
-- name: kube-x-prometheus
+- name: kubee-prometheus
   repository: file://../prometheus
   version: 0.0.1
 digest: sha256:52a397f052bdf4dc40a76d43ce8f00ac47d2800a09097b7331bdb1e3235d6d38

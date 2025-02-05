@@ -1,6 +1,6 @@
 apiVersion: v2
-name: kube-x-argocd
-description: Kube-x ArgoCd Chart
+name: kubee-argocd
+description: Kubee ArgoCd Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -26,32 +26,32 @@ appVersion: "v2.13.3" # The version of argocd (in kustomization.yml url)
 
 # https://github.com/external-secrets/external-secrets/releases
 dependencies:
-  - name: kube-x
+  - name: kubee
     version: 0.0.1
-    repository: file://../kube-x
-    alias: kube_x
+    repository: file://../kubee
+    alias: kubee
   # For the ingress
-  - name: kube-x-cert-manager
+  - name: kubee-cert-manager
     version: 0.0.1
     repository: file://../cert-manager
     alias: cert_manager
-    condition: kube_x_internal.dont_install_cross_dependency
+    condition: kubee_internal.dont_install_cross_dependency
   # For the dashboard
-  - name: kube-x-grafana
+  - name: kubee-grafana
     version: 0.0.1
     repository: file://../grafana
     alias: grafana
-    condition: kube_x_internal.dont_install_cross_dependency
+    condition: kubee_internal.dont_install_cross_dependency
   # For the scrape
-  - name: kube-x-prometheus
+  - name: kubee-prometheus
     version: 0.0.1
     repository: file://../prometheus
     alias: prometheus
-    condition: kube_x_internal.dont_install_cross_dependency
+    condition: kubee_internal.dont_install_cross_dependency
   # For CI
-  - name: kube-x-external-secrets
+  - name: kubee-external-secrets
     version: 0.0.1
     repository: file://../external-secrets
     alias: external_secrets
-    condition: kube_x_internal.dont_install_cross_dependency
+    condition: kubee_internal.dont_install_cross_dependency
 

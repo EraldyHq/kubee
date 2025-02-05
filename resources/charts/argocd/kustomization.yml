@@ -5,7 +5,7 @@ kind: Kustomization
 
 # Custom Namespace
 # https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#installing-argo-cd-in-a-custom-namespace
-namespace: ${KUBE_X_NAMESPACE}
+namespace: ${KUBEE_NAMESPACE}
 
 patches:
   # Patch needed to apply the server transport via annotation to disable tls validation from Traefik
@@ -19,7 +19,7 @@ patches:
   - patch: |-
       - op: replace
         path: /subjects/0/namespace
-        value: ${KUBE_X_NAMESPACE}
+        value: ${KUBEE_NAMESPACE}
     target:
       kind: ClusterRoleBinding
 

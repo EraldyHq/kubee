@@ -11,8 +11,8 @@ This chart installs the Grafana CRDs.
 CRD are global. No namespace is needed
 ```bash
 helm upgrade --install -n grafana-crds .
-# with kube-x
-kube-x-helm upgrade --install grafana-crds .
+# with kubee
+kubee-helm upgrade --install grafana-crds .
 ```
 
 

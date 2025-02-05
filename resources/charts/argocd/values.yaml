@@ -60,6 +60,6 @@ components:
 
 # Internal
 # Used to not output manifest from cross dependency in this charts
-kube_x_internal:
+kubee_internal:
   dont_install_cross_dependency: false
 

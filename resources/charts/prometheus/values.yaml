@@ -5,7 +5,7 @@ enabled: false
 namespace: 'monitoring'
 # The name of the prometheus instance
 # (used by clients such as the grafana Chart to create a connection)
-name: 'kube-x'
+name: 'kubee'
 # The prometheus version
 # https://github.com/prometheus/prometheus/releases
 version: '3.1.0'
@@ -98,9 +98,9 @@ secret:
   kind: 'Secret'
 
 
-# Tweak to not output the template of the kube-x cross-dependency chart
+# Tweak to not output the template of the kubee cross-dependency chart
 # in the prometheus release
 # It's used in the chart dependencies condition
-kube_x_internal:
+kubee_internal:
   # Don't modify the value, don't change
   install_cross_dependency: false

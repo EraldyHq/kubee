@@ -1,20 +1,20 @@
 // To execute
-// rm -rf jsonnet/multi/manifests && mkdir -p jsonnet/multi/manifests/setup && jsonnet -J vendor --multi jsonnet/multi/manifests "jsonnet/multi/kube-prometheus.jsonnet" --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
+// rm -rf jsonnet/multi/manifests && mkdir -p jsonnet/multi/manifests/setup && jsonnet -J vendor --multi jsonnet/multi/manifests "jsonnet/multi/kube-prometheus.jsonnet" --ext-code "values={ kubee: std.parseYaml(importstr \"../../kubee/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
 
 local extValues = std.extVar('values');
 
 // Validation Library
-local validation = import './kube-x/validation.libsonnet';
+local validation = import './kubee/validation.libsonnet';
 
 local values = {
 
-  admin_user_email: validation.getNestedPropertyOrThrow(extValues, 'kube_x.auth.admin_user.email'),
-  smtp_host: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.host'),
-  smtp_port: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.port'),
-  smtp_from: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.from'),
-  smtp_username: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.username'),
-  smtp_password: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.password'),
-  smtp_hello: validation.getNestedPropertyOrThrow(extValues, 'kube_x.email.smtp.hello'),
+  admin_user_email: validation.getNestedPropertyOrThrow(extValues, 'kubee.auth.admin_user.email'),
+  smtp_host: validation.getNestedPropertyOrThrow(extValues, 'kubee.email.smtp.host'),
+  smtp_port: validation.getNestedPropertyOrThrow(extValues, 'kubee.email.smtp.port'),
+  smtp_from: validation.getNestedPropertyOrThrow(extValues, 'kubee.email.smtp.from'),
+  smtp_username: validation.getNestedPropertyOrThrow(extValues, 'kubee.email.smtp.username'),
+  smtp_password: validation.getNestedPropertyOrThrow(extValues, 'kubee.email.smtp.password'),
+  smtp_hello: validation.getNestedPropertyOrThrow(extValues, 'kubee.email.smtp.hello'),
   alert_manager_name: validation.notNullOrEmpty(extValues, 'name'),
   alert_manager_version: validation.notNullOrEmpty(extValues, 'version'),
   alert_manager_namespace: validation.notNullOrEmpty(extValues, 'namespace'),
@@ -64,10 +64,10 @@ local alertManagerPatch = {
 
 
 // Ops Genie
-local opsGenieConfigObject = (if values.alert_manager_opsgenie_apikey == '' then null else (import 'kube-x/alertmanager-config-ops-genie.libsonnet')(values));
+local opsGenieConfigObject = (if values.alert_manager_opsgenie_apikey == '' then null else (import 'kubee/alertmanager-config-ops-genie.libsonnet')(values));
 
 // Email
-local emailConfigObject = (if values.smtp_host == '' then null else (import 'kube-x/alertmanager-config-email.libsonnet')(values));
+local emailConfigObject = (if values.smtp_host == '' then null else (import 'kubee/alertmanager-config-email.libsonnet')(values));
 
 
 // Kube Prometheus Alert Manager Object
@@ -123,17 +123,17 @@ local serviceMonitorPatch = {
   // Email Config Object
   [if emailConfigObject != null then 'alertmanager-config-email']: emailConfigObject.AlertmanagerConfig,
   // Watchdog Config Object
-  'alertmanager-config-watchdog': (import 'kube-x/alertmanager-config-watchdog.libsonnet')(values).AlertmanagerConfig,
+  'alertmanager-config-watchdog': (import 'kubee/alertmanager-config-watchdog.libsonnet')(values).AlertmanagerConfig,
   // Ingress
-  [if values.alert_manager_hostname != '' then 'alertmanager-ingress']: (import 'kube-x/ingress.libsonnet')(values),
+  [if values.alert_manager_hostname != '' then 'alertmanager-ingress']: (import 'kubee/ingress.libsonnet')(values),
   // AlertManager Initial Config (is in a secret)
   'alertmanager-secret-config': if std.asciiLower(values.secret_kind) == 'externalsecret' then
-    (import 'kube-x/external-secret-config.libsonnet')(values {
+    (import 'kubee/external-secret-config.libsonnet')(values {
       alert_manager_config: std.parseYaml(alertmanager.secret.stringData['alertmanager.yaml']),
     })
   else
     alertmanager.secret,
-} + (import 'kube-x/mixin-grafana.libsonnet')(values {
+} + (import 'kubee/mixin-grafana.libsonnet')(values {
   mixin: alertmanager.mixin,
   mixin_name: 'alertmanager',
   grafana_name: values.grafana_name,

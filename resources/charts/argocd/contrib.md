@@ -3,13 +3,13 @@
 ## About
 
 This is a `Kube-X`:
-* [kustomization chart](../../../docs/bin/kube-x-helm-post-renderer.md#kustomization) because this is the official supported installation (ie [Helm is community maintained](https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#helm))
-* and [Jsonnet chart](../../../docs/bin/kube-x-helm-x.md#what-is-a-jsonnet-kube-x-chart) to install the monitoring mixin
+* [kustomization chart](../../../docs/bin/kubee-helm-post-renderer.md#kustomization) because this is the official supported installation (ie [Helm is community maintained](https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#helm))
+* and [Jsonnet chart](../../../docs/bin/kubee-helm-x.md#what-is-a-jsonnet-kubee-chart) to install the monitoring mixin
 
 
 ## Dependency Script
 
-Run [utilties/dl-dependency-scripts](utilties/dl-dependency-scripts) to update to the last [mixin library](jsonnet/kube_x/mixin.libsonnet)
+Run [utilties/dl-dependency-scripts](utilties/dl-dependency-scripts) to update to the last [mixin library](jsonnet/kubee/mixin.libsonnet)
 
 ## How to
 
@@ -18,7 +18,7 @@ Run [utilties/dl-dependency-scripts](utilties/dl-dependency-scripts) to update t
 * With helm
 ```bash
 helm template -s templates/patches/argocd-secret-patch.yaml \
-  --set 'kube_x.auth.admin_user.password=welcome'  \
+  --set 'kubee.auth.admin_user.password=welcome'  \
   . | yq
 ```
 
@@ -43,7 +43,7 @@ To get the Jsonnet Manifest in `jsonnet/out`
 # Debug to not delete them on exit
 export BASHLIB_ECHO_LEVEL=4;
 # Run
-kube-x-helm-x \
+kubee-helm-x \
   --cluster clusterName \
   template \
   argocd

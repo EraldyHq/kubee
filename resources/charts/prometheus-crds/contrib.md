@@ -24,7 +24,7 @@ You can check the created manifest with:
 ```bash
 # set debug (to not delete the created manifests in the jsonnet/out directory)
 export BASHLIB_ECHO_LEVEL=4
-kube-x-helm-x -n prometheus template prometheus-crds > jsonnet/out/all.yaml
+kubee-helm-x -n prometheus template prometheus-crds > jsonnet/out/all.yaml
 ```
 * or Raw Jsonnet command
 ```bash

@@ -91,8 +91,8 @@ We prefer the grafana operator because:
 jb init
 jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@v0.14.0
 # then to get the manifest into jsonnet/multi/manifests
-rm -rf jsonnet/multi/manifests && mkdir -p jsonnet/multi/manifests/setup && jsonnet -J vendor --multi jsonnet/multi/manifests "jsonnet/multi/kube-prometheus.jsonnet" --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
+rm -rf jsonnet/multi/manifests && mkdir -p jsonnet/multi/manifests/setup && jsonnet -J vendor --multi jsonnet/multi/manifests "jsonnet/multi/kube-prometheus.jsonnet" --ext-code "values={ kubee: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
 # or set debug (to not delete the created manifests) and use the template command of helm-x
 export BASHLIB_ECHO_LEVEL=4
-kube-x-helm-x template prometheus
+kubee-helm-x template prometheus
 ```

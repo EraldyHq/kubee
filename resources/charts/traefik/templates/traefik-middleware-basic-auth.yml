@@ -4,17 +4,17 @@ https://doc.traefik.io/traefik/middlewares/http/basicauth/
 Enable only when the admin password is not empty
 
 Test:
-helm template -s templates/traefik-middleware-basic-auth.yml --set 'kube_x.auth.admin_user.password=yolo' .
+helm template -s templates/traefik-middleware-basic-auth.yml --set 'kubee.auth.admin_user.password=yolo' .
 
 Note: Operators are functions (ne is a function with 2 args)
 https://helm.sh/docs/chart_template_guide/functions_and_pipelines/#operators-are-functions
 */}}
-{{- if ne (((.Values.kube_x).cluster.adminUser).password) "" }}
+{{- if ne (((.Values.kubee).cluster.adminUser).password) "" }}
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: '{{ include "kube-x-traefik-basic-auth-name" (dict "Values" .Values.kube_x ) }}'
+  name: '{{ include "kubee-traefik-basic-auth-name" (dict "Values" .Values.kubee ) }}'
   namespace: '{{ .Release.Namespace }}'
 # The values for all keys in the data field have to be base64-encoded strings.
 # If the conversion to base64 string is not desirable, you can choose to specify the stringData field instead,
@@ -28,10 +28,10 @@ data:
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: '{{ include "kube-x-traefik-basic-auth-name" (dict "Values" .Values.kube_x ) }}'
+  name: '{{ include "kubee-traefik-basic-auth-name" (dict "Values" .Values.kubee ) }}'
   namespace: '{{ .Release.Namespace }}'
 spec:
   basicAuth:
-    secret: '{{ include "kube-x-traefik-basic-auth-name" (dict "Values" .Values.kube_x ) }}'
+    secret: '{{ include "kubee-traefik-basic-auth-name" (dict "Values" .Values.kubee ) }}'
 
 {{- end}}

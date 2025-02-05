@@ -14,20 +14,20 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "kubectl-xenv" "1" "" "Version Latest" "Print the export environment variables"
+.TH "kubee-env" "1" "" "Version Latest" "Print the export environment variables"
 .hy
 .SH DESCRIPTION
 .PP
 Print the export environment statements.
 .SH USAGE AND EXAMPLE
 .PP
-This script is used by all \f[V]kube-x\f[R] scripts to set the
+This script is used by all \f[V]kubee\f[R] scripts to set the
 environment
 .IP
 .nf
 \f[C]
-KUBE_X_ENV=$(source kubectl-xenv \[dq]$KUBE_X_APP_NAME\[dq])
-eval \[dq]$KUBE_X_ENV\[dq]
+KUBEE_ENV=$(source kubee-env \[dq]$KUBEE_APP_NAME\[dq])
+eval \[dq]$KUBEE_ENV\[dq]
 \f[R]
 .fi
 .PP
@@ -35,41 +35,41 @@ Note: The substitution is not in the eval because bash would not stop
 the script otherwise even with the \f[V]-Ee\f[R] options.
 .SH SYNOPSIS
 .PP
-Print the kubernetes and kube-x environment variables in a export format
+Print the kubernetes and kubee environment variables in a export format
 .IP
 .nf
 \f[C]
-kubectl-xenv [<chart name>]
+kubee-env [<chart name>]
 \f[R]
 .fi
 .PP
 where \f[V]chart name\f[R] is optional if the current directory is below
-a \f[V]KUBE_X_CHARTS_PATH\f[R].
+a \f[V]KUBEE_CHARTS_PATH\f[R].
 .SH ENVIRONMENT
-.SS KUBE_X_APP_NAME
+.SS KUBEE_APP_NAME
 .IP
 .nf
 \f[C]
-export KUBE_X_APP_NAME=xxx
+export KUBEE_APP_NAME=xxx
 \f[R]
 .fi
 .PP
-Default to the current directory name if it is below the KUBE_X_APP_HOME
+Default to the current directory name if it is below the KUBEE_APP_HOME
 .PP
 The kubernetes objects are searched with the label
 \f[V]app.kubernetes.io/name=<app name>\f[R]
-.SS KUBE_X_APP_NAMESPACE
+.SS KUBEE_APP_NAMESPACE
 .PP
-The \f[V]KUBE_X_APP_NAMESPACE\f[R] environment variable defines the
+The \f[V]KUBEE_APP_NAMESPACE\f[R] environment variable defines the
 \f[V]namespace\f[R] of the app and is used to determine the connection
 namespace
-.SS KUBE_X_DEFAULT_NAMESPACE
+.SS KUBEE_DEFAULT_NAMESPACE
 .PP
-\f[V]KUBE_X_DEFAULT_NAMESPACE\f[R] defines the default connection
+\f[V]KUBEE_DEFAULT_NAMESPACE\f[R] defines the default connection
 namespace when no namespace has been found
-.SS KUBE_X_APP_HOME
+.SS KUBEE_APP_HOME
 .PP
-The \f[V]$KUBE_X_APP_HOME\f[R] environment variable defines a path
+The \f[V]$KUBEE_APP_HOME\f[R] environment variable defines a path
 environment variable where each path is a directory that contains
 namespace applications.
 .PP
@@ -79,10 +79,10 @@ Example:
 .IP
 .nf
 \f[C]
-export KUBE_X_APP_HOME=$HOME/my-kube-apps:$HOME/my-other-kube-apps
+export KUBEE_APP_HOME=$HOME/my-kube-apps:$HOME/my-other-kube-apps
 \f[R]
 .fi
-.SS KUBE_X_BUSYBOX_IMAGE
+.SS KUBEE_BUSYBOX_IMAGE
 .PP
 The image used by kubectl-xshell when asking for a shell in a busybox.
 .PP
@@ -91,20 +91,20 @@ ghcr.io/gerardnico/busybox:latest (https://github.com/gerardnico/busybox/pkgs/co
 .IP
 .nf
 \f[C]
-export KUBE_X_BUSYBOX_IMAGE=ghcr.io/gerardnico/busybox:latest
+export KUBEE_BUSYBOX_IMAGE=ghcr.io/gerardnico/busybox:latest
 \f[R]
 .fi
 .SS Connection Namespace
 .PP
 The connection namespace is a derived environment variable
-\f[V]KUBE_X_CONNECTION_NAMESPACE\f[R] used by kubectx.
+\f[V]KUBEE_CONNECTION_NAMESPACE\f[R] used by kubectx.
 .SS Namespace Order of precedence
 .PP
 In order, the connection namespace value used is: * \f[V]default\f[R] if
 the flag \f[V]--all-namespace\f[R] is passed * the option value of the
-flag \f[V]-n|--namespace\f[R] * KUBE_X_APP_NAMESPACE * KUBE_X_APP_NAME
-if set * KUBE_X_DEFAULT_NAMESPACE if it exists * Otherwise, for the
-KUBE_X_KUBECTL value of: * \f[V]kubectx\f[R]: \f[V]default\f[R] *
+flag \f[V]-n|--namespace\f[R] * KUBEE_APP_NAMESPACE * KUBEE_APP_NAME if
+set * KUBEE_DEFAULT_NAMESPACE if it exists * Otherwise, for the
+KUBEE_KUBECTL value of: * \f[V]kubectx\f[R]: \f[V]default\f[R] *
 \f[V]kubectl\f[R]: the \f[V]kubeconfig\f[R] current namespace value
 .SS Mandatory Namespace
 .PP
@@ -116,7 +116,7 @@ Otherwise, it\[cq]s determined by a label global search on the app name.
 .PP
 You can override the default environment values by creating a
 \f[V].envrc\f[R] located in the app directory (ie
-\f[V]KUBE_X_APP_HOME/KUBE_X_APP_NAME\f[R]).
+\f[V]KUBEE_APP_HOME/KUBEE_APP_NAME\f[R]).
 .SH TIP
 .PP
 To get the env in the prompt such as cluster and namespace, check

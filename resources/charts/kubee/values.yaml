@@ -1,0 +1,173 @@
+# Bootstrap and common cluster values (ie global)
+
+# Cluster Wide variables
+cluster:
+  # The cluster name
+  # used:
+  # * to identify the cluster (for instance, on prometheus remote-write metrics, the name is added as label)
+  # * as default first instance name for operator (for instance, prometheus operator allows to install multiple prometheus that needs to be unique. Kube-prometheus asks for a unique name)
+  name: 'kubee'
+
+# Authentication
+auth:
+
+  # Ingress Authentication for internal web app (such as Traefik Dashboard, Prometheus, Alert Manager, ...)
+  # The app or api are still available from an internal container
+  ingress:
+    kind: 'basicAuth'
+
+  # The admin user
+  #  * created as admin user in Kubernetes and other app
+  #  * added in basicAuth
+  admin_user:
+    username: 'admin'
+    # The password
+    password: ''
+    # Kubernetes clusterRole
+    # * `cluster-admin` has full access
+    # * `admin` does not have access to node and cluster scope related object such as ClusterRoleBinding
+    clusterRole: 'cluster-admin'
+    # The email
+    # It's used by default in apps. For instance:
+    # * letsencrypt registration email
+    # * alert notifications: prometheus, argocd
+    email: ''
+
+  # Private Network ranges
+  # used for Ingress Ip restrictions (Traefik IpAllowList)
+  # example for a home ip: 143.176.206.80/32
+  private_networks: []
+
+# email
+email:
+  # Default smtp server parameters
+  smtp:
+    # The smtp host
+    # if the host is not empty, smtp configuration are added
+    # for example for argocd email notifications
+    host: ''
+    # the smtp port
+    port: ''
+    # the default from
+    from: ''
+    # the auth connection username
+    username: ''
+    # the auth connection password
+    password: ''
+    # hello (used to present itself, normally the email apex domain name)
+    hello: ''
+
+  
+# Kube-X Dashboard Variables
+kubernetes_dashboard:
+  enabled: true
+
+# Install Monitoring for the core Kubernetes components
+# Api Server, Dns, Controller Manager, Kubelet, Scheduler
+kubernetes_monitoring:
+  # Not a string, a boolean so no quote
+  enabled: false
+
+# Kube-X Traefik Variables
+traefik:
+  # Not a string, a boolean so no quote
+  enabled: true
+  # Instance/Release Name
+  # the kube-system namespace tells kubernetes that this app has a higher priority
+  namespace: 'kube-system'
+  # Middleware
+  # https://doc.traefik.io/traefik/middlewares
+  middleware:
+    # Create a basic Auth Middleware
+    # https://doc.traefik.io/traefik/middlewares/http/basicauth/
+    # Enabled by default when the admin user password is not empty
+    basicAuth:
+      # List of extra users
+      users:
+      # Example:
+      # users:
+      #   user1: password1
+      #   user2: password2
+  # Set the default certificate as default traefik cert
+  # Mandatory for kubernetes-dashboard on a local development
+  # The rootCA should be added to the OS/Browser as trusted root CA
+  # https://doc.traefik.io/traefik/https/tls/#default-certificate
+  defaultCertificate:
+    # Path to the cert file relatif to the working directory (ie cluster directory)
+    cert: ''
+    key: ''
+  # Traefik dashboard
+  dashboard:
+    # The FQDN is dnsName.apexDomain
+    # If not empty, an ingress is created
+    # example: hostname: 'traefik-haship.nip.io'
+    hostname: ''
+
+# Refer to the kubee-prometheus chart
+prometheus:
+  # Enable or disable prometheus
+  # Not a string, a boolean so no quote
+  enabled: false
+
+
+
+# Prometheus node exporter to gather server metrics, install dashboard and alerts
+# for node (ie OS, ie VPS)
+node_exporter:
+  # Not a string, a boolean so no quote
+  enabled: false
+  # The installation namespace
+  namespace: 'prometheus' # prometheus component
+
+# Prometheus Pushgateway to send metrics to Prometheus from a job
+pushgateway:
+  enabled: true
+
+# A prometheus exporter - Blackbox to do synthetic probe monitoring (ie verify the status of http,dns,... query)
+# Probe definition can be done via the Probes Manifest of prometheus operator
+blackbox_exporter:
+  # Not a string, a boolean so no quote
+  enabled: false
+  # The installation namespace
+  namespace: 'prometheus' # prometheus component
+
+# Prometheus Adapter
+prometheus_adapter:
+  # Not a string, a boolean so no quote
+  enabled: false
+  # The installation namespace
+  namespace: 'prometheus' # prometheus component
+
+
+
+# An HTTP application that gives you HTTP information
+# used to control Ingress configuration such as traefik
+whoami:
+  # Not a string, a boolean so no quote
+  enabled: false
+  # A non-empty Hostname will create an ingress
+  # example: hostname: 'whoami.kubee.dev'
+  hostname: ''
+  # Namespace
+  namespace: 'whoami'
+
+
+# Hashicorp Vault
+vault:
+  # Not a string, a boolean so no quote
+  enabled: false
+  # The hostname (create an ingress if not empty)
+  hostname: ''
+  # The installation namespace
+  namespace: 'vault'
+  # A KV secret store
+  kvSecretStore:
+    # The Vault KV secret engine version.
+    # This can be either "v1" or "v2", defaults to "v2"
+    version: 2
+    # the mount Path
+    mountPath: 'secret'
+
+# Argocd
+argocd:
+  enabled: true

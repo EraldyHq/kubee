@@ -2,10 +2,10 @@ dependencies:
 - name: kubernetes-dashboard
   repository: https://kubernetes.github.io/dashboard/
   version: 7.10.3
-- name: kube-x
-  repository: file://../kube-x
+- name: kubee
+  repository: file://../kubee
   version: 0.0.1
-- name: kube-x-cert-manager
+- name: kubee-cert-manager
   repository: file://../cert-manager
   version: 0.0.1
 digest: sha256:9a56d321316501ee1db8c7cddb485444f2bcfdf32c6261fb03a82db0db279c00

@@ -1,0 +1,71 @@
+#!/bin/bash
+#
+# @name kube-app-logs
+# @brief Return the log of pods of an app (workload)
+# @description
+#     Return the log of pods of an app (workload)
+#
+#     See also [stern](https://github.com/stern/stern) to tail multiple pods and container
+
+set -Eeuo pipefail
+source bashlib-echo.sh
+source bashlib-error.sh
+error::set_trap
+source bashlib-doc.sh
+source kubee-lib.sh
+
+######################
+# Main
+######################
+
+usage(){
+  echo "Usage:"
+  echo ""
+  echo "Return the logs of pods via an app name"
+  echo ""
+  echo '```bash'
+  # shellcheck disable=SC2005
+  echo "$(basename "$0") <app name>"
+  echo '```'
+  # shellcheck disable=SC2016
+  echo 'where `app name` is used in the label `app.kubernetes.io/name=<app name>`'
+
+}
+
+if [[ "${1:-}" == "synopsis" ]]; then
+  usage
+  exit
+fi
+
+# Check if the app name is provided
+if [ "${1-}" == "" ]; then
+    doc::help usage
+    echo::err "An app name should be provided"
+    exit 1
+fi
+
+APP_NAME="$1"
+
+# Help ?
+if [[ "$APP_NAME" =~ -h|help ]]; then
+  usage
+  exit
+fi
+
+read -r APP_NAMESPACE APP_NAME <<< "$(kube::get_qualified_app_name "$APP_NAME")"
+
+#echo::info Getting Pod Name and Namespace for app "$APP_NAME"
+read -r POD_NAME POD_NAMESPACE <<< "$(kube::get_resource_by_app_name "$APP_NAME" pod)"
+
+APP_LABEL=$(kube::get_app_label "$APP_NAME")
+if [ -z "$POD_NAME" ]; then
+    echo::err "Error: No pod found with the label $APP_LABEL"
+    exit 1
+fi
+
+# https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/
+echo::info "Getting logs for pods"
+COMMAND="kubectl logs -f -l $APP_LABEL -n $POD_NAMESPACE --all-containers=true"
+echo::info "Executing: $COMMAND"
+eval "$COMMAND"
+

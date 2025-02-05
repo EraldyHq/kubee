@@ -10,16 +10,16 @@ and optionally configure [vault](../vault/README.md) as secret store if
 ## Install
 
 ```bash
-kube-x-helx --cluster clusterName install external-secrets
-# example with a cluster name of kube-x-ssh
-kube-x-helx --cluster kube-x-ssh install external-secrets
+kubee-helx --cluster clusterName install external-secrets
+# example with a cluster name of kubee-ssh
+kubee-helx --cluster kubee-ssh install external-secrets
 ```
 
 ## Test/Check values before installation
 
 To check the [vault cluster store creation](templates/cluster-secret-store-vault.yaml)
 ```bash
-kube-x-helx -c kube-x-ssh template external-secrets | grep 'cluster-secret-store-vault.yaml' -A 30
+kubee-helx -c kubee-ssh template external-secrets | grep 'cluster-secret-store-vault.yaml' -A 30
 ```
 
 ## Test/Check after installation
@@ -27,19 +27,19 @@ kube-x-helx -c kube-x-ssh template external-secrets | grep 'cluster-secret-store
 * Chart are installed
 ```bash
 helm list -n external-secrets
-kube-x-helm list -n external-secrets
+kubee-helm list -n external-secrets
 ```
 ```
 NAME                    NAMESPACE               REVISION        UPDATED                                 STATUS          CHART                                   APP VERSION
-external-secrets        external-secrets        1               2025-01-08 15:49:54.444756277 +0100 CET deployed        kube-x-external-secrets-0.0.1           0.10.7     
-external-secrets-crds   external-secrets        1               2025-01-08 15:50:51.600676296 +0100 CET deployed        kube-x-external-secret-crds-0.0.1       0.10.7
+external-secrets        external-secrets        1               2025-01-08 15:49:54.444756277 +0100 CET deployed        kubee-external-secrets-0.0.1           0.10.7     
+external-secrets-crds   external-secrets        1               2025-01-08 15:50:51.600676296 +0100 CET deployed        kubee-external-secret-crds-0.0.1       0.10.7
 ```
 * Status of the vault cluster store manifest (if installed)
 
 
 ## Conf
 
-* Vault: The conf needs a secret (vault api token) to read the vault secrets. See [external-secret in kube-x values.yaml](../kube-x/values.yaml)
+* Vault: The conf needs a secret (vault api token) to read the vault secrets. See [external-secret in kubee values.yaml](../kubee/values.yaml)
 
 
 ## Note
@@ -55,10 +55,10 @@ helm lint
 ```
 * Install
 ```bash
-KUBE_X_APP_NAMESPACE=external-secrets
-helm upgrade --install -n $KUBE_X_APP_NAMESPACE --create-namespace external-secrets .
-# with kube-x
-kube-x-helm upgrade --install --create-namespace external-secrets .
+KUBEE_APP_NAMESPACE=external-secrets
+helm upgrade --install -n $KUBEE_APP_NAMESPACE --create-namespace external-secrets .
+# with kubee
+kubee-helm upgrade --install --create-namespace external-secrets .
 ```
 
 

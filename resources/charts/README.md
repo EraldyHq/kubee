@@ -3,7 +3,7 @@
 
 ## About
 This directory contains the charts that can be installed
-with the [helm-x package manager](../../docs/bin/kube-x-helm-x.md)
+with the [helm-x package manager](../../docs/bin/kubee-helm-x.md)
 
 ## Type
 

@@ -7,17 +7,17 @@ k3s_cluster:
       hosts:
         # The ansible host name
         # Used by k3s as the FQDN when creating the kubeconfig file
-        $KUBE_X_CLUSTER_SERVER_01_FQDN:
+        $KUBEE_CLUSTER_SERVER_01_FQDN:
           # The name of the host (dns or ip) to connect to,
           # if different from the inventory hostname.
-          ansible_host: "$KUBE_X_CLUSTER_SERVER_01_ANSIBLE_HOST"
+          ansible_host: "$KUBEE_CLUSTER_SERVER_01_ANSIBLE_HOST"
           # The FQDN to avoid: # https://docs.k3s.io/networking/basic-network-options#nodes-without-a-hostname
           # Some cloud providers, such as Linode, will create machines with "localhost" as the hostname
           # and others may not have a hostname set at all.
           # This can cause problems with domain name resolution.
           # You can run K3s with the --node-name flag or K3S_NODE_NAME environment variable
           # and this will pass the node name to resolve this issue.
-          kube_x_os_hostname: "$KUBE_X_CLUSTER_SERVER_01_FQDN"
+          kubee_os_hostname: "$KUBEE_CLUSTER_SERVER_01_FQDN"
 #    agent:
 #      hosts:
 #        192.16.35.12:
@@ -26,14 +26,14 @@ k3s_cluster:
     # With the host-specific parameter ansible_connection=<connector>
     # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#non-ssh-connection-types
     # see connection: ansible-doc -t connection -l
-    ansible_connection: "$KUBE_X_CLUSTER_CONNECTION"
+    ansible_connection: "$KUBEE_CLUSTER_CONNECTION"
     # The default username to use for log in. Most plugins default to the ‘current user running Ansible’.
     # Can be set via ANSIBLE_REMOTE_USER (default to the user executing Ansible)
     # https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_REMOTE_USER
-    ansible_user: "$KUBE_X_CLUSTER_SERVER_USER"
+    ansible_user: "$KUBEE_CLUSTER_SERVER_USER"
     # ANSIBLE_HOST_KEY_CHECKING
     # See also https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_HOST_KEY_CHECKING
-    kube_x_k3s_version: "$KUBE_X_CLUSTER_K3S_VERSION"
+    kubee_k3s_version: "$KUBEE_CLUSTER_K3S_VERSION"
     #
     # By default, K3s uses a single static token for both servers and agents.
     # This token cannot be changed once the cluster has been created.
@@ -56,5 +56,5 @@ k3s_cluster:
     # Or you can omit it if not using Vagrant and let the first server automatically generate one.
     # The value can also be given via an env: `K3S_TOKEN` - Ref: https://docs.k3s.io/cli/server#cluster-options
     #
-    kube_x_k3s_token: "$KUBE_X_CLUSTER_K3S_TOKEN"
+    kubee_k3s_token: "$KUBEE_CLUSTER_K3S_TOKEN"
 

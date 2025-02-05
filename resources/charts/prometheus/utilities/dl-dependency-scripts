@@ -12,8 +12,17 @@ FILES=(
   "components/prometheus.libsonnet"
   "components/prometheus-operator.libsonnet"
   "components/kube-rbac-proxy.libsonnet"
-  "components/alertmanager.libsonnet" # needed for variable reference
+  "components/alertmanager.libsonnet" # needed only for variable reference
   "versions.json"
+  # Custom Mixin (ie general rules, particularly targetdown)
+  # https://runbooks.prometheus-operator.dev/runbooks/general/
+  "components/mixin/custom.libsonnet"
+  "components/mixin/alerts/alerts.libsonnet"
+  "components/mixin/alerts/general.libsonnet"
+  "components/mixin/alerts/node.libsonnet"
+  "components/mixin/rules/rules.libsonnet"
+  "components/mixin/rules/general.libsonnet"
+  "components/mixin/rules/node-rules.libsonnet"
 )
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )

@@ -1,18 +1,18 @@
-{{- if ne .Values.kube_x.gogs.hostname "" -}}
+{{- if ne .Values.kubee.gogs.hostname "" -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: gogs
-  namespace: {{ .Values.kube_x.gogs.namespace }}
+  namespace: {{ .Values.kubee.gogs.namespace }}
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    {{- if ne (((.Values).kube_x).cert_manager).enabled false }}
-    cert-manager.io/cluster-issuer: '{{ .Values.kube_x.cert_manager.defaultIssuerName }}'
+    {{- if ne (((.Values).kubee).cert_manager).enabled false }}
+    cert-manager.io/cluster-issuer: '{{ .Values.kubee.cert_manager.defaultIssuerName }}'
     {{- end }}
 spec:
   rules:
-    - host: {{ .Values.kube_x.gogs.hostname }}
+    - host: {{ .Values.kubee.gogs.hostname }}
       http:
         paths:
           - backend:
@@ -24,6 +24,6 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - {{ .Values.kube_x.gogs.hostname }}
+        - {{ .Values.kubee.gogs.hostname }}
       secretName: gogs-cert
 {{- end -}}

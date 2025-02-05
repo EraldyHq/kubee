@@ -1,0 +1,92 @@
+#!/bin/bash
+# @name kube-app-restart
+# @brief Restart a workload (deployment/statefulset) by app name
+# @description
+#     Restart a workload by app name
+#     A deployment or statefulset is searched with the label `app.kubernetes.io/name=<app name>`
+#     and restarted if found with the command `kubectl rollout restart`
+#
+#
+
+
+synopsis(){
+
+  echo ""
+  echo "Restart an app (ie rollout restart a deployment or statefulset)"
+  echo ""
+  echo '```bash'
+  echo "$(basename "$0") [app name]"
+  echo '```'
+  # shellcheck disable=SC2016
+  echo 'where `app name` is'
+  # shellcheck disable=SC2016
+  echo '* optional if you run the command in the app directory (default to: `$KUBEE_APP_NAME`)'
+  echo '* mandatory otherwise'
+  echo ''
+
+
+}
+
+# shellcheck source=./bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+error::set_strict_mode
+error::set_trap
+# shellcheck source=./bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=./bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+# shellcheck source=./bashlib-kube.sh
+source "kubee-lib.sh"
+
+if [[ "${1:-}" == "synopsis" ]]; then
+  synopsis
+  exit
+fi
+
+######################
+# Main
+######################
+
+KUBEE_APP_NAME=${1:-}
+
+# Help
+if [[ "$KUBEE_APP_NAME" =~ -h|--help|help ]]; then
+  doc::help synopsis
+  exit
+fi
+
+# Get env
+KUBEE_ENV=$(source kubee-env "$KUBEE_APP_NAME") || error::exit $?
+eval "$KUBEE_ENV"
+
+if [ "$KUBEE_APP_NAME" == "" ]; then
+    doc::help synopsis
+    echo:err "An app name should be provided as argument or the KUBEE_APP_NAME env should not be empty"
+    exit 1
+fi
+
+
+echo::info "Searching a deployment"
+read -r DEPLOYMENT_NAME NAMESPACE  <<< "$(kube::get_resource_by_app_name "$KUBEE_APP_NAME" deployment)"
+if [ "$DEPLOYMENT_NAME" != "" ]; then
+    echo::info "Deployment found: $DEPLOYMENT_NAME in namespace: $NAMESPACE"
+    echo::info "Restarting"
+    COMMAND="kubectl rollout restart deployment/$DEPLOYMENT_NAME -n $NAMESPACE"
+    echo::info "Executing: $COMMAND"
+    eval "$COMMAND"
+    exit 0
+fi
+
+echo::info "No Deployment found. Searching a Statefulset"
+read -r STATEFULSET_NAME NAMESPACE <<< "$(kube::get_resource_by_app_name "$KUBEE_APP_NAME" statefulset)"
+if [ "$STATEFULSET_NAME" != "" ]; then
+    echo::info "StatefulSet found: $STATEFULSET_NAME in namespace: $NAMESPACE"
+    echo::info "Restarting"
+    COMMAND="kubectl rollout restart statefulset/$STATEFULSET_NAME -n $NAMESPACE"
+    echo::info "Executing: $COMMAND"
+    eval "$COMMAND"
+    exit 0
+fi
+
+echo::err "No deployment or statefulset found for the app $KUBEE_APP_NAME (with the label $(kube::get_app_label "$KUBEE_APP_NAME")"
+exit 1

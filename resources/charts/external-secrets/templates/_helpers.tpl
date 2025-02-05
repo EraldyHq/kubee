@@ -2,7 +2,7 @@
 Return the name of the grafana secret
 */}}
 {{- define "external-secrets-vault-secret-name" }}
-{{- printf "%s-vault-api-token" (include "kube-x-name-prefix" (dict "Release" $.Release "Values" $.Values.kube_x ))}}
+{{- printf "%s-vault-api-token" (include "kubee-name-prefix" (dict "Release" $.Release "Values" $.Values.kubee ))}}
 {{- end }}
 
 {{/*

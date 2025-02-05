@@ -6,7 +6,7 @@ namespace: 'external-secrets'
 # We support only vault for now
 # If the api token is not empty and vault is enabled, a vault secret store is created
 store:
-  name: 'kube-x-external-secret-store'
+  name: 'kubee-external-secret-store'
   vault:
     api_token: ''
 

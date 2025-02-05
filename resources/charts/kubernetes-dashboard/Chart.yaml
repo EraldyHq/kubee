@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kube-x-kubernetes-dashboard
+name: kubee-kubernetes-dashboard
 description: A Custom Kubernetes Dashboard chart
 
 # A chart can be either an 'application' or a 'library' chart.
@@ -35,13 +35,13 @@ dependencies:
     # must consist of lower case alphanumeric characters, '-' or '.'
     # * With kong: name resolution failed
     #alias: kubernetes_dashboard
-  - name: kube-x
+  - name: kubee
     version: 0.0.1
-    repository: file://../kube-x
-    alias: kube_x
+    repository: file://../kubee
+    alias: kubee
   # For the ingress
-  - name: kube-x-cert-manager
+  - name: kubee-cert-manager
     version: 0.0.1
     repository: file://../cert-manager
     alias: cert_manager
-    condition: kube_x_internal.install_cross_dependency
+    condition: kubee_internal.install_cross_dependency

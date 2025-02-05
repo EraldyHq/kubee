@@ -3,7 +3,7 @@ enabled: false
 # The namespace
 namespace: 'kubernetes-dashboard'
 # The external DNS
-# Example: hostname: 'dash.kube-x.dev'
+# Example: hostname: 'dash.kubee.dev'
 # If set, an ingress will be created
 hostname: ''
 
@@ -98,7 +98,7 @@ kubernetes-dashboard:
       tag: "3.9"
 
 # Internal, don't change
-kube_x_internal:
+kubee_internal:
   install_cross_dependency: false
 
 # Move these values to helpers

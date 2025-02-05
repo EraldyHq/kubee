@@ -1,5 +1,5 @@
 # Temporary
-kube_x:
+kubee:
   gogs:
     enabled: false
     namespace: gogs

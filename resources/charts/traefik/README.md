@@ -2,7 +2,7 @@
 
 
 ## About
-The `Kube-x Traefik sub-chart` will install Traefik. 
+The `Kubee Traefik sub-chart` will install Traefik. 
 
 ## Prerequisite
 
@@ -18,7 +18,7 @@ The `Kube-x Traefik sub-chart` will install Traefik.
 
 * Download dependency:
 ```bash
-helm dependency update # update the dependencies (ie kube-x if changed version or not)
+helm dependency update # update the dependencies (ie kubee if changed version or not)
 ```
 * Verify
 ```bash
@@ -29,8 +29,8 @@ helm template . --values=myvalues.yaml --show-only charts/(chart alias)/template
 * Install
 ```bash
 # namespace is hardcoded in the value.yaml
-# KUBE_X_APP_NAMESPACE=cert-manager
+# KUBEE_APP_NAMESPACE=cert-manager
 helm upgrade --install -n traefik --create-namespace traefik .
-# with kube-x
-kube-x-helm upgrade --install --create-namespace -f global-values.yaml  traefik .
+# with kubee
+kubee-helm upgrade --install --create-namespace -f global-values.yaml  traefik .
 ```

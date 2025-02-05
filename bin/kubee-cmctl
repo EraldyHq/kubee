@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# shellcheck source=./bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+error::set_strict_mode
+error::set_trap
+# shellcheck source=./bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=./bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+source "kubee-lib.sh"
+
+
+synopsis(){
+  cat <<EOF
+\`\`\`bash
+$(basename "$0") [-n|--namespace namespaceName] [cmctl args]
+\`\`\`
+
+A kubee wrapper around [cmctl](https://cert-manager.io/docs/reference/cmctl/)
+
+EOF
+}
+
+if [ "${1:-}" == "synopsis" ]; then
+  synopsis
+  exit
+fi
+
+args=()
+
+KUBEE_APP_NAMESPACE=${KUBEE_APP_NAMESPACE:-}
+while [[ $# -gt 0 ]]
+do
+   case  "$1" in
+    -n|--namespace)
+      shift
+      if [ "${1:-}" == "" ]; then
+        echo::err "The -n or --namespace flag expects a value"
+        exit 1
+      fi
+      KUBEE_APP_NAMESPACE="$1"
+      ;;
+    --all-namespaces)
+      # The created kubeconfig needs a namespace
+      # In a all-namespace query we set it to default
+      KUBEE_APP_NAMESPACE="default"
+      args+=("$1")
+      ;;
+    *)
+      args+=("$1")
+      ;;
+   esac
+   shift
+done
+
+
+
+# Get env
+KUBEE_ENV=$(source kubee-env) || error::exit $?
+eval "$KUBEE_ENV"
+
+
+
+
+###########################
+# Connection test
+###########################
+# We test the connection because otherwise the user
+# may get a message that a resource could not be found
+# where the culprit should have been the connection
+# Test Connection
+# Debug
+if [ "$BASHLIB_ECHO_LEVEL" == "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
+  kube::test_connection
+fi
+
+
+cmctl "${args[@]}"

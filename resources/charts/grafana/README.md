@@ -11,12 +11,12 @@ This app:
 ## Install
 
 ```bash
-kube-x-helx --cluster clusterName install grafana
+kubee-helx --cluster clusterName install grafana
 ```
 
 ## Values
 
-* [Kube_x Instance](../kube-x/values.yaml)
+* [Kube_x Instance](../kubee/values.yaml)
 * [Grafana Operator](https://grafana.github.io/grafana-operator/docs/installation/helm/#values)
 
 ## Notes
@@ -38,7 +38,7 @@ CRD are packaged in their own chart.
 
 * Download dependency:
 ```bash
-helm dependency update # update the dependencies (ie kube-x if changed version or not)
+helm dependency update # update the dependencies (ie kubee if changed version or not)
 ```
 * Test
 ```bash

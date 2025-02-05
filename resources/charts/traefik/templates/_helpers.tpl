@@ -17,9 +17,9 @@ Traefik expects the passwords to be hashed using MD5, SHA1, or BCrypt.
 {{- define "basic-auth-list-base64-encode" }}
 {{- $result := list }}
 {{/* Add the admin user */}}
-{{- $result = append $result (htpasswd .Values.kube_x.auth.admin_user.username .Values.kube_x.auth.admin_user.password | b64enc)}}
+{{- $result = append $result (htpasswd .Values.kubee.auth.admin_user.username .Values.kubee.auth.admin_user.password | b64enc)}}
 {{/*https://github.com/helm/helm/issues/7533#issuecomment-1039521776*/}}
-{{- range $user, $password := .Values.kube_x.traefik.middleware.basicAuth.users }}
+{{- range $user, $password := .Values.kubee.traefik.middleware.basicAuth.users }}
 {{- $result = append $result (htpasswd $user $password | b64enc) }}
 {{- end }}
 {{- join "\n" $result | indent 4}}
@@ -30,7 +30,7 @@ Traefik expects the passwords to be hashed using MD5, SHA1, or BCrypt.
 Name Helper
 */}}
 {{- define "traefik-name-prefix" }}
-{{- include "kube-x-name-prefix" (dict "Release" .Release "Values" .Values.kube_x )}}
+{{- include "kubee-name-prefix" (dict "Release" .Release "Values" .Values.kubee )}}
 {{- end }}
 
 
@@ -40,7 +40,7 @@ Name Helper to print the dashboard cert name for consistency
 */}}
 {{- define "traefik-name-dashboard-cert" }}
 {{- printf "%s-%s"
-    (include "kube-x-name-prefix" (dict "Release" .Release "Values" .Values.kube_x ))
+    (include "kubee-name-prefix" (dict "Release" .Release "Values" .Values.kubee ))
     "dashboard-cert"
     }}
 {{- end }}

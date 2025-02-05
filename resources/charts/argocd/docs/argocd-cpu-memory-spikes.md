@@ -13,9 +13,9 @@ All perf conf are explained [here](https://argo-cd.readthedocs.io/en/stable/oper
 [argocd-application-controller](https://argo-cd.readthedocs.io/en/stable/operator-manual/server-commands/argocd-application-controller/)
 is a controller that continuously monitors running applications and compares the current, live state against the desired target state (as specified in the repo).
 
-By default, `kubectl-parallelism-limit` is set to `1` in a `kube-x` cluster. 
+By default, `kubectl-parallelism-limit` is set to `1` in a `kubee` cluster. 
 
-You can change it via the `kube-x.argocd.conf.controller_kubectl_parallelism_limit` [conf](../../kube-x/values.yaml)
+You can change it via the `kubee.argocd.conf.controller_kubectl_parallelism_limit` [conf](../../kubee/values.yaml)
 
 Other important Perf Flags:
 * `--status-processors`: Number of application status processors (default 1)

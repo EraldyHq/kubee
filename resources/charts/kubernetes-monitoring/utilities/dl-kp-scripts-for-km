@@ -13,14 +13,6 @@ FILES=(
   "components/kube-state-metrics.libsonnet"
   "components/node-exporter.libsonnet"
   "components/kube-rbac-proxy.libsonnet" # dep of exporters
-  # Custom Mixin
-  "components/mixin/custom.libsonnet"
-  "components/mixin/alerts/alerts.libsonnet"
-  "components/mixin/alerts/general.libsonnet"
-  "components/mixin/alerts/node.libsonnet"
-  "components/mixin/rules/rules.libsonnet"
-  "components/mixin/rules/general.libsonnet"
-  "components/mixin/rules/node-rules.libsonnet"
   "addons/dropping-deprecated-metrics-relabelings.libsonnet"
   "versions.json"
 )

@@ -12,8 +12,8 @@ This chart installs the Traefik CRDs.
 CRD are global. No namespace is needed
 ```bash
 helm upgrade --install -n traefik --create-namespace traefik-crds .
-# with kube-x
-kube-x-helm upgrade --install traefik-crds .
+# with kubee
+kubee-helm upgrade --install traefik-crds .
 ```
 
 ## Contrib

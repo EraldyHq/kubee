@@ -4,7 +4,7 @@
   # DaemonSet install one Node Exporter on each node
   # and `hostNetwork: true` will install it on the host network
 */}}
-{{- if eq .Values.kube_x.prometheus.node_exporter.enabled true }}
+{{- if eq .Values.kubee.prometheus.node_exporter.enabled true }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:

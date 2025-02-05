@@ -1,19 +1,19 @@
-{{- if ne .Values.kube_x.vault.hostname "" -}}
+{{- if ne .Values.kubee.vault.hostname "" -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: vault
-  namespace: {{ .Values.kube_x.vault.namespace }}
+  namespace: {{ .Values.kubee.vault.namespace }}
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    {{- if ne (((.Values).kube_x).cert_manager).enabled false }}
-    cert-manager.io/cluster-issuer: '{{ .Values.kube_x.cert_manager.defaultIssuerName }}'
+    {{- if ne (((.Values).kubee).cert_manager).enabled false }}
+    cert-manager.io/cluster-issuer: '{{ .Values.kubee.cert_manager.defaultIssuerName }}'
     {{- end }}
 spec:
   ingressClassName: traefik
   rules:
-    - host: '{{ .Values.kube_x.vault.hostname }}'
+    - host: '{{ .Values.kubee.vault.hostname }}'
       http:
         paths:
           - backend:
@@ -23,10 +23,10 @@ spec:
                   number: 8200
             path: /
             pathType: Prefix
-  {{- if ne (((.Values.kube_x).cert_manager).enabled) false }}
+  {{- if ne (((.Values.kubee).cert_manager).enabled) false }}
   tls:
     - hosts:
-        - '{{ .Values.kube_x.vault.hostname }}'
+        - '{{ .Values.kubee.vault.hostname }}'
       secretName: 'vault-cert'
   {{- end }}
 {{- end -}}

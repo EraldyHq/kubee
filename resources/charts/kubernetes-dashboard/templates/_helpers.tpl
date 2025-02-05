@@ -10,7 +10,7 @@ Helper to print the basic auth name for consitency
 */}}
 {{- define "kubernetes-dashboard-name" }}
 {{- printf "%s"
-    (include "kube-x-name-prefix" (dict "Release" .Release "Values" .Values.kube_x ))
+    (include "kubee-name-prefix" (dict "Release" .Release "Values" .Values.kubee ))
     }}
 {{- end }}
 
@@ -19,7 +19,7 @@ Name Helper
 */}}
 {{- define "kubernetes-dashboard-transport-no-tls-name" }}
 {{- printf "%s-%s"
-    (include "kube-x-name-prefix" (dict "Release" .Release "Values" .Values.kube_x ))
+    (include "kubee-name-prefix" (dict "Release" .Release "Values" .Values.kubee ))
     "no-tls"
     }}
 {{- end }}

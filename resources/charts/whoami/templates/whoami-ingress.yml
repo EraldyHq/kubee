@@ -1,6 +1,6 @@
 {{/*
 Test:
-helm template -s templates/whoami-ingress.yml --set 'kube_x.cert_manager.enabled=true' .
+helm template -s templates/whoami-ingress.yml --set 'kubee.cert_manager.enabled=true' .
 */}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -10,12 +10,12 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    {{- if ne (((.Values.kube_x).cert_manager).enabled) false }}
-    cert-manager.io/cluster-issuer: '{{ .Values.kube_x.cert_manager.defaultIssuerName }}'
+    {{- if ne (((.Values.kubee).cert_manager).enabled) false }}
+    cert-manager.io/cluster-issuer: '{{ .Values.kubee.cert_manager.defaultIssuerName }}'
     {{- end }}
 spec:
   rules:
-    - host: '{{ .Values.kube_x.whoami.hostname }}'
+    - host: '{{ .Values.kubee.whoami.hostname }}'
       http:
         paths:
           - backend:
@@ -25,10 +25,10 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
-  {{- if ne (((.Values.kube_x).cert_manager).enabled) false }}
+  {{- if ne (((.Values.kubee).cert_manager).enabled) false }}
   tls:
     - hosts:
-        - '{{ .Values.kube_x.whoami.hostname }}'
+        - '{{ .Values.kubee.whoami.hostname }}'
       secretName: '{{ include "whoami-name" . }}'
   {{- end }}
 ---

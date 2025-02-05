@@ -10,7 +10,7 @@ namespace: 'monitoring'
 # Instance name
 # The operator uses it to create unique alertmanager
 # It's also a Kube-Prometheus mandatory variable
-name: 'kube-x'
+name: 'kubee'
 # hostname (install an ingress if not empty)
 hostname: ''
 
@@ -63,5 +63,5 @@ secret:
 
 # Internal, don't change
 # Used to not output manifest from cross helm dependency
-kube_x_internal:
+kubee_internal:
   install_cross_dependency: false

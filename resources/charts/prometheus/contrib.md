@@ -24,7 +24,7 @@ jb install github.com/prometheus/prometheus/documentation/prometheus-mixin@v3.1.
 ```bash
 # set debug (to not delete the created manifests in the jsonnet/out directory)
 export BASHLIB_ECHO_LEVEL=4
-kube-x-helm-x -n prometheus template prometheus > /tmp/all.yaml
+kubee-helm-x -n prometheus template prometheus > /tmp/all.yaml
 ```
 * or Raw Jsonnet command
 ```bash
@@ -32,7 +32,7 @@ cd jsonnet
 rm -rf out && mkdir -p out && jsonnet -J vendor \
   --multi out \
   "main.jsonnet"  \
-  --ext-code "values={ kube_x: std.parseYaml(importstr \"../../kube-x/values.yaml\") }" \
+  --ext-code "values={ kubee: std.parseYaml(importstr \"../../kubee/values.yaml\") }" \
   | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
 ```
 

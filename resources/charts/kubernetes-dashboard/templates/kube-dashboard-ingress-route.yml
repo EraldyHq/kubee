@@ -20,7 +20,7 @@ metadata:
 spec:
   entryPoints:
     - websecure
-  {{- if ne (((.Values.kube_x).cert_manager).enabled) false}}
+  {{- if ne (((.Values.kubee).cert_manager).enabled) false}}
   tls:
     # in the IngressRoute namespace
     secretName: '{{ include "kubernetes-dashboard-name" . }}'

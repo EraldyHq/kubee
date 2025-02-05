@@ -88,5 +88,5 @@ node_exporter:
 
 # Don't change, don't touch
 # Used to not output template from cross dependency in Chart.yaml
-kube_x_internal:
+kubee_internal:
   install_cross_dependency: false

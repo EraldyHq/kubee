@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kube-x-external-secrets
+name: kubee-external-secrets
 description: A Helm sub chart for External Secrets
 
 # A chart can be either an 'application' or a 'library' chart.
@@ -31,7 +31,7 @@ dependencies:
     repository: https://charts.external-secrets.io
     alias: external-secrets
     #condition: external-secrets.enabled
-  - name: kube-x
+  - name: kubee
     version: 0.0.1
-    repository: file://../kube-x
-    alias: kube_x
+    repository: file://../kubee
+    alias: kubee
