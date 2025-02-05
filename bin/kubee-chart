@@ -465,8 +465,7 @@ print_values(){
 args=$(getopt -l "cluster:,debug,skip-schema-validation,output-dir:,out" -o "c:o:" -- "$@")
 # eval set to set the positional arguments back to $args
 eval set -- "$args"
-KUBEE_DEFAULT_CLUSTER_NAME=${KUBEE_DEFAULT_CLUSTER_NAME:-}
-KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-$KUBEE_DEFAULT_CLUSTER_NAME}
+KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
 HELM_EXTRA_FLAGS=()
 OPTION_OUTPUT_DIR=""
 export FD_STDOUT_COMMAND="/dev/null" # where the stdout, stderr of command should go, exported because it's used also in the helm post-renderer

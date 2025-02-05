@@ -44,6 +44,10 @@ and is used to determine the [connection namespace](#namespace-order-of-preceden
 `KUBEE_DEFAULT_NAMESPACE` defines the default [connection namespace](#namespace-order-of-precedence)
 when no [namespace has been found](#namespace-order-of-precedence)
 
+## KUBE_CLUSTER_NAME
+
+`KUBE_CLUSTER_NAME` defines the cluster name.
+You can set it also via the `-c` or `--cluster` command line option.
 
 ## KUBEE_APP_HOME
 
