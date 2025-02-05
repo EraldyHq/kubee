@@ -1,7 +1,7 @@
 # Healthckecks.io integration 
 
 ## About
-This Kube-e Chart permits to monitor [healthchecks.io](https://healthchecks.io).
+This Kubee Chart permits to monitor [healthchecks.io](https://healthchecks.io).
 
 It will scrape the [Healthchecks.io prometheus endpoint](https://healthchecks.io/docs/configuring_prometheus/)
 
