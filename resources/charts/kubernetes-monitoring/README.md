@@ -71,7 +71,11 @@ The kubelet endpoint gives you metrics from:
 
 ### Bucket
 
-* Job: kubelet and api server
+Bucket are used for analytics query.
+
+For instance: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeapierrorbudgetburn/
+
+* The following metrics are dropped (on all scrape job - ie in the `kubelet` and `api server` job)
 ```
 apiserver_request_duration_seconds_bucket{}	32809
 apiserver_request_body_size_bytes_bucket{}	15744
@@ -81,4 +85,19 @@ apiserver_request_sli_duration_seconds_bucket{}	26092
 etcd_request_duration_seconds_bucket{}	22320
 workqueue_work_duration_seconds_bucket{}	2002
 workqueue_queue_duration_seconds_bucket{} 2002
+```
+
+## Support
+
+### apiserver_request_duration_seconds_bucket drop bug 
+
+Bug in Kubernetes Prometheus with the dropping of `le` in the bucket
+```jsonnet
+{
+    sourceLabels: ['__name__', 'le'],
+    regex: 'apiserver_request_duration_seconds_bucket;(0.15|0.25|0.3|0.35|0.4|0.45|0.6|0.7|0.8|0.9|1.25|1.5|1.75|2.5|3|3.5|4.5|6|7|8|9|15|25|30|50)',
+    # should be:
+    regex: 'apiserver_request_duration_seconds_bucket;(0.15|0.25|0.3|0.35|0.4|0.45|0.6|0.7|0.8|0.9|1.25|1.5|1.75|2.5|3.0|3.5|4.5|6.0|7.0|8.0|9.0|15.0|25.0|30.0|50.0)',
+    action: 'drop',
+},
 ```
