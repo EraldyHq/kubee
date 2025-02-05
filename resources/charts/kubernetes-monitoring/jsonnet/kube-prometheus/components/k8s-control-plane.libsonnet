@@ -321,7 +321,7 @@ function(params) {
             },
             {
               sourceLabels: ['__name__', 'le'],
-              regex: 'apiserver_request_duration_seconds_bucket;(0.15|0.25|0.3|0.35|0.4|0.45|0.6|0.7|0.8|0.9|1.25|1.5|1.75|2.5|3|3.5|4.5|6|7|8|9|15|25|30|50)',
+              regex: 'apiserver_request_duration_seconds_bucket;(0.15|0.25|0.3|0.35|0.4|0.45|0.6|0.7|0.8|0.9|1.25|1.5|1.75|2.5|3.0|3.5|4.5|6.0|7.0|8.0|9.0|15.0|25.0|30.0|50.0)',
               action: 'drop',
             },
           ],

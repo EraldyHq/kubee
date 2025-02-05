@@ -68,3 +68,17 @@ The api server endpoint gives you metrics from:
 * and `proxy`
 The kubelet endpoint gives you metrics from:
 * the `cadvisor`
+
+### Bucket
+
+* Job: kubelet and api server
+```
+apiserver_request_duration_seconds_bucket{}	32809
+apiserver_request_body_size_bytes_bucket{}	15744
+apiserver_response_sizes_bucket{}	6176
+apiserver_watch_events_sizes_bucket{}	2682
+apiserver_request_sli_duration_seconds_bucket{}	26092
+etcd_request_duration_seconds_bucket{}	22320
+workqueue_work_duration_seconds_bucket{}	2002
+workqueue_queue_duration_seconds_bucket{} 2002
+```
