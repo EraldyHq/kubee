@@ -6,54 +6,74 @@ error::set_strict_mode
 error::set_trap
 # shellcheck source=../../bash-lib/lib/bashlib-echo.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-bash.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-command.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-template.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
-
-
+# shellcheck source=./kubee-lib.sh
+source "kubee-lib.sh"
 
 
 inventory_file(){
 
-   SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-   KUBEE_CLUSTER_DIR="${SCRIPT_DIR}/../resources/cluster/$KUBEE_CLUSTER_NAME"
-   # Envrc
-   local KUBEE_ENV_FILE="${KUBEE_CLUSTER_ENV_FILE:-"$KUBEE_CLUSTER_DIR/.envrc"}"
-   if [ -f "$KUBEE_ENV_FILE" ]; then
-      echo::debug "Sourcing env file $KUBEE_ENV_FILE"
-      source "$KUBEE_ENV_FILE"
-   fi
-
-   # Connection type to the host. This can be the name of any Ansible connection plugin.
-   # The default is ssh
-   # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#connecting-to-hosts-behavioral-inventory-parameters
-   # See connection: ansible-doc -t connection -l
-   export KUBEE_CLUSTER_CONNECTION=${KUBEE_CLUSTER_CONNECTION:-ssh}
-
-   # FQDN
-   export KUBEE_CLUSTER_SERVER_01_FQDN="$KUBEE_CLUSTER_SERVER_01_NAME.$KUBEE_CLUSTER_APEX_DOMAIN"
-
-   # The host
-   export KUBEE_CLUSTER_SERVER_01_ANSIBLE_HOST;
-   case $KUBEE_CLUSTER_CONNECTION in
-      "ssh"|"ansible.builtin.ssh")
-        KUBEE_CLUSTER_SERVER_01_ANSIBLE_HOST=$KUBEE_CLUSTER_SERVER_01_IP
-        ;;
-      "docker"|"community.docker.docker")
-        KUBEE_CLUSTER_SERVER_01_ANSIBLE_HOST=$KUBEE_CLUSTER_SERVER_01_NAME
-        ;;
-      *)
-        ;;
-   esac
-
    # Inventory
    local KUBEE_INVENTORY_FILE="${KUBEE_CLUSTER_INVENTORY_FILE:-"$KUBEE_CLUSTER_DIR/ansible-inventory.yml"}"
    if [ ! -f "$KUBEE_INVENTORY_FILE" ]; then
-     echo::err "The ansible inventory file $KUBEE_INVENTORY_FILE does not exist"
-     exit 1
+     echo::info "Cluster ansible inventory file $KUBEE_INVENTORY_FILE does not exist, using the kubee inventory file"
+     SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+     KUBEE_INVENTORY_FILE="${SCRIPT_DIR}/../resources/ansible/inventory.yml"
+     echo::debug "Kubee inventory file $KUBEE_INVENTORY_FILE"
+
+     if [ ! -f "$KUBEE_INVENTORY_FILE" ]; then
+       echo::err "Internal error: The kubee default ansible inventory.yml could not be found at $KUBEE_INVENTORY_FILE"
+       return 1
+     fi
+
+     # Connection type to the host. This can be the name of any Ansible connection plugin.
+     # The default is ssh
+     # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#connecting-to-hosts-behavioral-inventory-parameters
+     # See connection: ansible-doc -t connection -l
+     export KUBEE_CLUSTER_CONNECTION=${KUBEE_CLUSTER_CONNECTION:-ssh}
+
+     # FQDN
+     export KUBEE_CLUSTER_SERVER_01_FQDN="${KUBEE_CLUSTER_SERVER_01_FQDN:-}"
+     if [ "$KUBEE_CLUSTER_SERVER_01_FQDN" == "" ]; then
+       echo::err "The env KUBEE_CLUSTER_SERVER_01_FQDN is mandatory for a SSH connection"
+       echo::err "It's the full qualified hostname (FQDN) that you have in your DNS zone"
+       echo::err "Example: kube-master-01.example.com"
+       return 1
+     fi
+
+     # The host
+     export KUBEE_CLUSTER_SERVER_01_ANSIBLE_HOST;
+     case $KUBEE_CLUSTER_CONNECTION in
+       "ssh"|"ansible.builtin.ssh")
+         local KUBEE_CLUSTER_SERVER_01_IP="${KUBEE_CLUSTER_SERVER_01_IP:-}"
+         if [ "$KUBEE_CLUSTER_SERVER_01_IP" == "" ]; then
+           echo::err "The env KUBEE_CLUSTER_SERVER_01_IP is mandatory for a ssh connection"
+           echo::err "This the IP of the server"
+           return 1
+         fi
+         KUBEE_CLUSTER_SERVER_01_ANSIBLE_HOST=$KUBEE_CLUSTER_SERVER_01_IP
+         ;;
+       "docker"|"community.docker.docker")
+         local KUBEE_CLUSTER_SERVER_01_NAME="${KUBEE_CLUSTER_SERVER_01_NAME:-}"
+         if [ "$KUBEE_CLUSTER_SERVER_01_NAME" == "" ]; then
+           echo::err "The env KUBEE_CLUSTER_SERVER_01_NAME is mandatory for a docker connection"
+           echo::err "This the name of the container"
+           return 1
+         fi
+         KUBEE_CLUSTER_SERVER_01_ANSIBLE_HOST=$KUBEE_CLUSTER_SERVER_01_NAME
+         ;;
+       *)
+         echo::err "Connection $KUBEE_CLUSTER_CONNECTION is not yet supported"
+         return 1
+         ;;
+     esac
    fi
 
 
@@ -68,21 +88,31 @@ inventory_file(){
    local SHM_INVENTORY_FILE="/dev/shm/kubee-ansible-inventory.yml"
 
    envsubst < "$KUBEE_INVENTORY_FILE" >| "$SHM_INVENTORY_FILE"
+   #bash::trap "rm $SHM_INVENTORY_FILE" EXIT
    echo "$SHM_INVENTORY_FILE"
 
 }
 
+
+
 play(){
 
-   if ! SHM_INVENTORY_FILE=$(inventory_file); then
-     echo::err "Inventory file has errors"
-     return 1
-   fi
-   ansible-playbook -i "$SHM_INVENTORY_FILE" ans_x.ans_x_base.kubee_site.yml
+  ansible-playbook -i "$SHM_INVENTORY_FILE" ans_x.ans_x_base.kubee_site.yml
 
 }
 
+upgrade(){
 
+  ansible-playbook -i "$SHM_INVENTORY_FILE" k3s.orchestration.upgrade.yml
+
+}
+
+ping(){
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/ping_module.html
+
+  ansible -i "$SHM_INVENTORY_FILE" all -m ping
+
+}
 
 # @internal
 synopsis(){
@@ -99,16 +129,84 @@ $(basename "$0") command opts
 Commands:
 
 * play             Provision a cluster
+* upgrade          Upgrade a cluster
 * inventory        Print the Ansible inventory file
+* ping             Verify the connection to the host
 
 Global Options:
 
 * -h --help                       Show this help message
+* -c --cluster                    The cluster name (default to KUBEE_CLUSTER_NAME)
 
 
 EOT
 }
 
+
+
+# Assign the rest of the arguments to an array
+args=$(getopt -l "cluster:,debug" -o "c:" -- "$@")
+# eval set to set the positional arguments back to $args
+eval set -- "$args"
+
+KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
+while [[ $# -gt 0 ]]
+do
+   case "$1" in
+      "--cluster"|"-c")
+        shift
+        KUBEE_CLUSTER_NAME=${1}
+        shift
+      ;;
+      "--debug")
+        export BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_DEBUG_LEVEL";
+        HELM_EXTRA_FLAGS+=("--debug");
+        FD_STDOUT_COMMAND=$(echo::get_file_descriptor);
+        shift
+      ;;
+      "--")
+        shift
+        break;
+        # from now on, $@ contains only the arguments
+        ;;
+   esac
+done
+
+# Cluster Directory
+if [ "$KUBEE_CLUSTER_NAME" == "" ]; then
+  echo::err "The cluster is mandatory"
+  exit 1
+fi
+
+KUBEE_CLUSTER_DIR=$(kubee::get_cluster_directory "$KUBEE_CLUSTER_NAME")
+# Envrc
+# Used in all function
+KUBEE_ENV_FILE="${KUBEE_CLUSTER_ENV_FILE:-"$KUBEE_CLUSTER_DIR/.envrc"}"
+if [ -f "$KUBEE_ENV_FILE" ]; then
+   echo::debug "Sourcing cluster env file $KUBEE_ENV_FILE"
+   # shellcheck disable=SC1090
+   if ! source "$KUBEE_ENV_FILE"; then
+     echo::err "Error while importing the envrc file $KUBEE_ENV_FILE"
+     exit 1
+   fi
+fi
+
+# Inventory
+if ! SHM_INVENTORY_FILE=$(inventory_file); then
+ echo::err "Inventory file has errors"
+ return 1
+fi
+bash::trap "rm $SHM_INVENTORY_FILE" EXIT
+
+# Key file
+if [ "$KUBEE_CLUSTER_PRIVATE_KEY" != "" ]; then
+  export ANSIBLE_PRIVATE_KEY_FILE=/dev/shm/ssh-key
+  echo "$KUBEE_CLUSTER_PRIVATE_KEY" >| "$ANSIBLE_PRIVATE_KEY_FILE"
+  bash::trap "rm $ANSIBLE_PRIVATE_KEY_FILE" EXIT
+  # to avoid Permissions 0644 for '/tmp/ssh-key' are too open
+  # as we mount with the current user, docker inherit the permissions
+  chmod 600 "$ANSIBLE_PRIVATE_KEY_FILE"
+fi
 
 # Assign the first argument to a string
 COMMAND="${1:-}"
@@ -131,24 +229,18 @@ if [[ $COMMAND == "synopsis" ]]; then
   exit
 fi
 
-
-
-
-# Assign the rest of the arguments to an array
-declare -a ARGS=()
-ARGS=("$@")
-
-
 case $COMMAND in
 "play")
-    play "${ARGS[@]}" || error::exit $?
+    play "$@" || error::exit $?
     ;;
 "inventory"|"inv")
-    INVENTORY_FILE=$(inventory_file) || error::exit $?
-    cat "$INVENTORY_FILE"
+    yq "$SHM_INVENTORY_FILE"
     ;;
-"app")
-    kubee- "${ARGS[@]}" || error::exit $?
+"upgrade")
+    upgrade "$@" || error::exit $?
+    ;;
+"ping")
+    ping "$@" || error::exit $?
     ;;
 *)
   doc::help synopsis

@@ -17,6 +17,7 @@ This directory contains the following files:
 ## How the rootCA and certificate were made
 
 ```bash
+cd ./cert # ie the directory of this file
 export CAROOT=$(realpath .)
 mkdir -p $CAROOT
 mkcert -install

@@ -2,7 +2,7 @@
 
 ## About
 
-This directory contains an example of a SSH cluster. 
+This directory contains an example of an SSH cluster. 
 
 ## Steps
 
@@ -64,11 +64,11 @@ kubee-cluster --cluster "$KUBEE_CLUSTER_NAME" inventory
 kubee-cluster --cluster "$KUBEE_CLUSTER_NAME" play
 ```
 
-## Install applications in the clusters
+## Install Applications in the clusters
 
 ### Individually
 
-With `kubee chart`, you can install any `kubee` charts.
+With `kubee chart`, you can install any `kubee charts`.
 
 Example:
 * Install Traefik

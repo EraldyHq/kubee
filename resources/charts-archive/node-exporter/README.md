@@ -1,5 +1,6 @@
 #  Node Exporter
 
+[Incorporated to kubernetes-monitoring](../../charts/kubernetes-monitoring/README.md)
 
 ## About
 `Node exporter` is a prometheus exporter that gather OS system metrics.

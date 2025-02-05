@@ -62,10 +62,10 @@ Create a k3s cluster
 kubee-cluster play
 ```
 
-### Kube-X App Installation
+### Kube-X Chart Installation
 
 ```bash
-kubee- install traefik
+kubee-chart install traefik
 ```
 
 
