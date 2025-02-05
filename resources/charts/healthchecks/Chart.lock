@@ -1,0 +1,9 @@
+dependencies:
+- name: kube-x
+  repository: file://../kube-x
+  version: 0.0.1
+- name: kube-x-prometheus
+  repository: file://../prometheus
+  version: 0.0.1
+digest: sha256:ff4d0daba44f3bda5852e057e5041f2b3bb0e61d53cb4f4f11e4126032292ae4
+generated: "2025-02-05T13:35:27.901078706+01:00"

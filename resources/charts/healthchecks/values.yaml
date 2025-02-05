@@ -1,0 +1,10 @@
+# Not a string, a boolean so no quote
+enabled: false
+# namespace
+namespace: 'monitoring'
+# api key
+# https://healthchecks.io/docs/configuring_prometheus/
+read_only_api_key: ''
+# projects uuid
+# https://healthchecks.io/docs/configuring_prometheus/
+project_uuids: []
