@@ -10,17 +10,20 @@ A One-Clik, Single VPS, Self-Hosted Kubernetes Platform
 * Extensible
 
 
-## Installation
+## Steps
+### Installation
 
 * Mac / Linux / Windows WSL with HomeBrew
 ```bash
 brew install --HEAD gerardnico/tap/kubee
 ```
 
-## How to
+### Provision a cluster
 
-### How to provision a cluster
-
+```bash
+kubee cluster \
+    
+```
 See [](resources/clusters/kubee-ssh/README.md)
 
 

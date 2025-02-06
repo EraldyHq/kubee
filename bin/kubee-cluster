@@ -14,6 +14,8 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-template.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-script.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-script.sh"
 # shellcheck source=./kubee-lib.sh
 source "kubee-lib.sh"
 
@@ -121,26 +123,26 @@ ping(){
 # @internal
 synopsis(){
 
+local CLI_NAME=$(basename $(script::get_actual_script) | tr "-" " ")
 cat << EOT
 
-$(basename "$0") - One-Clik Self-Hosted Kubernetes on a single VPS
+$CLI_NAME - Cluster Hosts Management
 
 Usage:
 \`\`\`bash
-$(basename "$0") command opts
+$CLI_NAME [options] command args
 \`\`\`
 
 Commands:
 
-* play             Provision a cluster
-* upgrade          Upgrade a cluster
-* inventory        Print the Ansible inventory file
-* ping             Verify the connection to the host
+* play             Deploy Kubernetes on the cluster hosts (Repeatable install and configuration)
+* upgrade          Upgrade Kubernetes on the cluster hosts
+* inventory        Print the cluster hosts inventory file
+* ping             Verify the connection to the clusters hosts
 
-Global Options:
+Options:
 
-* -h --help                       Show this help message
-* -c --cluster                    The cluster name (default to KUBEE_CLUSTER_NAME)
+* -h --help        Show this help message
 
 
 EOT

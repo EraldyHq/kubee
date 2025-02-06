@@ -11,23 +11,70 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 
 
 
-# The synopsis function is required by the doc::usage
+
 synopsis(){
+  cat <<EOF
+\`\`\`bash
+$(basename "$0") [kubee options] command args
+\`\`\`
 
-  cat << 'EOF'
-```bash
-kubee command options
-```
+where:
 
-where `command` can be:
+* \`kubee options\` are:
+  * \`-n|--namespace name\`    : the \`connection namespace name\` default to \`KUBEE_CONNECTION_NAMESPACE\`, ultimately to \`default\`.
+  * \`-c|--cluster   name\`    : the \`cluster name\` default to \`KUBEE_CLUSTER_NAME\`.
+  * \`--debug\`                : Print debug statements.
 
-* [cluster](kubee-cluster.md) - Cluster operations
 
+Example:
+* Execute the kubectl \`cluster-info\` command against the cluster
+\`\`\`bash
+$(basename "$0") -c my-kubee kubectl cluster-info
+\`\`\`
 
 EOF
-
 }
 
+if ! args=$(getopt -l "cluster:,debug,namespace:" -o "c:n:" -- "$@"); then
+  doc::help
+  exit 1
+fi
+# eval set to set the positional arguments back to $args
+eval set -- "$args"
+
+# Connection variables
+export KUBEE_CONNECTION_NAMESPACE=${KUBEE_CONNECTION_NAMESPACE:-"default"}
+export KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
+while [[ $# -gt 0 ]]
+do
+   case  "$1" in
+    -n|--namespace)
+      shift
+      if [ "${1:-}" == "" ]; then
+        echo::err "The -n or --namespace flag expects a value"
+        exit 1
+      fi
+      KUBEE_CONNECTION_NAMESPACE="$1"
+      ;;
+    -c|--cluster)
+      shift
+      KUBEE_CLUSTER_NAME="$1"
+      ;;
+    "--debug")
+      export BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_DEBUG_LEVEL";
+      ;;
+    "--")
+      shift
+      break;
+      # from now on, $@ contains only the arguments
+      ;;
+    *)
+      echo::err "Internal error: the option $1 was not processed"
+      exit 1
+      ;;
+   esac
+   shift
+done
 
 # Assign the first argument to a string
 COMMAND=${1:-}
@@ -45,7 +92,7 @@ shift  # Remove the first argument from the argument list
 
 case "$COMMAND" in
   "cluster")
-     kubee-cluster "$@" || error::exit $?
+     source kubee-cluster "$@" || error::exit $?
     ;;
   "synopsis")
     synopsis
