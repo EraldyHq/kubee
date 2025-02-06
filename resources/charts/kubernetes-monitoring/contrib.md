@@ -49,5 +49,34 @@ rm -rf out && mkdir -p out && jsonnet -J vendor \
 
 ### Kubelet SLI metrics not found
 
+Happens only on Kubernetes v1.31
 * Target Kubelet Sli Metrics at `:10250/metics/slis` is not found. `Error scraping target : server returned HTTP status 404 Not Found`
 * Discussions: https://github.com/k3s-io/k3s/discussions/11637
+
+### apiserver_request_duration_seconds_bucket drop bug
+
+Bug in Kubernetes Prometheus with the dropping of `le` in the bucket
+```jsonnet
+{
+    sourceLabels: ['__name__', 'le'],
+    regex: 'apiserver_request_duration_seconds_bucket;(0.15|0.25|0.3|0.35|0.4|0.45|0.6|0.7|0.8|0.9|1.25|1.5|1.75|2.5|3|3.5|4.5|6|7|8|9|15|25|30|50)',
+    # should be:
+    regex: 'apiserver_request_duration_seconds_bucket;(0.15|0.25|0.3|0.35|0.4|0.45|0.6|0.7|0.8|0.9|1.25|1.5|1.75|2.5|3.0|3.5|4.5|6.0|7.0|8.0|9.0|15.0|25.0|30.0|50.0)',
+    action: 'drop',
+}
+```
+
+### Why no Etcd monitoring
+
+Because k3s disables it by [default](https://docs.k3s.io/cli/server#database)
+The following server flag needs to be set`--etcd-expose-metrics=true`.
+
+### Why does the scheduler dashboard check the api server job and not the scheduler job ?
+
+With k3s, there is only one binary.
+The api server endpoint gives you metrics from:
+* the `controller manager`
+* `scheduler`
+* and `proxy`
+  The kubelet endpoint gives you metrics from:
+* the `cadvisor`

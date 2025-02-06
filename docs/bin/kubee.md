@@ -86,3 +86,17 @@ In this configuration:
 # so that you don't execute an app in a bad namespace, context ever. 
 eval "$(kubee-env appName [namespaceName])"
 ```
+
+
+## Kubectl Plugins
+
+To make these utilities [Kubectl plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/),
+you can rename them from `kubee-` to `kubectl-`
+
+They should then show up in:
+```bash
+kubectl plugin list
+```
+
+
+You can discover other plugins at [Krew](https://krew.sigs.k8s.io/plugins/)

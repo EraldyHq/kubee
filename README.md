@@ -2,44 +2,42 @@
 
 A One-Clik, Single VPS, Self-Hosted Kubernetes Platform
 
+The `E` stands for:
+* `Easy`
+* `Express`
+* `Extra`
+* `Extensible`
 
-`E` stands for:
-* Easy
-* Express
-* Extra
-* Extensible
+## Features
+
+* Admin Dashboard
+* Certificate Provisioning and monitoring
+* Host, System and App Monitoring
+* Cron Job
+* Container/Function execution
+* Web Hosting
+* Database provisioning
+* Secret Management
+* Self-healing mechanism with the Process supervisor 
+* No downtime thanks to Rolling Update 
+* CI/CD Deployment 
+* Backup
 
 
 ## Steps
 ### Installation
 
-* Mac / Linux / Windows WSL with HomeBrew
+On Mac / Linux / Windows WSL with HomeBrew
 ```bash
 brew install --HEAD gerardnico/tap/kubee
 ```
 
-### Provision a cluster
+### Getting Started
 
-```bash
-kubee cluster \
-    
-```
-See [](resources/clusters/kubee-ssh/README.md)
+See [How to create a cluster and install applications](docs/site/cluster-creation)
 
 
 ## Contribute 
 
 See [Contribute/Dev](contrib/contribute.md)
 
-## Kubectl Plugins
-
-To make these utilities [Kubectl plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/), 
-you can rename them from `kubee-` to `kubectl-`
-
-They should then show up in:
-```bash
-kubectl plugin list
-```
-
-
-You can discover other plugins at [Krew](https://krew.sigs.k8s.io/plugins/)

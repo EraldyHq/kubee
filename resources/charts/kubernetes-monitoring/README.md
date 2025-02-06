@@ -3,71 +3,67 @@
 
 ## About
 
-This [kubee jsonnet chart](../../../docs/bin/kubee-chart.md#what-is-a-jsonnet-kubee-chart) installs monitoring for the core systems Kubernetes components:
-* Api Server
-* Controller Manager
-* Core Dns
-* Kubelet
-* Proxy
-* Scheduler
+This [kubee jsonnet chart](../../../docs/bin/kubee-chart.md#what-is-a-jsonnet-kube-x-chart) installs monitoring for:
+* the core systems Kubernetes components:
+ * Api Server
+ * Controller Manager
+ * Core Dns
+ * Kubelet
+ * Proxy
+ * Scheduler
+* for the host/node (cpu/memory/storage) 
 
+
+## Installation
+
+These `kubee` charts should have been enabled and installed:
+* [Grafana](../grafana/README.md) if you want the dashboards
+* [Prometheus](../prometheus/README.md) if you want the prometheus scrape, alert and rules
+
+
+```bash
+kubee chart -c clusterName play kuberentes-monitoring
+```
+
+
+## Info
+
+### Exporters
 
 The dashboards are using metrics from:
-* Kubernetes System components
-* `Kube-State-Metrics` exporter
-* and `node-exporter`
+* the `Kubernetes System components`
+* the `Kube-State-Metrics` exporter
+* the `node` exporter
 
+### Prometheus Rules and Dashboard
 
 The following monitoring elements are installed for each:
 * prometheus scrape configuration
 * prometheus alerts and rules
   * `kubernetes-apps`: kube-state-metrics metrics
-  * `kubernetes-resources`: kube-state-metrics metrics 
+  * `kubernetes-resources`: kube-state-metrics metrics
 * and [grafana dashboards](https://monitoring.mixins.dev/kubernetes/#dashboards)
   * `Kubernetes / API server`
-  * `Kubernetes Kubelet` 
+  * `Kubernetes Kubelet`
   * `Kubernetes / Persistent Volumes`
   * `Kubernetes / Scheduler`
   * `Kubernetes / Controller Manager`
+  
+### Kubernetes Metrics List
 
-
-## Metrics List
-
-https://monitoring.mixins.dev/kubernetes/
+The [kubernetes mixin](https://monitoring.mixins.dev/kubernetes/) is installed
 where:
 * `apiserver_xxx`: Api server metrics
 * `kubeexx`: Kubelet metrics:
 
-## Alerts / Rules and Dashboard
-* https://kubernetes.io/docs/reference/instrumentation/metrics/
-
-
-## Optional Prerequisites: Kubee Chart Dependency
-
-This `kubee` charts should have been enabled and installed:
-  * [Grafana](../grafana/README.md) for the dashboards
-  * [Prometheus](../prometheus/README.md) for the prometheus scrape, alert and rules
+The Kubernetes components metrics reference list is available [here](https://kubernetes.io/docs/reference/instrumentation/metrics/)
 
 
 ## Dev/Contrib
 
-See [Dev/Contrib](contrib.md)
+If you want to contribute to the development of this chart. Check [Dev/Contrib page](contrib.md)
 
-## Support 
-### Why no Etcd monitoring
 
-Because k3s disables it by [default](https://docs.k3s.io/cli/server#database)
-The following server flag needs to be set`--etcd-expose-metrics=true`.
-
-### Why does the scheduler dashboard check the api server job and not the scheduler job ?
-
-With k3s, there is only one binary.
-The api server endpoint gives you metrics from:
-* the `controller manager`
-* `scheduler`
-* and `proxy`
-The kubelet endpoint gives you metrics from:
-* the `cadvisor`
 
 ### Bucket
 
@@ -75,7 +71,7 @@ Bucket are used for analytics query.
 
 For instance: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeapierrorbudgetburn/
 
-* The following metrics are dropped (on all scrape job - ie in the `kubelet` and `api server` job)
+The following metrics are dropped (on all scrape job - ie in the `kubelet` and `api server` job)
 ```
 apiserver_request_duration_seconds_bucket{}	32809
 apiserver_request_body_size_bytes_bucket{}	15744
@@ -87,17 +83,3 @@ workqueue_work_duration_seconds_bucket{}	2002
 workqueue_queue_duration_seconds_bucket{} 2002
 ```
 
-## Support
-
-### apiserver_request_duration_seconds_bucket drop bug 
-
-Bug in Kubernetes Prometheus with the dropping of `le` in the bucket
-```jsonnet
-{
-    sourceLabels: ['__name__', 'le'],
-    regex: 'apiserver_request_duration_seconds_bucket;(0.15|0.25|0.3|0.35|0.4|0.45|0.6|0.7|0.8|0.9|1.25|1.5|1.75|2.5|3|3.5|4.5|6|7|8|9|15|25|30|50)',
-    # should be:
-    regex: 'apiserver_request_duration_seconds_bucket;(0.15|0.25|0.3|0.35|0.4|0.45|0.6|0.7|0.8|0.9|1.25|1.5|1.75|2.5|3.0|3.5|4.5|6.0|7.0|8.0|9.0|15.0|25.0|30.0|50.0)',
-    action: 'drop',
-},
-```

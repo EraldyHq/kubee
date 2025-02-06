@@ -1,14 +1,18 @@
+{{- if eq .Values.type "external" }}
 {{- range .Values.project_uuids }}
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: ScrapeConfig
 metadata:
   name: healthchecks
+  labels:
+    app.kubernetes.io/name: healthchecks
 spec:
   jobName: healthchecks
   scrapeInterval: 60s
   scheme: HTTPS
-  metricsPath: /projects/{{ . }}/metrics/{{ required "read_only_api_key is required" $.Values.read_only_api_key }}
+  metricsPath: /projects/{{ . }}/metrics/{{ required "read_only_api_key is required for an external healthchecks instance" $.Values.read_only_api_key }}
   staticConfigs:
     - targets:
-        - healthchecks.io
+        - {{ $.Values.hostname }}
+{{- end }}
 {{- end }}

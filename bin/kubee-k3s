@@ -15,19 +15,22 @@ TLS_HOME=/var/lib/rancher/k3s/server/tls
 
 usage(){
 
+  echo "This script should be executed on the server"
+  echo ""
   echo '```bash'
   # shellcheck disable=SC2005
   echo "$(basename "$0") command args"
   echo '```'
   echo "where: command may be:"
   # shellcheck disable=SC2016
-  echo '  * `certs_expiration` : Print the certificates and their expiration date'
+  echo '  * `certs_expiration` : Print the k3s certificates and their expiration date'
   # shellcheck disable=SC2016
-  echo '  * `cert_print` : Print a single pem file'
+  echo '  * `cert_print` : Print a single k3s pem file'
   # shellcheck disable=SC2016
-  echo '  * `cert_secret_print` : Print a kubernetes TLS cert secret'
+  echo '  * `cert_secret_print` : Print the k3s-serving kubernetes TLS cert secret'
   echo ""
-  echo "All certs should be relative name (This script adds the directory: $TLS_HOME)"
+  echo "All certs should be relative name (This script adds the k3s tls directory: $TLS_HOME)"
+  echo ""
 
 }
 
