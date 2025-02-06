@@ -12,7 +12,7 @@ Returns the events of:
 Get the events of an app or namespace
 
 ```bash
-kubectl-xevent --scope [namespace|app] 
+kubee-event --scope [namespace|app] 
 ```
 where `app name` is
 * optional if you run the command in the app directory (default to: `$KUBE_APP_NAME`)

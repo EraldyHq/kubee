@@ -18,8 +18,7 @@
 .hy
 .SH NAME
 .PP
-\f[V]kubee-chart\f[R] (aka \f[V]helx\f[R]) is the \f[V]kubee\f[R]
-package manager.
+\f[V]kubee-chart\f[R] is the \f[V]kubee\f[R] chart manager.
 .SH Features
 .SS Familiar
 .PP
@@ -78,14 +77,12 @@ the \f[V]-c|--cluster clusterName\f[R] option
 the current directory
 .SH What is a Kubee Chart?
 .PP
-A \f[V]Kubee Chart\f[R]: * is a
-sub-chart (https://helm.sh/docs/chart_template_guide/subcharts_and_globals/)
-* that installed only one application * with the name of the app
-installed (ie grafana, not grafana operator) * that depends on: * the
-kubee Chart to share cluster and installation wide *
-\f[V]values.yaml\f[R] file * and \f[V]library\f[R] * and optionally: *
-cross dependency Charts: * to bring cross values to create cross
-conditional expression.
+A \f[V]Kubee Chart\f[R]: * is a Chart * that installs only one
+application * with the name of the app installed (ie grafana, not
+grafana operator) * that depends on: * the kubee Chart to share cluster
+and installation wide * \f[V]values.yaml\f[R] file * and
+\f[V]library\f[R] * and optionally: * cross dependency Charts: * to
+bring cross values to create cross conditional expression.
 Example: * conditional:
 \f[V]if cert_manager.enabled then create_certificate_request\f[R] *
 cross:
@@ -180,13 +177,13 @@ chart_2:
 \f[R]
 .fi
 .PP
-Helx will transform it in a compliant Helm values.
+\f[V]Kubee Chart\f[R] will transform it in a compliant Helm values.
 .PP
 You can see the Helm values: * to be applied with:
 .IP
 .nf
 \f[C]
-helx values --cluster clusterName chartName
+kubee-chart values --cluster clusterName chartName
 \f[R]
 .fi
 .IP \[bu] 2
@@ -218,3 +215,18 @@ helm get -n namespace values chartReleaseName
 .PP
 More information can be found in the storage backend
 section (https://helm.sh/docs/topics/advanced/#configmap-storage-backend)
+.SS Installation Graph (DAG)
+.IP \[bu] 2
+Secret (used everywhere)
+.IP \[bu] 2
+Ingress
+.SS FAQ: Why not multiple sub-chart by umbrella chart?
+.PP
+SubChart cannot by default installed in another namespace than the
+umbrella chart.
+This is a known issue with helm and
+subcharts (https://github.com/helm/helm/issues/5358)
+.PP
+That\[cq]s why: * the unit of execution is one sub-chart by umbrella
+chart * \f[V]kubee\f[R] is a common sub-chart of all umbrella chart *
+this is not one \f[V]kubee\f[R] umbrella chart with multiple sub-charts

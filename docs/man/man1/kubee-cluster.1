@@ -17,7 +17,42 @@
 .TH "" "" "" "" ""
 .hy
 .SH Kube eXpress - A One-Clik, Single VPS, Self-Hosted Kubernetes Platform
-.SS Copy KUBECONFIG and connection test
+.PP
+The \f[V]kubee-cluster\f[R] command manages the hosts of the clusters.
+.SH Command
+.SS PLAY
+.PP
+\f[V]play\f[R]: * Hardened the Operating System * Operating System
+package upgrade * Kubernetes installation
+.SS UPGRADE
+.PP
+\f[V]upgrade\f[R] will upgrade Kubernetes on your cluster if the k3s
+version is higher.
+.PP
+On a \f[V]upgrade\f[R], the system pods will restart and the cluster
+should become healthy in a couple of minutes.
+.SH Metadata
+.SS K3s version
+.PP
+The \f[V]k3s version\f[R] can be specified: * using an inventory file
+with the \f[V]k3s_version\f[R] var * using the default kubee inventory
+file, the environment variable: \f[V]KUBEE_CLUSTER_K3S_TOKEN\f[R]
+.PP
+The \f[V]k3s versions\f[R] are available at:
+https://github.com/k3s-io/k3s/releases
+.PP
+Example:
+.IP
+.nf
+\f[C]
+export KUBEE_CLUSTER_K3S_VERSION=\[dq]v1.32.0+k3s1\[dq]
+\f[R]
+.fi
+.PP
+The value is made up of: * \f[V]v1.32\f[R] is the version of
+Kubernetes (https://kubernetes.io/releases/) * \f[V]k3s1\f[R] is the
+version of the \f[V]k3s\f[R] wrapper.
+.SH Copy KUBECONFIG and connection test
 .IP
 .nf
 \f[C]

@@ -1,7 +1,7 @@
 % kubee-chart(1) Version Latest | Helm with Extra's
 # NAME
 
-`kubee-chart` (aka `helx`) is the `kubee` package manager.
+`kubee-chart` is the `kubee` chart manager.
 
 
 # Features
@@ -63,8 +63,8 @@ The cluster is determined in order of precedence by:
 # What is a Kubee Chart?
 
 A `Kubee Chart`:
-* is a [sub-chart](https://helm.sh/docs/chart_template_guide/subcharts_and_globals/)
-  * that installed only one application 
+* is a Chart
+  * that installs only one application 
   * with the name of the app installed (ie grafana, not grafana operator) 
   * that depends on:
     * the [kubee Chart](../../resources/charts/kubee/README.md) to share cluster and installation wide
@@ -142,12 +142,12 @@ chart_2:
   dns_zones: []
 ```
 
-Helx will transform it in a compliant Helm values.
+`Kubee Chart` will transform it in a compliant Helm values.
 
 You can see the Helm values:
 * to be applied with:
 ```bash
-helx values --cluster clusterName chartName
+kubee-chart values --cluster clusterName chartName
 ```
 * applied with:
 ```bash
@@ -170,4 +170,22 @@ helm get -n namespace values chartReleaseName
 ```
 
 More information can be found in the [storage backend section](https://helm.sh/docs/topics/advanced/#configmap-storage-backend)
+
+
+## Installation Graph (DAG)
+
+* Secret (used everywhere)
+* Ingress
+
+
+
+## FAQ: Why not multiple sub-chart by umbrella chart?
+
+SubChart cannot by default installed in another namespace than the umbrella chart.
+This is a [known issue with helm and subcharts](https://github.com/helm/helm/issues/5358)
+
+That's why:
+* the unit of execution is one sub-chart by umbrella chart
+* `kubee` is a common sub-chart of all umbrella chart
+* this is not one `kubee` umbrella chart with multiple sub-charts 
 

@@ -15,12 +15,23 @@ source "kubee-lib.sh"
 synopsis(){
   cat <<EOF
 \`\`\`bash
-$(basename "$0") [-n|--namespace namespaceName] [kubectl args]
+$(basename "$0") [kubee options]  [kubectl args]
 \`\`\`
 
 where:
 
-* \`-n|--namespace\` specifies the \`namespace\` default to \`KUBEE_APP_NAMESPACE\` or \`KUBEE_DEFAULT_NAMESPACE\` and ultimately to \`default\`.
+* \`kubee options\` are:
+  * \`-n|--namespace name\`    : the \`connection namespace name\` default to \`KUBEE_CONNECTION_NAMESPACE\`, ultimately to \`default\`.
+  * \`-c|--cluster   name\`    : the \`cluster name\` default to \`KUBEE_CLUSTER_NAME\`. Mandatory if there was no \`KUBECONFIG\` found.
+  * \`--debug\`                : Print debug statements.
+
+* \`kubectl args\` are kubectl arguments
+
+Example:
+* Execute the kubectl \`cluster-info\` command against the cluster
+\`\`\`bash
+$(basename "$0") -c my-kubee cluster-info
+\`\`\`
 
 EOF
 }
@@ -32,7 +43,8 @@ fi
 
 args=()
 
-KUBEE_APP_NAMESPACE=${KUBEE_APP_NAMESPACE:-}
+KUBEE_CONNECTION_NAMESPACE=${KUBEE_CONNECTION_NAMESPACE:-"default"}
+KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
 while [[ $# -gt 0 ]]
 do
    case  "$1" in
@@ -42,13 +54,14 @@ do
         echo::err "The -n or --namespace flag expects a value"
         exit 1
       fi
-      KUBEE_APP_NAMESPACE="$1"
+      KUBEE_CONNECTION_NAMESPACE="$1"
       ;;
-    --all-namespaces)
-      # The created kubeconfig needs a namespace
-      # In a all-namespace query we set it to default
-      KUBEE_APP_NAMESPACE="default"
-      args+=("$1")
+    -c|--cluster)
+      shift
+      KUBEE_CLUSTER_NAME="$1"
+      ;;
+    "--debug")
+      export BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_DEBUG_LEVEL";
       ;;
     *)
       args+=("$1")
@@ -58,12 +71,8 @@ do
 done
 
 
-
 # Get env
-KUBEE_ENV=$(source kubee-env) || error::exit $?
-eval "$KUBEE_ENV"
-
-
+source kubee-env || error::exit $?
 
 
 ###########################

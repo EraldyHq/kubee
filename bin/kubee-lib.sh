@@ -251,3 +251,94 @@ kubee::get_cluster_directory(){
 
 
 }
+
+kubee::connection_print_env(){
+  echo::err "Data Connection Values:"
+  echo::err "KUBEE_USER_NAME             : $KUBEE_USER_NAME"
+  echo::err "KUBEE_CLUSTER_NAME          : $KUBEE_CLUSTER_NAME"
+  echo::err "KUBEE_CLUSTER_SERVER_01_IP  : ${KUBEE_CLUSTER_SERVER_01_IP:-}"
+  echo::err ""
+  echo::err "Did you set the cluster name or a KUBECONFIG env?"
+}
+
+kubee::connection_generate_config_from_pass(){
+
+
+# Paths
+PASS_CLIENT_TOKEN_PATH="$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-token"
+PASS_CLIENT_CERT_PATH="$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-certificate-data"
+PASS_CLIENT_KEY_DATA="$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-key-data"
+PASS_CLUSTER_CERT_PATH="$KUBEE_PASS_HOME/clusters/$KUBEE_CLUSTER_NAME/certificate-authority-data"
+PASS_CLUSTER_SERVER_PATH="$KUBEE_PASS_HOME/clusters/$KUBEE_CLUSTER_NAME/server"
+
+
+###################
+# Client
+###################
+# Token?
+if ! KUBEE_CLIENT_TOKEN=$(pass "$PASS_CLIENT_TOKEN_PATH" 2>/dev/null); then
+  KUBEE_CLIENT_TOKEN=""
+  if ! KUBEE_CLIENT_CERTIFICATE_DATA=$(pass "$PASS_CLIENT_CERT_PATH" 2>/dev/null); then
+    echo::err "No client token or client certificate has been found in pass at $PASS_CLIENT_TOKEN_PATH and $PASS_CLIENT_CERT_PATH respectively"
+    kubee::connection_print_env
+    return 1
+  fi
+  # Private Key
+  if ! KUBEE_CLIENT_KEY_DATA=$(pass "$PASS_CLIENT_KEY_DATA" 2>/dev/null); then
+    echo::err "No client key has been found in pass at $PASS_CLIENT_TOKEN_PATH and $PASS_CLIENT_CERT_PATH respectively"
+    kubee::connection_print_env
+    return 1
+  fi
+fi
+
+###################
+# Cluster
+###################
+if ! KUBEE_CLUSTER_CERTIFICATE_AUTHORITY_DATA=$(pass "$PASS_CLUSTER_CERT_PATH" 2>/dev/null); then
+  echo::err "No cluster certificate authority has been found in pass at $PASS_CLUSTER_CERT_PATH"
+  kubee::connection_print_env
+  return 1
+fi
+
+
+if ! KUBEE_CLUSTER_SERVER=$(pass "$PASS_CLUSTER_SERVER_PATH" 2>/dev/null); then
+  KUBEE_CLUSTER_SERVER_01_IP=${KUBEE_CLUSTER_SERVER_01_IP:-}
+  if [ "$KUBEE_CLUSTER_SERVER_01_IP" == "" ]; then
+    echo::err "No cluster server could found"
+    echo::err "  No server data has been found in pass at $PASS_CLUSTER_PASS_CLUSTER_SERVER_PATH"
+    echo::err "  No server ip was defined for the env KUBEE_CLUSTER_SERVER_01_IP"
+    kubee::connection_print_env
+    return 1
+  fi
+  KUBEE_CLUSTER_SERVER="https://$KUBEE_CLUSTER_SERVER_01_IP:6443"
+  echo::debug "KUBEE_CLUSTER_SERVER ($KUBEE_CLUSTER_SERVER) built from KUBEE_CLUSTER_SERVER_01_IP"
+else
+  echo::debug "KUBEE_CLUSTER_SERVER ($KUBEE_CLUSTER_SERVER) built from pass $PASS_CLUSTER_SERVER_PATH"
+fi
+
+
+cat <<-EOF
+apiVersion: v1
+clusters:
+  - name: $KUBEE_CLUSTER_NAME
+    cluster:
+      certificate-authority-data: $KUBEE_CLUSTER_CERTIFICATE_AUTHORITY_DATA
+      server: $KUBEE_CLUSTER_SERVER
+contexts:
+  - context:
+      cluster: $KUBEE_CLUSTER_NAME
+      namespace: $KUBEE_CONNECTION_NAMESPACE
+      user: $KUBEE_USER_NAME
+    name: $KUBEE_CONTEXT_NAME
+current-context: $KUBEE_CONTEXT_NAME
+kind: Config
+preferences: {}
+users:
+  - name: $KUBEE_USER_NAME
+    user:
+      client-certificate-data: $KUBEE_CLIENT_CERTIFICATE_DATA
+      client-key-data: $KUBEE_CLIENT_KEY_DATA
+      token: $KUBEE_CLIENT_TOKEN
+EOF
+
+}

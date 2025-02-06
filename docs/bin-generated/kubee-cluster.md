@@ -1,11 +1,44 @@
 # Kube eXpress - A One-Clik, Single VPS, Self-Hosted Kubernetes Platform
 
 
+The `kubee-cluster` command manages the hosts of the clusters.
+
+ 
+# Command 
+## PLAY
+
+`play`:
+* Hardened the Operating System 
+* Operating System package upgrade 
+* Kubernetes installation
+
+## UPGRADE
+
+`upgrade` will upgrade Kubernetes on your cluster if the [k3s version](#k3s-version) is higher. 
+
+On a `upgrade`, the system pods will restart and the cluster should become healthy in a couple of minutes.
 
 
+# Metadata
+
+## K3s version
+
+The `k3s version` can be specified:
+* using an inventory file with the `k3s_version` var
+* using the default kubee inventory file, the environment variable: `KUBEE_CLUSTER_K3S_TOKEN`
+
+The `k3s versions` are available at: https://github.com/k3s-io/k3s/releases
+
+Example:
+```bash
+export KUBEE_CLUSTER_K3S_VERSION="v1.32.0+k3s1"
+```
+The value is made up of: 
+* `v1.32` is the [version of Kubernetes](https://kubernetes.io/releases/)
+* `k3s1` is the version of the `k3s` wrapper. 
 
 
-### Copy KUBECONFIG and connection test
+# Copy KUBECONFIG and connection test
 
 ```bash
 # env

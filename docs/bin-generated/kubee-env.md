@@ -29,42 +29,43 @@ where `chart name` is optional if the current directory is below a `KUBEE_CHARTS
 
 
 
-## KUBEE_APP_NAME
+## KUBEE_USER_NAME
 
+`KUBEE_USER_NAME`: the connection username (default to `default`)
+Used in the creation of a config file
+
+## KUBEE_CLUSTER_NAME
+
+`KUBEE_CLUSTER_NAME` defines the default cluster name.
+You can set it also via the `-c` or `--cluster` command line option.
+
+The cluster name is used:
+* in connection
+* in the detection of a cluster project
+
+## KUBEE_CLUSTERS_PATH
+`KUBEE_CLUSTERS_PATH` defines a list of directory path where you could find cluster definitions (environment, values and inventory file)
+
+Example
 ```bash
-export KUBEE_APP_NAME=xxx
-```  
-Default to the current directory name if it is below the [KUBEE_APP_HOME](#KUBEE_APP_HOME)
+export KUBEE_CLUSTERS_PATH="$HOME/argocd/clusters:$HOME/argocd-2/clusters"
+```
 
-The kubernetes objects are searched with the label `app.kubernetes.io/name=<app name>`
+## KUBEE_CHARTS_PATH
 
-
-## KUBEE_APP_NAMESPACE
-
-The `KUBEE_APP_NAMESPACE` environment variable defines the `namespace` of the app
-and is used to determine the [connection namespace](#namespace-order-of-precedence) 
-
-## KUBEE_DEFAULT_NAMESPACE
-
-`KUBEE_DEFAULT_NAMESPACE` defines the default [connection namespace](#namespace-order-of-precedence)
-when no [namespace has been found](#namespace-order-of-precedence)
-
-
-## KUBEE_APP_HOME
-
-The `$KUBEE_APP_HOME` environment variable defines a path environment variable where each path is a directory that contains 
-namespace applications.
+The `$KUBEE_CHARTS_PATH` environment variable defines a path environment variable where each path is a directory that contains 
+kubee charts.
 
 It should be set in your `.bashrc`
 
 Example:
 ```bash
-export KUBEE_APP_HOME=$HOME/my-kube-apps:$HOME/my-other-kube-apps
+export KUBEE_CHARTS_PATH=$HOME/my-kubee-charts:$HOME/my-other-kubee-charts
 ```
 
 ## KUBEE_BUSYBOX_IMAGE
 
-The image used by [kubectl-xshell](kubee-shell) when asking for a shell in a busybox.
+The image used by [kubee-shell](kubee-shell) when asking for a shell in a busybox.
 
 Default to [ghcr.io/gerardnico/busybox:latest](https://github.com/gerardnico/busybox/pkgs/container/busybox)
 
@@ -72,38 +73,39 @@ Default to [ghcr.io/gerardnico/busybox:latest](https://github.com/gerardnico/bus
 export KUBEE_BUSYBOX_IMAGE=ghcr.io/gerardnico/busybox:latest
 ```
 
-## Connection Namespace
 
-The connection namespace is a derived environment variable `KUBEE_CONNECTION_NAMESPACE` used by [kubectx](kubee-kubectl).
+## KUBEE_CONNECTION_NAMESPACE_DEFAULT
+`KUBEE_CONNECTION_NAMESPACE_DEFAULT`: the default connection namespace.
 
-### Namespace Order of precedence
+## KUBEE_PASS_HOME
 
-
-In order, the connection namespace value used is:
-* `default` if the flag `--all-namespace` is passed
-* the option value of the flag `-n|--namespace`
-* [KUBEE_APP_NAMESPACE](#KUBEE_APP_NAME)
-* [KUBEE_APP_NAME](#KUBEE_APP_NAME) if set
-* [KUBEE_DEFAULT_NAMESPACE](#KUBEE_APP_NAME) if it exists
-* Otherwise, for the [KUBEE_KUBECTL](#KUBEE_KUBECTL) value of:
-    * `kubectx`: `default`
-    * `kubectl`: the `kubeconfig` current namespace value
-
-### Mandatory Namespace
-
-The namespace is only mandatory for the [kubectl-xapply](kubectl-xapply.md)
-command.
-
-Otherwise, it's determined by a label global search on the app name. 
-
-## How
-
-### How to set my own environment variable by app scope
-
-You can override the default environment values by creating a `.envrc` located
-in the app directory (ie `KUBEE_APP_HOME/KUBEE_APP_NAME`).
+`KUBEE_PASS_HOME`: the home directory in pass (default to `kubee`) for the location of the [connection secrets](#connection-secrets-path)
 
 
 # TIP
 
 To get the env in the prompt such as cluster and namespace, check [kube-ps1](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/kube-ps1)
+
+
+# Connection
+
+## Connection namespace
+
+Connection Namespace Order of precedence:
+In order, the connection namespace value used is:
+* `default` if the flag `--all-namespace` is passed
+* the option value of the flag `-n|--namespace`
+* [KUBEE_CONNECTION_NAMESPACE_DEFAULT](#kubee_connection_namespace_default) if it exists
+* otherwise `default`
+
+
+## Connection Context Name 
+The connection context name in the config file is derived as `$KUBEE_USER@$KUBEE_CLUSTER/$KUBEE_CONNECTION_NAMESPACE`
+
+## Connection Secrets Path
+
+* `client-certificate-data` : `$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-certificate-data`
+* `client-key-data` : `$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-key-data`
+* `client-token` : `$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-token`
+
+

@@ -57,6 +57,41 @@ if [[ "$KUBEE_APP_NAME" =~ -h|--help|help ]]; then
   exit 0
 fi
 
+set_kubeconfig_env(){
+
+  if [ "${KUBECONFIG:-}" != "" ]; then
+    echo::debug "KUBECONFIG env already set to: $KUBECONFIG"
+    return
+  fi
+
+  export KUBECONFIG="$HOME/.kube/config"
+  if  [ -f "$KUBECONFIG" ]; then
+    echo::debug "KUBECONFIG set to the existing default config file: $KUBECONFIG"
+    return
+  fi
+
+  if ! command::exists "pass"; then
+    echo::err "KUBECONFIG was not found"
+    echo::err "The pass command was not found, we cannot generate a KUBECONFIG file"
+    return 1
+  fi
+  # Config does not work with process substitution (ie /dev/
+  # It seems that it starts another process deleting/closing the file descriptor
+
+  # Trap work exit  also on source
+  # https://stackoverflow.com/questions/69614179/bash-trap-not-working-when-script-is-sourced
+  # As what we want is to delete it after the main script
+  # We just output the trap statement
+  # Note: On kubectl, we could also just pass the data but we should
+  # do that for all kubernetes clients (promtool, ...) and this is pretty hard
+  KUBECONFIG="/dev/shm/kubee-config" # we create a shared memory file because we test the presence of the file
+  chmod 0600 /dev/shm/kubee-config # same permission as ssh key
+  if ! kubee::connection_generate_config_from_pass >| /dev/shm/kubee-config; then
+    echo::err "Error while generating the config file with pass"
+    return 1
+  fi
+
+}
 
 ###########################
 # App Name
@@ -133,6 +168,25 @@ fi
 #echo "# The directory of the app"
 #echo "KUBEE_APP_DIR=$KUBEE_APP_DIR"
 
+# The cluster
+KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
+
+# Cluster Directory
+if [ "$KUBEE_CLUSTER_NAME" != "" ]; then
+
+  KUBEE_CLUSTER_DIR=$(kubee::get_cluster_directory "$KUBEE_CLUSTER_NAME")
+  # Envrc
+  # Used in all function
+  KUBEE_ENV_FILE="${KUBEE_CLUSTER_ENV_FILE:-"$KUBEE_CLUSTER_DIR/.envrc"}"
+  if [ -f "$KUBEE_ENV_FILE" ]; then
+     echo::debug "Sourcing cluster env file $KUBEE_ENV_FILE"
+     # shellcheck disable=SC1090
+     if ! source "$KUBEE_ENV_FILE"; then
+       echo::err "Error while importing the envrc file $KUBEE_ENV_FILE"
+       exit 1
+     fi
+  fi
+fi
 
 
 #############################
@@ -140,71 +194,31 @@ fi
 # Should be after app envrc call
 #############################
 
-# App Namespace
-echo ""
-echo "# The namespace of the app"
-KUBEE_APP_NAMESPACE=${KUBEE_APP_NAMESPACE:-"$KUBEE_APP_NAME"}
-echo "KUBEE_APP_NAMESPACE=$KUBEE_APP_NAMESPACE"
+
+## Connection namespace
+# The namespace for the connection (in the kubectx kubeconfig context)
+KUBEE_CHART_NAMESPACE=${KUBEE_CHART_NAMESPACE:-"default"}
 
 
-## Default namespace
-echo ""
-echo "# The default namespace for the connection"
-KUBEE_DEFAULT_NAMESPACE=${KUBEE_DEFAULT_NAMESPACE:-default}
-echo "KUBEE_DEFAULT_NAMESPACE=${KUBEE_DEFAULT_NAMESPACE}"
-
-## Derived
-echo ""
-echo "# The namespace for the connection (in the kubectx kubeconfig context)"
-KUBEE_CONNECTION_NAMESPACE=${KUBEE_APP_NAMESPACE:-$KUBEE_DEFAULT_NAMESPACE}
-echo "KUBEE_CONNECTION_NAMESPACE=${KUBEE_CONNECTION_NAMESPACE}"
-
-# The user
-echo ""
-echo "# The username for the connection (in the kubeconfig context)"
+# The username for the connection (in the kubeconfig context)"
 KUBEE_USER_NAME=${KUBEE_USER_NAME:-"default"}
-echo "KUBEE_USER_NAME=$KUBEE_USER_NAME"
 
-# The cluster
-echo ""
-echo "# The cluster name for connection (in the kubeconfig context or ansible inventory)"
-KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-"default"}
-echo "KUBEE_CLUSTER_NAME=KUBEE_CLUSTER_NAME"
+# The connection namespace
+KUBEE_CONNECTION_NAMESPACE=${KUBEE_CONNECTION_NAMESPACE:-"default"}
 
-# The context name
-echo ""
-echo "# The name of the context (in kubectx kubeconfig)"
+# The name of the context (in kubectx kubeconfig)"
 KUBEE_CONTEXT_NAME=${KUBEE_CONTEXT_NAME:-"$KUBEE_USER_NAME@$KUBEE_CLUSTER_NAME/$KUBEE_CONNECTION_NAMESPACE"}
-echo "KUBEE_CONTEXT_NAME=$KUBEE_CONTEXT_NAME"
 
-# The pass home
-echo ""
-echo "# The directory for the kubeconfig data in the pass store manager"
+# The directory for the kubeconfig data in the pass store manager"
 KUBEE_PASS_HOME=${KUBEE_PASS_HOME:-"kubee"}
-echo "KUBEE_PASS_HOME=$KUBEE_PASS_HOME"
 
-# Busybox
-echo ""
-echo "# The busybox image to use for a shell in a busybox or ephemeral container"
+# The busybox image to use for a shell in a busybox or ephemeral container"
 KUBEE_BUSYBOX_IMAGE=${KUBEE_BUSYBOX_IMAGE:-ghcr.io/gerardnico/busybox:latest}
-echo "KUBEE_BUSYBOX_IMAGE=$KUBEE_BUSYBOX_IMAGE"
 
-if [ "${KUBECONFIG:-}" == "" ]; then
-  # Config does not work with process substitution (ie /dev/
-  # It seems that it starts another process deleting/closing the file descriptor
-  touch /dev/shm/kubee-config
-  # Trap work exit  also on source
-  # https://stackoverflow.com/questions/69614179/bash-trap-not-working-when-script-is-sourced
-  # As what we want is to delete it after the main script
-  # We just output the trap statement
-  # Note: On kubectl, we could also just pass the data but we should
-  # do that for all kubernetes clients (promtool, ...) and this is pretty hard
-  echo 'bash::trap "rm /dev/shm/kubee-config" EXIT'
-  chmod 0600 /dev/shm/kubee-config
-  source kubee-config.sh >| /dev/shm/kubee-config
-  KUBECONFIG="/dev/shm/kubee-config" # we test the presence of the file
-  echo "export KUBECONFIG=$KUBECONFIG"
-fi
+
+
+set_kubeconfig_env || error::exit $?
+
 if [ ! -f "$KUBECONFIG" ]; then
-  echo::warn "The \$KUBECONFIG variable points to the file $KUBECONFIG that does not exist"
+ echo::warn "The \$KUBECONFIG variable points to the file $KUBECONFIG that does not exist"
 fi

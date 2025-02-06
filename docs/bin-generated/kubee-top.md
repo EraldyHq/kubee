@@ -17,5 +17,5 @@ Usage:
 Shows the top process inside a Pod
 
 ```bash
-kubectl-xtop <app name>
+kubee-top <app name>
 ```
