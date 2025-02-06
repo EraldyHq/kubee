@@ -14,9 +14,14 @@ The `kubee-cluster` command manages the hosts of the clusters.
 
 ## UPGRADE
 
+If you are on a vps, it's a good time to do a snapshot.
+
 `upgrade` will upgrade Kubernetes on your cluster if the [k3s version](#k3s-version) is higher. 
 
-On a `upgrade`, the system pods will restart and the cluster should become healthy in a couple of minutes.
+On a `upgrade`:
+* if the kubee chart `kubernetes-monitoring` is installed, you may get some alerting
+* the system pods will restart 
+* the cluster should become again healthy in a couple of minutes.
 
 
 # Metadata
