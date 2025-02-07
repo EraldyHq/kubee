@@ -50,8 +50,11 @@ kube_state_metrics:
 # Node Exporter to gather server resources metrics
 # https://github.com/prometheus/node_exporter
 node_exporter:
-  enabled: false
-  version:
+  enabled: true
+  # https://github.com/prometheus/node_exporter/releases
+  version: 'v1.8.2'
+  # Default was 15s
+  scrape_interval: '45s'
 
 
 # Don't change, don't touch

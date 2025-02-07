@@ -7,10 +7,11 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 # The synopsis function is required by the doc::usage
 synopsis(){
 
-  local CLI_NAME=$(basename $(script::get_actual_script) | tr "-" " ")
+  local CLI_NAME;
+  CLI_NAME=$(basename "$(doc::get_cli_command_words)" | tr "-" " ")
   cat << EOF
 \`\`\`bash
-$CLI_NAME [-c|--cluster clusterName] [--debug] command options
+$CLI_NAME options
 \`\`\`
 
 where:
@@ -186,14 +187,17 @@ apply(){
       "play")
         HELM_COMMAND+=( "upgrade" "--install" )
         echo::info "Playing package $CHART_NAME  (ie upgrade or install if not present)"
+        kubee::set_kubeconfig_env_and_check
         ;;
       "upgrade")
         HELM_COMMAND+=( "upgrade" )
         echo::info "Upgrade package $CHART_NAME"
+        kubee::set_kubeconfig_env_and_check
         ;;
       "install")
         HELM_COMMAND+=( "install" )
         echo::info "Install package $CHART_NAME"
+        kubee::set_kubeconfig_env_and_check
         ;;
       "template")
         HELM_COMMAND+=( "template" )
@@ -209,9 +213,6 @@ apply(){
         ;;
   esac
 
-
-  # Get env
-  source kubee-env || error::exit $?
 
   HELM_COMMAND+=("-f" "${CHART_VALUES_PATH}")
 

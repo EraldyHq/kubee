@@ -251,7 +251,10 @@ kubee::get_cluster_directory(){
 
 }
 
-kubee::connection_print_env(){
+# @description
+#     Print Data Connection values for debugging purpose
+#     No args
+kubee::print_connection_env(){
   echo::err "Data Connection Values:"
   echo::err "KUBEE_USER_NAME             : $KUBEE_USER_NAME"
   echo::err "KUBEE_CLUSTER_NAME          : $KUBEE_CLUSTER_NAME"
@@ -260,7 +263,11 @@ kubee::connection_print_env(){
   echo::err "Did you set the cluster name or a KUBECONFIG env?"
 }
 
-kubee::connection_generate_config_from_pass(){
+
+# @description
+#     Generate a KUBECONFIG file from the pass manager
+#     No args, only global env
+kubee::print_kubeconfig_from_pass(){
 
 
 # Paths
@@ -279,13 +286,13 @@ if ! KUBEE_CLIENT_TOKEN=$(pass "$PASS_CLIENT_TOKEN_PATH" 2>/dev/null); then
   KUBEE_CLIENT_TOKEN=""
   if ! KUBEE_CLIENT_CERTIFICATE_DATA=$(pass "$PASS_CLIENT_CERT_PATH" 2>/dev/null); then
     echo::err "No client token or client certificate has been found in pass at $PASS_CLIENT_TOKEN_PATH and $PASS_CLIENT_CERT_PATH respectively"
-    kubee::connection_print_env
+    kubee::print_connection_env
     return 1
   fi
   # Private Key
   if ! KUBEE_CLIENT_KEY_DATA=$(pass "$PASS_CLIENT_KEY_DATA" 2>/dev/null); then
     echo::err "No client key has been found in pass at $PASS_CLIENT_TOKEN_PATH and $PASS_CLIENT_CERT_PATH respectively"
-    kubee::connection_print_env
+    kubee::print_connection_env
     return 1
   fi
 fi
@@ -295,7 +302,7 @@ fi
 ###################
 if ! KUBEE_CLUSTER_CERTIFICATE_AUTHORITY_DATA=$(pass "$PASS_CLUSTER_CERT_PATH" 2>/dev/null); then
   echo::err "No cluster certificate authority has been found in pass at $PASS_CLUSTER_CERT_PATH"
-  kubee::connection_print_env
+  kubee::print_connection_env
   return 1
 fi
 
@@ -306,7 +313,7 @@ if ! KUBEE_CLUSTER_SERVER=$(pass "$PASS_CLUSTER_SERVER_PATH" 2>/dev/null); then
     echo::err "No cluster server could found"
     echo::err "  No server data has been found in pass at $PASS_CLUSTER_PASS_CLUSTER_SERVER_PATH"
     echo::err "  No server ip was defined for the env KUBEE_CLUSTER_SERVER_01_IP"
-    kubee::connection_print_env
+    kubee::print_connection_env
     return 1
   fi
   KUBEE_CLUSTER_SERVER="https://$KUBEE_CLUSTER_SERVER_01_IP:6443"
@@ -339,5 +346,60 @@ users:
       client-key-data: $KUBEE_CLIENT_KEY_DATA
       token: $KUBEE_CLIENT_TOKEN
 EOF
+
+}
+
+# @description
+#     Set the KUBECONFIG env
+#     And errored if it does not exists
+kubee::set_kubeconfig_env_and_check(){
+  set_kubeconfig_env || return $?
+
+  if [ "${KUBECONFIG:-}" != "" ] && [ ! -f "$KUBECONFIG" ]; then
+   echo::err "The \$KUBECONFIG variable points to the file $KUBECONFIG that does not exist"
+   return 1
+  fi
+
+}
+
+# @description
+#     Set the KUBECONFIG env
+#     This function should be called just before a kubectl command that needs KUBECONFIG
+#     Why ? because it will ask for a password at an interval if pass is used
+#     Note that this is a little bit useless if `pass` is used to store secrets in the `envrc` file of a cluster project,
+#     as it will also trigger a gpg pinentry
+kubee::set_kubeconfig_env(){
+
+  if [ "${KUBECONFIG:-}" != "" ]; then
+    echo::debug "KUBECONFIG env already set to: $KUBECONFIG"
+    return
+  fi
+
+  export KUBECONFIG="$HOME/.kube/config"
+  if  [ -f "$KUBECONFIG" ]; then
+    echo::debug "KUBECONFIG set to the existing default config file: $KUBECONFIG"
+    return
+  fi
+
+  if ! command::exists "pass"; then
+    echo::err "KUBECONFIG was not found"
+    echo::err "The pass command was not found, we cannot generate a KUBECONFIG file"
+    return 1
+  fi
+  # Config does not work with process substitution (ie /dev/
+  # It seems that it starts another process deleting/closing the file descriptor
+
+  # Trap work exit  also on source
+  # https://stackoverflow.com/questions/69614179/bash-trap-not-working-when-script-is-sourced
+  # As what we want is to delete it after the main script
+  # We just output the trap statement
+  # Note: On kubectl, we could also just pass the data but we should
+  # do that for all kubernetes clients (promtool, ...) and this is pretty hard
+  KUBECONFIG="/dev/shm/kubee-config" # we create a shared memory file because we test the presence of the file
+  chmod 0600 /dev/shm/kubee-config # same permission as ssh key
+  if ! kubee::print_kubeconfig_from_pass >| /dev/shm/kubee-config; then
+    echo::err "Error while generating the config file with pass"
+    return 1
+  fi
 
 }

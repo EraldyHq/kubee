@@ -29,6 +29,7 @@ jb install github.com/kubernetes-monitoring/kubernetes-mixin@master # last main 
 # compatibility     v1.26+	                    v2.11.0+                    v2.0+
 jb install github.com/kubernetes/kube-state-metrics/jsonnet/kube-state-metrics@main
 jb install github.com/kubernetes/kube-state-metrics/jsonnet/kube-state-metrics-mixin@main
+jb install github.com/prometheus/node_exporter/docs/node-mixin@master
 ```
 * Try it out with
 * Helm X

@@ -66,6 +66,8 @@ export KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
 # The destination of any std for an executed command
 # default to null and is set to stderr or tty for debug level
 export COMMAND_STDOUT_FD="/dev/null"
+# Default level
+export BASHLIB_ECHO_LEVEL=$BASHLIB_ECHO_INFO_LEVEL
 
 
 # Parsing
@@ -123,6 +125,8 @@ shift  # Remove the first argument from the argument list
 # Get the env
 source kubee-env
 
+# Advertise the --debug flag if any error
+# shellcheck disable=SC2016
 bash::trap 'exit_code=$?; if [ $exit_code -ne 0 ]; then echo -e "\033[0;33mScript failed use the --debug flag to get more information\033[0m"; fi' EXIT
 
 case "$COMMAND" in

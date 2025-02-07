@@ -11,5 +11,5 @@ dependencies:
 - name: kubee-cert-manager
   repository: file://../cert-manager
   version: 0.0.1
-digest: sha256:a763f2d1aa3b8344fad29dea3e0ee7c46b296e4f53d6d89f604c1fe1d70c68d7
-generated: "2025-01-25T23:14:30.58206333+01:00"
+digest: sha256:63893c5339737b2999de9d1a42c7cac8f6519da494e92b90c07c5fe9f3f64d68
+generated: "2025-02-07T17:54:18.621595171+01:00"
