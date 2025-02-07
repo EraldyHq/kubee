@@ -54,7 +54,7 @@ kubee library chart the same values are used accros multiple app/charts
 .IP
 .nf
 \f[C]
-kubee-chart [-c|--cluster clusterName] [--debug] command options
+kubee chart [-c|--cluster clusterName] [--debug] command options
 \f[R]
 .fi
 .PP
@@ -129,30 +129,7 @@ bootstrapping (ie install all charts at once)
 [!Info] The \f[V]enabled\f[R] property comes from the Helm best
 practices (https://helm.sh/docs/chart_best_practices/dependencies/#conditions-and-tags)
 .RE
-.SH What is a Jsonnet Kube-X Chart?
-.PP
-A \f[V]Jsonnet Kubee chart\f[R] is a chart that has only a Jsonnet
-project.
-.PP
-It could be then: * executed only with \f[V]Jsonnet\f[R].
-Example:
-.IP
-.nf
-\f[C]
-cd jsonnet
-rm -rf out && mkdir -p out && jsonnet -J vendor \[rs]
-  --multi out \[rs]
-  \[dq]main.jsonnet\[dq]  \[rs]
-  --ext-code \[dq]values={ kubee: std.parseYaml(importstr \[rs]\[dq]../../cluster/values.yaml\[rs]\[dq]) }\[dq] \[rs]
-  | xargs -I{} sh -c \[aq]cat {} | gojsontoyaml > \[dq]{}.yaml\[dq] && rm {}\[aq] -- {}
-\f[R]
-.fi
-.IP \[bu] 2
-or added as Jsonnet dependency
-.PP
-You can then add them in GitOps Pull app such as
-ArgoCd (https://argo-cd.readthedocs.io/en/stable/user-guide/jsonnet/) to
-manage your infrastructure.
+.SH What is a Jsonnet Kubee Chart?
 .SH What is the format of a Cluster Values file?
 .PP
 Rules: * Hard: Every root property in a cluster values file is the alias

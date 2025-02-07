@@ -132,9 +132,6 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
                 interval: kxValues.kubelet_scrape_interval,
               }
               for endpoint in serviceMonitorKubelet.spec.endpoints
-              // We filter out the /metrics/slis target
-              // https://github.com/k3s-io/k3s/discussions/11637
-              if !(std.objectHas(endpoint, 'path') && endpoint.path == '/metrics/slis')
             ],
           },
         }

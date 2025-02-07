@@ -71,7 +71,7 @@ handle_empty_templates_output(){
       # error: trouble configuring builtin PatchTransformer with config: `
       # path: templates/patches/argocd-secret-patch.yaml
       #`: unable to parse SM or JSON patch from []
-      command::echo_debug_eval "yq -i 'del(.patches[] | select(.path == \"$relative_path\"))' $TARGET_PROJECT_DIR/kustomization.yml"
+      echo::eval "yq -i 'del(.patches[] | select(.path == \"$relative_path\"))' $TARGET_PROJECT_DIR/kustomization.yml"
 
       # Empty file
       touch "$target_file"
@@ -106,7 +106,7 @@ kustomize_processing(){
     # Output templates
     # helm template --output-dir /tmp
     # will output all templates one by one at: $KUSTOMIZE_OUT_DIR/chart-name/templates/argocd-service-monitor-metrics.yml
-    command::echo_eval "helm template --output-dir $(dirname "$KUBEE_OUTPUT_DIR") -f $KUBEE_VALUES_FILE $KUBEE_CHART_DIRECTORY 2>$FD_STDOUT_COMMAND 1>&2"
+    echo::eval "helm template --output-dir $(dirname "$KUBEE_OUTPUT_DIR") -f $KUBEE_VALUES_FILE $KUBEE_CHART_DIRECTORY 2>$COMMAND_STDOUT_FD 1>&2"
 
     # Sync
     echo::debug "Create empty template files"
@@ -153,7 +153,7 @@ jsonnet_processing(){
     if [ ! -f $JSONNET_LOCK_FILE ]; then
       JB_COMMAND="jb install --jsonnetpkg-home=$JPATH"
     fi
-    if ! command::echo_eval "$JB_COMMAND"; then
+    if ! echo::eval "$JB_COMMAND"; then
       echo::err "Error while executing the jb command (jsonnet bundler)"
       exit 1
     fi
@@ -177,7 +177,7 @@ jsonnet_processing(){
               # Run
               JSONNET_MANIFEST=$(
                 # --string: string as output
-                command::echo_eval "jsonnet \
+                echo::eval "jsonnet \
                   --jpath $JPATH \
                   --string \
                   --ext-code 'values=std.parseYaml(importstr \"$KUBEE_VALUES_FILE\")' \
@@ -209,12 +209,12 @@ jsonnet_processing(){
           if command::exists "$GO_JSON_TO_YAML"; then
             POST_PROCESSING="$POST_PROCESSING.yaml"
           fi
-          POST_PROCESSING="$POST_PROCESSING > $FD_STDOUT_COMMAND)"
+          POST_PROCESSING="$POST_PROCESSING > $COMMAND_STDOUT_FD)"
           # Closing
           POST_PROCESSING="$POST_PROCESSING'"
 
           if ! JSONNET_MANIFEST=$(
-            command::echo_eval "jsonnet -J $JPATH \
+            echo::eval "jsonnet -J $JPATH \
             --multi $JSONNET_OUTPUT_DIR \
             --ext-code 'values=std.parseYaml(importstr \"$KUBEE_VALUES_FILE\")' \
             $JSONNET_FILE \
@@ -301,9 +301,9 @@ if [ "$KUBEE_OUTPUT_DIR" == "" ]; then
   exit 1
 fi
 
-# FD_STDOUT_COMMAND is exported from helm_x
+# COMMAND_STDOUT_FD is exported from helm_x
 # where the output of stdout and stderr from external command should go
-FD_STDOUT_COMMAND=${FD_STDOUT_COMMAND:-"/dev/null"}
+COMMAND_STDOUT_FD=${COMMAND_STDOUT_FD:-"/dev/null"}
 
 # The whole script run in the app directory
 pushd "$KUBEE_CHART_DIRECTORY" > /dev/null

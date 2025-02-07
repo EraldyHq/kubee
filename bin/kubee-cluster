@@ -167,7 +167,7 @@ do
       "--debug")
         export BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_DEBUG_LEVEL";
         HELM_EXTRA_FLAGS+=("--debug");
-        FD_STDOUT_COMMAND=$(echo::get_file_descriptor);
+        COMMAND_STDOUT_FD=$(echo::get_file_descriptor);
         shift
       ;;
       "--")

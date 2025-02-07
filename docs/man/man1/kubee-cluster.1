@@ -26,11 +26,15 @@ The \f[V]kubee-cluster\f[R] command manages the hosts of the clusters.
 package upgrade * Kubernetes installation
 .SS UPGRADE
 .PP
+If you are on a vps, it\[cq]s a good time to do a snapshot.
+.PP
 \f[V]upgrade\f[R] will upgrade Kubernetes on your cluster if the k3s
 version is higher.
 .PP
-On a \f[V]upgrade\f[R], the system pods will restart and the cluster
-should become healthy in a couple of minutes.
+On a \f[V]upgrade\f[R]: * if the kubee chart
+\f[V]kubernetes-monitoring\f[R] is installed, you may get some alerting
+* the system pods will restart * the cluster should become again healthy
+in a couple of minutes.
 .SH Metadata
 .SS K3s version
 .PP

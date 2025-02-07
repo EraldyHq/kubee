@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+
+# shellcheck source=../../bash-lib/lib/bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+
+# The synopsis function is required by the doc::usage
+synopsis(){
+local CLI_NAME=$(basename $(doc::get_cli_command_words) | tr "-" " ")
+  cat << EOF
+\`\`\`bash
+$CLI_NAME command options appName
+\`\`\`
+
+where:
+* \`command\` can be:
+  * \`service\`      - List services for an app
+  * \`shell\`        - Get a shell into a app pod
+
+\`appName\` is used to select resources via the labels:
+* \`app.kubernetes.io/instance=<app name>\`
+* \`app.kubernetes.io/name=<app name>\`
+EOF
+
+}
+
+if [ "${1:-}" == "synopsis" ]; then
+   synopsis
+   exit
+fi
+
+# Get the command
+COMMAND=${1:-}
+if [ "$COMMAND" = "" ]; then
+    doc::help
+    echo::err "A command is mandatory"
+    exit 1
+fi
+echo::debug "Command Name: $COMMAND"
+# Remove the command argument from the argument list
+shift
+
+
+
+case "$COMMAND" in
+  "service")
+     APP_NAME=${1:-}
+     echo::echo
+     kube::get_resources_by_app_name --type service --custom-columns "NAME:.metadata.name,NAMESPACE:.metadata.namespace" --headers "$APP_NAME"
+     # custom-columns expect a json path expression to extract only data (ie you can't concatenate???)
+     # ie <header>:<json-path-expr>
+     # Doc: https://kubernetes.io/docs/reference/kubectl/#custom-columns
+     # The expression below is not valid
+     # The union operator `DNS:.items[*][metadata.name,metadata.namespace]` does not work
+     # Error: error: unexpected custom-columns spec: metadata.namespace], expected <header>:<json-path-expr>
+     # https://kubernetes.io/docs/reference/kubectl/jsonpath/
+     echo::echo
+     echo::tip "Access them locally via the DNS name: name.namespace.svc.cluster.local"
+    ;;
+  *)
+    doc::help synopsis
+    echo::err  "Command $COMMAND is unknown"
+    exit 1
+esac
+

@@ -24,13 +24,48 @@
 .IP
 .nf
 \f[C]
-kubee command options
+kubee [kubee options] command args
 \f[R]
 .fi
 .PP
-where \f[V]command\f[R] can be:
+where:
 .IP \[bu] 2
-cluster - Cluster operations
+\f[V]command\f[R] is one of:
+.RS 2
+.IP \[bu] 2
+\f[V]cluster\f[R] : Kubernetes cluster hosts installation and
+configuration
+.IP \[bu] 2
+\f[V]chart\f[R] : Kubee Package Manager
+.IP \[bu] 2
+\f[V]app\f[R] : Application scoped commands
+.IP \[bu] 2
+\f[V]kubectl\f[R] : Kubectl Kubee scluster aware
+.RE
+.IP \[bu] 2
+\f[V]kubee options\f[R] are:
+.RS 2
+.IP \[bu] 2
+\f[V]-n|--namespace name\f[R] : the \f[V]connection namespace name\f[R]
+default to \f[V]KUBEE_CONNECTION_NAMESPACE\f[R], ultimately to
+\f[V]default\f[R].
+.IP \[bu] 2
+\f[V]-c|--cluster   name\f[R] : the \f[V]cluster name\f[R] default to
+\f[V]KUBEE_CLUSTER_NAME\f[R].
+.IP \[bu] 2
+\f[V]--debug\f[R] : Print debug statements.
+.IP \[bu] 2
+\f[V]--print-commands\f[R] : Print the command statements.
+.RE
+.PP
+Example: * Execute the kubectl \f[V]cluster-info\f[R] command against
+the cluster
+.IP
+.nf
+\f[C]
+kubee -c my-kubee kubectl cluster-info
+\f[R]
+.fi
 .SS Extras
 .SS Vault
 .PP
@@ -119,3 +154,19 @@ kubee-env script
 eval \[dq]$(kubee-env appName [namespaceName])\[dq]
 \f[R]
 .fi
+.SS Kubectl Plugins
+.PP
+To make these utilities Kubectl
+plugin (https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/),
+you can rename them from \f[V]kubee-\f[R] to \f[V]kubectl-\f[R]
+.PP
+They should then show up in:
+.IP
+.nf
+\f[C]
+kubectl plugin list
+\f[R]
+.fi
+.PP
+You can discover other plugins at
+Krew (https://krew.sigs.k8s.io/plugins/)

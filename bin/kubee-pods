@@ -6,8 +6,8 @@ if [[ "${1:-}" =~ "synopsis"|"-h"|"--help" ]]; then
   exit 0
 fi
 
-KUBEE_ENV=$(source kubee-env) || error::exit $?
-eval "$KUBEE_ENV"
+# Get env
+source kubee-env || error::exit $?
 
 # Do the work
 kubectl get pod --all-namespaces  -o custom-columns='NAME:.metadata.name,NAMESPACE:.metadata.namespace'

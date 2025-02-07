@@ -65,7 +65,7 @@ export KUBEE_CHARTS_PATH=$HOME/my-kubee-charts:$HOME/my-other-kubee-charts
 
 ## KUBEE_BUSYBOX_IMAGE
 
-The image used by [kubee-shell](kubee-shell) when asking for a shell in a busybox.
+The image used by [kubee-shell](kubee-app-shell) when asking for a shell in a busybox.
 
 Default to [ghcr.io/gerardnico/busybox:latest](https://github.com/gerardnico/busybox/pkgs/container/busybox)
 

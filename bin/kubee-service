@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-if [[ "${1:-}" == "synopsis" ]]; then
-  basename "$0"
-  exit
-fi
-
-kubectx get services --all-namespaces -o custom-columns=NAME:.metadata.name,NAMESPACE:.metadata.namespace,DNS:.metadata.name.namespace.svc.cluster.local

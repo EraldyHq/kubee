@@ -20,7 +20,7 @@ This tool adds also this command for the \`PrometheusRule\` CRD file of \`Promet
 * \`promtool test prometheusRules\` to execute unit test with \`PrometheusRule\` as source of rules.
 
 EOF
-  command::echo_debug_eval "docker run ${DOCKER_OPTIONS[*]} prom/prometheus:latest --help"
+  echo::eval "docker run ${DOCKER_OPTIONS[*]} prom/prometheus:latest --help"
 }
 
 check_prometheus_rule(){
@@ -96,7 +96,7 @@ test_prometheus_rule(){
   DOCKER_OPTIONS+=("-v" "$TEST_LOCAL_SHM_PATH:$TEST_DOCKER_PATH")
 
   # Run
-  command::echo_eval "docker run ${DOCKER_OPTIONS[*]} prom/prometheus:latest test rules $TEST_DOCKER_PATH"
+  echo::eval "docker run ${DOCKER_OPTIONS[*]} prom/prometheus:latest test rules $TEST_DOCKER_PATH"
 
 }
 

@@ -1,4 +1,4 @@
-% kubeeservice(1) Version Latest | Show service data
+% kubee-app(1) Version Latest | Show app data
 # DESCRIPTION
 
 Shows the service data:

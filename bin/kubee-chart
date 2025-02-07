@@ -1,21 +1,47 @@
 #!/usr/bin/env bash
 
-set -TCEeuo pipefail
-# shellcheck source=../..//bash-lib/lib/bashlib-error.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
-error::set_trap
-# shellcheck source=../../bash-lib/lib/bashlib-echo.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+
 # shellcheck source=../../bash-lib/lib/bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+
+# The synopsis function is required by the doc::usage
+synopsis(){
+
+  local CLI_NAME=$(basename $(script::get_actual_script) | tr "-" " ")
+  cat << EOF
+\`\`\`bash
+$CLI_NAME [-c|--cluster clusterName] [--debug] command options
+\`\`\`
+
+where:
+* \`command\` can be:
+  * \`play packageName\`     - Upgrade or install a Kubee Chart if not present
+  * \`upgrade packageName\`  - Upgrade a Kubee Chart
+  * \`install packageName\`  - Install a Kubee Chart
+  * \`template packageName\` - Output the manifests for a Chart (used for ArgoCd Integration and debugging)
+  * \`values\` - Shows the values
+* \`-c|--cluster clusterName\` - Defines the cluster
+* \`--output-dir string\`: Writes the executed templates to files in output-dir instead of stdout
+* \`--out string\`: Writes the executed templates to the \`out\` relatif directory
+* \`--debug\`: run in debug mode, a more verbose mode
+
+The cluster is determined in order of precedence by:
+
+* the \`-c|--cluster clusterName\` option
+* the current directory
+
+EOF
+
+}
+
+if [ "${1:-}" == "synopsis" ]; then
+   synopsis
+   exit
+fi
+
+
 # shellcheck source=../../bash-lib/lib/bashlib-template.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
-# shellcheck source=../../bash-lib/lib/bashlib-bash.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
-# shellcheck source=../../bash-lib/lib/bashlib-command.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
-# shellcheck source=./kubee-lib.sh
-source "kubee-lib.sh"
 
 # @description
 #     Return the directory of a package
@@ -132,7 +158,7 @@ install_crd_first(){
   # recursion
   # We don't use helm directly as we have now CRD charts that are only with Jsonnet
   echo::info "Installing CRD Chart $PACKAGE_CRDS_NAME in namespace $CHART_NAMESPACE"
-  if ! command::echo_eval "$(basename "$0") play -n $CHART_NAMESPACE $PACKAGE_CRDS_NAME"; then
+  if ! echo::eval "$(basename "$0") play -n $CHART_NAMESPACE $PACKAGE_CRDS_NAME"; then
     return 1
   fi
 
@@ -184,10 +210,8 @@ apply(){
   esac
 
 
-  # Get env (KubeConfig) used by helm for CRD Chart and app Chart
-  export KUBEE_ENV
-  KUBEE_ENV=$(source kubee-env) || error::exit $?
-  eval "$KUBEE_ENV"
+  # Get env
+  source kubee-env || error::exit $?
 
   HELM_COMMAND+=("-f" "${CHART_VALUES_PATH}")
 
@@ -206,8 +230,8 @@ apply(){
 
 
   # To update the kubee helm
-  # 2>FD_STDOUT_COMMAND to silence: walk.go:75: found symbolic link in path
-  command::echo_eval "helm dependency update ${HELM_EXTRA_FLAGS[*]} $CHART_DIRECTORY 1>$FD_STDOUT_COMMAND 2>$FD_STDOUT_COMMAND"
+  # 2>COMMAND_STDOUT_FD to silence: walk.go:75: found symbolic link in path
+  echo::eval "helm dependency update ${HELM_EXTRA_FLAGS[*]} $CHART_DIRECTORY 1>$COMMAND_STDOUT_FD 2>$COMMAND_STDOUT_FD"
   HELM_COMMAND+=( "--dependency-update" )
 
   # Options ???
@@ -240,9 +264,9 @@ apply(){
   # Working directory is the cluster directory
   # Why? To be able to set relative path to the cluster object such as certificate
   # example: "--set-file kubee.traefik.defaultCertificate.cert=cert/kubee.dev+1.pem"
-  command::echo_debug_eval "pushd $KUBEE_CLUSTER_DIR 1>$FD_STDOUT_COMMAND"
-  bash::trap "popd 1>$FD_STDOUT_COMMAND" EXIT
-  if ! command::echo_eval "${HELM_COMMAND[*]}"; then
+  echo::eval "pushd $KUBEE_CLUSTER_DIR 1>$COMMAND_STDOUT_FD"
+  bash::trap "popd 1>$COMMAND_STDOUT_FD" EXIT
+  if ! echo::eval "${HELM_COMMAND[*]}"; then
     echo::err "An error occurs during the command $COMMAND"
     exit 1
   fi
@@ -306,7 +330,7 @@ get_cluster_values_files(){
     # The cluster values need to lose their scope
     local SHM_CLUSTER_CHART_VALUES="$CHART_OUTPUT_VALUES_DIR/cluster-chart-values.yml"
     local CHART_VALUES;
-    CHART_VALUES=$(command::echo_debug_eval "yq '.$ACTUAL_CHART_ALIAS' $SHM_CLUSTER_VALUES")
+    CHART_VALUES=$(echo::eval "yq '.$ACTUAL_CHART_ALIAS' $SHM_CLUSTER_VALUES")
     if [ "$CHART_VALUES" == "null" ]; then
       # CRD chart does not have any value in the cluster values files
       if [ "$IS_CRD_CHART" != "1" ]; then
@@ -327,34 +351,7 @@ get_cluster_values_files(){
     echo "${CLUSTER_FILES[@]}"
 
 }
-# The synopsis function is required by the doc::usage
-synopsis(){
 
-  cat << EOF
-\`\`\`bash
-kubee-chart [-c|--cluster clusterName] [--debug] command options
-\`\`\`
-
-where:
-* \`command\` can be:
-  * \`play packageName\`     - Upgrade or install a Kubee Chart if not present
-  * \`upgrade packageName\`  - Upgrade a Kubee Chart
-  * \`install packageName\`  - Install a Kubee Chart
-  * \`template packageName\` - Output the manifests for a Chart (used for ArgoCd Integration and debugging)
-  * \`values\` - Shows the values
-* \`-c|--cluster clusterName\` - Defines the cluster
-* \`--output-dir string\`: Writes the executed templates to files in output-dir instead of stdout
-* \`--out string\`: Writes the executed templates to the \`out\` relatif directory
-* \`--debug\`: run in debug mode, a more verbose mode
-
-The cluster is determined in order of precedence by:
-
-* the \`-c|--cluster clusterName\` option
-* the current directory
-
-EOF
-
-}
 
 
 
@@ -399,15 +396,15 @@ print_values(){
         ;;
       esac
       local SHM_DEPENDENCY_CHART_VALUES_FILE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default_non_scoped.yml"
-      # 2>FD_STDOUT_COMMAND to silence: walk.go:75: found symbolic link in path
-      if ! command::echo_debug_eval "helm show values $DEPENDENCY_CHART_REPOSITORY >| $SHM_DEPENDENCY_CHART_VALUES_FILE 2>$FD_STDOUT_COMMAND"; then
+      # 2>COMMAND_STDOUT_FD to silence: walk.go:75: found symbolic link in path
+      if ! echo::eval "helm show values $DEPENDENCY_CHART_REPOSITORY >| $SHM_DEPENDENCY_CHART_VALUES_FILE 2>$COMMAND_STDOUT_FD"; then
         echo::err "Error while trying to the get values for the Chart $DEPENDENCY_CHART_ALIAS"
         return 1
       fi
       # The default value should be under the alias key (ie scoped)
       local SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default.yml"
       # --null-input flag: does not have any input as we create a new file
-      if ! command::echo_debug_eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$SHM_DEPENDENCY_CHART_VALUES_FILE\"))' >| $SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE"; then
+      if ! echo::eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$SHM_DEPENDENCY_CHART_VALUES_FILE\"))' >| $SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE"; then
         echo::err "Error while processing the chart values file $SHM_DEPENDENCY_CHART_VALUES_FILE"
         return 1
       fi
@@ -451,7 +448,7 @@ print_values(){
   # Merge
   # shellcheck disable=SC2016
   # https://mikefarah.gitbook.io/yq/commands/evaluate-all
-  if ! command::echo_debug_eval "yq eval-all '. as \$item ireduce ({}; . * \$item )' ${CHART_VALUES_FILES[*]}"; then
+  if ! echo::eval "yq eval-all '. as \$item ireduce ({}; . * \$item )' ${CHART_VALUES_FILES[*]}"; then
     echo::err "Error while merging the yaml files"
     return 1
   fi
@@ -468,7 +465,7 @@ eval set -- "$args"
 KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
 HELM_EXTRA_FLAGS=()
 OPTION_OUTPUT_DIR=""
-export FD_STDOUT_COMMAND="/dev/null" # where the stdout, stderr of command should go, exported because it's used also in the helm post-renderer
+export COMMAND_STDOUT_FD="/dev/null" # where the stdout, stderr of command should go, exported because it's used also in the helm post-renderer
 while [[ $# -gt 0 ]]
 do
    case "$1" in
@@ -489,12 +486,6 @@ do
       "--skip-schema-validation")
         shift
         HELM_EXTRA_FLAGS+=("--skip-schema-validation")
-        ;;
-      "--debug")
-        export BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_DEBUG_LEVEL";
-        HELM_EXTRA_FLAGS+=("--debug");
-        FD_STDOUT_COMMAND=$(echo::get_file_descriptor);
-        shift
       ;;
       "--")
         shift
@@ -504,8 +495,12 @@ do
    esac
 done
 
+# Debug ??
+if [ "$BASHLIB_ECHO_LEVEL" == "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
+  HELM_EXTRA_FLAGS+=("--debug");
+fi
 
-# Assign the first argument to a string
+# Get the command
 COMMAND=${1:-}
 if [ "$COMMAND" = "" ]; then
     doc::help
@@ -612,7 +607,7 @@ if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ] && [ "$OPTION_OUTPUT
   bash::trap "echo 'Cleaning' > $(echo::get_file_descriptor);$CLEAN_OUT_COMMAND" EXIT
 else
   # To not kept old manifests, we clean
-  command::echo_eval "$CLEAN_OUT_COMMAND"
+  echo::eval "$CLEAN_OUT_COMMAND"
 fi
 
 # Create the output directory as it's mandatory by Jsonnet

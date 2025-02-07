@@ -4,10 +4,22 @@
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
 error::set_strict_mode
 error::set_trap
-# shellcheck source=../..//bash-lib/lib/bashlib-echo.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
-# shellcheck source=../..//bash-lib/lib/bashlib-doc.sh
+# shellcheck source=../../bash-lib/lib/bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
+# shellcheck source=../../bashlib-command.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-echo.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=../../bashlib-error.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+# shellcheck source=../../bashlib-path.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-path.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-script.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-script.sh"
+# shellcheck source=./kubee-lib.sh
+source "kubee-lib.sh"
 
 
 
@@ -20,10 +32,17 @@ $(basename "$0") [kubee options] command args
 
 where:
 
+* \`command\` is one of:
+  * \`cluster\`                  : Kubernetes cluster hosts installation and configuration
+  * \`chart\`                    : Kubee Package Manager
+  * \`app\`                      : Application scoped commands
+  * \`kubectl\`                  : Kubectl Kubee scluster aware
+
 * \`kubee options\` are:
   * \`-n|--namespace name\`    : the \`connection namespace name\` default to \`KUBEE_CONNECTION_NAMESPACE\`, ultimately to \`default\`.
   * \`-c|--cluster   name\`    : the \`cluster name\` default to \`KUBEE_CLUSTER_NAME\`.
   * \`--debug\`                : Print debug statements.
+  * \`--print-commands\`       : Print the command statements.
 
 
 Example:
@@ -35,7 +54,12 @@ $(basename "$0") -c my-kubee kubectl cluster-info
 EOF
 }
 
-if ! args=$(getopt -l "cluster:,debug,namespace:" -o "c:n:" -- "$@"); then
+if [ "${1:-}" == "synopsis" ]; then
+   synopsis
+   exit
+fi
+
+if ! args=$(getopt -l "cluster:,debug,namespace:,print-commands" -o "c:n:" -- "$@"); then
   doc::help
   exit 1
 fi
@@ -45,6 +69,10 @@ eval set -- "$args"
 # Connection variables
 export KUBEE_CONNECTION_NAMESPACE=${KUBEE_CONNECTION_NAMESPACE:-"default"}
 export KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
+# Echo variables
+# The destination of any std for an executed command
+# default to null and is set to stderr or tty for debug level
+export COMMAND_STDOUT_FD="/dev/null"
 while [[ $# -gt 0 ]]
 do
    case  "$1" in
@@ -60,8 +88,12 @@ do
       shift
       KUBEE_CLUSTER_NAME="$1"
       ;;
+    "--print-commands")
+      BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_COMMAND_LEVEL";
+      ;;
     "--debug")
-      export BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_DEBUG_LEVEL";
+      BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_DEBUG_LEVEL";
+      COMMAND_STDOUT_FD=$(echo::get_file_descriptor);
       ;;
     "--")
       shift
@@ -90,12 +122,23 @@ if [[ "$COMMAND" =~ "-h"|"--help"|"help" ]]; then
 fi
 shift  # Remove the first argument from the argument list
 
+# Get the env
+source kubee-env
+
+bash::trap 'exit_code=$?; if [ $exit_code -ne 0 ]; then echo -e "\033[0;33mScript failed use the --debug flag to get more information\033[0m"; fi' EXIT
+
 case "$COMMAND" in
   "cluster")
      source kubee-cluster "$@" || error::exit $?
     ;;
-  "synopsis")
-    synopsis
+  "app")
+    source kubee-app "$@" || error::exit $?
+    ;;
+  "chart")
+    source kubee-chart "$@" || error::exit $?
+    ;;
+  "kubectl")
+    source kubee-kubectl "$@" || error::exit $?
     ;;
   *)
     doc::help synopsis

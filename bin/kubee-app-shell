@@ -17,24 +17,23 @@ source "kubee-lib.sh"
 
 
 synopsis(){
-
+  CLI_COMMANDS=$(doc::get_cli_command_words)
 cat <<EOF
 
 Get a shell into your application pod or your cluster with busybox
 
 \`\`\`bash
-$(basename "$0") [--shell|-s shellName [--namespace|-n namespace] <app name>
+$CLI_COMMANDS [--shell|-s shellName <app name>
 \`\`\`
 
 where:
 
-* \`app name\` (Default to \`KUBEE_APP_NAME\`) may be:
-    * an app name (used with the label \`app.kubernetes.io/name=<app name>\` to select the target pod)
+* \`app name\` may be:
+    * an app name
     * or \`busybox\` to run a standalone busybox pod
 * \`--shell|-s shell name\` may be:'
   * a shell path (ie \`bash\`, \`sh\`, \`bin/bash\`)
   * or \`ephemeral\` to add busybox as an ephemeral container if your container app has no shell
-* \`--namespace|-n namespace\` to override the default namespace
 EOF
 }
 
@@ -53,11 +52,11 @@ SHELL_NAME=""
 
 # Normalization
 # A shell option with an option argument
-args=$(getopt --longoptions "shell:,help,namespace"  --options "s:hn"  -- "$@")
+args=$(getopt --longoptions "shell:,help"  --options "s:h"  -- "$@")
 # eval set to set the positional arguments back to $args
 eval set -- "$args"
 
-export KUBEE_APP_NAMESPACE
+export KUBEE_CONNECTION_NAMESPACE
 # Loop
 while [[ $# -gt 0 ]]
 do
@@ -70,11 +69,6 @@ do
     "-h"|"--help")
       doc::help synopsis
       exit
-    ;;
-    "-n"|"--namespace")
-      shift
-      KUBEE_APP_NAMESPACE="$1"
-      shift
     ;;
     --)
       # Starts argument
@@ -107,10 +101,6 @@ if [ "$APP_NAME" != "busybox" ]; then
   KUBEE_APP_NAME=$APP_NAME
 fi
 
-# Set the env
-# The substitution is not in the eval because bash would not stop the script otherwise
-KUBEE_ENV=$(source kubee-env "$KUBEE_APP_NAME") || exit $?
-eval "$KUBEE_ENV"
 
 # Busy box is a special kind of app
 # That does have any pod or directory

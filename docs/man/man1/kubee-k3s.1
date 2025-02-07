@@ -20,6 +20,8 @@
 .PP
 K3s specific scripts that should be used on the server
 .SH SYNOPSIS
+.PP
+This script should be executed on the server
 .IP
 .nf
 \f[C]
@@ -27,10 +29,10 @@ kubee-k3s command args
 \f[R]
 .fi
 .PP
-where: command may be: * \f[V]certs_expiration\f[R] : Print the
+where: command may be: * \f[V]certs_expiration\f[R] : Print the k3s
 certificates and their expiration date * \f[V]cert_print\f[R] : Print a
-single pem file * \f[V]cert_secret_print\f[R] : Print a kubernetes TLS
-cert secret
+single k3s pem file * \f[V]cert_secret_print\f[R] : Print the
+k3s-serving kubernetes TLS cert secret
 .PP
-All certs should be relative name (This script adds the directory:
-/var/lib/rancher/k3s/server/tls)
+All certs should be relative name (This script adds the k3s tls
+directory: /var/lib/rancher/k3s/server/tls)

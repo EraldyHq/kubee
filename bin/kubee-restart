@@ -56,8 +56,7 @@ if [[ "$KUBEE_APP_NAME" =~ -h|--help|help ]]; then
 fi
 
 # Get env
-KUBEE_ENV=$(source kubee-env "$KUBEE_APP_NAME") || error::exit $?
-eval "$KUBEE_ENV"
+source kubee-env) || error::exit $?
 
 if [ "$KUBEE_APP_NAME" == "" ]; then
     doc::help synopsis

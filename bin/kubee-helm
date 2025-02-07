@@ -66,8 +66,8 @@ fi
 
 
 # Get env
-KUBEE_ENV=$(source kubee-env) || error::exit $?
-eval "$KUBEE_ENV"
+# Get env
+source kubee-env || error::exit $?
 
 
 helm "${args[@]}"
