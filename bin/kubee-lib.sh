@@ -353,7 +353,7 @@ EOF
 #     Set the KUBECONFIG env
 #     And errored if it does not exists
 kubee::set_kubeconfig_env_and_check(){
-  set_kubeconfig_env || return $?
+  kubee::set_kubeconfig_env || return $?
 
   if [ "${KUBECONFIG:-}" != "" ] && [ ! -f "$KUBECONFIG" ]; then
    echo::err "The \$KUBECONFIG variable points to the file $KUBECONFIG that does not exist"
