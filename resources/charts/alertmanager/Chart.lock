@@ -14,5 +14,5 @@ dependencies:
 - name: kubee-prometheus
   repository: file://../prometheus
   version: 0.0.1
-digest: sha256:52a397f052bdf4dc40a76d43ce8f00ac47d2800a09097b7331bdb1e3235d6d38
-generated: "2025-01-27T13:49:15.488705171+01:00"
+digest: sha256:e90950e393633a37fe9a9a010526bf79572f99ba1d460b05be489cb037afd26e
+generated: "2025-02-07T15:31:33.880658203+01:00"
