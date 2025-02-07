@@ -59,13 +59,6 @@ if [ "${1:-}" == "synopsis" ]; then
    exit
 fi
 
-if ! args=$(getopt -l "cluster:,debug,namespace:,print-commands" -o "c:n:" -- "$@"); then
-  doc::help
-  exit 1
-fi
-# eval set to set the positional arguments back to $args
-eval set -- "$args"
-
 # Connection variables
 export KUBEE_CONNECTION_NAMESPACE=${KUBEE_CONNECTION_NAMESPACE:-"default"}
 export KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
@@ -73,6 +66,14 @@ export KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
 # The destination of any std for an executed command
 # default to null and is set to stderr or tty for debug level
 export COMMAND_STDOUT_FD="/dev/null"
+
+
+# Parsing
+# Note: getopt cannot be used because of : unrecognized --out option. This is an option of a sub-command
+# Example:
+# this command : `getopt -l "cluster:,debug,namespace:,print-commands" -o "c:n:" -- "$@"`
+# will fail with: `kubee chart template kubernetes-monitoring --out`
+args=()
 while [[ $# -gt 0 ]]
 do
    case  "$1" in
@@ -95,18 +96,15 @@ do
       BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_DEBUG_LEVEL";
       COMMAND_STDOUT_FD=$(echo::get_file_descriptor);
       ;;
-    "--")
-      shift
-      break;
-      # from now on, $@ contains only the arguments
-      ;;
     *)
-      echo::err "Internal error: the option $1 was not processed"
-      exit 1
+      echo::debug "Subcommand args ($1) added"
+      args+=("$1")
       ;;
    esac
    shift
 done
+eval set -- "${args[@]}"
+
 
 # Assign the first argument to a string
 COMMAND=${1:-}

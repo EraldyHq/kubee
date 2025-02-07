@@ -512,10 +512,6 @@ echo::debug "Command Name: $COMMAND"
 shift
 
 
-if [ "$COMMAND" = "synopsis" ]; then
-  synopsis
-  exit
-fi
 # Help
 if [[ "$COMMAND" =~ "-h"|"--help"|"help" ]]; then
   doc::help

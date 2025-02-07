@@ -16,8 +16,12 @@ hostname: ''
 resources:
   # Depend on scrape interval, max_block_duration, number of metrics scraped, number of recording rules
   # Dynamically, if you query data above the max_block_duration, data is loaded in memory
-  # 400Mi is the default of Kube-Prometheus with default memory setting.
-  memory: '800Mi'
+  # Why? 400Mi.
+  # This is:
+  # * the default of Kube-Prometheus with default memory setting.
+  # * the amount that we get after installing kubernetes-monitoring
+  # This is our goal
+  memory: '400Mi'
 # Retention
 # How long to retain data (it's the prometheus server argument --storage.tsdb.retention.time=24h)
 # Data in memory is 2 hour old, by setting retention to 2h, we don't allow to query data over 2 hours and to load data in memory
@@ -30,7 +34,7 @@ retention: '1h'
 # Note that 1h is the default of:
 # * the prometheus query ui
 # * the grafana explore panel (ie last hour)
-max_block_duration: '30m'
+max_block_duration: '1h'
 # The default scrape interval for target
 # It does influence memory as Prometheus keeps by default 2 hours of scraping in memory (max_block_duration)
 # Default was 30s

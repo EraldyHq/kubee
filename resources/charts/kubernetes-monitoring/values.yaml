@@ -6,46 +6,6 @@ enabled: false
 # namespace. This is a monitoring component
 namespace: 'monitoring'
 
-# The mixin
-# https://github.com/kubernetes-monitoring/kubernetes-mixin
-kube_mixin:
-  alerts_enabled:
-    kubernetes_apps
-    kubernetes_resources
-    kubernetes_storage
-    kubernetes_system
-    kube_apiserver_slos
-    kubernetes_system_apiserver
-    kubernetes_system_kubelet
-    kubernetes_system_scheduler
-    kubernetes_system_controller_manager
-    kubernetes_system_kube_proxy
-  recording_rules_enabled:
-    apps: false
-    # https://monitoring.mixins.dev/kubernetes/#kube-apiserver-availabilityrules
-    api_server_availability: false
-    api_server_burn_rate: false
-    api_server_config: false
-    node_rules: false
-
-#  Recording rules
-#  kube-apiserver-availability.rules
-#  kube-apiserver-burnrate.rules
-#  kube-apiserver-histogram.rules
-#  k8s.rules.container_cpu_usage_seconds_total
-#  k8s.rules.container_memory_working_set_bytes
-#  k8s.rules.container_memory_rss
-#  k8s.rules.container_memory_cache
-#  k8s.rules.container_memory_swap
-#  k8s.rules.container_memory_requests
-#  k8s.rules.container_cpu_requests
-#  k8s.rules.container_memory_limits
-#  k8s.rules.container_cpu_limits
-#  k8s.rules.pod_owner
-#  kube-scheduler.rules
-#  node.rules
-#  kubelet.rules
-
 
 # Scrape of the kubelet (CPU and Memory Resources)
 kubelet:
@@ -54,12 +14,20 @@ kubelet:
   # Headlamp uses a CPU rate functon over 1 minutes
   # If the scrape interval is above 1m, there is no data returned
   scrape_interval: '45s'
+  # Buckets metrics are high cardinality metrics
+  # that are not used in alerting but in debugging
+  # and consume a lot of memory
+  drop_bucket_metrics: true
 
 # Scrape of the api server
 api_server:
   enabled: true
   # Default 30s (and 5s for sli)
   scrape_interval: '60s'
+  # Buckets metrics are high cardinality metrics
+  # that are not used in alerting but in debugging
+  # and consume a lot of memory
+  drop_bucket_metrics: true
 
 # Scrape of the Core Dns server
 core_dns:

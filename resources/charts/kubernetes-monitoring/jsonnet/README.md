@@ -6,3 +6,4 @@ This is the Jsonnet project of the kubee Kubernetes monitoring chart
 
 
 For more information, see [](../contrib.md#how-this-project-was-bootstrapped-jsonnet-bootstrap)
+

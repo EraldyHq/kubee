@@ -17,8 +17,10 @@ local kxValues = {
   kube_state_metrics_version: validation.notNullOrEmpty(kxExtValues, 'kube_state_metrics.version'),
   kubelet_enabled: validation.notNullOrEmpty(kxExtValues, 'kubelet.enabled'),
   kubelet_scrape_interval: validation.notNullOrEmpty(kxExtValues, 'kubelet.scrape_interval'),
+  kubelet_drop_buckets: validation.notNullOrEmpty(kxExtValues, 'kubelet.drop_bucket_metrics'),
   api_server_enabled: validation.notNullOrEmpty(kxExtValues, 'api_server.enabled'),
   api_server_scrape_interval: validation.notNullOrEmpty(kxExtValues, 'api_server.scrape_interval'),
+  api_server_drop_buckets: validation.notNullOrEmpty(kxExtValues, 'api_server.drop_bucket_metrics'),
   core_dns_enabled: validation.notNullOrEmpty(kxExtValues, 'core_dns.enabled'),
   core_dns_scrape_interval: validation.notNullOrEmpty(kxExtValues, 'core_dns.scrape_interval'),
 
@@ -97,7 +99,6 @@ local kpValues = {
 local kubernetesControlPlane = (import './kube-prometheus/components/k8s-control-plane.libsonnet')(kpValues.kubernetesControlPlane);
 
 
-
 // mixin is not a function but an object
 local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.libsonnet') {
   _config+:: k3sConfigPatch {
@@ -130,6 +131,13 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
             endpoints: [
               endpoint {
                 interval: kxValues.kubelet_scrape_interval,
+                metricRelabelings+: (if !kxValues.kubelet_drop_buckets then [] else [
+                                       {
+                                         sourceLabels: ['__name__'],
+                                         regex: '.*_bucket',
+                                         action: 'drop',
+                                       },
+                                     ]),
               }
               for endpoint in serviceMonitorKubelet.spec.endpoints
             ],
@@ -142,6 +150,13 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
             endpoints: [
               endpoint {
                 interval: kxValues.api_server_scrape_interval,
+                metricRelabelings+: (if !kxValues.api_server_drop_buckets then [] else [
+                                       {
+                                         sourceLabels: ['__name__'],
+                                         regex: '.*_bucket',
+                                         action: 'drop',
+                                       },
+                                     ]),
               }
               for endpoint in serviceMonitorApiServer.spec.endpoints
             ],
