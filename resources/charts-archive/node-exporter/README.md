@@ -13,7 +13,7 @@ This chart installs:
 It was added as a `DaemonSet` with `hostNetwork` capability.
 
 See:
-* [prometheus-node-exporter](templates/prometheus-node-exporter.yml)
+* [prometheus-node-exporter](templates/prometheus-node-exporter-daemonset.yml)
 * [prometheus-node-exporter service monitor](templates/prometheus-node-exporter-service-monitor.yml)
 
 ## Ref
