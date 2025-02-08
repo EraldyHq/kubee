@@ -207,3 +207,9 @@ kubee- \
   cert-manager \
   | grep "cert-manager-mixin-alert-rules" -B 3 -A 30
 ```
+
+### Why not ingress traefik cert?
+
+Cert-Manager supports HA setups without requiring you to use the enterprise version of the ingress.
+
+For example, Traefik CE (community edition) is stateless, and it's not possible to run multiple instances of Traefik CE with LetsEncrypt enabled. 

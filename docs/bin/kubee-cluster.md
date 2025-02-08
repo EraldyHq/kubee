@@ -12,6 +12,9 @@ The `kubee-cluster` command manages the hosts of the clusters.
 * Operating System package upgrade 
 * Kubernetes installation
 
+Os gets upgraded automatically on each node every 24 hours and reboot safely with the [Kubernetes Reboot Daemon](https://github.com/kubereboot/kured) to performs safe automatic node reboots 
+
+
 ## UPGRADE
 
 If you are on a vps, it's a good time to do a snapshot.
@@ -23,6 +26,9 @@ On a `upgrade`:
 * the system pods will restart 
 * the cluster should become again healthy in a couple of minutes.
 
+To avoid alerts, you need a cluster with a minimum 2 control plane/master node to maintain quorum when one goes down for upgrading.
+
+You can automate it with the K3 system upgrade controller https://github.com/rancher/system-upgrade-controller
 
 # Metadata
 
