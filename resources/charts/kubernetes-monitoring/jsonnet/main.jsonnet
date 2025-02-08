@@ -26,6 +26,7 @@ local kxValues = {
   node_exporter_enabled: validation.notNullOrEmpty(kxExtValues, 'node_exporter.enabled'),
   node_exporter_version: validation.notNullOrEmpty(kxExtValues, 'node_exporter.version'),
   node_exporter_scrape_interval: validation.notNullOrEmpty(kxExtValues, 'node_exporter.scrape_interval'),
+  node_exporter_memory: validation.notNullOrEmpty(kxExtValues, 'node_exporter.memory'),
 
 };
 
@@ -96,6 +97,10 @@ local kpValues = {
       _config+:: k3sConfigPatch,
     },
     kubeRbacProxyImage: $.common.images.kubeRbacProxy,
+    resources:: {
+        requests: { cpu: '102m', memory: kxValues.node_exporter_memory },
+        limits: { memory: kxValues.node_exporter_memory },
+      },
   },
 };
 // k8s-control-plane.libsonnet is a function
@@ -203,7 +208,7 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
 // Node Exporter
 (
   if !kxValues.node_exporter_enabled then {} else
-    local nodeExporter = (import './kube-prometheus/components/node-exporter.libsonnet')(kpValues.nodeExporter);
+    local nodeExporter = (import './kubee/node-exporter.libsonnet')(kpValues.nodeExporter + kxValues);
     {
       ['kubernetes-monitoring-node-' + name]: nodeExporter[name]
       for name in std.objectFields(nodeExporter)

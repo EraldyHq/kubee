@@ -55,6 +55,9 @@ node_exporter:
   version: 'v1.8.2'
   # Default was 15s
   scrape_interval: '45s'
+  # The memory of the exporter
+  # Kube Prometheus set 180Mi
+  memory: '50Mi'
 
 
 # Don't change, don't touch

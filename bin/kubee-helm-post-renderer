@@ -134,14 +134,14 @@ jsonnet_processing(){
 
   JSONNET_DIR="jsonnet"
   if [ ! -d "$JSONNET_DIR" ]; then
-    echo::info "No Jsonnet directory found"
+    echo::info "Jsonnet: No directory found"
   fi
+  echo::info "Jsonnet: project processing"
+
   pushd "$JSONNET_DIR" > /dev/null
   echo::debug "Working directory for jsonnet processing is $JSONNET_DIR"
   # we can't use bash::trap on return because it's a signal processing meaning
   trap "popd > /dev/null" EXIT
-
-  echo::debug "Jsonnet processing into the Jsonnet directory $JSONNET_DIR"
 
   # Update the dependencies (vendor directory)
   # Mandatory when using jsonnet bundler
@@ -317,7 +317,8 @@ KUSTOMIZATION_MODE=0
 if [ -f "$KUSTOMIZATION_FILE" ]; then
   KUSTOMIZATION_MODE=1
 else
-  echo::info "No kustomization file ($KUSTOMIZATION_FILE)"
+  echo::info "Kustomize Project: Not found"
+  echo::debug "No kustomization file found at ($KUSTOMIZATION_FILE)"
 fi
 
 # Grab the manifests passed by Helm

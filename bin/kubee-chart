@@ -201,7 +201,7 @@ apply(){
         ;;
       "template")
         HELM_COMMAND+=( "template" )
-        echo::debug "Templating package $CHART_NAME "
+        echo::info "Templating package $CHART_NAME "
         # Output
         if [ "$OPTION_OUTPUT_DIR" != "" ]; then
           HELM_COMMAND+=("--output-dir" "$(dirname "$CHART_OUTPUT_DIR")")
@@ -222,16 +222,15 @@ apply(){
     "--create-namespace"
   )
 
-
   # Install CRD first
   if ! install_crd_first; then
     echo::err "An error has occurred while installing the CRD chart"
     return 1
   fi
 
-
   # To update the kubee helm
   # 2>COMMAND_STDOUT_FD to silence: walk.go:75: found symbolic link in path
+  echo::info "Executing Helm Dependency Update"
   echo::eval "helm dependency update ${HELM_EXTRA_FLAGS[*]} $CHART_DIRECTORY 1>$COMMAND_STDOUT_FD 2>$COMMAND_STDOUT_FD"
   HELM_COMMAND+=( "--dependency-update" )
 
@@ -267,6 +266,7 @@ apply(){
   # example: "--set-file kubee.traefik.defaultCertificate.cert=cert/kubee.dev+1.pem"
   echo::eval "pushd $KUBEE_CLUSTER_DIR 1>$COMMAND_STDOUT_FD"
   bash::trap "popd 1>$COMMAND_STDOUT_FD" EXIT
+  echo::info "Executing Helm $COMMAND"
   if ! echo::eval "${HELM_COMMAND[*]}"; then
     echo::err "An error occurs during the command $COMMAND"
     exit 1
