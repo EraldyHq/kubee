@@ -1,26 +1,7 @@
-% kubee-env(1) Version Latest | Print the export environment variables
-# DESCRIPTION
-
-Print the export environment statements.
-
-# USAGE AND EXAMPLE
-
-This script is used by all `kubee` scripts to set the [environment](#ENVIRONMENT)
-
-```bash
-KUBEE_ENV=$(source kubee-env "$KUBEE_APP_NAME")
-eval "$KUBEE_ENV"
-```
-
-Note: The substitution is not in the eval because bash would not stop the script otherwise
-even with the `-Ee` options.
-
-# SYNOPSIS
-
-${SYNOPSIS}
-
-
 # ENVIRONMENT
+
+The environment statements.
+
 
 
 

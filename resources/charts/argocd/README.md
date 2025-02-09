@@ -2,7 +2,7 @@
 
 
 ## About
-This chart is a [Helm-x Chart](../../../docs/bin/kubee-chart.md) that:
+This chart is a [Helm-x Chart](../../../docs/bin/kubee-helmet) that:
 * executes [a standard installation with cluster-admin access](https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#non-high-availability)
 * and configure optionally:
   * an [Ingress](templates/resources/argocd-ingress.yaml)

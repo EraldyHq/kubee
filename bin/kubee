@@ -5,24 +5,11 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
 error::set_strict_mode
 error::set_trap
 # shellcheck source=../../bash-lib/lib/bashlib-doc.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
-# shellcheck source=../../bashlib-command.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
-# shellcheck source=../../bash-lib/lib/bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-echo.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
-# shellcheck source=../../bashlib-error.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
-# shellcheck source=../../bashlib-path.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-path.sh"
-# shellcheck source=../../bash-lib/lib/bashlib-script.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-script.sh"
 # shellcheck source=./kubee-lib.sh
 source "kubee-lib.sh"
-
-
-
 
 synopsis(){
   cat <<EOF
@@ -33,10 +20,11 @@ $(basename "$0") [kubee options] command args
 where:
 
 * \`command\` is one of:
-  * \`cluster\`                  : Kubernetes cluster hosts installation and configuration
-  * \`chart\`                    : Kubee Package Manager
   * \`app\`                      : Application scoped commands
+  * \`cluster\`                  : Kubernetes cluster hosts installation and configuration
   * \`kubectl\`                  : Kubectl Kubee scluster aware
+  * \`helmet\`                   : Kubee Package Manager
+  * \`helm\`                     : Helm Package Manager
 
 * \`kubee options\` are:
   * \`-n|--namespace name\`    : the \`connection namespace name\` default to \`KUBEE_CONNECTION_NAMESPACE\`, ultimately to \`default\`.
@@ -74,8 +62,8 @@ export BASHLIB_ECHO_LEVEL=$BASHLIB_ECHO_INFO_LEVEL
 # Note: getopt cannot be used because of : unrecognized --out option. This is an option of a sub-command
 # Example:
 # this command : `getopt -l "cluster:,debug,namespace:,print-commands" -o "c:n:" -- "$@"`
-# will fail with: `kubee chart template kubernetes-monitoring --out`
-args=()
+# will fail with: `kubee helmet template kubernetes-monitoring --out`
+KUBEE_COMMAND=""
 while [[ $# -gt 0 ]]
 do
    case  "$1" in
@@ -99,46 +87,47 @@ do
       COMMAND_STDOUT_FD=$(echo::get_file_descriptor);
       ;;
     *)
-      echo::debug "Subcommand args ($1) added"
-      args+=("$1")
+      echo::debug "Command ($1)"
+      KUBEE_COMMAND=${1}
+      shift
+      break
       ;;
    esac
    shift
 done
-eval set -- "${args[@]}"
 
 
-# Assign the first argument to a string
-COMMAND=${1:-}
-if [ "$COMMAND" = "" ]; then
+if [ "$KUBEE_COMMAND" = "" ]; then
     doc::help
     echo::err "A command is mandatory"
     exit 1
 fi
 # Help
-if [[ "$COMMAND" =~ "-h"|"--help"|"help" ]]; then
+if [[ "$KUBEE_COMMAND" =~ "-h"|"--help"|"help" ]]; then
   doc::help
   exit
 fi
-shift  # Remove the first argument from the argument list
 
-# Get the env
-source kubee-env
+# Set the env
+kubee::set_env
 
 # Advertise the --debug flag if any error
 # shellcheck disable=SC2016
 bash::trap 'exit_code=$?; if [ $exit_code -ne 0 ]; then echo -e "\033[0;33mScript failed use the --debug flag to get more information\033[0m"; fi' EXIT
 
-case "$COMMAND" in
+case "$KUBEE_COMMAND" in
   "cluster")
      source kubee-cluster "$@" || error::exit $?
     ;;
   "app")
     source kubee-app "$@" || error::exit $?
     ;;
-  "chart")
-    source kubee-chart "$@" || error::exit $?
+  "helmet")
+    source kubee-helmet "$@" || error::exit $?
     ;;
+  "helm")
+      source kubee-helm "$@" || error::exit $?
+      ;;
   "kubectl")
     source kubee-kubectl "$@" || error::exit $?
     ;;

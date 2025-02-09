@@ -3,7 +3,7 @@
 
 ## About
 This directory contains the charts that can be installed
-with the [Kubee Chart Manager](../../docs/bin/kubee-chart.md)
+with the [Kubee Chart Manager](../../docs/bin/kubee-helmet)
 
 ## Type
 

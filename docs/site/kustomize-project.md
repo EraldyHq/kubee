@@ -1,7 +1,7 @@
 # Kubee Kustomize Project Support
 
 
-Kubee chart supports kustomization project.
+A [Kubee Helmet chart](kubee-helmet-chart.md) supports kustomization project.
 
 ## Project Structure
 

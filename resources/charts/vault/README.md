@@ -1,7 +1,7 @@
 # Kubee Vault Chart
 
 ## About
-A [kubee chart](../../../docs/bin/kubee-chart.md#what-is-a-kubee-chart) that [installs Vault](https://developer.hashicorp.com/vault/docs/platform/k8s) 
+A [kubee chart](../../../docs/bin/kubee-helmet#what-is-a-kubee-chart) that [installs Vault](https://developer.hashicorp.com/vault/docs/platform/k8s) 
 in a standalone mode.
 
 ## Installation

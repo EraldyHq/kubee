@@ -41,7 +41,7 @@ kubee-chart -c clusterName template alertmanager > /tmp/all.yaml
 
 ## How to adapt 
 
-This `Kubee Chart` is a [Jsonnet Chart](../../../docs/bin/kubee-chart.md#what-is-a-jsonnet-kubee-chart). 
+This `Kubee Chart` is a [Jsonnet Chart](../../../docs/bin/kubee-helmet#what-is-a-jsonnet-kubee-chart). 
 You can use it as Jsonnet dependency in your projects.
 
 ## Contrib

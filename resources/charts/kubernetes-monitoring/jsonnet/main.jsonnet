@@ -17,16 +17,19 @@ local kxValues = {
   kube_state_metrics_version: validation.notNullOrEmpty(kxExtValues, 'kube_state_metrics.version'),
   kubelet_enabled: validation.notNullOrEmpty(kxExtValues, 'kubelet.enabled'),
   kubelet_scrape_interval: validation.notNullOrEmpty(kxExtValues, 'kubelet.scrape_interval'),
-  kubelet_drop_buckets: validation.notNullOrEmpty(kxExtValues, 'kubelet.drop_bucket_metrics'),
+  kubelet_scrape_metrics_optimization: validation.notNullOrEmpty(kxExtValues, 'kubelet.scrape_metrics_optimization'),
   api_server_enabled: validation.notNullOrEmpty(kxExtValues, 'api_server.enabled'),
   api_server_scrape_interval: validation.notNullOrEmpty(kxExtValues, 'api_server.scrape_interval'),
-  api_server_drop_buckets: validation.notNullOrEmpty(kxExtValues, 'api_server.drop_bucket_metrics'),
+  api_server_scrape_metrics_optimization: validation.notNullOrEmpty(kxExtValues, 'api_server.scrape_metrics_optimization'),
   core_dns_enabled: validation.notNullOrEmpty(kxExtValues, 'core_dns.enabled'),
   core_dns_scrape_interval: validation.notNullOrEmpty(kxExtValues, 'core_dns.scrape_interval'),
   node_exporter_enabled: validation.notNullOrEmpty(kxExtValues, 'node_exporter.enabled'),
   node_exporter_version: validation.notNullOrEmpty(kxExtValues, 'node_exporter.version'),
   node_exporter_scrape_interval: validation.notNullOrEmpty(kxExtValues, 'node_exporter.scrape_interval'),
   node_exporter_memory: validation.notNullOrEmpty(kxExtValues, 'node_exporter.memory'),
+  node_exporter_scrape_metrics_optimization: validation.notNullOrEmpty(kxExtValues, 'node_exporter.scrape_metrics_optimization'),
+  rbac_enabled: validation.notNullOrEmpty(kxExtValues, 'prometheus.exporter_auth.kube_rbac_proxy.enabled'),
+  rbac_version: validation.notNullOrEmpty(kxExtValues, 'prometheus.exporter_auth.kube_rbac_proxy.version'),
 
 };
 
@@ -62,6 +65,7 @@ local kpValues = {
     } + (import 'kube-prometheus/versions.json') + {
       kubeStateMetrics: stripLeadingV(kxValues.kube_state_metrics_version),
       nodeExporter: stripLeadingV(kxValues.node_exporter_version),
+      kubeRbacProxy: stripLeadingV(kxValues.rbac_version)
     },
     images: {
       kubeStateMetrics: 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v' + $.common.versions.kubeStateMetrics,
@@ -140,7 +144,7 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
             endpoints: [
               endpoint {
                 interval: kxValues.kubelet_scrape_interval,
-                metricRelabelings+: (if !kxValues.kubelet_drop_buckets then [] else [
+                metricRelabelings+: (if !kxValues.kubelet_scrape_metrics_optimization then [] else [
                                        {
                                          sourceLabels: ['__name__'],
                                          regex: '.*_bucket',
@@ -159,7 +163,7 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
             endpoints: [
               endpoint {
                 interval: kxValues.api_server_scrape_interval,
-                metricRelabelings+: (if !kxValues.api_server_drop_buckets then [] else [
+                metricRelabelings+: (if !kxValues.api_server_scrape_metrics_optimization then [] else [
                                        {
                                          sourceLabels: ['__name__'],
                                          regex: '.*_bucket',
@@ -199,7 +203,9 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
 // kube-state metrics
 (
   if !kxValues.kube_state_metrics_enabled then {} else
-    local kubeStateMetrics = (import './kubee/kube-state-metrics.libsonnet')(kpValues.kubeStateMetrics);
+    local kubeStateMetrics = if !kxValues.rbac_enabled
+        then (import './kubee/kube-state-metrics.libsonnet')(kpValues.kubeStateMetrics)
+        else (import './kube-prometheus/components/kube-state-metrics.libsonnet')(kpValues.kubeStateMetrics);
     {
       ['kubernetes-monitoring-state-metrics-' + name]: kubeStateMetrics[name]
       for name in std.objectFields(kubeStateMetrics)
@@ -208,7 +214,9 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
 // Node Exporter
 (
   if !kxValues.node_exporter_enabled then {} else
-    local nodeExporter = (import './kubee/node-exporter.libsonnet')(kpValues.nodeExporter + kxValues);
+    local nodeExporter = if !kxValues.rbac_enabled
+        then (import './kubee/node-exporter.libsonnet')(kpValues.nodeExporter + kxValues)
+        else (import './kube-prometheus/components/node-exporter.libsonnet')(kpValues.nodeExporter);
     {
       ['kubernetes-monitoring-node-' + name]: nodeExporter[name]
       for name in std.objectFields(nodeExporter)

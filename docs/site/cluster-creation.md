@@ -63,7 +63,7 @@ kubee-cluster --cluster "$KUBEE_CLUSTER_NAME" play
 ### Install Applications in the clusters
 
 
-With `kubee chart`, you can install any `kubee charts`.
+With `kubee helmet`, you can install any `kubee charts`.
 
 Example:
 * Install Traefik

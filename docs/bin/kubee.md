@@ -33,7 +33,7 @@ Generate a Ephemere Kubeconfig from pass with [kubee-config](../lib/kubee-config
 
 ## List and documentation
 
-* [kubee chart](../bin-generated/kubee-chart.md) - the kubee chart manager
+* [kubee helmet](../bin-generated/kubee-chart.md) - the kubee chart manager
 * [kubee shell](../bin-generated/kubee-shell.md) - get a shell from a busybox container or a pod
 * [kubee-kapply](../bin/kubee-kapply) - apply a kustomize app (ie `kustomize apply`)
 * [kubee-env](../bin/kubee-env) - print the environment configuration of an app

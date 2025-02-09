@@ -403,3 +403,56 @@ kubee::set_kubeconfig_env(){
   fi
 
 }
+
+# @description
+#     Set the global env
+kubee::set_env(){
+  # The cluster
+  KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
+
+  # Cluster Directory
+  if [ "$KUBEE_CLUSTER_NAME" != "" ]; then
+
+    KUBEE_CLUSTER_DIR=$(kubee::get_cluster_directory "$KUBEE_CLUSTER_NAME")
+    # Envrc
+    # Used in all function
+    KUBEE_ENV_FILE="${KUBEE_CLUSTER_ENV_FILE:-"$KUBEE_CLUSTER_DIR/.envrc"}"
+    if [ -f "$KUBEE_ENV_FILE" ]; then
+       echo::debug "Sourcing cluster env file $KUBEE_ENV_FILE"
+       # shellcheck disable=SC1090
+       if ! source "$KUBEE_ENV_FILE"; then
+         echo::err "Error while importing the envrc file $KUBEE_ENV_FILE"
+         exit 1
+       fi
+    fi
+  fi
+
+
+  #############################
+  # All env with default value
+  # Should be after app envrc call
+  #############################
+
+
+  ## Connection namespace
+  # The namespace for the connection (in the kubectx kubeconfig context)
+  KUBEE_CHART_NAMESPACE=${KUBEE_CHART_NAMESPACE:-"default"}
+
+
+  # The username for the connection (in the kubeconfig context)"
+  KUBEE_USER_NAME=${KUBEE_USER_NAME:-"default"}
+
+  # The connection namespace
+  KUBEE_CONNECTION_NAMESPACE=${KUBEE_CONNECTION_NAMESPACE:-"default"}
+
+  # The name of the context (in kubectx kubeconfig)"
+  KUBEE_CONTEXT_NAME=${KUBEE_CONTEXT_NAME:-"$KUBEE_USER_NAME@$KUBEE_CLUSTER_NAME/$KUBEE_CONNECTION_NAMESPACE"}
+
+  # The directory for the kubeconfig data in the pass store manager"
+  KUBEE_PASS_HOME=${KUBEE_PASS_HOME:-"kubee"}
+
+  # The busybox image to use for a shell in a busybox or ephemeral container"
+  KUBEE_BUSYBOX_IMAGE=${KUBEE_BUSYBOX_IMAGE:-ghcr.io/gerardnico/busybox:latest}
+
+
+}

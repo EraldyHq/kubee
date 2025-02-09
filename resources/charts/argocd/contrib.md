@@ -4,7 +4,7 @@
 
 This is a `Kube-X`:
 * [kustomization chart](../../../docs/bin/kubee-helm-post-renderer.md#kustomization) because this is the official supported installation (ie [Helm is community maintained](https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#helm))
-* and [Jsonnet chart](../../../docs/bin/kubee-chart.md#what-is-a-jsonnet-kubee-chart) to install the monitoring mixin
+* and [Jsonnet chart](../../../docs/bin/kubee-helmet#what-is-a-jsonnet-kubee-chart) to install the monitoring mixin
 
 
 ## Dependency Script

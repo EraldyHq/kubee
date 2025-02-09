@@ -3,7 +3,7 @@
 
 ## About
 
-This [kubee jsonnet chart](../../../docs/bin/kubee-chart.md#what-is-a-jsonnet-kube-x-chart) installs monitoring for:
+This [kubee jsonnet chart](../../../docs/bin/kubee-helmet#what-is-a-jsonnet-kube-x-chart) installs monitoring for:
 * the core systems Kubernetes components:
  * Api Server
  * Controller Manager
@@ -22,7 +22,7 @@ These `kubee` charts should have been enabled and installed:
 
 
 ```bash
-kubee chart -c clusterName play kuberentes-monitoring
+kubee helmet -c clusterName play kuberentes-monitoring
 ```
 
 

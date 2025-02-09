@@ -13,7 +13,7 @@ It's based on the following well-supported Kubernetes tools.
 * [Kustomize](https://github.com/kubernetes-sigs/kustomize), the official manifest customization tool 
 * [Jsonnet Kubernetes](https://jsonnet.org/articles/kubernetes.html), the Google configuration language
 
-At its core, `Kubee chart` is a `Helm` wrapper.
+At its core, `kubee helmet` is a `Helm` wrapper.
 
 It just executes [Helm commands](https://helm.sh/docs/helm/helm/) and therefore installs [Charts](https://helm.sh/docs/topics/charts/)
 
@@ -29,7 +29,7 @@ There is no magic. All commands are:
 
 ## New
 
-`Kubee chart` adds support for:
+`kubee helmet` adds support for:
 * `Jsonnet` - to add [Prometheus Mixin](https://monitoring.mixins.dev/)) support
 * `kustomize` - to add support for application without Helm Chart such as ArgoCd)
 * cluster based installation through the use of the [kubee library chart](../../resources/charts/kubee/) the same values are used accros multiple app/charts
@@ -39,7 +39,7 @@ There is no magic. All commands are:
 # Synopsis
 
 ```bash
-kubee chart [-c|--cluster clusterName] [--debug] command options
+kubee helmet [-c|--cluster clusterName] [--debug] command options
 ```
 
 where:

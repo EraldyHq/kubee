@@ -1,7 +1,7 @@
 # Jsonnet Chart Support
 
 
-A kubee chart can contains a Jsonnet project.
+A [Kubee Helmet chart](kubee-helmet-chart.md) can contain a Jsonnet project.
 
 ## Project Layout and Structure
 

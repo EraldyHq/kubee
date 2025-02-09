@@ -2,7 +2,7 @@
 
 ## About
 
-This chart is a [kubee jsonnet chart](../../../docs/bin/kubee-chart.md#what-is-a-jsonnet-kubee-chart)
+This chart is a [kubee jsonnet chart](../../../docs/bin/kubee-helmet#what-is-a-jsonnet-kubee-chart)
 
 ## Dependency
 

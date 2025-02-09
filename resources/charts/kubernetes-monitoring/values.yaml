@@ -14,20 +14,22 @@ kubelet:
   # Headlamp uses a CPU rate functon over 1 minutes
   # If the scrape interval is above 1m, there is no data returned
   scrape_interval: '45s'
-  # Buckets metrics are high cardinality metrics
+  # For memory and cost optimization, low level metrics are dropped
+  # For api server, Buckets metrics are high cardinality metrics
   # that are not used in alerting but in debugging
   # and consume a lot of memory
-  drop_bucket_metrics: true
+  scrape_metrics_optimization: true
 
 # Scrape of the api server
 api_server:
   enabled: true
   # Default 30s (and 5s for sli)
   scrape_interval: '60s'
-  # Buckets metrics are high cardinality metrics
+  # For memory and cost optimization, low level metrics are dropped
+  # For api server, Buckets metrics are high cardinality metrics
   # that are not used in alerting but in debugging
   # and consume a lot of memory
-  drop_bucket_metrics: true
+  scrape_metrics_optimization: true
 
 # Scrape of the Core Dns server
 core_dns:
@@ -58,6 +60,8 @@ node_exporter:
   # The memory of the exporter
   # Kube Prometheus set 180Mi
   memory: '50Mi'
+  # For memory and cost optimization, low levels metrics are dropped
+  scrape_metrics_optimization: true
 
 
 # Don't change, don't touch
