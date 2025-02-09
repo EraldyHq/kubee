@@ -11,7 +11,7 @@ This [kubee jsonnet chart](../../../docs/bin/kubee-helmet#what-is-a-jsonnet-kube
  * Kubelet
  * Proxy
  * Scheduler
-* for the host/node (cpu/memory/storage) 
+* the host/node (cpu/memory/storage) 
 
 
 ## Installation
@@ -39,16 +39,9 @@ The dashboards are using metrics from:
 
 The following monitoring elements are installed for each:
 * prometheus scrape configuration
-* prometheus alerts and rules
-  * `kubernetes-apps`: kube-state-metrics metrics
-  * `kubernetes-resources`: kube-state-metrics metrics
-* and [grafana dashboards](https://monitoring.mixins.dev/kubernetes/#dashboards)
-  * `Kubernetes / API server`
-  * `Kubernetes Kubelet`
-  * `Kubernetes / Persistent Volumes`
-  * `Kubernetes / Scheduler`
-  * `Kubernetes / Controller Manager`
-  
+* [Kubernetes Rules and Grafana dashboards](https://monitoring.mixins.dev/kubernetes/)
+* [Node Rules and Grafana dashboards](https://monitoring.mixins.dev/node-exporter/#dashboards)
+
 ### Kubernetes Metrics List
 
 The [kubernetes mixin](https://monitoring.mixins.dev/kubernetes/) is installed

@@ -65,7 +65,7 @@ local kpValues = {
     } + (import 'kube-prometheus/versions.json') + {
       kubeStateMetrics: stripLeadingV(kxValues.kube_state_metrics_version),
       nodeExporter: stripLeadingV(kxValues.node_exporter_version),
-      kubeRbacProxy: stripLeadingV(kxValues.rbac_version)
+      kubeRbacProxy: stripLeadingV(kxValues.rbac_version),
     },
     images: {
       kubeStateMetrics: 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v' + $.common.versions.kubeStateMetrics,
@@ -102,23 +102,14 @@ local kpValues = {
     },
     kubeRbacProxyImage: $.common.images.kubeRbacProxy,
     resources:: {
-        requests: { cpu: '102m', memory: kxValues.node_exporter_memory },
-        limits: { memory: kxValues.node_exporter_memory },
-      },
+      requests: { cpu: '102m', memory: kxValues.node_exporter_memory },
+      limits: { memory: kxValues.node_exporter_memory },
+    },
   },
 };
 // k8s-control-plane.libsonnet is a function
 local kubernetesControlPlane = (import './kube-prometheus/components/k8s-control-plane.libsonnet')(kpValues.kubernetesControlPlane);
 
-
-
-// mixin is not a function but an object
-local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.libsonnet') {
-  _config+:: k3sConfigPatch {
-    // the name of the data source (in place of default)
-    datasourceName: kxValues.grafana_data_source,
-  },
-};
 
 // Returned Object
 {
@@ -204,8 +195,8 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
 (
   if !kxValues.kube_state_metrics_enabled then {} else
     local kubeStateMetrics = if !kxValues.rbac_enabled
-        then (import './kubee/kube-state-metrics.libsonnet')(kpValues.kubeStateMetrics)
-        else (import './kube-prometheus/components/kube-state-metrics.libsonnet')(kpValues.kubeStateMetrics);
+    then (import './kubee/kube-state-metrics.libsonnet')(kpValues.kubeStateMetrics)
+    else (import './kube-prometheus/components/kube-state-metrics.libsonnet')(kpValues.kubeStateMetrics);
     {
       ['kubernetes-monitoring-state-metrics-' + name]: kubeStateMetrics[name]
       for name in std.objectFields(kubeStateMetrics)
@@ -215,18 +206,39 @@ local mixin = (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.l
 (
   if !kxValues.node_exporter_enabled then {} else
     local nodeExporter = if !kxValues.rbac_enabled
-        then (import './kubee/node-exporter.libsonnet')(kpValues.nodeExporter + kxValues)
-        else (import './kube-prometheus/components/node-exporter.libsonnet')(kpValues.nodeExporter);
+    then (import './kubee/node-exporter.libsonnet')(kpValues.nodeExporter + kxValues)
+    else (import './kube-prometheus/components/node-exporter.libsonnet')(kpValues.nodeExporter);
     {
       ['kubernetes-monitoring-node-' + name]: nodeExporter[name]
       for name in std.objectFields(nodeExporter)
     }
 ) +
 // Kubernetes Dashboard and Folder
+// Kube Prometheus List is here: https://github.com/prometheus-operator/kube-prometheus/blob/e9e35af6cd0c3013397d056779d684a1d0185af8/jsonnet/kube-prometheus/main.libsonnet#L73
 (
-  if !kxValues.grafana_enabled then {} else (import 'kubee/mixin-grafana.libsonnet')(kxValues {
-    mixin: mixin,
-    mixin_name: 'kubernetes-monitoring',
-    grafana_folder_label: 'Kubernetes Monitoring',
-  })
+  if !kxValues.grafana_enabled then {} else
+    local getGrafanaCrds = (import 'kubee/mixin-grafana.libsonnet');
+    getGrafanaCrds(kxValues {
+      mixin_name: 'kubernetes-monitoring',
+      grafana_folder_label: 'Kubernetes Monitoring',
+      // mixin is not a function but an object
+      mixin: (import 'github.com/kubernetes-monitoring/kubernetes-mixin/mixin.libsonnet') {
+        _config+:: k3sConfigPatch {
+          // the name of the data source (in place of default)
+          datasourceName: kxValues.grafana_data_source,
+        },
+      },
+    })
+    +
+    getGrafanaCrds(kxValues {
+      mixin: (import 'github.com/prometheus/node_exporter/docs/node-mixin/mixin.libsonnet') {
+        _config+:: {
+          // the name of the data source (in place of default)
+          datasourceName: kxValues.grafana_data_source,
+          nodeExporterSelector: 'job="node-exporter"'
+        },
+      },
+      mixin_name: 'node',
+      grafana_folder_label: 'Node',
+    })
 )
