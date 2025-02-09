@@ -14,8 +14,8 @@ function(params)
 
   local values = defaults + params;
 
-  local newScheme = 'http';
-
+  local httpScheme = 'http';
+  local nodeExporterPort = 9100;
   // The kube-prometheus lib
   local kpNodeExporter = (import '../kube-prometheus/components/node-exporter.libsonnet')(params);
   kpNodeExporter {
@@ -29,10 +29,15 @@ function(params)
             containers: [
               container {
                 ports: [{
-                  containerPort: 9100,
-                  hostPort: 9100,
-                  name: newScheme,
+                  containerPort: nodeExporterPort,
+                  hostPort: nodeExporterPort,
+                  name: httpScheme,
                 }],
+                args: [
+                  // To avoid: Error scraping target: Get "http://ip:9100/metrics": dial tcp ip:9100: connect: connection refused
+                  if arg != '--web.listen-address=127.0.0.1:9100' then arg else '--web.listen-address=0.0.0.0:9100'
+                  for arg in container.args
+                ],
               }
               for container in kpNodeExporter.daemonset.spec.template.spec.containers
               if container.name == 'node-exporter'
@@ -41,12 +46,21 @@ function(params)
         },
       },
     },
+    service+: {
+      spec+: {
+        ports: [{
+          targetPort: httpScheme,
+          port: nodeExporterPort,
+          name: httpScheme,
+        }],
+      },
+    },
     serviceMonitor+: {
       spec+: {
         endpoints: [
           endpoint {
-            port: newScheme,
-            scheme: newScheme,
+            port: httpScheme,
+            scheme: httpScheme,
             // Not overwridden but we can see where the data comes from
             interval: values.node_exporter_scrape_interval,
             relabelings+: if !values.node_exporter_scrape_metrics_optimization then [] else [
