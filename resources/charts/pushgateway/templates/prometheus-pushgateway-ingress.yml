@@ -6,8 +6,7 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    # Because Middleware is not namespace, we use the kube-system-traefik-dashboard-auth@kubernetescrd
-    traefik.ingress.kubernetes.io/router.middlewares: kube-system-traefik-dashboard-auth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.traefik.namespace }}-{{ .Values.traefik.auth.middleware_name }}@kubernetescrd'
     {{- if ne ((.Values).cert_manager).enabled false }}
     cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuer_name }}'
     {{- end }}

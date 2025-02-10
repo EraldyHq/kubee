@@ -33,3 +33,8 @@ dependencies:
     repository: file://../cert-manager
     alias: cert_manager
     condition: kubee_internal.dont_install_dependency
+  - name: kubee-traefik
+    version: 0.0.1
+    repository: file://../traefik
+    alias: traefik
+    condition: kubee_internal.dont_install_dependency

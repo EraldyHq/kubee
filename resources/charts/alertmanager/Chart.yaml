@@ -50,3 +50,9 @@ dependencies:
     repository: file://../prometheus
     alias: prometheus
     condition: kubee_internal.install_cross_dependency
+  # For ingress auth
+  - name: kubee-traefik
+    version: 0.0.1
+    repository: file://../traefik
+    alias: traefik
+    condition: kubee_internal.install_cross_dependency

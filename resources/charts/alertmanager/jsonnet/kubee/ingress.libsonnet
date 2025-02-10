@@ -3,6 +3,8 @@ local defaultValues = {
   cert_manager_issuer_name: error 'Cert Manager Issuer Name should be provided',
   alert_manager_hostname: error 'Alert manager host Name should be provided',
   alert_manager_name: error 'Alert manager Name should be provided',
+  traefik_namespace: error 'traefik_namespace should be provided',
+  traefik_auth_middelware_name: error 'traefik_auth_middelware_name should be provided',
 };
 
 /*
@@ -23,7 +25,7 @@ function(params) {
       'traefik.ingress.kubernetes.io/router.entrypoints': 'websecure',
       'traefik.ingress.kubernetes.io/router.tls': 'true',
       /* Auth */
-      'traefik.ingress.kubernetes.io/router.middlewares': 'kube-system-traefik-dashboard-auth@kubernetescrd',
+      'traefik.ingress.kubernetes.io/router.middlewares': values.traefik_namespace + '-' +values.traefik_auth_middelware_name + '@kubernetescrd',
       [if values.cert_manager_enabled then 'cert-manager.io/cluster-issuer']: values.cert_manager_issuer_name,
     },
   },

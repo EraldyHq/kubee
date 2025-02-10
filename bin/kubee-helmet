@@ -230,6 +230,7 @@ apply(){
     return 1
   fi
 
+  # To get the dependency chart, you need to run helm dependency update or build
   # To update the kubee helm
   # 2>COMMAND_STDOUT_FD to silence: walk.go:75: found symbolic link in path
   # echo::info "Executing Helm Dependency Update"

@@ -14,5 +14,8 @@ dependencies:
 - name: kubee-prometheus
   repository: file://../prometheus
   version: 0.0.1
-digest: sha256:e90950e393633a37fe9a9a010526bf79572f99ba1d460b05be489cb037afd26e
-generated: "2025-02-07T15:31:33.880658203+01:00"
+- name: kubee-traefik
+  repository: file://../traefik
+  version: 0.0.1
+digest: sha256:d32a6b18c337184c20b69c5984e39ec568a195d799e3547eaac0ffdb24582cec
+generated: "2025-02-10T21:59:23.01822964+01:00"

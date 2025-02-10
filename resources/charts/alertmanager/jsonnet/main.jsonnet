@@ -31,6 +31,8 @@ local values = {
   watchdog_webhook_repeat_interval: validation.getNestedPropertyOrThrow(extValues, 'watchdog.webhook.repeat_interval'),
   watchdog_email_to: validation.getNestedPropertyOrThrow(extValues, 'watchdog.email.to'),
   watchdog_email_repeat_interval: validation.getNestedPropertyOrThrow(extValues, 'watchdog.email.repeat_interval'),
+  traefik_namespace: validation.getNestedPropertyOrThrow(extValues, 'traefik.namespace'),
+  traefik_auth_middelware_name: validation.getNestedPropertyOrThrow(extValues, 'traefik.auth.middleware_name'),
 
 };
 
