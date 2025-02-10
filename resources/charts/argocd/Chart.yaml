@@ -35,23 +35,28 @@ dependencies:
     version: 0.0.1
     repository: file://../cert-manager
     alias: cert_manager
-    condition: kubee_internal.dont_install_cross_dependency
+    condition: kubee_internal.install_cross_dependency
   # For the dashboard
   - name: kubee-grafana
     version: 0.0.1
     repository: file://../grafana
     alias: grafana
-    condition: kubee_internal.dont_install_cross_dependency
+    condition: kubee_internal.install_cross_dependency
   # For the scrape
   - name: kubee-prometheus
     version: 0.0.1
     repository: file://../prometheus
     alias: prometheus
-    condition: kubee_internal.dont_install_cross_dependency
+    condition: kubee_internal.install_cross_dependency
   # For CI
   - name: kubee-external-secrets
     version: 0.0.1
     repository: file://../external-secrets
     alias: external_secrets
-    condition: kubee_internal.dont_install_cross_dependency
+    condition: kubee_internal.install_cross_dependency
+  - name: kubee-traefik
+    version: 0.0.1
+    repository: file://../traefik
+    alias: traefik
+    condition: kubee_internal.install_cross_dependency
 

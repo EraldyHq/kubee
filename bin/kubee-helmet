@@ -232,8 +232,8 @@ apply(){
 
   # To update the kubee helm
   # 2>COMMAND_STDOUT_FD to silence: walk.go:75: found symbolic link in path
-  echo::info "Executing Helm Dependency Update"
-  echo::eval "helm dependency update ${HELM_EXTRA_FLAGS[*]} $CHART_DIRECTORY 1>$COMMAND_STDOUT_FD 2>$COMMAND_STDOUT_FD"
+  # echo::info "Executing Helm Dependency Update"
+  # echo::eval "helm dependency update ${HELM_EXTRA_FLAGS[*]} $CHART_DIRECTORY 1>$COMMAND_STDOUT_FD 2>$COMMAND_STDOUT_FD"
   # Note that helm has also a flag
   # HELM_COMMAND+=( "--dependency-update" )
 

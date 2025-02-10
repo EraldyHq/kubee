@@ -16,7 +16,7 @@ metadata:
     {{- end }}
     {{- /* Only from Github or our network */}}
     {{- if and (not (empty (.Values.kubee.auth.private_networks))) ( eq .Values.git.webhook.service "github") }}
-    traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.kubee.traefik.namespace }}-{{ include "kubee-traefik-github-hooks-allow-list-name" . }}@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.traefik.namespace }}-{{ .Values.traefik.middlewares.git_hooks.name }}@kubernetescrd
     {{- end}}
 spec:
   ingressClassName: traefik

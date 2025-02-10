@@ -20,7 +20,7 @@ metadata:
 spec:
   secretName: '{{ include "traefik-name-dashboard-cert" . }}'
   dnsNames:
-    - '{{ .Values.dashboard.hostname }}'
+    - '{{ .Values.hostname }}'
   issuerRef:
     kind: ClusterIssuer
     name: '{{ .Values.cert_manager.issuer_name }}'

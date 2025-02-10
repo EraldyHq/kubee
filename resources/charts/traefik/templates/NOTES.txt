@@ -1,2 +1,2 @@
 {{/*https://github.com/traefik/traefik-helm-chart/blob/master/traefik/templates/NOTES.txt*/}}
-Happy Traefik with Kube-x
+Happy Traefik with Kubee

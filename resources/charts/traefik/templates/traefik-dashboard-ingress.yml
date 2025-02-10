@@ -21,7 +21,7 @@ spec:
   routes:
     - kind: Rule
       # Host rule as advised in the doc, and it's much easier to get to the dashboard from the root (no trailing slash after dashboard)
-      match: Host(`{{ .Values.dashboard.hostname }}`)
+      match: Host(`{{ .Values.hostname }}`)
       services:
         # dashboard and api are in the same pod
         - kind: TraefikService

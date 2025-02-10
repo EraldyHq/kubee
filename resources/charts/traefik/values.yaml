@@ -23,8 +23,6 @@ default_certificate:
   key: ''
 
 
-
-
 # Traefik dashboard
 # The FQDN is dnsName.apexDomain
 # If not empty, an ingress is created
