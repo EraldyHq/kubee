@@ -18,11 +18,11 @@ Traefik expects the passwords to be hashed using MD5, SHA1, or BCrypt.
 {{- $result := list }}
 {{/* Add the admin user */}}
 {{- $result = append $result (htpasswd .Values.kubee.auth.admin_user.username .Values.kubee.auth.admin_user.password | b64enc)}}
-{{/*https://github.com/helm/helm/issues/7533#issuecomment-1039521776*/}}
-{{- range $user, $password := .Values.kubee.traefik.middleware.basicAuth.users }}
+{{/* See https://github.com/helm/helm/issues/7533#issuecomment-1039521776 */}}
+{{- range $user, $password := .Values.middlewares.basic_auth.users }}
 {{- $result = append $result (htpasswd $user $password | b64enc) }}
 {{- end }}
-{{- join "\n" $result | indent 4}}
+{{- join "\n" $result}}
 {{- end }}
 
 

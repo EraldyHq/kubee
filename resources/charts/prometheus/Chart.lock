@@ -14,8 +14,11 @@ dependencies:
 - name: kubee-alertmanager
   repository: file://../alertmanager
   version: 0.0.1
+- name: kubee-traefik
+  repository: file://../traefik
+  version: 0.0.1
 - name: kubee-prometheus-crds
   repository: file://../prometheus-crds
   version: 0.0.1
-digest: sha256:27677ad11a366a8601187dfb4a6d1435fa3dc0e7d2ac52be9c89e6f5e6cd4728
-generated: "2025-02-05T17:45:40.834376676+01:00"
+digest: sha256:9ca0653817616576b0cf7d9a293b7b31cd0b8d5149c18057ff0ef5761650941b
+generated: "2025-02-10T21:11:35.549631494+01:00"

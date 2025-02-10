@@ -53,6 +53,12 @@ dependencies:
     repository: file://../alertmanager
     alias: alert_manager
     condition: kubee_internal.install_cross_dependency
+  # For ingress middleware auth
+  - name: kubee-traefik
+    version: 0.0.1
+    repository: file://../traefik
+    alias: traefik
+    condition: kubee_internal.install_cross_dependency
   # Not sure
   - name: kubee-prometheus-crds
     version: 0.0.1

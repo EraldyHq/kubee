@@ -234,7 +234,7 @@ function(kpValues, kxValues)
           'traefik.ingress.kubernetes.io/router.entrypoints': 'websecure',
           'traefik.ingress.kubernetes.io/router.tls': 'true',
           /* Auth*/
-          'traefik.ingress.kubernetes.io/router.middlewares': 'kube-system-traefik-dashboard-auth@kubernetescrd',
+          'traefik.ingress.kubernetes.io/router.middlewares': kxConfig.traefik_namespace+ '-'+kxConfig.traefik_auth_middelware_name + '@kubernetescrd',
           // Issuer
           [if kxConfig.cert_manager_enabled then 'cert-manager.io/cluster-issuer']: kxConfig.cert_manager_issuer_name,
         },

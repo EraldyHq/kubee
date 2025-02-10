@@ -1,4 +1,4 @@
-{{/*
+{{- /*
 https://doc.traefik.io/traefik/middlewares/http/basicauth/
 
 Enable only when the admin password is not empty
@@ -10,28 +10,26 @@ Note: Operators are functions (ne is a function with 2 args)
 https://helm.sh/docs/chart_template_guide/functions_and_pipelines/#operators-are-functions
 */}}
 {{- if ne .Values.kubee.auth.admin_user.password "" }}
----
 apiVersion: v1
 kind: Secret
 metadata:
-  name: '{{ include "kubee-traefik-basic-auth-name" . }}'
+  name: '{{ .Values.middlewares.basic_auth.name }}'
   namespace: '{{ .Values.namespace }}'
-# The values for all keys in the data field have to be base64-encoded strings.
-# If the conversion to base64 string is not desirable, you can choose to specify the stringData field instead,
-# which accepts arbitrary strings as values.
+{{- /*#
+ The values for all keys in the data field have to be base64-encoded strings.
+ If the conversion to base64 string is not desirable, you can choose to specify the stringData field instead,
+ which accepts arbitrary strings as values.
+*/}}
 data:
-  # one user by line
-  users: |
-    {{- include "basic-auth-list-base64-encode" . }}
+  {{- /* one user by line*/}}
+  users: |{{- include "basic-auth-list-base64-encode" . | indent 4}}
 ---
-# Authentication
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: '{{ include "kubee-traefik-basic-auth-name" . }}'
+  name: '{{ .Values.middlewares.basic_auth.name }}'
   namespace: '{{ .Values.namespace }}'
 spec:
   basicAuth:
-    secret: '{{ include "kubee-traefik-basic-auth-name" . }}'
-
+    secret: '{{ .Values.middlewares.basic_auth.name }}'
 {{- end}}

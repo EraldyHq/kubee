@@ -11,11 +11,6 @@ cluster:
 # Authentication
 auth:
 
-  # Ingress Authentication for internal web app (such as Traefik Dashboard, Prometheus, Alert Manager, ...)
-  # The app or api are still available from an internal container
-  ingress:
-    kind: 'basicAuth'
-
   # The admin user
   #  * created as admin user in Kubernetes and other app
   #  * added in basicAuth
@@ -33,10 +28,8 @@ auth:
     # * alert notifications: prometheus, argocd
     email: ''
 
-  # Private Network ranges
-  # used for Ingress Ip restrictions (Traefik IpAllowList)
-  # example for a home ip: 143.176.206.80/32
-  private_networks: []
+
+
 
 # email
 email:
@@ -71,37 +64,7 @@ kubernetes_monitoring:
 # Kubee Traefik Variables
 traefik:
   # Not a string, a boolean so no quote
-  enabled: true
-  # Instance/Release Name
-  # the kube-system namespace tells kubernetes that this app has a higher priority
-  namespace: 'kube-system'
-  # Middleware
-  # https://doc.traefik.io/traefik/middlewares
-  middleware:
-    # Create a basic Auth Middleware
-    # https://doc.traefik.io/traefik/middlewares/http/basicauth/
-    # Enabled by default when the admin user password is not empty
-    basicAuth:
-      # List of extra users
-      users:
-      # Example:
-      # users:
-      #   user1: password1
-      #   user2: password2
-  # Set the default certificate as default traefik cert
-  # Mandatory for kubernetes-dashboard on a local development
-  # The rootCA should be added to the OS/Browser as trusted root CA
-  # https://doc.traefik.io/traefik/https/tls/#default-certificate
-  defaultCertificate:
-    # Path to the cert file relatif to the working directory (ie cluster directory)
-    cert: ''
-    key: ''
-  # Traefik dashboard
-  dashboard:
-    # The FQDN is dnsName.apexDomain
-    # If not empty, an ingress is created
-    # example: hostname: 'traefik-haship.nip.io'
-    hostname: ''
+  enabled: false
 
 # Refer to the kubee-prometheus chart
 prometheus:

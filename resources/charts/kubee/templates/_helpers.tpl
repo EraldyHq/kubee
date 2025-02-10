@@ -20,30 +20,3 @@ include "kubee-name-prefix" (dict "Release" .Release "Values" .Values.kubee )
 {{- printf "%s-%s" .Release.Name (include "kubee-prefix" .)  | replace "_" "-" | trunc 63 -}}
 {{- end }}
 
-
-{{/*
-Return the name of the traefik basic auth
-Name is fixed and does not depend on the release
-*/}}
-{{- define "kubee-traefik-basic-auth-name" }}
-{{- printf "%s-traefik-middleware-basic-auth" (include "kubee-prefix" .) -}}
-{{- end }}
-
-{{/*
-Return the name of the traefik transport that can be used as label
-*/}}
-{{- define "kubee-traefik-basic-auth-label-name" }}
-{{- printf "%s-%s@kubernetescrd"
-    .Values.traefik.namespace
-    (include "kubee-traefik-basic-auth-name" .)
--}}
-{{- end }}
-
-
-{{/*
-Return the name of the github allow list middelware (used on ingress)
-Name is fixed and does not depend on the release
-*/}}
-{{- define "kubee-traefik-github-hooks-allow-list-name" }}
-{{- printf "%s-traefik-ip-allow-github-hooks-cidr" (include "kubee-prefix" .) -}}
-{{- end }}

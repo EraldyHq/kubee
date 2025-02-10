@@ -57,6 +57,9 @@ local kxValues = {
   // Grafana Instance
   grafana_enabled: validation.notNullOrEmpty(kxExtValues, 'grafana.enabled'),
   grafana_name: validation.notNullOrEmpty(kxExtValues, 'grafana.name'),
+  // Traefik
+  traefik_namespace: validation.notNullOrEmpty(kxExtValues, 'traefik.namespace'),
+  traefik_auth_middelware_name: validation.notNullOrEmpty(kxExtValues, 'traefik.auth.middleware_name'),
 
 };
 

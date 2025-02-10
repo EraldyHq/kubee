@@ -11,7 +11,7 @@ synopsis(){
   CLI_NAME=$(basename "$(doc::get_cli_command_words)" | tr "-" " ")
   cat << EOF
 \`\`\`bash
-$CLI_NAME options
+$CLI_NAME command options
 \`\`\`
 
 where:
@@ -19,17 +19,12 @@ where:
   * \`play packageName\`     - Upgrade or install a Kubee Chart if not present
   * \`upgrade packageName\`  - Upgrade a Kubee Chart
   * \`install packageName\`  - Install a Kubee Chart
-  * \`template packageName\` - Output the manifests for a Chart (used for ArgoCd Integration and debugging)
-  * \`values\` - Shows the values
-* \`-c|--cluster clusterName\` - Defines the cluster
-* \`--output-dir string\`: Writes the executed templates to files in output-dir instead of stdout
-* \`--out string\`: Writes the executed templates to the \`out\` relatif directory
-* \`--debug\`: run in debug mode, a more verbose mode
-
-The cluster is determined in order of precedence by:
-
-* the \`-c|--cluster clusterName\` option
-* the current directory
+  * \`template packageName\` - Output the manifests of a Chart
+     * The following template options are supported
+       * \`-s, --show-only\`     : Show only one template
+       * \`--output-dir string\` : Writes the executed templates to files in output-dir instead of stdout
+       * \`--out string\`        : Writes the executed templates to the \`out\` relative directory
+  * \`values\`               - Shows the values content
 
 EOF
 
@@ -183,6 +178,7 @@ apply(){
     echo::err "Internal error: A command is mandatory as first argument (install or template)"
     return 1
   fi
+  shift
   case "$COMMAND" in
       "play")
         HELM_COMMAND+=( "upgrade" "--install" )
@@ -206,6 +202,11 @@ apply(){
         if [ "$OPTION_OUTPUT_DIR" != "" ]; then
           HELM_COMMAND+=("--output-dir" "$(dirname "$CHART_OUTPUT_DIR")")
         fi
+        # Options
+        if [ "$OPTION_SHOW_ONLY" != "" ]; then
+          HELM_COMMAND+=("--show-only" "$OPTION_SHOW_ONLY")
+        fi
+
         ;;
       *)
         echo::err "The command $COMMAND is unknown"
@@ -486,12 +487,13 @@ print_values(){
 ##########################
 ## Collect the options
 ##########################
-args=$(getopt -l "skip-schema-validation,output-dir:,out" -o "o:" -- "$@")
+args=$(getopt -l "skip-schema-validation,output-dir:,out,show-only" -o "o:s:" -- "$@")
 # eval set to set the positional arguments back to $args
 eval set -- "$args"
 KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
 HELM_EXTRA_FLAGS=()
 OPTION_OUTPUT_DIR=""
+OPTION_SHOW_ONLY=""
 while [[ $# -gt 0 ]]
 do
    case "$1" in
@@ -507,6 +509,11 @@ do
       "--skip-schema-validation")
         shift
         HELM_EXTRA_FLAGS+=("--skip-schema-validation")
+        ;;
+      "--show-only"|"-s")
+        shift
+        SHOW_ONLY=${1}
+        shift
       ;;
       "--")
         shift
@@ -543,7 +550,7 @@ fi
 # Come first because we use it in the log, we use it in all command
 CHART_NAME="${1:-}"
 if [ "$CHART_NAME" == "" ]; then
-  echo::err "A chart name is mandatory as second argument"
+  echo::err "A chart name is mandatory"
   exit 1
 fi
 echo::debug "Chart Name: $CHART_NAME"
