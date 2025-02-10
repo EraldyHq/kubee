@@ -47,7 +47,7 @@ dependencies:
     repository: file://../external-secrets
     alias: external_secrets
     condition: kubee_internal.install_cross_dependency
-  # For the alert integraton
+  # For the alert integration
   - name: kubee-alertmanager
     version: 0.0.1
     repository: file://../alertmanager

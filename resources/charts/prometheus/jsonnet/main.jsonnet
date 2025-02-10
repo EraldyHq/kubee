@@ -44,7 +44,7 @@ local kxValues = {
   prometheus_operator_config_reloader_memory: '50mi',
   // No Rbac Proxy Sidecar or Network Policies
   // Why? Takes 20Mb memory by exporter
-  noRbacProxy: true,
+  noRbacProxy: validation.notNullOrEmpty(kxExtValues, 'exporter_auth.kube_rbac_proxy.enabled'),
   // Grafana Remote write
   grafana_cloud_enabled: validation.notNullOrEmpty(kxExtValues, 'grafana_cloud.enabled'),
   grafana_cloud_prometheus_username: validation.notNullOrEmpty(kxExtValues, 'grafana_cloud.username'),
