@@ -1,7 +1,7 @@
-# Kube-X Chart of kubernetes-dashboard
+# Kubee Chart of kubernetes-dashboard
 
 ## About
-A Kube-X Chart of the [kubernetes-dashboard](https://github.com/kubernetes/dashboard)
+A Kubee Chart of the [kubernetes-dashboard](https://github.com/kubernetes/dashboard)
 
 ## Steps
 

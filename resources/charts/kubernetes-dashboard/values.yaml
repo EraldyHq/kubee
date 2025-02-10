@@ -18,7 +18,7 @@ kubernetes-dashboard:
       ## Global dashboard settings
       global:
         # Cluster name that appears in the browser window title if it is set
-        clusterName: "Kube-X"
+        clusterName: "Kubee"
         # Max number of items that can be displayed on each list page
         itemsPerPage: 50
         # Max number of labels that are displayed by default on most views.

@@ -103,7 +103,7 @@ inventory_file(){
 
 play(){
 
-  ansible-playbook -i "$SHM_INVENTORY_FILE" ans_x.ans_x_base.kubee_site.yml
+  ansible-playbook -i "$SHM_INVENTORY_FILE" ans_e.ans_e_base.kubee_site.yml
 
 }
 
@@ -123,7 +123,8 @@ ping(){
 # @internal
 synopsis(){
 
-local CLI_NAME=$(basename $(script::get_actual_script) | tr "-" " ")
+local CLI_NAME;
+CLI_NAME=$(basename "$(script::get_actual_script)" | tr "-" " ")
 cat << EOT
 
 $CLI_NAME - Cluster Hosts Management
@@ -149,34 +150,6 @@ EOT
 }
 
 
-
-# Assign the rest of the arguments to an array
-args=$(getopt -l "cluster:,debug" -o "c:" -- "$@")
-# eval set to set the positional arguments back to $args
-eval set -- "$args"
-
-KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
-while [[ $# -gt 0 ]]
-do
-   case "$1" in
-      "--cluster"|"-c")
-        shift
-        KUBEE_CLUSTER_NAME=${1}
-        shift
-      ;;
-      "--debug")
-        export BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_DEBUG_LEVEL";
-        HELM_EXTRA_FLAGS+=("--debug");
-        COMMAND_STDOUT_FD=$(echo::get_file_descriptor);
-        shift
-      ;;
-      "--")
-        shift
-        break;
-        # from now on, $@ contains only the arguments
-        ;;
-   esac
-done
 
 # Assign the first argument to a string
 COMMAND="${1:-}"

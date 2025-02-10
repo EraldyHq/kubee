@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-node-exporter
-description: Kube-X Node Exporter Chart
+description: Kubee Node Exporter Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #

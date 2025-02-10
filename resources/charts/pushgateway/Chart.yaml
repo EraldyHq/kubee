@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-pushgateway
-description: Kube-X PushGateway Chart
+description: Kubee PushGateway Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #

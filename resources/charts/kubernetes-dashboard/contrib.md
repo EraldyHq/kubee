@@ -22,7 +22,7 @@ helm template --set 'cert_manager.enabled=true' --output-dir out .
 ```bash
 kubee-chart -c clusertName play kubernetes-dashboard
 ```
-* Note: Because this a Kube-X Helm Chart only, you can use the Helm command directly (dev only)
+* Note: Because this a Kubee Helm Chart only, you can use the Helm command directly (dev only)
 ```bash
 # Only with helm
 helm upgrade --install -n kubernetes-dashboard --create-namespace kubernetes-dashboard .

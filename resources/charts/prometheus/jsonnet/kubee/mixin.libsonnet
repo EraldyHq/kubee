@@ -1,5 +1,5 @@
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// Don't modify this script if you are not in the Kube-X `prometheus/utilities` chart
+// Don't modify this script if you are not in the Kubee `prometheus/utilities` chart
 // Otherwise this file will be overwritten
 // as this is not the source
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!

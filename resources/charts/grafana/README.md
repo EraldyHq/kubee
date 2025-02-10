@@ -1,4 +1,4 @@
-# Kube-X Grafana
+# Kubee Grafana
 
 ## About
 

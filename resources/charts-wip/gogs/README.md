@@ -1,4 +1,4 @@
-# Kube-X Chart of Gogs
+# Kubee Chart of Gogs
 
 ## About
 

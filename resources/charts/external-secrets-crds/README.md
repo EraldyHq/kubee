@@ -1,4 +1,4 @@
-# Kube-X External Secret CRDS
+# Kubee External Secret CRDS
 
 
 ## About

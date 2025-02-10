@@ -1,12 +1,12 @@
-# If not enabled=false
-{{- if ne ( ((.Values.kubee).prometheus).enabled) false -}}
+{{/* If not enabled=false*/}}
+{{- if ne .Values.prometheus.enabled false -}}
 
 # https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#use-prometheus-operator
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: '{{ .Release.Name }}'
-  namespace: '{{ .Release.Namespace }}'
+  namespace: '{{ .Values.namespace }}'
   labels:
     app.kubernetes.io/name: '{{ .Release.Name }}'
 spec:

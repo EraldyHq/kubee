@@ -8,5 +8,5 @@ collections:
     type: git
     version: 2a5a89a  # specify branch/tag/commit
   # With just the collection name
-  # At installation: 'ans_x.ans_x_base:1.0.0' is already installed, skipping.
-  - name: ans_x.ans_x_base
+  # At installation: 'ans_e.ans_e_base:1.0.0' is already installed, skipping.
+  - name: ans_e.ans_e_base

@@ -1,6 +1,28 @@
+# Enabled
+# Not a string, no quote
+enabled: false
+# The installation namespace
+namespace: 'kube-system'
+
+
+# A default certificate
+# Used to provide https locally
+default_certificate:
+  # The PEM content file
+  # Not a path to the cert file relative to the working directory (ie cluster directory)
+  # Set with `KUBEE_HELM_INSTALL_OPTIONS`
+  # --set-file KUBEE.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem
+  cert: ''
+  # The PEM content file
+  # Not a path to the key file relative to the working directory (ie cluster directory)
+  # Set with `KUBEE_HELM_INSTALL_OPTIONS`
+  # --set-file KUBEE.traefik.defaultCertificate.key=cert/kube-x.dev+1-key.pem
+  key: ''
+
 
 # Traefik Helm Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
+
 traefik:
 
   # We do it ourself
@@ -17,7 +39,7 @@ traefik:
       # Enable Prometheus Metrics https://doc.traefik.io/traefik/observability/metrics/prometheus/
       # Metrics Info: https://doc.traefik.io/traefik/observability/metrics/overview/#global-metrics
       service:
-        enabled: true
+        enabled: false # We do it ourselves
 
   additionalArguments:
     # Don't verify cert on pods
@@ -25,6 +47,10 @@ traefik:
     # true by default on server, otherwise there will be an error
     # if a pod loads a self-signed certificate with a CA that Traefik does not know.
     - '--serversTransport.insecureSkipVerify=true'
+    # Debug
+    # - '--log.level=DEBUG'
+    # Logs just add too much noise on what is going on
+    # - '--accesslog=false'
 
   service:
     # type: LoadBalancer
@@ -84,9 +110,6 @@ traefik:
   # ref: http://kubernetes.io/docs/user-guide/persistent-volumes/.
   # It can be used to store TLS certificates along with `certificatesResolvers.<name>.acme.storage`  option
 
-# The chart properties (used by kubee)
-chart:
-  # The crd dependencies of this sub-chart (for crd installation)
-  crdDependencies:
-    - prometheus
-    - certManager
+# Don't change
+kubee_internal:
+  install_cross_dependency: false

@@ -1,4 +1,4 @@
-# Kube-X Traefik CRDS
+# Kubee Traefik CRDS
 
 
 ## About

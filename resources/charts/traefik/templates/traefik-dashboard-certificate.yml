@@ -10,13 +10,13 @@ The certificate needs to be created manually
 
 If not enabled=false
 */}}
-{{- if ne (((.Values.kubee).cert_manager).enabled) false -}}
+{{- if eq .Values.cert_manager.enabled true -}}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: '{{ include "traefik-name-dashboard-cert" . }}'
-  namespace: '{{ .Release.Namespace }}'
+  namespace: '{{ .Values.namespace }}'
   labels:
     # use cloudflare Dns
     "issuer-challenge": "dns01-cloudflare"
@@ -26,6 +26,6 @@ spec:
     - '{{ .Values.kubee.traefik.dashboard.hostname }}'
   issuerRef:
     kind: ClusterIssuer
-    name: '{{ .Values.kubee.cert_manager.defaultIssuerName }}'
+    name: '{{ .Values.cert_manager.issuer_name }}'
 
 {{- end -}}

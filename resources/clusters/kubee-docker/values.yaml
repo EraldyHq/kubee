@@ -11,14 +11,14 @@ kubee:
   prometheus:
     # Not a string, a boolean so no quote
     enabled: false
-  # Kube-X Dashboard Variables
+  # Kubee Dashboard Variables
   kubernetes_dashboard:
     # The external DNS
     hostname: 'dash.kubee.dev'
   # Whoami
   whoami:
     hostname: 'whoami.kubee.dev'
-  # Kube-X Traefik Variables
+  # Kubee Traefik Variables
   traefik:
     defaultCertificate:
       # The PEM content file

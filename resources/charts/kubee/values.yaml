@@ -58,7 +58,7 @@ email:
     hello: ''
 
   
-# Kube-X Dashboard Variables
+# Kubee Dashboard Variables
 kubernetes_dashboard:
   enabled: true
 
@@ -68,7 +68,7 @@ kubernetes_monitoring:
   # Not a string, a boolean so no quote
   enabled: false
 
-# Kube-X Traefik Variables
+# Kubee Traefik Variables
 traefik:
   # Not a string, a boolean so no quote
   enabled: true

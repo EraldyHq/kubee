@@ -2,7 +2,7 @@ export KUBEE_CLUSTER_NAME=kube-test
 # Env file for the project
 export PATH=$PWD/bin:$PATH
 # Override any other default bashrc setting
-export ANS_X_PROJECT_DIR=$PWD
+export ANS_E_PROJECT_DIR=$PWD
 # KUBEE env
 export KUBEE_CLUSTER_API_SERVER_01_IP=78.46.190.50
 export KUBEE_CLUSTER_SERVER_01_NAME=kube-test-server-01

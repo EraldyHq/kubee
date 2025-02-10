@@ -1,5 +1,5 @@
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// Don't modify this script if you are not in the Kube-X Utilities Promtheus Chart directory
+// Don't modify this script if you are not in the Kubee Utilities Promtheus Chart directory
 // Otherwise this file will be overwritten
 // as this is not the source
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!

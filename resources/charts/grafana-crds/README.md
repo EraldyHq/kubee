@@ -1,4 +1,4 @@
-# Kube-X Grafana CRDS
+# Kubee Grafana CRDS
 
 
 ## About

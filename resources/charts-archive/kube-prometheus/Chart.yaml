@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-kube-prometheus
-description: Kube-X Kube Prometheus Chart
+description: Kubee Kube Prometheus Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #

@@ -13,7 +13,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 33.1.0
+version: 0.0.1
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
@@ -33,3 +33,15 @@ dependencies:
     version: 0.0.1
     repository: file://../kubee
     alias: kubee
+  # For the dashboard
+  - name: kubee-grafana
+    version: 0.0.1
+    repository: file://../grafana
+    alias: grafana
+    condition: kubee_internal.install_cross_dependency
+  # For the scrape
+  - name: kubee-prometheus
+    version: 0.0.1
+    repository: file://../prometheus
+    alias: prometheus
+    condition: kubee_internal.install_cross_dependency

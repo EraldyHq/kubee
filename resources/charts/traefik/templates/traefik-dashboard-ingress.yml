@@ -1,19 +1,19 @@
 {{/*
 Test:
-helm template -s templates/traefik-dashboard-ingress.yml --set 'kubee.cert_manager.enabled=true' .
+helm template -s templates/traefik-dashboard-ingress.yml --set 'cert_manager.enabled=true' .
 */}}
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: '{{ include "traefik-name-prefix" . }}-dashboard'
-  namespace: '{{ .Release.Namespace }}'
+  namespace: '{{ .Values.namespace }}'
   labels:
     app.kubernetes.io/name: traefik
 spec:
   entryPoints:
     - websecure
-  {{- if ne (((.Values.kubee).cert_manager).enabled) false }}
+  {{- if eq .Values.cert_manager.enabled true }}
   tls:
     # the secret name used to store the certificate
     secretName: '{{ include "traefik-name-dashboard-cert" . }}'
@@ -21,7 +21,7 @@ spec:
   routes:
     - kind: Rule
       # Host rule as advised in the doc, and it's much easier to get to the dashboard from the root (no trailing slash after dashboard)
-      match: Host(`{{ .Values.kubee.traefik.dashboard.hostname }}`)
+      match: Host(`{{ .Values.dashboard.hostname }}`)
       services:
         # dashboard and api are in the same pod
         - kind: TraefikService

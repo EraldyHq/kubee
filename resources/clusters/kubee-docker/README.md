@@ -55,14 +55,14 @@ More info: see [cert](cert/README.md)
 
 
 
-### Kube-X Cluster Installation
+### Kubee Cluster Installation
 
 Create a k3s cluster
 ```bash
 kubee-cluster play
 ```
 
-### Kube-X Chart Installation
+### Kubee Chart Installation
 
 ```bash
 kubee-chart install traefik

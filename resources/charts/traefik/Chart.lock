@@ -5,5 +5,11 @@ dependencies:
 - name: kubee
   repository: file://../kubee
   version: 0.0.1
-digest: sha256:43a4f8040b2bd226f853417a6274a0858e6950530f616d31ef33e5abc6a334c0
-generated: "2024-12-11T21:25:21.050198478+01:00"
+- name: kubee-grafana
+  repository: file://../grafana
+  version: 0.0.1
+- name: kubee-prometheus
+  repository: file://../prometheus
+  version: 0.0.1
+digest: sha256:16b1540cfae740ab6a4f6b608be2f3a95699a3e5e794bf544d27185ae40bed52
+generated: "2025-02-10T11:10:15.950552517+01:00"

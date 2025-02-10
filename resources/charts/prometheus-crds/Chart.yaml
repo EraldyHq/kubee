@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-prometheus-crds
-description: Kube-X Prometheus CRDS Chart
+description: Kubee Prometheus CRDS Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #

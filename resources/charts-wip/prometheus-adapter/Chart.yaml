@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-prometheus-adapter
-description: Kube-X Prometheus Adapter Chart
+description: Kubee Prometheus Adapter Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #

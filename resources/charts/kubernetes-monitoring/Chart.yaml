@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-kubernetes-monitoring
-description: Kube-X Kubernetes Monitoring Chart
+description: Kubee Kubernetes Monitoring Chart
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives

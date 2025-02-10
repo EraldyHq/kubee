@@ -23,14 +23,14 @@ kubee:
     enabled: false
     # Installation namespace
     namespace: 'kube-prometheus'
-  # Kube-X Dashboard Variables
+  # Kubee Dashboard Variables
   kubernetes_dashboard:
     # The external DNS
     hostname: 'kube.i.eraldy.com'
   # Whoami
   whoami:
     hostname: 'whoami.eraldy.com'
-  # Kube-X Traefik Variables
+  # Kubee Traefik Variables
   traefik:
     namespace: 'kube-system'
     defaultCertificate:

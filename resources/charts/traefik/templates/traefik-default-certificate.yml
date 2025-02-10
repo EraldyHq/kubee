@@ -6,12 +6,12 @@ Test:
 helm template --debug -s templates/traefik-default-certificate.yml --set 'kubee.traefik.defaultCertificate.cert=yolo' .
 
 */}}
-{{- if ne .Values.kubee.traefik.defaultCertificate.cert ""  -}}
+{{- if ne .Values.default_certificate.cert ""  -}}
 apiVersion: v1
 kind: Secret
 metadata:
   name: '{{ include "traefik-name-prefix" . }}-default-certificate'
-  namespace: '{{ .Release.Namespace }}'
+  namespace: '{{ .Values.namespace }}'
   labels:
     app.kubernetes.io/name: traefik
 type: kubernetes.io/tls
@@ -25,7 +25,7 @@ apiVersion: traefik.io/v1alpha1
 kind: TLSStore
 metadata:
   name: default
-  namespace: '{{ .Release.Namespace }}'
+  namespace: '{{ .Values.namespace }}'
 spec:
   defaultCertificate:
     secretName: '{{ include "traefik-name-prefix" . }}-default-certificate'
