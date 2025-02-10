@@ -1,13 +1,5 @@
 #!/bin/bash
 
-# shellcheck source=./bashlib-error.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
-error::set_strict_mode
-error::set_trap
-# shellcheck source=./bashlib-echo.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
-# shellcheck source=./bashlib-doc.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 
 synopsis(){
   cat <<EOF
@@ -64,10 +56,5 @@ if [ "$KUBEE_APP_NAMESPACE" == "" ] && [[ "$COMMAND" =~ install|uninstall ]]; th
   exit 1
 fi
 
-
-# Get env
-# Get env
-source kubee-env || error::exit $?
-
-
+kubee::set_kubeconfig_env
 helm "${args[@]}"

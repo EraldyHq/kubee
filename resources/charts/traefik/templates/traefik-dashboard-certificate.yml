@@ -17,15 +17,11 @@ kind: Certificate
 metadata:
   name: '{{ include "traefik-name-dashboard-cert" . }}'
   namespace: '{{ .Values.namespace }}'
-  labels:
-    # use cloudflare Dns
-    "issuer-challenge": "dns01-cloudflare"
 spec:
   secretName: '{{ include "traefik-name-dashboard-cert" . }}'
   dnsNames:
-    - '{{ .Values.kubee.traefik.dashboard.hostname }}'
+    - '{{ .Values.dashboard.hostname }}'
   issuerRef:
     kind: ClusterIssuer
     name: '{{ .Values.cert_manager.issuer_name }}'
-
 {{- end -}}

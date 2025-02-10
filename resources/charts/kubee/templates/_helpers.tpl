@@ -12,7 +12,7 @@ https://helm.sh/docs/chart_template_guide/named_templates/#declaring-and-using-t
 {{- printf "kubee" }}
 {{- end }}
 {{/*
-Return a name prefix
+Return a name prefix created from the release
 Usage in a sub-chart
 include "kubee-name-prefix" (dict "Release" .Release "Values" .Values.kubee )
 */}}
@@ -23,9 +23,10 @@ include "kubee-name-prefix" (dict "Release" .Release "Values" .Values.kubee )
 
 {{/*
 Return the name of the traefik basic auth
+Name is fixed and does not depend on the release
 */}}
 {{- define "kubee-traefik-basic-auth-name" }}
-{{- printf "%s-middelware-basic-auth" (include "kubee-prefix" .) -}}
+{{- printf "%s-traefik-middleware-basic-auth" (include "kubee-prefix" .) -}}
 {{- end }}
 
 {{/*
@@ -41,8 +42,8 @@ Return the name of the traefik transport that can be used as label
 
 {{/*
 Return the name of the github allow list middelware (used on ingress)
-Kubee prefix later
+Name is fixed and does not depend on the release
 */}}
 {{- define "kubee-traefik-github-hooks-allow-list-name" }}
-{{- printf "ip-allow-github-hooks-cidr" }}
+{{- printf "%s-traefik-ip-allow-github-hooks-cidr" (include "kubee-prefix" .) -}}
 {{- end }}

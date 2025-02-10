@@ -14,5 +14,5 @@ dependencies:
 - name: kubee-external-secrets
   repository: file://../external-secrets
   version: 0.0.1
-digest: sha256:1acb28162b4c9d0867a798fdcf5bacf817829f33b798f38c123603bca24cf572
-generated: "2025-01-26T18:35:57.529651386+01:00"
+digest: sha256:2db92780a7bf5d8ed3c09b89df9ba44a8eb80b629f5e160db12a32cf16cd1a04
+generated: "2025-02-10T15:17:00.9692024+01:00"

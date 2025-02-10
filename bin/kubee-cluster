@@ -1,23 +1,9 @@
 #!/usr/bin/env bash
 
-# shellcheck source=../..//bash-lib/lib/bashlib-error.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
-error::set_strict_mode
-error::set_trap
-# shellcheck source=../../bash-lib/lib/bashlib-echo.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
-# shellcheck source=../../bash-lib/lib/bashlib-bash.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
-# shellcheck source=../../bash-lib/lib/bashlib-doc.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
-# shellcheck source=../../bash-lib/lib/bashlib-command.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
+
 # shellcheck source=../../bash-lib/lib/bashlib-template.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
-# shellcheck source=../../bash-lib/lib/bashlib-script.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-script.sh"
-# shellcheck source=./kubee-lib.sh
-source "kubee-lib.sh"
+
 
 
 inventory_file(){
@@ -38,6 +24,10 @@ inventory_file(){
      # k3s version
      # https://github.com/k3s-io/k3s/releases
      export KUBEE_CLUSTER_K3S_VERSION=${KUBEE_CLUSTER_K3S_VERSION:-"v1.32.0+k3s1"}
+
+     # Empty by default
+     export KUBEE_CLUSTER_SERVER_ADMIN_USERNAME=${KUBEE_CLUSTER_SERVER_ADMIN_USERNAME:-""}
+     export KUBEE_CLUSTER_SERVER_ADMIN_PUBLIC_KEY=${KUBEE_CLUSTER_SERVER_ADMIN_PUBLIC_KEY:-""}
 
      # Connection type to the host. This can be the name of any Ansible connection plugin.
      # The default is ssh
@@ -152,8 +142,8 @@ EOT
 
 
 # Assign the first argument to a string
-COMMAND="${1:-}"
-if [ "$COMMAND" = "" ]; then
+CLUSTER_COMMAND="${1:-}"
+if [ "$CLUSTER_COMMAND" = "" ]; then
     synopsis
     echo::err "A command is mandatory"
     exit 1
@@ -162,12 +152,12 @@ shift  # Remove the first argument from the argument list
 
 # Help Asked should not fail for the doc
 # We test if before the error warning
-if [[ $COMMAND =~ help|-h|--help ]]; then
+if [[ $CLUSTER_COMMAND =~ help|-h|--help ]]; then
   doc::help synopsis
   exit
 fi
 
-if [[ $COMMAND == "synopsis" ]]; then
+if [[ $CLUSTER_COMMAND == "synopsis" ]]; then
   synopsis
   exit
 fi
@@ -199,18 +189,28 @@ fi
 bash::trap "rm $SHM_INVENTORY_FILE" EXIT
 
 # Key file
-if [ "$KUBEE_CLUSTER_PRIVATE_KEY" != "" ]; then
-  export ANSIBLE_PRIVATE_KEY_FILE=/dev/shm/ssh-key
-  echo "$KUBEE_CLUSTER_PRIVATE_KEY" >| "$ANSIBLE_PRIVATE_KEY_FILE"
-  bash::trap "rm $ANSIBLE_PRIVATE_KEY_FILE" EXIT
+if [ "${KUBEE_CLUSTER_SERVER_CONNECTION_PRIVATE_KEY_FILE:-""}" != "" ]; then
+  export ANSIBLE_PRIVATE_KEY_FILE="${KUBEE_CLUSTER_SERVER_CONNECTION_PRIVATE_KEY_FILE}"
+else
+  if [ "${KUBEE_CLUSTER_SERVER_CONNECTION_PRIVATE_KEY:-""}" != "" ]; then
+    export ANSIBLE_PRIVATE_KEY_FILE="/dev/shm/ssh-key"
+    echo "$KUBEE_CLUSTER_SERVER_CONNECTION_PRIVATE_KEY" >| "$ANSIBLE_PRIVATE_KEY_FILE"
+    bash::trap "rm $ANSIBLE_PRIVATE_KEY_FILE" EXIT
+  else
+    echo::warn "No server connection private key defined."
+    echo::warn "The env KUBEE_CLUSTER_SERVER_CONNECTION_PRIVATE_KEY_FILE and KUBEE_CLUSTER_SERVER_CONNECTION_PRIVATE_KEY were empty"
+    echo::warn "Ssh will try to connect with the default key file in ~/.ssh"
+    echo::warn "If there is none, the connection will failed"
+  fi
+fi
+if [ "${ANSIBLE_PRIVATE_KEY_FILE:-""}" != "" ]; then
   # to avoid Permissions 0644 for '/tmp/ssh-key' are too open
   # as we mount with the current user, docker inherit the permissions
   chmod 600 "$ANSIBLE_PRIVATE_KEY_FILE"
 fi
 
 
-
-case $COMMAND in
+case $CLUSTER_COMMAND in
 "play")
     play "$@" || error::exit $?
     ;;
@@ -225,6 +225,6 @@ case $COMMAND in
     ;;
 *)
   doc::help synopsis
-  echo::err "Command $COMMAND is unknown"
+  echo::err "Command $CLUSTER_COMMAND is unknown"
   exit 1
 esac

@@ -11,7 +11,7 @@ source bashlib-echo.sh
 # this works for executed script or sourced script
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-# Get the Traefik chart
+# Get the Dependency Traefik chart
 TRAEFIK_CHART_VERSION=$(yq '.dependencies[] | select(.name == "traefik") | .version' "$SCRIPT_DIR/../traefik/Chart.yaml" | tr -d '~' )
 
 if [ "$TRAEFIK_CHART_VERSION" == "" ]; then
@@ -27,8 +27,7 @@ if [ "$TRAEFIK_VERSION" == "" ]; then
 fi
 
 echo::info "Updating traefik-crds Chart.yml with Traefik version: $TRAEFIK_VERSION. Chart: $TRAEFIK_CHART_VERSION"
-yq ".appVersion = \"$TRAEFIK_VERSION\"" -i Chart.yaml
-yq ".version = \"$TRAEFIK_CHART_VERSION\"" -i Chart.yaml
+yq ".appVersion = \"$TRAEFIK_CHART_VERSION\"" -i Chart.yaml
 
 echo::info "Download the CRD of Traefik $TRAEFIK_VERSION"
 curl \

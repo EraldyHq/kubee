@@ -18,6 +18,7 @@ k3s_cluster:
           # You can run K3s with the --node-name flag or K3S_NODE_NAME environment variable
           # and this will pass the node name to resolve this issue.
           kubee_os_hostname: "$KUBEE_CLUSTER_SERVER_01_FQDN"
+
 #    agent:
 #      hosts:
 #        192.16.35.12:
@@ -30,7 +31,7 @@ k3s_cluster:
     # The default username to use for log in. Most plugins default to the ‘current user running Ansible’.
     # Can be set via ANSIBLE_REMOTE_USER (default to the user executing Ansible)
     # https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_REMOTE_USER
-    ansible_user: "$KUBEE_CLUSTER_SERVER_USER"
+    ansible_user: "$KUBEE_CLUSTER_SERVER_CONNECTION_USER"
     # ANSIBLE_HOST_KEY_CHECKING
     # See also https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_HOST_KEY_CHECKING
     k3s_version: "$KUBEE_CLUSTER_K3S_VERSION"
@@ -58,4 +59,10 @@ k3s_cluster:
     # Don't change the token as the cluster data is encrypted with it
     #
     k3s_token: "$KUBEE_CLUSTER_K3S_TOKEN"
-
+    # Admin user
+    # An admin is created on the server if these values are not empty
+    # The admin username
+    kubee_os_admin_username: "$KUBEE_CLUSTER_SERVER_ADMIN_USERNAME"
+    # The admin user Public key that is added to the `authorized_keys`
+    # The key is mandatory if the admin username is not empty
+    kubee_os_admin_public_key: "$KUBEE_CLUSTER_SERVER_ADMIN_PUBLIC_KEY"

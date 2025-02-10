@@ -1,7 +1,7 @@
 dependencies:
 - name: traefik
   repository: https://traefik.github.io/charts
-  version: 33.1.0
+  version: 34.3.0
 - name: kubee
   repository: file://../kubee
   version: 0.0.1
@@ -11,5 +11,5 @@ dependencies:
 - name: kubee-prometheus
   repository: file://../prometheus
   version: 0.0.1
-digest: sha256:16b1540cfae740ab6a4f6b608be2f3a95699a3e5e794bf544d27185ae40bed52
-generated: "2025-02-10T11:10:15.950552517+01:00"
+digest: sha256:3ebe6467149d88437f12ec75f364f825b6787dab6808001c74076c83d4c66866
+generated: "2025-02-10T15:06:26.317925523+01:00"

@@ -5,7 +5,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: '{{ .Release.Name }}'
+  name: '{{ include "traefik-name-prefix" . }}'
   namespace: '{{ .Values.namespace }}'
   labels:
     app.kubernetes.io/name: '{{ .Release.Name }}'
