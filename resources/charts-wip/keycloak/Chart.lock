@@ -1,0 +1,6 @@
+dependencies:
+- name: kubee
+  repository: ""
+  version: 0.0.1
+digest: sha256:f682806f0a352d60c082a388b513ab54e4557a95bf579d6d59a1da057cb95167
+generated: "2025-02-11T11:34:03.750884659+01:00"
