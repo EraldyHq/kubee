@@ -407,6 +407,11 @@ kubee::set_kubeconfig_env(){
 # @description
 #     Set the global env
 kubee::set_env(){
+
+  # Tmp dir
+  # TMPDIR, TEMP and TMP may not be always set at the same time
+  TMPDIR=${TMPDIR:-${TEMP:-${TMP:-/tmp}}}
+
   # The cluster
   KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
 

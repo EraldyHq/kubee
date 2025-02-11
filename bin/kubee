@@ -116,7 +116,7 @@ kubee::set_env
 
 # Advertise the --debug flag if any error
 # shellcheck disable=SC2016
-bash::trap "exit_code=\$?; if [ \$exit_code -ne 0 ]; then echo -e \"\033[0;33mScript failed use the global debug flag ie (kubee --debug $KUBEE_COMMAND) to get more information\033[0m\"; fi" EXIT
+bash::trap "exit_code=\$?; if [ \$exit_code -ne 0 ]; then echo -e \"${BASHLIB_ERROR_COLOR}Script failed use the global debug flag ie (kubee --debug $KUBEE_COMMAND) to get more information${NC}\"; fi" EXIT
 
 case "$KUBEE_COMMAND" in
   "cluster")

@@ -13,14 +13,17 @@ This is equivalent to create a line by user that contains the ouput of:
 `htpasswd -nb admin@traefik welcome`
 
 Traefik expects the passwords to be hashed using MD5, SHA1, or BCrypt.
+
+Email is used as the main identifier as Dex does
+https://dexidp.io/docs/connectors/local/
 */}}
 {{- define "basic-auth-list-base64-encode" }}
 {{- $result := list }}
 {{/* Add the admin user */}}
-{{- $result = append $result (htpasswd .Values.kubee.auth.admin_user.username .Values.kubee.auth.admin_user.password | b64enc)}}
+{{- $result = append $result (htpasswd .Values.kubee.auth.admin_user.email .Values.kubee.auth.admin_user.password | b64enc)}}
 {{/* See https://github.com/helm/helm/issues/7533#issuecomment-1039521776 */}}
-{{- range $user, $password := .Values.middlewares.basic_auth.users }}
-{{- $result = append $result (htpasswd $user $password | b64enc) }}
+{{- range $email, $password := .Values.middlewares.basic_auth.users }}
+{{- $result = append $result (htpasswd $email $password | b64enc) }}
 {{- end }}
 {{- join "\n" $result}}
 {{- end }}

@@ -30,6 +30,13 @@ dependencies:
   - name: kubee
     version: 0.0.1
     alias: kubee
+  - name: dex
+    # https://github.com/dexidp/helm-charts/release
+    # helm repo add dex https://charts.dexidp.io/
+    # or helm search repo dex/dex -l
+    repository: https://charts.dexidp.io/
+    version: 0.20.0
+    alias: dex
   - name: kubee-traefik
     version: 0.0.1
     alias: traefik

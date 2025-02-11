@@ -437,7 +437,11 @@ print_values(){
                 HELM_SHOW_VALUE_COMMAND+=(">| $SHM_DEPENDENCY_CHART_VALUES_FILE")
                 # 2>COMMAND_STDOUT_FD to silence: walk.go:75: found symbolic link in path
                 HELM_SHOW_VALUE_COMMAND+=("2>$COMMAND_STDOUT_FD")
-                if ! echo::eval "${HELM_SHOW_VALUE_COMMAND[*]}"; then
+                # In the following command, we cd in tempdir
+                # because when the current directory is a Chart directory such as dex
+                # We get: Error: Chart.yaml file is missing
+                # No idea why???
+                if ! echo::eval "cd ${TMPDIR};${HELM_SHOW_VALUE_COMMAND[*]}"; then
                   echo::err "Error while trying to the get values for the Chart $DEPENDENCY_CHART_ALIAS"
                   return 1
                 fi

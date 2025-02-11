@@ -44,16 +44,17 @@ auth:
 # https://doc.traefik.io/traefik/middlewares
 middlewares:
   # A basic Auth Middleware
+  # With the email as main identifier
   # https://doc.traefik.io/traefik/middlewares/http/basicauth/
-  # Enabled by default when the admin user password is not empty
+  # The admin user is added
   basic_auth:
     name: 'basic-auth'
-    # List of extra users
+    # List of extra users alongside the admin user
     users:
     # Example:
     # users:
-    #   user1: password1
-    #   user2: password2
+    #   emailUser1: password1
+    #   emailUser2: password2
   # Create an IP Allow list for webhook of git service
   # Used in Gitops app such as Argocd
   # https://doc.traefik.io/traefik/middlewares/http/ipallowlist/
@@ -64,7 +65,6 @@ middlewares:
 
 # Traefik Helm Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
-
 traefik:
 
   # We do it ourself

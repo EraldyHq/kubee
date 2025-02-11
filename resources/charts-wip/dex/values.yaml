@@ -23,3 +23,9 @@ connectors:
 # Internal don't change
 kubee_internal:
   install_cross_dependency: false
+
+# Internal
+dex:
+  configSecret:
+    create: false # we do it
+    name: "dex"
