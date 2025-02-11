@@ -146,6 +146,14 @@ https://cert-manager.io/docs/troubleshooting/acme/
 
 ## FAQ
 
+### Why not cert with Traefik Ingress ?
+
+* No ingress dependence
+* We can use the cert inside a pod to serve https
+* We have the whole order to be able to debug
+* We can monitor the certs and be alerted
+* HA only setup - Traefik does not share certificate between instance
+
 ### Default cert, what happens if the secret name is omitted in an ingress?
 
 If the `secretName` is omitted in an `Ingress`, the `Ingress controller`
