@@ -392,16 +392,25 @@ print_values(){
   local CHART_VALUES_FILES=()
 
   local DEPENDENCIES;
-  DEPENDENCIES="$(yq -r '.dependencies[] | [ .name + "," + .alias + "," + .repository + "," + .version] | join("\n")' "$ACTUAL_CHART_FILE")"
+  DEPENDENCIES="$(yq -r '.dependencies[] | [ (.name // "") + "," + (.alias // "") + "," + .repository + "," + .version] | join("\n")' "$ACTUAL_CHART_FILE")"
   if [ "$DEPENDENCIES" != "" ]; then
     # Loop over the dependencies
     while IFS=, read -r DEPENDENCY_CHART_NAME DEPENDENCY_CHART_ALIAS DEPENDENCY_CHART_REPOSITORY DEPENDENCY_CHART_VERSION; do
 
-              if [ "$DEPENDENCY_CHART_ALIAS" == "" ] || [ "$DEPENDENCY_CHART_ALIAS" == "null" ]; then
-                echo::err "All dependency should have an alias"
-                echo::err "The repository $DEPENDENCY_CHART_REPOSITORY does not have one"
-                return 1
+              if [ "$DEPENDENCY_CHART_NAME" == "" ] || [ "$DEPENDENCY_CHART_NAME" == "null" ]; then
+                    echo::err "All dependency should have an name"
+                    echo::err "The repository $DEPENDENCY_CHART_REPOSITORY does not have one"
+                    return 1
               fi
+
+              # Alias is not mandatory and sometimes
+              # You can't even change it (ie kubernetes-dashboard)
+              # We generate a kubee alias
+              if [ "$DEPENDENCY_CHART_ALIAS" == "" ] || [ "$DEPENDENCY_CHART_ALIAS" == "null" ]; then
+                DEPENDENCY_CHART_ALIAS="$(echo "$DEPENDENCY_CHART_NAME" | tr "-" "_")"
+                echo::debug "No alias found for the chart $DEPENDENCY_CHART_NAME. Alias generated to $DEPENDENCY_CHART_ALIAS"
+              fi
+
               local HELM_SHOW_VALUE_COMMAND=(
                 'helm' 'show' 'values'
               )

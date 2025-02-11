@@ -7,8 +7,6 @@ namespace: 'kubernetes-dashboard'
 # If set, an ingress will be created
 hostname: ''
 
-
-
 # Default of
 # https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml
 kubernetes-dashboard:
