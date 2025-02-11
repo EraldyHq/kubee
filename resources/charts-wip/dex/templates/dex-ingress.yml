@@ -2,27 +2,27 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress
+  name: dex
+  namespace: {{.Values.namespace}}
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    {{- if eq .Values.cert_manager.enabled true}}
+    cert-manager.io/cluster-issuer: {{.Values.cert_manager.issuer_name}}
+    {{- end }}
 spec:
   rules:
-    - host: dex.eraldy.com
+    - host: {{ .Values.hostname}}
       http:
         paths:
           - backend:
               service:
-                name: dex
+                name: {{ template "dex-service-name" }}
                 port:
                   number: 5556
             path: /
             pathType: Prefix
   tls:
     - hosts:
-        - dex.eraldy.com
-        - dex
-        - dex.dex
-        - dex.dex.svc.cluster.local
-      secretName: dex-cert
+        - {{.Values.hostname}}
+      secretName: {{ template "dex-cert-name"}}

@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: keycloak
-          image: "quay.io/keycloak/keycloak:{{ .Values.version }}"
+          image: "quay.io/keycloak/keycloak:26.1.2"
           args: ["start", "--cache-stack=kubernetes"]
           env:
             # Bootstrap user

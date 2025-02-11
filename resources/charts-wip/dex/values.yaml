@@ -1,0 +1,25 @@
+# Enabled or not
+# not a string, don't quote
+enabled: false
+# The namespace
+namespace: 'dex'
+# https://github.com/dexidp/dex/releases
+version: 'v2.41.1'
+# The public hostname
+# (Required as you need a callback)
+hostname: ''
+# Trusted proxy
+trusted_proxy: 10.42.0.0/24
+
+# connectors
+connectors:
+  # https://dexidp.io/docs/connectors/github/
+  github:
+    client_id: ''
+    client_secret: ''
+    # List of orgs that may connect
+    orgs: []
+
+# Internal don't change
+kubee_internal:
+  install_cross_dependency: false

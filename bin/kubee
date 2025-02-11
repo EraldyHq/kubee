@@ -8,6 +8,8 @@ error::set_trap
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-echo.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-bash.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
 # shellcheck source=./kubee-lib.sh
 source "kubee-lib.sh"
 
@@ -124,11 +126,11 @@ case "$KUBEE_COMMAND" in
     source kubee-app "$@" || error::exit $?
     ;;
   "helmet")
-    source kubee-helmet "$@" || error::exit $?
+    source kubee-helmet "$@"
     ;;
   "helm")
-      source kubee-helm "$@" || error::exit $?
-      ;;
+    source kubee-helm "$@" || error::exit $?
+    ;;
   "kubectl")
     source kubee-kubectl "$@" || error::exit $?
     ;;
@@ -137,3 +139,4 @@ case "$KUBEE_COMMAND" in
     echo::err  "Command $KUBEE_COMMAND is unknown"
     exit 1
 esac
+

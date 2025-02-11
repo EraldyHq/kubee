@@ -1,3 +1,4 @@
+# as seen here: Ingress
 # https://docs.goauthentik.io/docs/add-secure-apps/providers/proxy/server_traefik
 apiVersion: traefik.io/v1alpha1
 kind: Middleware

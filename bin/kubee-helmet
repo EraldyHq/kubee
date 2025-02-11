@@ -47,11 +47,6 @@ get_chart_directory(){
   # All packages directories in an array
   local KUBEE_CHARTS_DIRS=()
   IFS=":" read -ra KUBEE_CHARTS_DIRS <<< "${KUBEE_CHARTS_PATH:-}"
-  # this works for executed script or sourced script
-  local SCRIPT_DIR
-  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  # KUBEE_RESOURCE_CHARTS_DIR is not local because we use it in case of error in the message
-  KUBEE_RESOURCE_CHARTS_DIR=$(realpath "$SCRIPT_DIR/../resources/charts")
   local KUBEE_CHARTS_DIRS+=("$KUBEE_RESOURCE_CHARTS_DIR")
   for KUBEE_PACKAGES_DIR in "${KUBEE_CHARTS_DIRS[@]}"; do
       if [ ! -d "$KUBEE_PACKAGES_DIR" ]; then
@@ -282,8 +277,9 @@ apply(){
 
   echo::info "Executing Helm $COMMAND"
   if ! echo::eval "${HELM_COMMAND[*]}"; then
-    echo::err "An error occurs during the command $COMMAND"
-    exit 1
+    echo::err "An error occurs during the command $COMMAND."
+    echo::err "Uses the --debug flag for more information (ie kubee --debug helmet $COMMAND)"
+    return 1
   fi
 
   # Can we Wait with that?
@@ -392,7 +388,7 @@ print_values(){
   local CHART_VALUES_FILES=()
 
   local DEPENDENCIES;
-  DEPENDENCIES="$(yq -r '.dependencies[] | [ (.name // "") + "," + (.alias // "") + "," + .repository + "," + .version] | join("\n")' "$ACTUAL_CHART_FILE")"
+  DEPENDENCIES="$(yq -r '.dependencies[] | [ (.name // "") + "," + (.alias // "") + "," + (.repository // "") + "," + ( .version // "")] | join("\n")' "$ACTUAL_CHART_FILE")"
   if [ "$DEPENDENCIES" != "" ]; then
     # Loop over the dependencies
     while IFS=, read -r DEPENDENCY_CHART_NAME DEPENDENCY_CHART_ALIAS DEPENDENCY_CHART_REPOSITORY DEPENDENCY_CHART_VERSION; do
@@ -410,33 +406,44 @@ print_values(){
                 DEPENDENCY_CHART_ALIAS="$(echo "$DEPENDENCY_CHART_NAME" | tr "-" "_")"
                 echo::debug "No alias found for the chart $DEPENDENCY_CHART_NAME. Alias generated to $DEPENDENCY_CHART_ALIAS"
               fi
-
-              local HELM_SHOW_VALUE_COMMAND=(
-                'helm' 'show' 'values'
-              )
-              case "$DEPENDENCY_CHART_REPOSITORY" in
-                file://.*)
-                  # Local
-                  # The name of the chart is the path to the chart directory
-                  # Delete the file scheme (not supported by `helm get values`)
-                  DEPENDENCY_CHART="$CHART_DIRECTORY/${DEPENDENCY_CHART_REPOSITORY#"file://"}"
-                  HELM_SHOW_VALUE_COMMAND+=("$DEPENDENCY_CHART")
-                ;;
-                *)
-                  # Other scheme: Http, Oci scheme, ...
-                  HELM_SHOW_VALUE_COMMAND+=("--repo" "$DEPENDENCY_CHART_REPOSITORY")
-                  HELM_SHOW_VALUE_COMMAND+=("--version" "$DEPENDENCY_CHART_VERSION")
-                  HELM_SHOW_VALUE_COMMAND+=("$DEPENDENCY_CHART_NAME")
-                ;;
-              esac
+              # The non-scoped dependency value file
               local SHM_DEPENDENCY_CHART_VALUES_FILE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default_non_scoped.yml"
-              HELM_SHOW_VALUE_COMMAND+=(">| $SHM_DEPENDENCY_CHART_VALUES_FILE")
-              # 2>COMMAND_STDOUT_FD to silence: walk.go:75: found symbolic link in path
-              HELM_SHOW_VALUE_COMMAND+=("2>$COMMAND_STDOUT_FD")
-              if ! echo::eval "${HELM_SHOW_VALUE_COMMAND[*]}"; then
-                echo::err "Error while trying to the get values for the Chart $DEPENDENCY_CHART_ALIAS"
-                return 1
+              # In case of a symlink, the values file is in the charts directory
+              local LOCAL_DEPENDENCY_CHART_VALUES_FILE="$CHART_DIRECTORY/charts/$DEPENDENCY_CHART_NAME/values.yaml"
+              if [ -f "$LOCAL_DEPENDENCY_CHART_VALUES_FILE" ]; then
+                cp -f "$LOCAL_DEPENDENCY_CHART_VALUES_FILE" "$SHM_DEPENDENCY_CHART_VALUES_FILE"
+              else
+                echo::debug "Local dependency values does not exist at $LOCAL_DEPENDENCY_CHART_VALUES_FILE"
+                # Retrieve the value file with the show values command
+                local HELM_SHOW_VALUE_COMMAND=(
+                  'helm' 'show' 'values'
+                )
+                case "$DEPENDENCY_CHART_REPOSITORY" in
+                  file://.*)
+                    # Local
+                    # The name of the chart is the path to the chart directory
+                    # Delete the file scheme (not supported by `helm get values`)
+                    DEPENDENCY_CHART="$CHART_DIRECTORY/${DEPENDENCY_CHART_REPOSITORY#"file://"}"
+                    HELM_SHOW_VALUE_COMMAND+=("$DEPENDENCY_CHART")
+                  ;;
+                  *)
+                    # Other scheme: Http, Oci scheme, ...
+                    HELM_SHOW_VALUE_COMMAND+=("--repo" "$DEPENDENCY_CHART_REPOSITORY")
+                    HELM_SHOW_VALUE_COMMAND+=("--version" "$DEPENDENCY_CHART_VERSION")
+                    HELM_SHOW_VALUE_COMMAND+=("$DEPENDENCY_CHART_NAME")
+                  ;;
+                esac
+
+                HELM_SHOW_VALUE_COMMAND+=(">| $SHM_DEPENDENCY_CHART_VALUES_FILE")
+                # 2>COMMAND_STDOUT_FD to silence: walk.go:75: found symbolic link in path
+                HELM_SHOW_VALUE_COMMAND+=("2>$COMMAND_STDOUT_FD")
+                if ! echo::eval "${HELM_SHOW_VALUE_COMMAND[*]}"; then
+                  echo::err "Error while trying to the get values for the Chart $DEPENDENCY_CHART_ALIAS"
+                  return 1
+                fi
               fi
+
+              # Scoping (ie adding the alias to the dependency values file)
               # The default value should be under the alias key (ie scoped)
               local SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default.yml"
               # --null-input flag: does not have any input as we create a new file
@@ -598,10 +605,16 @@ else
 fi
 
 
+# KUBEE_RESOURCE_CHARTS_DIR is not local in the get_chart_directory function
+# because we use it just below in case of error in the message
+# this works for executed script or sourced script
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+KUBEE_RESOURCE_CHARTS_DIR=$(realpath "$SCRIPT_DIR/../resources/charts")
+
 # Chart Directory
 if ! CHART_DIRECTORY=$(get_chart_directory "$CHART_NAME"); then
   echo::err "No chart directory found with the name ($CHART_NAME) in"
-  echo::err "  * the cluster resources directory (${KUBEE_RESOURCE_CHARTS_DIR}) " # the /resources/charts dir
+  echo::err "  * in the Kubee chart directory  (${KUBEE_RESOURCE_CHARTS_DIR}) " # the /resources/charts dir
   echo::err "  * or the paths of the KUBEE_CHARTS_PATH variable (${KUBEE_CHARTS_PATH:-'not set'})"
   exit 1
 fi
@@ -674,7 +687,7 @@ echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAM
 
 case "$COMMAND" in
   "install"|"template"|"upgrade"|"play")
-     apply "$COMMAND" "$@" || error::exit $?
+    apply "$COMMAND" "$@"
     ;;
   "values")
     # The -t test checks if the file descriptor is connected to a terminal.

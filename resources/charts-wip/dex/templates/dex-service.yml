@@ -2,7 +2,8 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: dex
+  name: {{ template "dex-service-name" }}
+  namespace: {{.Values.namespace}}
   labels:
     app.kubernetes.io/name: dex
 spec:

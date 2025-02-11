@@ -1,10 +1,5 @@
-# KeyCloak
-
-https://www.keycloak.org/getting-started/getting-started-kube
-https://www.keycloak.org/server/configuration-production
+# KeyCloak (WIP)
 
 
 
-
-
-https://www.keycloak.org/keycloak-benchmark/kubernetes-guide/latest/
+They don't have any official Helm, they have an operator.
