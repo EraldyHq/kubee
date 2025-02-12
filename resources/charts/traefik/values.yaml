@@ -34,7 +34,8 @@ auth:
   # The middleware auth name ingress Authentication
   # That's applied for internal web app (such as Traefik Dashboard, Prometheus, Alert Manager, ...)
   # The app or api endpoints are still available from an internal container
-  middleware_name: 'basic-auth' # only supported for now
+  # The supported auth are basic-auth and forward-auth
+  middleware_name: 'basic-auth'
   # Private Network ranges
   # used for Ingress Ip restrictions (Traefik IpAllowList)
   # example for a home ip: 143.176.206.80/32
@@ -61,6 +62,12 @@ middlewares:
   git_hooks:
     name: 'git-hooks'
     service: 'github' # only supported for now
+  # Forward Auth
+  # https://doc.traefik.io/traefik/middlewares/http/forwardauth/
+  # Traefik-forward-auth should be installed for this auth to work
+  forward_auth:
+    name: 'forward-auth'
+    service: 'traefik-forward-auth' # only forward-auth portal supported for now
 
 
 # Traefik Helm Values

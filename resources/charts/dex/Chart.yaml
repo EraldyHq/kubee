@@ -1,6 +1,7 @@
 apiVersion: v2
-name: kubee-traefik
-description: A sub-chart of Traefik
+name: kubee-dex
+description: The dex kubee chart
+
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives
@@ -10,44 +11,41 @@ description: A sub-chart of Traefik
 # a dependency of application charts to inject those utilities and functions into the rendering
 # pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: application
+
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 version: 0.0.1
+
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "34.3.0" # Traefik Version
+appVersion: "0.13" # The version of the app packaged
+
+
 # https://github.com/cert-manager/cert-manager/releases
 # https://cert-manager.io/docs/installation/helm/#example-usage
 dependencies:
-  - name: traefik
-    # https://helm.sh/docs/chart_best_practices/dependencies/#versions
-    # ~33.1.0, equivalent to >= 33.1.0, < 33.2.0
-    # https://github.com/traefik/traefik-helm-chart/releases
-    version: 34.3.0
-    repository: https://traefik.github.io/charts
-    alias: traefik
-    #condition: certManager.enabled
   - name: kubee
     version: 0.0.1
-    #repository: file://../kubee
     alias: kubee
-  # For the dashboard
-  - name: kubee-grafana
+  - name: dex
+    # https://github.com/dexidp/helm-charts/release
+    # helm repo add dex https://charts.dexidp.io/
+    # or helm search repo dex/dex -l
+    repository: https://charts.dexidp.io/
+    version: 0.20.0
+    alias: dex
+  - name: kubee-traefik
     version: 0.0.1
-    #repository: file://../grafana
-    alias: grafana
+    alias: traefik
     condition: kubee_internal.install_cross_dependency
   - name: kubee-traefik-forward-auth
     version: 0.0.1
-    #repository: file://../grafana
     alias: traefik_forward_auth
     condition: kubee_internal.install_cross_dependency
-  # For the scrape
-  - name: kubee-prometheus
+  - name: kubee-cert-manager
     version: 0.0.1
-    #repository: file://../prometheus
-    alias: prometheus
+    alias: cert_manager
     condition: kubee_internal.install_cross_dependency

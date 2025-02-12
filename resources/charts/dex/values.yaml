@@ -20,6 +20,12 @@ connectors:
     # List of orgs that may connect
     orgs: []
 
+# Client
+clients:
+  traefik_forward_auth:
+    client_id: 'traefik-forward-auth'
+    secret: '' # shared secret mandatory
+
 # Internal don't change
 kubee_internal:
   install_cross_dependency: false

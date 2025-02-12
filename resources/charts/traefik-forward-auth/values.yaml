@@ -1,0 +1,28 @@
+# Enabled
+enabled: false
+# Installation Namespace
+namespace: 'traefik'
+# Docker Hub Version
+# https://hub.docker.com/r/thomseddon/traefik-forward-auth/tags
+# Unfortunately, the last release is not on Docker
+# https://github.com/thomseddon/traefik-forward-auth/issues/373
+# We use the v2.2.0 instead of the v2.3.0
+version: 'v2.2.0'
+# The hostname
+# To expose forward-auth to the internet for OAuth initialization and callbacks.
+hostname: ''
+# Secret
+# A random value used to encrypt cookies
+# Example: bc989147a1d2ff433933b39b40b9b1d0
+secret: ''
+
+
+
+
+
+
+
+
+# Internal
+kubee_internal:
+  install_cross_dependency: false

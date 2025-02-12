@@ -1,0 +1,34 @@
+# Expose forward-auth to the internet for OAuth initialization and callbacks.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: traefik-forward-auth
+  namespace: {{ .Values.namespace }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    {{- if ne .Values.cert_manager.enabled false }}
+    cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuer_name }}'
+    {{- end }}
+    # While possibly unexpected, this is required for the OAuth callback to process correctly.
+    # It will never actually return a 200 so it's mostly just a protocol issue.
+    traefik.ingress.kubernetes.io/router.middlewares: '{{.Values.traefik.namespace}}-{{.Values.traefik.middlewares.forward_auth.name}}@kubernetescrd'
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: '{{ required "The forward-auth hostname is required" .Values.hostname }}'
+      http:
+        paths:
+          - backend:
+              service:
+                name: 'forward-auth'
+                port:
+                  number: 4181
+            path: /
+            pathType: Prefix
+  {{- if ne .Values.cert_manager.enabled false }}
+  tls:
+    - hosts:
+        - '{{ .Values.hostname }}'
+      secretName: 'traefik-forward-auth-cert'
+  {{- end }}

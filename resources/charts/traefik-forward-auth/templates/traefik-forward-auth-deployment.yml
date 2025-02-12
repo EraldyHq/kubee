@@ -1,0 +1,37 @@
+# Run forward-auth
+# https://github.com/thomseddon/traefik-forward-auth/blob/master/examples/traefik-v2/kubernetes/simple-separate-pod/k8s-traefik-forward-auth.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forward-auth
+  namespace: {{.Values.namespace}}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: forward-auth
+      app.kubernetes.io/instance: {{.Release.Name}}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: forward-auth
+        app.kubernetes.io/instance: {{.Release.Name }}
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: forward-auth
+          image: 'thomseddon/traefik-forward-auth:{{ .Values.version }}'
+          ports:
+            - containerPort: 4181
+          args:
+            # Random value used for encrypting cookies, pick a new one.
+            - --secret={{ required "secret is required to encrypt cookie" .Values.secret }}
+            # The only hard rule of auth-host mode is that the auth-host must be a subdomain of cookie-domain.
+            - --auth-host={{ .Values.hostname }}
+            - --cookie-domain={{ regexReplaceAll "^.*?([^.]+\\.[^.]+)$" "$1"}}
+            # Dex
+            {{- if ne .Values.dex.hostname "" }}
+            - --default-provider=dex
+            - --providers.dex.issuer-url=https://{{ .Values.dex.hostname }}
+            - --providers.dex.client-id={{ required "The dex.clients.traefik_forward_auth.client_id should not be empty" .Values.dex.clients.traefik_forward_auth.client_id }}
+            - --providers.dex.client-secret={{ required "dex.clients.traefik_forward_auth.secret should not be empty" .Values.dex.clients.traefik_forward_auth.secret }}
+            {{- end }}

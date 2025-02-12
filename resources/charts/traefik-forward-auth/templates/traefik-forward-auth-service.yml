@@ -1,0 +1,11 @@
+# Service for Traefik to talk to Forward-Auth.
+apiVersion: v1
+kind: Service
+metadata:
+  name: forward-auth
+  namespace: {{.Values.namespace}}
+spec:
+  selector:
+    app: forward-auth
+  ports:
+    - port: 4181

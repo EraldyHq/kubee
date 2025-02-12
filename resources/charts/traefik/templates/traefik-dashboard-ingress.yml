@@ -2,7 +2,6 @@
 Test:
 helm template -s templates/traefik-dashboard-ingress.yml --set 'cert_manager.enabled=true' .
 */}}
----
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
