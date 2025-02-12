@@ -1,5 +1,10 @@
+# Dev
 
+## Helm
 
+This chart is an umbrella chart over:
+https://charts.dexidp.io/
+https://github.com/dexidp/helm-charts
 
 ## Setup
 

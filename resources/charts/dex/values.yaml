@@ -8,8 +8,6 @@ version: 'v2.41.1'
 # The public hostname
 # (Required as you need a callback)
 hostname: ''
-# Trusted proxy
-trusted_proxy: 10.42.0.0/24
 
 # connectors
 connectors:
@@ -30,8 +28,9 @@ clients:
 kubee_internal:
   install_cross_dependency: false
 
-# Internal
+# Dex Chart Values
+# https://github.com/dexidp/helm-charts/blob/master/charts/dex/values.yaml
 dex:
   configSecret:
-    create: false # we do it
+    create: true # we do it
     name: "dex"

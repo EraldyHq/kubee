@@ -8,6 +8,7 @@ metadata:
   namespace: {{ x.Values.namespace }}
 spec:
   forwardAuth:
+    {{- /* For info: Authentik supports forward auth https://docs.goauthentik.io/docs/add-secure-apps/providers/proxy/server_traefik*/}}
     address: "http://traefik-forward-auth.{{ .Values.traefik_forward_auth.namespace }}.svc.cluster.local:4181"
     authResponseHeaders:
       # The authenticated user is set in the X-Forwarded-User header

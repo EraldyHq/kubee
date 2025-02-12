@@ -43,6 +43,9 @@ shift
 
 
 case "$COMMAND" in
+  "shell")
+    source kubee-app-shell "$@"
+    ;;
   "service")
      APP_NAME=${1:-}
      echo::echo

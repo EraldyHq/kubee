@@ -1,18 +1,10 @@
 #!/bin/bash
 
 
-# shellcheck source=./bashlib-error.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
-error::set_strict_mode
-error::set_trap
-# shellcheck source=./bashlib-echo.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+
+
 # shellcheck source=./bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
-# shellcheck source=./bashlib-bash.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
-# shellcheck source=./bashlib-kube.sh
-source "kubee-lib.sh"
 
 
 
@@ -81,6 +73,9 @@ do
   esac
 done
 
+# This is a kubectl tool
+# Set the kubeconfig
+kubee::set_kubeconfig_env
 
 
 # Set the known default shell
@@ -128,7 +123,7 @@ echo::info "Pod Namespace: $POD_NAMESPACE"
 
 if [ "$SHELL_NAME" == "ephemeral" ]; then
   echo::info "Starting a ephemeral busybox shell on the pod $POD_NAMESPACE/$POD_NAME"
-  kubectl debug -it --image=$BUSY_BOX_IMAGE -n "$POD_NAMESPACE" --target="$POD_NAME" ephemeral-shell
+  kubectl debug -it --image="$BUSY_BOX_IMAGE" -n "$POD_NAMESPACE" --target="$POD_NAME" ephemeral-shell
   exit 0
 fi
 

@@ -2,5 +2,5 @@ out
 vendors
 # Don't add cross-dependency charts to not create recursive symlinks
 charts/kubee-cert-manager/charts
-charts/traefik/charts
-charts/traefik-forward-auth/charts
+charts/kubee-traefik/charts
+charts/kubee-traefik-forward-auth/charts
