@@ -1,5 +1,7 @@
 # Run forward-auth
 # https://github.com/thomseddon/traefik-forward-auth/blob/master/examples/traefik-v2/kubernetes/simple-separate-pod/k8s-traefik-forward-auth.yml
+# We use env as conf because they can come for secret,
+# meaning we can store them in a Gitops way
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -22,16 +24,53 @@ spec:
           image: 'thomseddon/traefik-forward-auth:{{ .Values.version }}'
           ports:
             - containerPort: 4181
-          args:
-            # Random value used for encrypting cookies, pick a new one.
-            - --secret={{ required "secret is required to encrypt cookie" .Values.secret }}
-            # The only hard rule of auth-host mode is that the auth-host must be a subdomain of cookie-domain.
-            - --auth-host={{ .Values.hostname }}
-            - --cookie-domain={{ regexReplaceAll "^.*?([^.]+\\.[^.]+)$" "$1"}}
-            # Dex
-            {{- if ne .Values.dex.hostname "" }}
-            - --default-provider=dex
-            - --providers.dex.issuer-url=https://{{ .Values.dex.hostname }}
-            - --providers.dex.client-id={{ required "The dex.clients.traefik_forward_auth.client_id should not be empty" .Values.dex.clients.traefik_forward_auth.client_id }}
-            - --providers.dex.client-secret={{ required "dex.clients.traefik_forward_auth.secret should not be empty" .Values.dex.clients.traefik_forward_auth.secret }}
-            {{- end }}
+          env:
+            # Single host to use when returning from 3rd party auth
+            # When a user returns from authentication with a 3rd party provider they will always be forwarded to this host.
+            # The host should be specified without protocol or path
+            # This is the host mode operation, not the overlay mode
+            # https://github.com/thomseddon/traefik-forward-auth#auth-host-mode
+            - name: AUTH_HOST
+              value: {{ .Values.hostname }}
+            {{- if and (eq .Values.providers.oidc.service "dex") (eq .Values.providers.oidc.enabled)}}
+            # Issuer URL
+            - name: PROVIDERS_OIDC_ISSUER_URL
+              value: 'https://{{ .Values.dex.hostname }}'
+            # Client ID
+            - name: PROVIDERS_OIDC_CLIENT_ID
+              value: '{{ required "The dex.clients.traefik_forward_auth.client_id should not be empty" .Values.dex.clients.traefik_forward_auth.client_id }}'
+            # Client Secret
+            - name: PROVIDERS_OIDC_CLIENT_SECRET
+              value: '{{ required "dex.clients.traefik_forward_auth.secret should not be empty" .Values.dex.clients.traefik_forward_auth.secret }}'
+            {{- end}}
+            # Secret used for signing (required)
+            - name: SECRET
+              value: '{{ required "secret is required to encrypt cookie" .Values.secret }}'
+            - name: LOG_LEVEL
+              value: 'warn' # default
+            # Domain to set auth cookie on, can be set multiple times
+            - name: COOKIE_DOMAIN
+              value: '{{.Values.auth.cookie_domains}}'
+            # CSRF Cookie Name
+            - name: CSRF_COOKIE_NAME
+              value: '_forward_auth_csrf'
+            - name: COOKIE_NAME
+              value: '_forward_auth'
+            # Http?
+            - name: INSECURE_COOKIE
+              value: "false" # never
+            # Lifetime in seconds
+            - name: LIFETIME
+              value: '{{.Values.auth.cookie_lifetime}}'
+            # CallBackUrl Path
+            - name: URL_PATH
+              value: '/_oauth'
+            # Only allow given email addresses, can be set multiple times
+            - name: WHITELIST
+              value: '{{.Values.auth.whitelist_email_addresses}}'
+            # Only allow given email domains, can be set multiple times
+            - name: DOMAIN
+              value: '{{.Values.auth.whitelist_email_domains}}'
+            # Port to listen
+            - name: PORT
+              value: '{{ template "traefik-forward-auth-port" }}'

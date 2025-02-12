@@ -1,2 +1,7 @@
+# https://helm.sh/docs/chart_template_guide/helm_ignore_file/
+# helmignore does not exclude itself by default,
+helmignore
 vendor
 out
+# Don't follow charts symlinks to not create a recursion
+charts/kubee-dex/charts

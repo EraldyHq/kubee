@@ -10,5 +10,7 @@ spec:
   forwardAuth:
     address: "http://traefik-forward-auth.{{ .Values.traefik_forward_auth.namespace }}.svc.cluster.local:4181"
     authResponseHeaders:
+      # The authenticated user is set in the X-Forwarded-User header
+      # https://github.com/thomseddon/traefik-forward-auth#forwarded-headers
       - X-Forwarded-User
 {{- end }}

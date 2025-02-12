@@ -1,4 +1,5 @@
 # Expose forward-auth to the internet for OAuth initialization and callbacks.
+# https://github.com/thomseddon/traefik-forward-auth/blob/master/examples/traefik-v2/kubernetes/advanced-separate-pod/traefik-forward-auth/ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -7,12 +8,8 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    {{- if ne .Values.cert_manager.enabled false }}
+    {{- .Values.cert_manager.enabled |  required "Cert Manager is not enabled and is required"  }}
     cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuer_name }}'
-    {{- end }}
-    # While possibly unexpected, this is required for the OAuth callback to process correctly.
-    # It will never actually return a 200 so it's mostly just a protocol issue.
-    traefik.ingress.kubernetes.io/router.middlewares: '{{.Values.traefik.namespace}}-{{.Values.traefik.middlewares.forward_auth.name}}@kubernetescrd'
 spec:
   ingressClassName: traefik
   rules:
@@ -23,12 +20,10 @@ spec:
               service:
                 name: 'forward-auth'
                 port:
-                  number: 4181
+                  number: {{ template "traefik-forward-auth-port" }}
             path: /
             pathType: Prefix
-  {{- if ne .Values.cert_manager.enabled false }}
   tls:
     - hosts:
         - '{{ .Values.hostname }}'
       secretName: 'traefik-forward-auth-cert'
-  {{- end }}

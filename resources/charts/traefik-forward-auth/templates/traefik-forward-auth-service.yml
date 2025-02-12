@@ -8,4 +8,4 @@ spec:
   selector:
     app: forward-auth
   ports:
-    - port: 4181
+    - port: {{ template "traefik-forward-auth-port" }}

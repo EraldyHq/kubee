@@ -8,20 +8,40 @@ namespace: 'traefik'
 # https://github.com/thomseddon/traefik-forward-auth/issues/373
 # We use the v2.2.0 instead of the v2.3.0
 version: 'v2.2.0'
-# The hostname
-# To expose forward-auth to the internet for OAuth initialization and callbacks.
+# The hostname (mandatory)
 hostname: ''
 # Secret
-# A random value used to encrypt cookies
+# A random value used to encrypt back data such as cookies
 # Example: bc989147a1d2ff433933b39b40b9b1d0
 secret: ''
-
-
-
-
-
-
-
+# The auth providers
+providers:
+  # The default provider
+  # Values from google|oidc|generic-oauth
+  default: 'oidc'
+  # The oidc server
+  oidc:
+    enabled: false
+    # The service
+    # Dex is the only one supported now
+    # The kubee dex chart should be installed
+    service: 'dex'
+# Auth configuration
+auth:
+  # If set, the cookie is set to the domain level
+  # creating an SSO experience
+  # Comma separated of apex domain
+  # https://github.com/thomseddon/traefik-forward-auth#auth-host-mode
+  cookie_domains: ''
+  # Session Lifetime in seconds, ie cookie (12 hours)
+  cookie_lifetime: 43200
+  # Allow only given email addresses
+  # Comma separated list of emails
+  whitelist_email_addresses: ''
+  # When set, only users matching a given domain will be permitted to access.
+  # With example.com, thom@example.com would be allowed but thom@another.com would not.
+  # Comma separated list of domain
+  whitelist_email_domains: ''
 
 # Internal
 kubee_internal:

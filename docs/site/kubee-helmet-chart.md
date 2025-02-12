@@ -55,3 +55,26 @@ That's why:
 * the unit of execution is one sub-chart by umbrella chart
 * `kubee` is a common sub-chart of all umbrella chart
 
+
+## Dev: Cross dependency
+
+Cross Dependency are only used to share values.
+
+When developing a Chart, you should:
+* add them in `Chart.yml` and disable them with a condition
+```yaml
+- name: kubee-traefik-forward-auth
+  version: 0.0.1
+  alias: traefik_forward_auth
+  condition: kubee_internal.install_cross_dependency
+```
+* add them as symlink
+* add the cross-dependency sub-charts directory in the `helmignore` file to avoid symlink recursion
+
+Example: The chart `kubee-dex` depends on the `kubee-traefik-forward-auth` that depends on the `kubee-dex` chart
+creating a recursion.
+
+To avoid this recursion, add the `kubee-traefik-forward-auth/charts` in the `helmignore` file
+```ignore
+charts/kubee-traefik-forward-auth/charts
+```
