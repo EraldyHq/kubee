@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+# How it works?
+
+# This script creates:
+# a root CA private key and certificate
+# * that creates then a server key and a certificate
+
+# Signature and validation:
+# The server key is used to sign the JWT token
+# The root CA certificate is passed to Kubernetes to validate the token
+
+# See also: https://raw.githubusercontent.com/dexidp/dex/refs/heads/master/examples/k8s/gencert.sh
+
+HOSTNAME=$1 # dex.example.com
+mkdir -p ssl
+
+# Root/CA Key and Certificate
+# Create the Key
+openssl genrsa -out ssl/ca-key.pem 2048
+# Create the Certificate
+openssl req -x509 -new -nodes -key ssl/ca-key.pem -days 3650 -out ssl/ca-cert.pem -subj "/CN=dex-ca"
+
+# Server Key and Certificate
+cat << EOF > ssl/req.ini
+[req]
+req_extensions = v3_req
+distinguished_name = req_distinguished_name
+
+[req_distinguished_name]
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = $HOSTNAME
+EOF
+
+# Server Key
+openssl genrsa -out ssl/server-key.pem 2048
+# Create Request
+openssl req -new -key ssl/server-key.pem -out ssl/server-csr.pem -subj "/CN=dex-ca" -config ssl/req.ini
+# Create the certificate
+openssl x509 -req -in ssl/server-csr.pem -CA ssl/ca-cert.pem -CAkey ssl/ca-key.pem -CAcreateserial -out ssl/server-cert.pem -days 3650 -extensions v3_req -extfile ssl/req.ini
+
+
