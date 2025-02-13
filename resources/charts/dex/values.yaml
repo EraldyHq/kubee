@@ -38,7 +38,7 @@ dex:
     tag: 'v2.41.1'
   https:
     # False because it enable it with only one flag via command line and it conflicts with the configuration
-    enabled: false
+    enabled: true
   # Deployment volumes
   # as seen here: https://github.com/dexidp/dex/blob/a6dfa5ca9f9e1c819a846bd667c3c357da5252ac/examples/k8s/dex.yaml#L34
   volumeMounts:

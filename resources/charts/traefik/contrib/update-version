@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 # This script update the version and appversion of the chart
-# by selecting the
 
 source bashlib-error.sh
 error::set_strict_mode

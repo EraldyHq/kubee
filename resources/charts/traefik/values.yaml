@@ -150,7 +150,9 @@ traefik:
         entryPoint:
           to: websecure
           scheme: https
-    #websecure:
+
+      #websecure:
+      # # Use it to add trusted proxy
       # Enable X-Headers from Cloudflare
       # https://doc.traefik.io/traefik/v2.3/routing/entrypoints/#forwarded-headers
       # forwardedHeaders:

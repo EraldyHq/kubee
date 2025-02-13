@@ -2,17 +2,18 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: dex
+  name: {{ include "kubee-name-prefix" . }}
   namespace: {{.Values.namespace}}
   labels:
     app.kubernetes.io/name: dex
     app.kubernetes.io/instance: {{ .Release.Name }}
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    # traefik.ingress.kubernetes.io/router.tls: "true"
-    {{- if eq .Values.cert_manager.enabled true}}
-    cert-manager.io/cluster-issuer: {{.Values.cert_manager.issuer_name}}
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    {{- if not .Values.cert_manager.enabled }}
+    {{- fail "cert_manager should be enabled" }}
     {{- end }}
+    cert-manager.io/cluster-issuer: {{.Values.cert_manager.issuer_name}}
 spec:
   rules:
     - host: {{ .Values.hostname}}
@@ -22,7 +23,7 @@ spec:
               service:
                 name: {{ template "dex-service-name"}}
                 port:
-                  number: 5556
+                  name: https
             path: /
             pathType: Prefix
   tls:

@@ -1,4 +1,5 @@
 #!/bin/bash
+# WIP: an attempt to check the CIDR
 
 set -e
 
@@ -8,10 +9,11 @@ if [ "$#" -ne 3 ]; then
 fi
 
 # same as https://www.cloudflare.com/en-gb/ips/
-curl -s https://api.cloudflare.com/client/v4/ips | jq -r '.result.ipv4_cidrs | join("\n")' | grep -v '::/'
+EXPECTED_CIDR=$(curl -s https://api.cloudflare.com/client/v4/ips | jq -r '.result.ipv4_cidrs | join(",")')
+# | grep -v '::/'
 
-DEPLOYMENT_NAME="$1"
-CONTAINER_NAME="$2"
+DEPLOYMENT_NAME="traefik"
+CONTAINER_NAME="traefik"
 NEW_VALUE="$3"
 
 DEPLOYMENT_FILE=$(mktemp)

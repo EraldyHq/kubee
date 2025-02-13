@@ -33,7 +33,7 @@ auth:
   # You should set the CIDR value of:
   # * internal proxy such as traefik
   # * and external proxy such as cloudflare
-  trusted_proxy: []
+  trusted_proxies: []
 
 
 # email
