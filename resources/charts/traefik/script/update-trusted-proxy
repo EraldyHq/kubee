@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -e
+
+if [ "$#" -ne 3 ]; then
+  echo "Usage: $0 <deployment-name> <container-name> <new-value>"
+  exit 1
+fi
+
+# same as https://www.cloudflare.com/en-gb/ips/
+curl -s https://api.cloudflare.com/client/v4/ips | jq -r '.result.ipv4_cidrs | join("\n")' | grep -v '::/'
+
+DEPLOYMENT_NAME="$1"
+CONTAINER_NAME="$2"
+NEW_VALUE="$3"
+
+DEPLOYMENT_FILE=$(mktemp)
+kubectl get deployment "$DEPLOYMENT_NAME" -o yaml > "$DEPLOYMENT_FILE"
+
+yq eval "
+  with(.spec.template.spec.containers[] | select(.name == \"$CONTAINER_NAME\") | .args;
+    . as \$args |
+    if \$args then
+      (map(select(startswith(\"--entryPoints.web.http.redirections\")).empty) as \$not_present |
+      if \$not_present then
+        . += [\"$NEW_VALUE\"]
+      else
+        map(if startswith(\"--entryPoints.web.http.redirections\") then \"$NEW_VALUE\" else . end)
+      end)
+    else
+      [\"$NEW_VALUE\"]
+    end
+  )
+" "$DEPLOYMENT_FILE" > "$DEPLOYMENT_FILE.tmp" && mv "$DEPLOYMENT_FILE.tmp" "$DEPLOYMENT_FILE"
+
+kubectl apply -f "$DEPLOYMENT_FILE"
+
+echo "Updated deployment $DEPLOYMENT_NAME successfully"
