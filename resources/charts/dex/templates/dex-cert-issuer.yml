@@ -1,0 +1,35 @@
+# A self-signed issuer, used for settings up CA certs.
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "kubee-name-prefix" . }}-self-signed
+  namespace: {{ .Values.namespace }}
+spec:
+  selfSigned: {}
+---
+# Create the CA cert for the local-ca issuer.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "kubee-name-prefix" . }}-ca
+  namespace: {{ .Values.namespace }}
+spec:
+  {{- /* Secret Name that will store the certificate (ie private key and certificate) */}}
+  secretName: {{ include "kubee-name-prefix" . }}-ca
+  commonName: "{{ (include "kubee-to-camel-case" .Release.Name)}} {{ include "kubee-to-camel-case"  (include "kubee-prefix" .)}} Ca"
+  isCA: true
+  issuerRef:
+    kind: Issuer
+    name: {{ include "kubee-name-prefix" . }}-self-signed
+  usages:
+    - any
+---
+# A global issuer using the local CA keypair.
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "kubee-name-prefix" . }}-ca
+spec:
+  ca:
+    {{- /* Name of the certificate (ie private key and certificate) */}}
+    secretName: {{ include "kubee-name-prefix" . }}-ca

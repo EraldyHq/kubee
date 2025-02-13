@@ -12,6 +12,8 @@
 
 # See also: https://raw.githubusercontent.com/dexidp/dex/refs/heads/master/examples/k8s/gencert.sh
 
+# Note in the cert-manager doc, they use `ca.crt` in place of `ca.pem`
+
 HOSTNAME=$1 # dex.example.com
 mkdir -p ssl
 

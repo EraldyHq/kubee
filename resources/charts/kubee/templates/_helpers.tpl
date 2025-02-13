@@ -20,3 +20,10 @@ include "kubee-name-prefix" (dict "Release" .Release "Values" .Values.kubee )
 {{- printf "%s-%s" .Release.Name (include "kubee-prefix" .)  | replace "_" "-" | trunc 63 -}}
 {{- end }}
 
+
+{{- define "kubee-to-camel-case"}}
+{{- $word := . -}}
+{{- $firstUpperCaseLetter := upper (substr 0 1 $word) -}}
+{{- $restOfString := substr 1 (len $word) $word -}}
+{{- printf "%s%s" $firstUpperCaseLetter $restOfString -}}
+{{- end }}

@@ -409,15 +409,26 @@ print_values(){
               # The non-scoped dependency value file
               local SHM_DEPENDENCY_CHART_VALUES_FILE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default_non_scoped.yml"
               # In case of a symlink, the values file is in the charts directory
-              local LOCAL_DEPENDENCY_CHART_VALUES_FILE="$CHART_DIRECTORY/charts/$DEPENDENCY_CHART_NAME/values.yaml"
-              if [ -f "$LOCAL_DEPENDENCY_CHART_VALUES_FILE" ]; then
-                cp -f "$LOCAL_DEPENDENCY_CHART_VALUES_FILE" "$SHM_DEPENDENCY_CHART_VALUES_FILE"
+              local LOCAL_DEPENDENCY_CHART_PATH="$CHART_DIRECTORY/charts/$DEPENDENCY_CHART_NAME"
+              if [ -d "$LOCAL_DEPENDENCY_CHART_PATH" ]; then
+                local LOCAL_DEPENDENCY_CHART_VALUES_FILE="$LOCAL_DEPENDENCY_CHART_PATH/values.yaml"
+                if [ -f "$LOCAL_DEPENDENCY_CHART_VALUES_FILE" ]; then
+                  cp -f "$LOCAL_DEPENDENCY_CHART_VALUES_FILE" "$SHM_DEPENDENCY_CHART_VALUES_FILE"
+                else
+                  echo::warn "The dependency chart $DEPENDENCY_CHART_NAME found in charts/ has no values file"
+                  touch "$SHM_DEPENDENCY_CHART_VALUES_FILE"
+                fi
               else
-                echo::debug "Local dependency values does not exist at $LOCAL_DEPENDENCY_CHART_VALUES_FILE"
+                echo::debug "The dependency chart $DEPENDENCY_CHART_NAME was not found locally at $LOCAL_DEPENDENCY_CHART_PATH"
                 # Retrieve the value file with the show values command
                 local HELM_SHOW_VALUE_COMMAND=(
                   'helm' 'show' 'values'
                 )
+                if [ "$DEPENDENCY_CHART_REPOSITORY" == "" ]; then
+                  echo::err "The dependency chart $DEPENDENCY_CHART_NAME has no repository"
+                  echo::err "A dependency that is not in the charts/ directory should have a repository or be pullet into charts/"
+                  return 1
+                fi
                 case "$DEPENDENCY_CHART_REPOSITORY" in
                   file://.*)
                     # Local
