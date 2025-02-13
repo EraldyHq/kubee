@@ -18,6 +18,7 @@ spec:
   secretName: {{ include "kubee-name-prefix" . }}-ca
   commonName: "{{ (include "kubee-to-camel-case" .Release.Name)}} {{ include "kubee-to-camel-case"  (include "kubee-prefix" .)}} Ca"
   isCA: true
+  duration: '87600h'  # ie 3650 days, default to 90 days
   issuerRef:
     kind: Issuer
     name: {{ include "kubee-name-prefix" . }}-self-signed
