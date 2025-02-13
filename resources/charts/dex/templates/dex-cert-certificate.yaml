@@ -1,0 +1,15 @@
+# TLS certificate for the Dex service, from local certificate authority.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "kubee-name-prefix" . }}-tls
+  namespace: {{ .Values.namespace }}
+spec:
+  secretName: {{ include "kubee-name-prefix" . }}-tls
+  issuerRef:
+    kind: Issuer
+    name: {{ include "kubee-name-prefix" . }}-ca
+  dnsNames:
+    - dex
+    - dex.{{ .Values.namespace }}
+    - dex.{{ .Values.namespace }}.svc.cluster.local

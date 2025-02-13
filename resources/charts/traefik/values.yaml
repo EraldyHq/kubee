@@ -143,11 +143,13 @@ traefik:
       # return 503, needed to start stopped container with sablier
       allowEmptyServices: true
 
-  # ports: (kubee-traefik/charts/traefik/templates/_podtemplate.tpl:601:18): ERROR: redirectTo syntax has been removed in v34 of this Chart. See Release notes or EXAMPLES.md for new syntax.
-#  ports:
-#    web:
-#      redirectTo:
-#        port: websecure
+  ports:
+    web:
+      # https://doc.traefik.io/traefik/routing/entrypoints/#redirection
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
     #websecure:
       # Enable X-Headers from Cloudflare
       # https://doc.traefik.io/traefik/v2.3/routing/entrypoints/#forwarded-headers

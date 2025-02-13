@@ -3,8 +3,7 @@
 enabled: false
 # The namespace
 namespace: 'dex'
-# https://github.com/dexidp/dex/releases
-version: 'v2.41.1'
+
 # The public hostname
 # (Required as you need a callback)
 hostname: ''
@@ -32,5 +31,26 @@ kubee_internal:
 # https://github.com/dexidp/helm-charts/blob/master/charts/dex/values.yaml
 dex:
   configSecret:
-    create: true # we do it
-    name: "dex"
+    create: false # we do it
+    name: "dex-kubee-config"
+  image:
+    # https://github.com/dexidp/dex/releases
+    tag: 'v2.41.1'
+  https:
+    # False because it enable it with only one flag via command line and it conflicts with the configuration
+    enabled: false
+  # Deployment volumes
+  # as seen here: https://github.com/dexidp/dex/blob/a6dfa5ca9f9e1c819a846bd667c3c357da5252ac/examples/k8s/dex.yaml#L34
+  volumeMounts:
+    - name: tls
+      mountPath: /etc/dex/tls
+  volumes:
+    - name: tls
+      secret:
+        secretName: dex-kubee-tls
+  serviceMonitor:
+    enabled: true
+  networkPolicy:
+    enabled: true
+
+

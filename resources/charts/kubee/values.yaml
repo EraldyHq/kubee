@@ -28,7 +28,12 @@ auth:
     # * alert notifications: prometheus, argocd
     email: ''
 
-
+  # Trusted Proxy
+  # If trusted, reverse_proxy handler will proxy and augment the sensitive X-Forwarded-* request headers.
+  # You should set the CIDR value of:
+  # * internal proxy such as traefik
+  # * and external proxy such as cloudflare
+  trusted_proxy: []
 
 
 # email

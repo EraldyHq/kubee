@@ -5,7 +5,7 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: {{.Values.middlewares.forward_auth.name }}
-  namespace: {{ x.Values.namespace }}
+  namespace: {{ .Values.namespace }}
 spec:
   forwardAuth:
     {{- /* For info: Authentik supports forward auth https://docs.goauthentik.io/docs/add-secure-apps/providers/proxy/server_traefik*/}}
