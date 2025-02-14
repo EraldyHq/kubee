@@ -3,7 +3,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: traefik-forward-auth
+  name: {{ include "kubee-name-prefix" . }}
   namespace: {{ .Values.namespace }}
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -11,6 +11,10 @@ metadata:
     {{- if not .Values.cert_manager.enabled }}
     {{-  fail "Cert Manager is not enabled and is required"  }}
     {{- end }}
+    {{- /* While possibly unexpected, this is required for the OAuth callback to process correctly */}}
+    {{- /* Otherwise it will request auth for itself   */}}
+    {{- /* Ref https://github.com/coderanger/traefik-forward-auth-dex/blob/da8fd51cd49c3c22b4746c9918bb06c9bf7def8b/forward-auth.yml#L61C5-L63C93  */}}
+    {{- /* traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.namespace}}-{{ .Values.traefik.middlewares.forward_auth.name }}@kubernetescrd'*/}}
     cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuer_name }}'
 spec:
   ingressClassName: traefik
@@ -20,7 +24,7 @@ spec:
         paths:
           - backend:
               service:
-                name: 'forward-auth'
+                name: {{.Values.service}}
                 port:
                   number: {{ template "traefik-forward-auth-port" }}
             path: /

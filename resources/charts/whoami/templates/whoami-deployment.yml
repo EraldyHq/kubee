@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: '{{ include "whoami-name" . }}'
-  namespace: '{{ .Release.Namespace }}'
+  namespace: '{{ .Values.namespace }}'
   labels:
     app.kubernetes.io/name: '{{ .Release.Name }}'
 spec:

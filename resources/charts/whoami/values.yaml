@@ -1,0 +1,14 @@
+# Enabled
+enabled: false
+# Namespace
+namespace: 'whoami'
+
+# List of hostnames
+# Why an array? because you can create 2 names:
+# * a proxied hostname (such as cloudflare)
+# * a direct name (no proxy)
+hostnames: []
+
+# If true, the traefik authentication middleware is applied
+auth: false
+

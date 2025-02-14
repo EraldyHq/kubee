@@ -4,12 +4,8 @@
 synopsis(){
   cat <<EOF
 \`\`\`bash
-$(basename "$0") [-n|--namespace namespaceName] [helm args]
+$(basename "$0") helm args
 \`\`\`
-
-where:
-
-* \`-n|--namespace\` specifies the \`namespace\` default to \`KUBEE_APP_NAMESPACE\` or \`KUBEE_DEFAULT_NAMESPACE\` and ultimately to \`default\`.
 
 EOF
 }
@@ -22,39 +18,21 @@ fi
 args=("$@")
 
 # Parsing
-KUBEE_APP_NAMESPACE=${KUBEE_APP_NAMESPACE:-}
-COMMAND=""
 while [[ $# -gt 0 ]]
 do
    case  "$1" in
-    -n|--namespace)
-      shift
-      if [ "${1:-}" == "" ]; then
-        echo::err "The -n or --namespace flag expects a value"
-        exit 1
-      fi
-      KUBEE_APP_NAMESPACE="$1"
-      ;;
-    --all-namespaces)
-      # The created kubeconfig needs a namespace
-      # In a all-namespace query we set it to default
-      KUBEE_APP_NAMESPACE="default"
-      ;;
-    *)
-      if [ "$COMMAND" == "" ]; then
-        COMMAND=$1
-      fi
+    --help|-h)
+      helm --help
+      echo::echo ""
+      echo::echo "kubee helm allows also kubee global flag such as cluster"
+      echo::echo "ie"
+      echo::echo "kubee --cluster cluster_name helm ..."
+      exit 0
       ;;
    esac
    shift
 done
 
-# With Helm, if the namespace is not specified, it defaults to `default`
-if [ "$KUBEE_APP_NAMESPACE" == "" ] && [[ "$COMMAND" =~ install|uninstall ]]; then
-  doc::help synopsis
-  echo::err "The app namespace should be specified for install and uninstall"
-  exit 1
-fi
 
 kubee::set_kubeconfig_env
 helm "${args[@]}"

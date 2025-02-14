@@ -2,10 +2,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: forward-auth
+  name: {{.Values.service}}
   namespace: {{.Values.namespace}}
 spec:
   selector:
-    app: forward-auth
+    app.kubernetes.io/name: traefik-forward-auth
+    app.kubernetes.io/instance: {{.Release.Name}}
   ports:
     - port: {{ template "traefik-forward-auth-port" }}

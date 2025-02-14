@@ -14,7 +14,8 @@ https://helm.sh/docs/chart_template_guide/named_templates/#declaring-and-using-t
 {{/*
 Return a name prefix created from the release
 Usage in a sub-chart
-include "kubee-name-prefix" (dict "Release" .Release "Values" .Values.kubee )
+include "kubee-name-prefix" .
+include "kubee-name-prefix" (dict "Release" $.Release )
 */}}
 {{- define "kubee-name-prefix" }}
 {{- printf "%s-%s" .Release.Name (include "kubee-prefix" .)  | replace "_" "-" | trunc 63 -}}
@@ -27,3 +28,11 @@ include "kubee-name-prefix" (dict "Release" .Release "Values" .Values.kubee )
 {{- $restOfString := substr 1 (len $word) $word -}}
 {{- printf "%s%s" $firstUpperCaseLetter $restOfString -}}
 {{- end }}
+
+{{/* Return the apex domain */}}
+{{- define "kubee-get-apex-domain"}}
+{{- $name := . -}}
+{{- regexReplaceAll "^(.*\\.)?([^.]+\\.[^.]+)$" $name "$2" }}
+{{- end }}
+
+

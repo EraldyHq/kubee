@@ -6,29 +6,35 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: '{{ include "whoami-name" . }}'
-  namespace: '{{ .Release.Namespace }}'
+  namespace: '{{ .Values.namespace }}'
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    {{- if ne (((.Values.kubee).cert_manager).enabled) false }}
-    cert-manager.io/cluster-issuer: '{{ .Values.kubee.cert_manager.defaultIssuerName }}'
+    {{- if .Values.auth }}
+    traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.traefik.namespace }}-{{ .Values.traefik.auth.middleware_name }}@kubernetescrd'
+    {{- end }}
+    {{- if ne .Values.cert_manager.enabled false }}
+    cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuer_name }}'
     {{- end }}
 spec:
   rules:
-    - host: '{{ .Values.kubee.whoami.hostname }}'
+    {{- range $hostname := .Values.hostnames }}
+    - host: '{{ $hostname }}'
       http:
         paths:
           - backend:
               service:
-                name: '{{ include "whoami-name" . }}'
+                name: '{{ include "whoami-name" (dict "Release" $.Release ) }}'
                 port:
                   number: 80
             path: /
             pathType: Prefix
+    {{- end }}
   {{- if ne (((.Values.kubee).cert_manager).enabled) false }}
   tls:
+    {{- range $i, $hostname := .Values.hostnames }}
     - hosts:
-        - '{{ .Values.kubee.whoami.hostname }}'
-      secretName: '{{ include "whoami-name" . }}'
+        - '{{ $hostname }}'
+      secretName: '{{ include "whoami-name" (dict "Release" $.Release ) }}-{{ $i }}'
+    {{- end }}
   {{- end }}
----

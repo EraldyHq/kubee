@@ -24,5 +24,10 @@ appVersion: "v1.10.3" # Whoami version
 dependencies:
   - name: kubee
     version: 0.0.1
-    repository: file://../kubee
     alias: kubee
+  - name: kubee-cert-manager
+    version: 0.0.1
+    alias: cert_manager
+  - name: kubee-traefik
+    version: 0.0.1
+    alias: traefik

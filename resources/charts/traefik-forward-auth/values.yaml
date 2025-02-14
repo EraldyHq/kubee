@@ -1,18 +1,20 @@
 # Enabled
 enabled: false
-# Installation Namespace
-namespace: 'traefik'
+# Installation Namespace (same as traefik)
+namespace: 'kube-system'
+# The hostname (mandatory) for external dns access for callback by providers such as dex
+hostname: ''
+# Service name for internal dns access by the traefik middleware
+service: 'traefik-forward-auth'
 # Docker Hub Version
 # https://hub.docker.com/r/thomseddon/traefik-forward-auth/tags
 # Unfortunately, the last release is not on Docker
 # https://github.com/thomseddon/traefik-forward-auth/issues/373
 # We use the v2.2.0 instead of the v2.3.0
 version: 'v2.2.0'
-# The hostname (mandatory)
-hostname: ''
 # Auth Parameters
 auth:
-  # Secret: A random value used to sign cookies
+  # Secret Mandatory: A random value used to sign cookies
   # Example command : openssl rand -base64 32
   # Example value   : bc989147a1d2ff433933b39b40b9b1d0
   cookie_secret: ''

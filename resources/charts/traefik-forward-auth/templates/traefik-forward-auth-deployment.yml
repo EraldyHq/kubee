@@ -10,12 +10,12 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: forward-auth
+      app.kubernetes.io/name: traefik-forward-auth
       app.kubernetes.io/instance: {{.Release.Name}}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: forward-auth
+        app.kubernetes.io/name: traefik-forward-auth
         app.kubernetes.io/instance: {{.Release.Name }}
     spec:
       terminationGracePeriodSeconds: 60
@@ -54,7 +54,9 @@ spec:
               value: 'warn' # default
             # Domain to set auth cookie on, can be set multiple times
             - name: COOKIE_DOMAIN
-              value: '{{.Values.auth.cookie_domains}}'
+              {{- /* Domain of the hostname should be in the cookie domain */}}
+              {{- /* See https://github.com/thomseddon/traefik-forward-auth/issues/65#issuecomment-526947137 */}}
+              value: '{{ include "kubee-get-apex-domain" .Values.dex.hostname }},{{.Values.auth.cookie_domains}}'
             # CSRF Cookie Name
             - name: CSRF_COOKIE_NAME
               value: '_forward_auth_csrf'
