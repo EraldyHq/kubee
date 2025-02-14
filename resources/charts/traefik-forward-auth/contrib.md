@@ -1,5 +1,15 @@
 
 
+## Auth Host mode
+
+Two criteria must be met for an auth-host to be used:
+* Request matches given `cookie-domain`
+* `auth-host` is also subdomain of same cookie-domain
+
+In the other mode, you need to register in Dex all callback `redirect_uri`.
+* ie https://traefik-bcf52bfa.nip.io/_oauth
+* ie https://prometheus-bcf52bfa.nip.io/_oauth
+
 ## Setup
 
 ```bash

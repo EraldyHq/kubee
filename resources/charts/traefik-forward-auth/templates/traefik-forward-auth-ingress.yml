@@ -1,3 +1,4 @@
+{{- if ne .Values.hostname '' }}
 # Expose forward-auth to the internet for OAuth initialization and callbacks.
 # https://github.com/thomseddon/traefik-forward-auth/blob/master/examples/traefik-v2/kubernetes/advanced-separate-pod/traefik-forward-auth/ingress.yaml
 apiVersion: networking.k8s.io/v1
@@ -11,10 +12,10 @@ metadata:
     {{- if not .Values.cert_manager.enabled }}
     {{-  fail "Cert Manager is not enabled and is required"  }}
     {{- end }}
-    {{- /* While possibly unexpected, this is required for the OAuth callback to process correctly */}}
+    {{- /* In Auth Host mode, this is required so that it does not redirect a call to the hostname to the identity provider */}}
     {{- /* Otherwise it will request auth for itself   */}}
-    {{- /* Ref https://github.com/coderanger/traefik-forward-auth-dex/blob/da8fd51cd49c3c22b4746c9918bb06c9bf7def8b/forward-auth.yml#L61C5-L63C93  */}}
-    {{- /* traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.namespace}}-{{ .Values.traefik.middlewares.forward_auth.name }}@kubernetescrd'*/}}
+    {{- /* Credit https://github.com/coderanger/traefik-forward-auth-dex/blob/da8fd51cd49c3c22b4746c9918bb06c9bf7def8b/forward-auth.yml#L61C5-L63C93  */}}
+    traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.namespace}}-{{ .Values.traefik.middlewares.forward_auth.name }}@kubernetescrd'
     cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuer_name }}'
 spec:
   ingressClassName: traefik
@@ -33,3 +34,4 @@ spec:
     - hosts:
         - '{{ .Values.hostname }}'
       secretName: 'traefik-forward-auth-cert'
+{{- end }}

@@ -25,6 +25,8 @@ spec:
           ports:
             - containerPort: 4181
           env:
+            {{- if ne .Values.hostname ''}}
+            # Auth Host Mode
             # Single host to use when returning from 3rd party auth
             # When a user returns from authentication with a 3rd party provider they will always be forwarded to this host.
             # The host should be specified without protocol or path
@@ -32,6 +34,7 @@ spec:
             # https://github.com/thomseddon/traefik-forward-auth#auth-host-mode
             - name: AUTH_HOST
               value: {{ .Values.hostname }}
+            {{- end }}
             {{- if ne .Values.dex.enabled true}}
             {{- fail "Dex should be enabled" }}
             {{- end}}
@@ -51,12 +54,14 @@ spec:
             - name: SECRET
               value: '{{ required "the traefik-forward-auth.auth.cookie_secret is required" .Values.auth.cookie_secret }}'
             - name: LOG_LEVEL
-              value: 'warn' # default
+              value: '{{.Values.log.level}}'
+            - name: LOG_FORMAT
+              value: '{{.Values.log.format}}'
             # Domain to set auth cookie on, can be set multiple times
             - name: COOKIE_DOMAIN
               {{- /* Domain of the hostname should be in the cookie domain */}}
               {{- /* See https://github.com/thomseddon/traefik-forward-auth/issues/65#issuecomment-526947137 */}}
-              value: '{{ include "kubee-get-apex-domain" .Values.dex.hostname }},{{.Values.auth.cookie_domains}}'
+              value: '{{if ne .Values.hostname ''}}{{ include "kubee-get-apex-domain" .Values.hostname }},{{end}}{{.Values.auth.cookie_domains}}'
             # CSRF Cookie Name
             - name: CSRF_COOKIE_NAME
               value: '_forward_auth_csrf'
@@ -73,7 +78,7 @@ spec:
               value: '/_oauth'
             # Only allow given email addresses, can be set multiple times
             - name: WHITELIST
-              value: '{{.Values.auth.whitelist_email_addresses}}'
+              value: '{{.Values.kubee.auth.admin_user.email}},{{.Values.auth.whitelist_email_addresses}}'
             # Only allow given email domains, can be set multiple times
             - name: DOMAIN
               value: '{{.Values.auth.whitelist_email_domains}}'

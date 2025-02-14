@@ -4,7 +4,22 @@
 This kubee chart will install [traefik-forward-auth](https://github.com/thomseddon/traefik-forward-auth).
 to forward ingress authentication to [dex](../dex/README.md)
 
-# Installation Steps
+## Mode
+
+`Traefik Forward Auth` works in [2 modes](https://github.com/thomseddon/traefik-forward-auth#operation-modes)
+* the `auth host mode` where:
+  * The `Traefik Forward Auth` has a hostname `name.apex.tld`
+  * All protected apps should have the same apex domain `apex.tld` as the hostname
+* the `overlay mode`, where you need to register in Dex all protected apps (ie callback `redirect_uri`) ie
+  * `traefik.xxx.tld`
+  * `prometheus.xxx.tld`
+  * `alertmanager.xxx.tld`
+  * ...
+
+This chart uses the `auth host mode` if the hostname is not empty.
+
+
+# Installation Steps for the Auth Host Mode
 
 * The following chart should be enabled and installed:
   * [dex chart](../dex/README.md) 
@@ -15,7 +30,8 @@ to forward ingress authentication to [dex](../dex/README.md)
 ```yaml
 traefik_forward_auth:
   enabled: true
-  # The callback hostname
+  # For Host mode, the callback hostname (All protected apps should have the same apex domain)
+  # https://github.com/thomseddon/traefik-forward-auth#auth-host-mode
   hostname: 'forward-auth.example.com'
   auth:
     # The encryption secret
@@ -40,3 +56,5 @@ auth:
   * [Prometheus](../prometheus/README.md) for the web app
   * [Alert manager](../alertmanager/README.md) for the web app
   * ...
+
+

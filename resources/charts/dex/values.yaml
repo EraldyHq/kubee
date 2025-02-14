@@ -17,8 +17,16 @@ connectors: []
 clients:
   # Traefik Forward Auth
   traefik_forward_auth:
+    # The oidc client id
     client_id: 'traefik-forward-auth'
+    # The oidc client secret (used to exchange the code between traefik_forward_auth and dex)
     secret: ''
+    # app_domains: the app domains (without https) of the protected apps
+    # This value is only mandatory when traefik_forward_auth has no hostname
+    # ie when traefik_forward_auth is not in auth-host mode, but in overlay mode
+    # https://github.com/thomseddon/traefik-forward-auth#auth-host-mode
+    # In this case, all overloaded web app should be listed as authorized redirect uris
+    app_domains: []
   # Other client
   # https://dexidp.io/docs/guides/using-dex/#configuring-your-app
   others: []

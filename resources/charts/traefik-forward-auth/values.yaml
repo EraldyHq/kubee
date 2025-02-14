@@ -2,7 +2,10 @@
 enabled: false
 # Installation Namespace (same as traefik)
 namespace: 'kube-system'
-# The hostname (mandatory) for external dns access for callback by providers such as dex
+# The hostname for external dns access for callback by providers such as dex
+# If this value is not null, traefik-forward-auth is implemented in host mode
+# meaning that all apps should be under the same apex domain
+# https://github.com/thomseddon/traefik-forward-auth#auth-host-mode
 hostname: ''
 # Service name for internal dns access by the traefik middleware
 service: 'traefik-forward-auth'
@@ -32,6 +35,15 @@ auth:
   # With example.com, thom@example.com would be allowed but thom@another.com would not.
   # Comma separated list of domain
   whitelist_email_domains: ''
+
+# Log for debugging
+log:
+  # The log level
+  # trace|debug|info|warn|error|fatal|panic
+  level: 'warn'
+  # format
+  # text|json|pretty
+  format: 'text'
 
 # Auth configuration
 # Internal
