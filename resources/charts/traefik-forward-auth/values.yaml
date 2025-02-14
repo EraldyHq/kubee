@@ -10,24 +10,12 @@ namespace: 'traefik'
 version: 'v2.2.0'
 # The hostname (mandatory)
 hostname: ''
-# Secret
-# A random value used to encrypt back data such as cookies
-# Example: bc989147a1d2ff433933b39b40b9b1d0
-secret: ''
-# The auth providers
-providers:
-  # The default provider
-  # Values from google|oidc|generic-oauth
-  default: 'oidc'
-  # The oidc server
-  oidc:
-    enabled: false
-    # The service
-    # Dex is the only one supported now
-    # The kubee dex chart should be installed
-    service: 'dex'
-# Auth configuration
+# Auth Parameters
 auth:
+  # Secret: A random value used to sign cookies
+  # Example command : openssl rand -base64 32
+  # Example value   : bc989147a1d2ff433933b39b40b9b1d0
+  cookie_secret: ''
   # If set, the cookie is set to the domain level
   # creating an SSO experience
   # Comma separated of apex domain
@@ -43,6 +31,7 @@ auth:
   # Comma separated list of domain
   whitelist_email_domains: ''
 
+# Auth configuration
 # Internal
 kubee_internal:
   install_cross_dependency: false

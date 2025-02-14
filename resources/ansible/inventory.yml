@@ -49,7 +49,7 @@ k3s_cluster:
     #
     # The token should be a random string of reasonable length. You can generate
     # one with the following commands:
-    # - openssl rand -base64 64 | tr '\n' ''
+    # - openssl rand -base64 64 | tr -d '\n'
     # - pwgen -s 64 1
     # - head -c 16 /dev/urandom | od -An -t x | tr -d ' '
     #

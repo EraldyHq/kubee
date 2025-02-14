@@ -21,9 +21,11 @@ version: 0.0.1
 appVersion: "34.3.0" # Traefik Version
 
 dependencies:
+  - name: kubee
+    version: 0.0.1
+    alias: kubee
   - name: kubee-dex
     version: 0.0.1
-    #repository: file://../grafana
     alias: dex
     condition: kubee_internal.install_cross_dependency
 

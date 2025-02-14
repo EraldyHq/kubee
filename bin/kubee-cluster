@@ -21,6 +21,9 @@ inventory_file(){
        return 1
      fi
 
+     # Default to root
+     export KUBEE_CLUSTER_SERVER_CONNECTION_USER=${KUBEE_CLUSTER_SERVER_CONNECTION_USER:-root}
+
      # k3s version
      # https://github.com/k3s-io/k3s/releases
      export KUBEE_CLUSTER_K3S_VERSION=${KUBEE_CLUSTER_K3S_VERSION:-"v1.32.0+k3s1"}

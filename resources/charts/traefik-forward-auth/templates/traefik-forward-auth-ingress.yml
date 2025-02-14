@@ -8,12 +8,14 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    {{- .Values.cert_manager.enabled |  required "Cert Manager is not enabled and is required"  }}
+    {{- if not .Values.cert_manager.enabled }}
+    {{-  fail "Cert Manager is not enabled and is required"  }}
+    {{- end }}
     cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuer_name }}'
 spec:
   ingressClassName: traefik
   rules:
-    - host: '{{ required "The forward-auth hostname is required" .Values.hostname }}'
+    - host: '{{ required "The traefik-forward-auth hostname is required" .Values.hostname }}'
       http:
         paths:
           - backend:

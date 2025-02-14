@@ -9,19 +9,19 @@ namespace: 'dex'
 hostname: ''
 
 # connectors
-connectors:
-  # https://dexidp.io/docs/connectors/github/
-  github:
-    client_id: ''
-    client_secret: ''
-    # List of orgs that may connect
-    orgs: []
+# https://dexidp.io/docs/connectors
+connectors: []
 
-# Client
+# Clients
+# https://dexidp.io/docs/guides/using-dex/#configuring-your-app
 clients:
+  # Traefik Forward Auth
   traefik_forward_auth:
     client_id: 'traefik-forward-auth'
-    secret: '' # shared secret mandatory
+    secret: ''
+  # Other client
+  # https://dexidp.io/docs/guides/using-dex/#configuring-your-app
+  others: []
 
 # Internal don't change
 kubee_internal:

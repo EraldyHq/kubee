@@ -4,8 +4,10 @@
 
 ```bash
 mkdir "charts"
-ln -s $(realpath ../traefik) charts/kubee-traefik
-ln -s $(realpath ../dex) charts/kubee-dex
+ln -s $(realpath ../kubee) charts/kubee
+mkdir "charts/kubee-dex"
+ln -s $(realpath ../dex/Chart.yaml) charts/kubee-dex/Chart.yaml
+ln -s $(realpath ../dex/values.yaml) charts/kubee-dex/values.yaml
 ```
 
 ## Ref
