@@ -1,0 +1,18 @@
+{
+  "name": "Dev Container for Bash, Ansible, yq, and kubectl",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/ansible:2": {},
+    "ghcr.io/devcontainers/features/kubectl:2": {}
+  },
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y yq",
+  "extensions": [
+    "ms-kubernetes-tools.vscode-kubernetes-tools",
+    "ms-azuretools.vscode-docker",
+    "redhat.ansible"
+  ],
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
+  "remoteUser": "vscode"
+}
