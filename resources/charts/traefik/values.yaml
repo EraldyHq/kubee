@@ -35,6 +35,7 @@ auth:
   # That's applied for internal web app (such as Traefik Dashboard, Prometheus, Alert Manager, ...)
   # The app or api endpoints are still available from an internal container
   # The supported auth are basic-auth and forward-auth
+  # Before changing to forward-auth, you should test it with the whoami chart
   middleware_name: 'basic-auth'
   # Private Network ranges
   # used for Ingress Ip restrictions (Traefik IpAllowList)

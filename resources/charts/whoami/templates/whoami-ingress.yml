@@ -10,8 +10,8 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    {{- if .Values.auth }}
-    traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.traefik.namespace }}-{{ .Values.traefik.auth.middleware_name }}@kubernetescrd'
+    {{- if .Values.auth_middleware }}
+    traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.traefik.namespace }}-{{ .Values.auth_middleware }}@kubernetescrd'
     {{- end }}
     {{- if ne .Values.cert_manager.enabled false }}
     cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuer_name }}'

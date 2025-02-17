@@ -3,23 +3,35 @@
 ## About
 A Kubee Chart installation of [Oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/installation)
 configured as:
-* a middleware to add authentication with Traefik forward auth.
-* with [Dex](../dex/README.md)
+* an authentication middleware to apply a Traefik forward auth rule
+* with [Dex](../dex/README.md) as auth provider
 
 
-![](https://oauth2-proxy.github.io/oauth2-proxy/assets/images/simplified-architecture-2a6ee6443dc78a5a28dfdb49f07f981e.svg)
+## Installation Steps
 
-## Installation
-
-* [Dex](../dex/README.md) should be installed first as Oauth2 Proxy needs get the reach the Dex discovery endpoint to start
-
-
-
-## Support
-
-### failed to verify certificate: x509
-
-Dex should be installed first so that it got a valid certificate and not the default one of Traefik
+* [Dex](../dex/README.md) should be installed first as Oauth2 Proxy needs to reach the Dex discovery endpoint to start
+* Minimal Cluster Values files
+```yaml
+oauth2_proxy:
+  enabled: true
+  hostname: 'oauth2-xxx.nip.io'
+  auth:
+    cookie_secret: '${KUBE_OAUTH2_COOKIE_SECRET}'
 ```
-certificate is valid for ff5fc57a51876b3c153c91cf9855aa80.5598babb9dff56b78b2b0ccea0e125ea.traefik.default, not dex-xxx.nip.io
+* Play
+```bash
+kubee --clustert clusterName helmet play oauth2-proxy
 ```
+* Test:
+  * Dex Integration: 
+    * Go to https://oauth2-proxy-hostname 
+    * Try to authenticate. 
+    * The flow should go through and you should see `Authenticated`
+  * Forward Auth Configuration: 
+    * Apply on the [whoami](../whoami/README.md) chart the `forward-auth` middleware.
+    * Try to reach the whoami hostname
+
+
+## Contrib
+
+[Contrib](contrib/contrib.md)

@@ -10,5 +10,5 @@ namespace: 'whoami'
 hostnames: []
 
 # If true, the traefik authentication middleware is applied
-auth: false
+auth_middleware: 'forward-auth'
 

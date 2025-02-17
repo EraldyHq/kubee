@@ -1,8 +1,8 @@
-# Cert Manager Sub-Chart
+# Kubee Cert Manager Chart
 
 
 ## About
-This `chart` will install `cert-manager` with:
+This `kubee chart` will install `cert-manager` with:
 * letsencrypt as ACME server
 * optional cloudflare as DNS server
 
@@ -28,11 +28,11 @@ In your helm values file, set the following [kubee values](../kubee/values.yaml)
 
 ```yaml
 kubee:
-  cluster:
-    adminUser:
+  auth:
+    admin_user:
       email: 'foo@bar.com'
-  cert_manager:
-    enabled: true
+cert_manager:
+  enabled: true
 ```
 
 ### Optional: Get the Cloudflare Api Key
@@ -47,10 +47,9 @@ kubee:
     * Zone Resources :
         * Include - All Zones
 
-Set it cloudflare properties in your [values file](../kubee/values.yaml)
+Set it cloudflare properties in your [values file](values.yaml)
 ```yaml
-kubee:
-  cert_manager:
+cert_manager:
     dns01:
         cloudflare:
           # See cert-manager/README.md on how to get cloudflare api key
@@ -64,36 +63,18 @@ kubee:
 ### Deploy
 
 ```bash
-kubee-cluster install cert-manager
+kubee --cluster clusterName helmet play cert-manager
 ```
 
-### Create a certificate
 
-
-```yml
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: 'cert-name'
-  namespace: 'app-namespace'
-spec:
-  secretName: 'secret-name' # the secret created to store the signed certificate and the private key
-  dnsNames:
-    - 'name.my-apex-domain.com' # the SAN
-  issuerRef:
-    kind: ClusterIssuer
-    name: 'letsencrypt-staging' # then letsencrypt-prod
-```
-
-### Change the default
+### Change the default issuer
 
 If a certificate was issued with `letsencrypt-staging`, you should change the default issuer to `letsencrypt-prod`
-in the [kubee values](../kubee/values.yaml)
+in the [cluster values file](../../../docs/site/cluster-values.md)
 
 ```yaml
-kubee:
-  cert_manager:
-    defaultIssuerName: 'letsencrypt-prod'
+cert_manager:
+  issuer_name: 'letsencrypt-prod'
 ```
 
 
@@ -121,52 +102,6 @@ https://dashbord.example.com/#/customresourcedefinition/clusterissuers.cert-mana
 
 
 
-
-
-    
-## How to
-
-### How to use it with Traefik
-
-Guide:
-* [Traefik and Cert manager](https://doc.traefik.io/traefik/user-guides/cert-manager/)
-
-Routing (Annotation):
-* [Ingress](https://doc.traefik.io/traefik/routing/providers/kubernetes-ingress/)
-* [Ingress Route](https://doc.traefik.io/traefik/routing/providers/kubernetes-crd/)
-
-Providers (Configuration Discovery):
-* [Ingress](https://doc.traefik.io/traefik/providers/kubernetes-ingress/)
-* [Ingress Route](https://doc.traefik.io/traefik/providers/kubernetes-crd/)
-
-
-### How to debug
-
-https://cert-manager.io/docs/troubleshooting/acme/
-
-## FAQ
-
-### Why not cert with Traefik Ingress ?
-
-* No ingress dependence
-* We can use the cert inside a pod to serve https
-* We have the whole order to be able to debug
-* We can monitor the certs and be alerted
-* HA only setup - Traefik does not share certificate between instance
-
-### Default cert, what happens if the secret name is omitted in an ingress?
-
-If the `secretName` is omitted in an `Ingress`, the `Ingress controller`
-will use its default certificate.
-
-* For traefik, [TLS default certificate](https://doc.traefik.io/traefik/https/tls/#default-certificate)
-
-
-If the default certificate is not the logic that you want, 
-you can use [Kyverno to set a default based on condition](https://cert-manager.io/docs/tutorials/certificate-defaults/)
-
-* [Tuto](https://cert-manager.io/docs/devops-tips/syncing-secrets-across-namespaces/#serving-a-wildcard-to-ingress-resources-in-different-namespaces-default-ssl-certificate)
-
 ### Where are the Private Key Registration stored?
 
 The generated client registration private key is stored in a Secret with the same name
@@ -177,47 +112,4 @@ as the issuer with `letsencrypt`, ie
 
 ## Contrib / Dev
 
-* Download dependency:
-```bash
-helm dependency build
-```
-* Verify
-```bash
-helm lint
-helm template -s templates/cluster-issuer-acme.yaml .
-helm template . --values=myvalues.yaml --show-only charts/(chart alias)/templates/deployment.yaml
-```
-* Install
-```bash
-# namespace is hardcoded in the value.yaml
-# KUBEE_APP_NAMESPACE=cert-manager
-helm upgrade --install -n $KUBEE_APP_NAMESPACE --create-namespace cert-manager .
-# with kubee
-kubee-helm upgrade --install --create-namespace cert-manager .
-```
-
-
-### JsonNet Prometheus Mixin
-
-Local:
-```bash
-cd cert-manager
-jb update
-jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/prometheusRule.jsonnet"))'
-jsonnet -J vendor -S -e 'std.manifestYamlDoc((import "jsonnet/grafanaDashboard.jsonnet"))'
-```
-
-End-to-end Test:
-```bash
-kubee- \
-  --cluster kubee-ssh \
-  template \
-  cert-manager \
-  | grep "cert-manager-mixin-alert-rules" -B 3 -A 30
-```
-
-### Why not ingress traefik cert?
-
-Cert-Manager supports HA setups without requiring you to use the enterprise version of the ingress.
-
-For example, Traefik CE (community edition) is stateless, and it's not possible to run multiple instances of Traefik CE with LetsEncrypt enabled. 
+See [contrib](contrib/contrib.md)

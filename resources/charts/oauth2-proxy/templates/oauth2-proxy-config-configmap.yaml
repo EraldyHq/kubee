@@ -44,9 +44,10 @@ data:
     set_authorization_header = true
 
     # Tls
-    # force_https = true - Cert are mandatory
-    # tls-cert-file=/path/to/cert.pem
-    # tls-key-file=/path/to/cert.key
+    # To force https, certs are mandatory
+    force_https = true
+    tls_cert_file = "/etc/oauth2-proxy/tls/tls.crt"
+    tls_key_file = "/etc/oauth2-proxy/tls/tls.key"
 
     # Cookie
     cookie_expire = "{{.Values.auth.cookie_expire}}"
@@ -60,4 +61,5 @@ data:
     provider_display_name = "Kubee Dex"
     oidc_issuer_url = "https://{{required "dex.hostname is required" .Values.dex.hostname}}"
     # populate login_url, redeem_url, and oidc_jwks_url using https://{{.Values.dex.hostname}}/.well-known/openid-configuration
+    # dex needs to be up otherwise the pod does not start
     skip_oidc_discovery = false

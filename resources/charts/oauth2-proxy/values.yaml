@@ -28,12 +28,13 @@ auth:
 # Oauth proxy helm values
 # https://github.com/oauth2-proxy/manifests/blob/main/helm/oauth2-proxy/values.yaml
 oauth2-proxy:
-  httpScheme: https
   config:
     # We use our own secret
-    existingSecret: oauth2-proxy
+    # The secret name
+    existingSecret: oauth2-proxy-config
     # We use our own config
-    existingConfig: oauth2-proxy
+    # the configmap name
+    existingConfig: oauth2-proxy-config
   # To set the name of objects
   fullnameOverride: 'oauth2-proxy'
   # To set the name of labels
@@ -60,6 +61,20 @@ oauth2-proxy:
   # Local User
   htpasswdFile:
     enabled: false # Dex or the oidc is having a list of user
+  # Tls
+  # https://github.com/oauth2-proxy/manifests/tree/main/helm/oauth2-proxy#tls-configuration
+  httpScheme: https
+  # Args are in config map
+  #extraArgs:
+  #  tls-cert-file: /etc/oauth2-proxy/tls/cert.pem
+  #  tls-key-file: /etc/oauth2-proxy/tls/cert.key
+  extraVolumeMounts:
+    - name: tls
+      mountPath: /etc/oauth2-proxy/tls
+  extraVolumes:
+    - name: tls
+      secret:
+        secretName: oauth2-proxy-kubee-tls-ca
 
 # Tweak to not output the template of the kubee cross-dependency chart
 # in the prometheus release

@@ -23,3 +23,13 @@ helm pull https://github.com/oauth2-proxy/manifests/releases/download/oauth2-pro
 
 Dex Config: https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/openid_connect
 Example: https://github.com/oauth2-proxy/oauth2-proxy/tree/master/contrib/local-environment/kubernetes
+
+
+## Support
+
+### failed to verify certificate: x509
+
+Dex should be installed first so that it got a valid certificate and not the default one of Traefik
+```
+certificate is valid for ff5fc57a51876b3c153c91cf9855aa80.5598babb9dff56b78b2b0ccea0e125ea.traefik.default, not dex-xxx.nip.io
+```
