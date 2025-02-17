@@ -1,7 +1,10 @@
+{{- if eq .Values.middlewares.forward_auth.service "traefik-forward-auth" }}
 # Forward authentication Middleware
 # Traefik Doc: https://doc.traefik.io/traefik/middlewares/http/forwardauth/#configuration-examples
 # Based on the traefik_forward_auth example: https://github.com/thomseddon/traefik-forward-auth/blob/master/examples/traefik-v2/kubernetes/advanced-separate-pod/traefik-forward-auth/middleware.yaml
-# For info: Authentic supports forward auth https://docs.goauthentik.io/docs/add-secure-apps/providers/proxy/server_traefik
+# For info:
+#  * Authentic supports forward auth https://docs.goauthentik.io/docs/add-secure-apps/providers/proxy/server_traefik
+#  * oauth2-proxy also as Middleware: https://oauth2-proxy.github.io/oauth2-proxy/
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
@@ -10,7 +13,10 @@ metadata:
 spec:
   forwardAuth:
     address: "http://{{ .Values.traefik_forward_auth.service }}.{{ .Values.traefik_forward_auth.namespace }}.svc.cluster.local:4181"
+    # trust all X-Forwarded-* headers ???
+    # trustForwardHeader: true
     authResponseHeaders:
       {{- /* The authenticated user is set in the X-Forwarded-User header */}}
       {{- /* https://github.com/thomseddon/traefik-forward-auth#forwarded-headers */}}
       - X-Forwarded-User
+{{- end}}

@@ -67,7 +67,9 @@ middlewares:
   # Traefik-forward-auth should be installed for this auth to work
   forward_auth:
     name: 'forward-auth'
-    service: 'traefik-forward-auth' # only forward-auth portal supported for now
+    # The auth middleware
+    # Possible values: oauth2-proxy or traefik-forward-auth
+    service: 'oauth2-proxy'
 
 
 # Traefik Helm Values

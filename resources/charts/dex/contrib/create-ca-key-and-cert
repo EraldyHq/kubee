@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# For information only, we use now self signed cert-manager ca
+# to generate the key and cert
+
 # How it works?
 
 # This script creates:

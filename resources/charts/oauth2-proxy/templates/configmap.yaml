@@ -1,0 +1,64 @@
+{{/*# Source: kubee-oauth2-proxy/charts/oauth2-proxy/templates/configmap.yaml*/}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: oauth2-proxy
+    app.kubernetes.io/name: oauth2-proxy
+    app.kubernetes.io/instance: {{.Release.Name}}
+  name: {{.Values.oauth2_proxy.config.existingConfig}}
+  namespace: {{.Values.namespace}}
+data:
+  # Toml Config file
+  # Every command line argument can be specified in a config file by replacing hyphens (-) with underscores (_).
+  # If the argument can be specified multiple times, the config option is plural (trailing s).
+  #
+  # Example:
+  #    https://github.com/oauth2-proxy/oauth2-proxy/blob/master/contrib/oauth2-proxy.cfg.example
+  #    https://github.com/oauth2-proxy/oauth2-proxy/blob/2d29cee51e7e26daf9021685369c58822b8e2dc2/contrib/local-environment/kubernetes/values.yaml#L50
+  # Doc: https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview
+  # Traefik Config: https://oauth2-proxy.github.io/oauth2-proxy/configuration/integration#configuring-for-use-with-the-traefik-v2-forwardauth-middleware
+  oauth2_proxy.cfg: |-
+
+    redirect_url = "https://{{required "oauth2_proxy.hostname is required" .Values.hostname}}/oauth2/callback"
+
+    # Auth
+    {{- if (gt (len .Values.auth.email_domains) 0 ) }}
+    email_domains = [ {{ range $index, $emailDomain := .Values.auth.email_domains }}{{if $index}},{{end}}"{{$emailDomain}}"{{end}} ]
+    {{- end }}
+    {{- if (gt (len .Values.auth.whitelist_domains) 0 ) }}
+    whitelist_domains = [ {{ range $index, $whiteListDomain := .Values.auth.whitelist_domains }}{{if $index}},{{end}}"{{$whiteListDomain}}"{{end}} ]
+    {{- end }}
+
+    # Traefik
+    # Doc: https://oauth2-proxy.github.io/oauth2-proxy/configuration/integration#forwardauth-with-static-upstreams-configuration
+    # Enables the use of X-Forwarded-* headers to determine redirects correctly
+    reverse_proxy = true
+    # Configures a static response for authenticated sessions
+    upstream = static://202
+    # We don't want to proxy anything so pick a non-existent directory
+    # upstreams = [ "file:///dev/null" ]
+
+
+    # Headers options
+    # To be able to log to Kubernetes dashboard
+    set_authorization_header = true
+
+    # Tls
+    force_https = true
+    # tls-cert-file=/path/to/cert.pem
+    # tls-key-file=/path/to/cert.key
+
+    # Cookie
+    cookie_expire = "{{.Values.auth.cookie_expire}}"
+    cookie_secure = true
+    {{- if (gt (len .Values.auth.cookie_domains) 0 ) }}
+    cookie_domains = [ {{ range $index, $cookieDomain := .Values.auth.cookie_domains }}{{if $index}},{{end}}"{{$cookieDomain}}"{{end}} ]
+    {{- end }}
+
+    # Dex
+    provider = "oidc"
+    provider_display_name = "Kubee Dex"
+    oidc_issuer_url = "https://{{required "dex.hostname is required" .Values.dex.hostname}} }}
+    # populate login_url, redeem_url, and oidc_jwks_url using https://{{.Values.dex.hostname}}/.well-known/openid-configuration
+    skip_oidc_discovery = false

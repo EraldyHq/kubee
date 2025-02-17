@@ -17,6 +17,9 @@ ln -s $(realpath ../grafana/values.yaml) charts/kubee-grafana/values.yaml
 mkdir "charts/kubee-traefik-forward-auth"
 ln -s $(realpath ../traefik-forward-auth/Chart.yaml) charts/kubee-traefik-forward-auth/Chart.yaml
 ln -s $(realpath ../traefik-forward-auth/values.yaml) charts/kubee-traefik-forward-auth/values.yaml
+mkdir "charts/kubee-oauth2-proxy"
+ln -s $(realpath ../oauth2-proxy/Chart.yaml) charts/kubee-oauth2-proxy/Chart.yaml
+ln -s $(realpath ../oauth2-proxy/values.yaml) charts/kubee-oauth2-proxy/values.yaml
 # Pull traefik
 helm pull https://traefik.github.io/charts/traefik/traefik-34.3.0.tgz -d charts --untar
 ```

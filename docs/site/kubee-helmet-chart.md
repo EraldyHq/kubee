@@ -5,7 +5,7 @@ A `Kubee Helmet Chart`:
     * that installs only one application
     * with the name of the app installed (ie grafana, not grafana operator)
     * that depends on:
-        * the [kubee Chart](../../resources/charts/kubee/README.md) to share cluster and installation wide
+        * the [kubee Library Chart](../../resources/charts/kubee/README.md) to share cluster and installation wide
             * `values.yaml` file
             * and `library`
         * and optionally:
@@ -25,25 +25,21 @@ A `Kubee Helmet Chart`:
         * or the grafana operator
     * Only one chart is going to supports this 2 methods.
 
-# What is the Kubee Chart?
+    
+# Values file
 
-The [kubee Chart](../../resources/charts/kubee/README.md) is a shared chart dependency with:
-* a [shared library](../../resources/charts/kubee/templates/_helpers.tpl)
-* a [values.yaml](../../resources/charts/kubee/values.yaml)
-
-The values files has one top node for each [kubee chart](#what-is-a-kubee-chart).
-Each node contains all configurations for:
-* the chart
-* the external services (opsgenie, new relic, grafana cloud, ...) - making clear what the parameters are for.
-
-Each `values.yaml` top configuration node contains the following common properties:
-* `namespace`: the namespace where to install the chart (default to the name of the chart if not found)
-* `enabled`: if the chart is used or not (default to false if not found). It's used to:
+Each `values.yaml` file should contain at least the following properties:
+* `namespace = name`: the namespace where to install the chart
+* `enabled = false`: if the chart is used or not. The value should be false. It's used to:
     * conditionally applied manifest. If there is no grafana, don't install the dashboard
     * cluster bootstrapping (ie install all charts at once)
 
 > [!Info]
 > The `enabled` property comes from the [Helm best practices](https://helm.sh/docs/chart_best_practices/dependencies/#conditions-and-tags)
+
+The values file should contain different nodes for:
+* the chart itself
+* the external services (opsgenie, new relic, grafana cloud, ...) - making clear what the parameters are for.
 
 
 ## FAQ: Why not multiple sub-chart by umbrella chart?

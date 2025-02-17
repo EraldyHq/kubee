@@ -1,6 +1,4 @@
+.helmignore
 out
 vendors
-# Don't add cross-dependency charts to not create recursive symlinks
-charts/kubee-cert-manager/charts
-charts/kubee-traefik/charts
-charts/kubee-traefik-forward-auth/charts
+contrib

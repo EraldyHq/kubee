@@ -48,4 +48,4 @@ Check the [discovery file](#how-to-i-check-the-installation) for all endpoints.
 
 ## Contrib / Dec
 
-Dev and contrib documentation can be found [here](contrib.md)
+Dev and contrib documentation can be found [here](contrib/contrib.md)

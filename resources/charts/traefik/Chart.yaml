@@ -42,8 +42,13 @@ dependencies:
     condition: kubee_internal.install_cross_dependency
   - name: kubee-traefik-forward-auth
     version: 0.0.1
-    #repository: file://../grafana
+    repository: file://../traefik-forward-auth
     alias: traefik_forward_auth
+    condition: kubee_internal.install_cross_dependency
+  - name: kubee-oauth2-proxy
+    version: 0.0.1
+    repository: file://../kubee-oauth2-proxy
+    alias: oauth2_proxy
     condition: kubee_internal.install_cross_dependency
   # For the scrape
   - name: kubee-prometheus

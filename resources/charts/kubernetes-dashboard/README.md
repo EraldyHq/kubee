@@ -7,7 +7,7 @@ A Kubee Chart of the [kubernetes-dashboard](https://github.com/kubernetes/dashbo
 
 ### Cluster file Configuration
 
-All configurations can be seen in their respectives `values file`
+All configurations can be seen in their respective `values file`
 * [kubernetes_dashboard values file](values.yaml)
 * [kubee values file](../kubee/values.yaml)
 
@@ -26,16 +26,17 @@ kubee:
     # They use K8s RBAC. You need to create a token in the next step.
     password: ''
     # The Kubernetes role for the service account
-    clusterRole: 'cluster-admin'
+    cluster_role: 'cluster-admin'
 ```
 
 ### Install
 
 ```bash
-kubee-chart -c clusterName play kubernetes-dashboard
+kubee -c clusterName helmet play kubernetes-dashboard
 ```
 
-### Create token
+### Create Access Credentials
+
 
 To access your dashboard, you need a `token`.
 
@@ -47,6 +48,7 @@ kubectl -n kubernetes-dashboard create token ACCOUNT_NAME --duration=8400h
 # with admin
 kubectl -n kubernetes-dashboard create token admin --duration=8400h
 ```
+
 
 ### Access the dashboard
 
@@ -70,12 +72,5 @@ You can then access the dashboard at http://localhost:8001/api/v1/namespaces/kub
 
 
 
-
-## FAQ
-
-### Why there is no ingress basic auth protection?
-
-The ingress cannot be protected with an authentication mechanism that uses the `Authenticate` HTTP header
-such as the `basic auth` otherwise they conflict, and you get a `401` not authorized.
 
 

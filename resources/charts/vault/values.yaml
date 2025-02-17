@@ -1,3 +1,17 @@
+# Not a string, a boolean so no quote
+enabled: false
+# The hostname (create an ingress if not empty)
+hostname: ''
+# The installation namespace
+namespace: 'vault'
+# A KV secret store
+kvSecretStore:
+  # The Vault KV secret engine version.
+  # This can be either "v1" or "v2", defaults to "v2"
+  version: 2
+  # the mount Path
+  mountPath: 'secret'
+
 # Vault
 # A copy of https://raw.githubusercontent.com/hashicorp/vault-helm/main/values.yaml
 vault:

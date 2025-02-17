@@ -3,5 +3,4 @@
 helmignore
 vendor
 out
-# Don't follow charts symlinks to not create a recursion
-charts/kubee-dex/charts
+contrib

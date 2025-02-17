@@ -1,0 +1,18 @@
+{{- if eq .Values.middlewares.forward_auth.service "oauth2-proxy" }}
+# Forward authentication Middleware
+# Oauth Proxy Doc: https://oauth2-proxy.github.io/oauth2-proxy/configuration/integration#configuring-for-use-with-the-traefik-v2-forwardauth-middleware
+# Traefik Doc: https://doc.traefik.io/traefik/middlewares/http/forwardauth/#configuration-examples
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{.Values.middlewares.forward_auth.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  forwardAuth:
+    address: "http://{{ .Values.o.service }}.{{ .Values.traefik_forward_auth.namespace }}.svc.cluster.local:4181"
+    # trust all X-Forwarded-* headers ???
+    # trustForwardHeader: true
+    authResponseHeaders:
+      - X-Auth-Request-Access-Token
+      - Authorization
+{{- end}}
