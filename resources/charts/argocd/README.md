@@ -20,7 +20,7 @@ This chart is a [Helm-x Chart](../../../docs/bin/kubee-helmet) that:
 With Helm-x For instance, to check the [repo creation](templates/resources/argocd-secret-repo.yaml)
 ```bash
 export BASHLIB_ECHO_LEVEL=4;
-kubee-chart -c clusterName template argocd | grep 'name: argocd-secret-repo' -A 2 -B 11
+kubee helmet -c clusterName template argocd | grep 'name: argocd-secret-repo' -A 2 -B 11
 ```
 
 

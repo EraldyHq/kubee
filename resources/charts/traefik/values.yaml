@@ -70,6 +70,9 @@ middlewares:
     # The auth middleware
     # Possible values: oauth2-proxy or traefik-forward-auth
     service: 'oauth2-proxy'
+  # Middleware to apply headers on forwarded auth
+  auth_headers:
+    name: 'auth-headers'
 
 
 # Traefik Helm Values

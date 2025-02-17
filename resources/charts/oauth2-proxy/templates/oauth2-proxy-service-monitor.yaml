@@ -1,0 +1,22 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{(index .Values "oauth2-proxy").fullnameOverride}}
+  namespace: {{.Values.namespace}}
+  labels:
+    app: {{(index .Values "oauth2-proxy").nameOverride}}
+    app.kubernetes.io/name: {{(index .Values "oauth2-proxy").nameOverride}}
+    app.kubernetes.io/instance: {{.Release.Name}}
+spec:
+  jobLabel: oauth2-proxy
+  selector:
+    matchLabels:      
+      app.kubernetes.io/name: {{(index .Values "oauth2-proxy").nameOverride}}
+      app.kubernetes.io/instance: oauth2-proxy
+  endpoints:
+  - port: metrics
+    path: "/metrics"
+    interval: {{ .Values.prometheus.scrape_interval }}
+    scrapeTimeout: 30s
+{{- end }}

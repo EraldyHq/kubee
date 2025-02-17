@@ -2,7 +2,9 @@
 
 
 ## About
-The `Kubee Traefik Chart` will install Traefik. 
+The `Kubee Traefik Chart` will install:
+* Traefik
+* and the [Traefik Dashboard](https://monitoring.mixins.dev/traefik/)
 
 ## Prerequisite
 

@@ -3,7 +3,7 @@
 
 ## Setup
 
-### Create Dependency
+### Dependency Charts Bootstrapping
 
 ```bash
 mkdir "charts"
@@ -24,6 +24,24 @@ ln -s $(realpath ../oauth2-proxy/values.yaml) charts/kubee-oauth2-proxy/values.y
 helm pull https://traefik.github.io/charts/traefik/traefik-34.3.0.tgz -d charts --untar
 ```
 
+### Jsonnet Project Bootstrapping
+
+The [jsonnet project](../jsonnet/README.md) was bootstrapped with:
+```bash
+cd jsonnet
+```
+* The [mixin util](./mixin-util)
+```bash
+./mixin-util
+```
+* The jsonnet bundler (as seen on the [kube-prometheus jsonnetfile.json](https://github.com/prometheus-operator/kube-prometheus/blob/main/jsonnet/kube-prometheus/jsonnetfile.json)
+```bash
+jb init
+jb install  https://github.com/grafana/jsonnet-libs/traefik-mixin@master # last main commit
+```
+
+
+
 ### Verify
 
 * Lint
@@ -32,13 +50,13 @@ helm lint
 ```
 * Output
 ```bash
-kubee -c clusterName helmet template traefik --out
+kubee -c clusterName helmet template traefik --out > /tmp/all.yaml
 ```
 
 ### Install
 
 ```bash
-kubee -c clusterName helmet template traefik --out
+kubee -c clusterName helmet play traefik
 ```
 
 

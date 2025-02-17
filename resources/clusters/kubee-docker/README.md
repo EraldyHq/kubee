@@ -65,7 +65,7 @@ kubee-cluster play
 ### Kubee Chart Installation
 
 ```bash
-kubee-chart install traefik
+kubee helmet install traefik
 ```
 
 

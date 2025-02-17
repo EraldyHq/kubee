@@ -94,5 +94,5 @@ jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheu
 rm -rf jsonnet/multi/manifests && mkdir -p jsonnet/multi/manifests/setup && jsonnet -J vendor --multi jsonnet/multi/manifests "jsonnet/multi/kube-prometheus.jsonnet" --ext-code "values={ kubee: std.parseYaml(importstr \"../../kubee/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
 # or set debug (to not delete the created manifests) and use the template command of chart
 export BASHLIB_ECHO_LEVEL=4
-kubee-chart template prometheus
+kubee helmet template prometheus
 ```

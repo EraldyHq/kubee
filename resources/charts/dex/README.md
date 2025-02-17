@@ -46,6 +46,13 @@ https://hostname/.well-known/openid-configuration
 https://hostname/ is not an entrypoint and returns `404`
 Check the [discovery file](#how-to-i-check-the-installation) for all endpoints.
 
+### Why do i need to restart after a config change?
+
+The [Helm Chart Roll Deployment](https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments)
+is on the Dex Helm deployment chart.
+
+We can't trick it to apply the checksum on our configuration.
+
 ## Contrib / Dec
 
 Dev and contrib documentation can be found [here](contrib/contrib.md)

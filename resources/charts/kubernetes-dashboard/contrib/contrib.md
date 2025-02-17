@@ -20,7 +20,7 @@ helm template --set 'cert_manager.enabled=true' --output-dir out .
 ```
 * Install
 ```bash
-kubee-chart -c clusertName play kubernetes-dashboard
+kubee helmet -c clusertName play kubernetes-dashboard
 ```
 * Note: Because this a Kubee Helm Chart only, you can use the Helm command directly (dev only)
 ```bash

@@ -1,7 +1,8 @@
 # Enabled
 enabled: false
-# Installation Namespace (same as traefik)
-namespace: 'kube-system'
+# Installation Namespace
+# For auth related apps such as oauth-proxy, dex, ....
+namespace: 'auth'
 # The hostname for external dns access for callback by providers such as dex
 # If this value is not null, traefik-forward-auth is implemented in host mode
 # meaning that all apps should be under the same apex domain

@@ -2,7 +2,8 @@
 # not a string, don't quote
 enabled: false
 # The namespace
-namespace: 'dex'
+# Used also for all auth clients such as auth proxy
+namespace: 'auth'
 
 # The public hostname
 # (Required as you need a callback)

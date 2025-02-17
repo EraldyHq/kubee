@@ -1,0 +1,15 @@
+# Headers to be applied on auth
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: '{{ .Values.middlewares.auth_headers.name }}'
+  namespace: '{{ .Values.namespace }}'
+spec:
+  headers:
+    stsSeconds: 315360000
+    browserXssFilter: true
+    contentTypeNosniff: true
+    forceSTSHeader: true
+    stsIncludeSubdomains: true
+    stsPreload: true
+    frameDeny: true

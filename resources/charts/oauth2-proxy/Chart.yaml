@@ -29,18 +29,27 @@ dependencies:
   - name: oauth2-proxy
     version: 7.11.0
     repository: https://oauth2-proxy.github.io/manifests
-    alias: oauth2_proxy
+    # Pfffffff
+    # We can't use a oauth2_proxy
+    # Deployment.apps "oauth2-proxy" is invalid: spec.template.spec.containers[0].name: Invalid value: "oauth2_proxy"
+    alias: oauth2-proxy
   - name: kubee
     version: 0.0.1
-    repository: file://../kubee
+    #repository: file://../kubee
     alias: kubee
   - name: kubee-dex
     version: 0.0.1
-    repository: file://../dex
+    #repository: file://../dex
     alias: dex
-#  # For the ingress
-#  - name: kubee-cert-manager
-#    version: 0.0.1
-#    repository: file://../cert-manager
-#    alias: cert_manager
-#    condition: kubee_internal.install_cross_dependency
+    condition: kubee_internal.install_cross_dependency
+  - name: kubee-prometheus
+    version: 0.0.1
+    #repository: file://../prometheus
+    alias: prometheus
+    condition: kubee_internal.install_cross_dependency
+  # For the ingress
+  - name: kubee-cert-manager
+    version: 0.0.1
+    #repository: file://../cert-manager
+    alias: cert_manager
+    condition: kubee_internal.install_cross_dependency

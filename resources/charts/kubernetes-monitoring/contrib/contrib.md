@@ -13,11 +13,11 @@ This chart has the following Jsonnet Dependencies:
 
 ## How this project was bootstrapped: Jsonnet Bootstrap
 
-The [jsonnet project](jsonnet/README.md) was bootstrapped with:
+The [jsonnet project](../jsonnet/README.md) was bootstrapped with:
 ```bash
 cd jsonnet
 ```
-* The [kube-prometheus libs](utilities/dl-kp-scripts-for-km):
+* The [kube-prometheus libs](dl-kp-scripts-for-km):
 ```bash
 ../utilities/dl-kp-scripts-for-km
 ```
@@ -32,9 +32,9 @@ jb install github.com/kubernetes/kube-state-metrics/jsonnet/kube-state-metrics-m
 jb install github.com/prometheus/node_exporter/docs/node-mixin@master
 ```
 * Try it out with
-* Helm X
+* helmet
 ```bash
-kubee-chart template kubernetes-monitoring --out > /tmp/all.yaml
+kubee -c clusterName helmet template kubernetes-monitoring --out > /tmp/all.yaml
 ```
 * or Raw Jsonnet command
 ```bash

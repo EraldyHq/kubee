@@ -17,26 +17,11 @@ synopsis(){
   echo '```bash'
   echo "$(basename "$0") [app name]"
   echo '```'
-  # shellcheck disable=SC2016
-  echo 'where `app name` is'
-  # shellcheck disable=SC2016
-  echo '* optional if you run the command in the app directory (default to: `$KUBEE_APP_NAME`)'
-  echo '* mandatory otherwise'
-  echo ''
+
 
 
 }
 
-# shellcheck source=./bashlib-error.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
-error::set_strict_mode
-error::set_trap
-# shellcheck source=./bashlib-echo.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
-# shellcheck source=./bashlib-doc.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
-# shellcheck source=./bashlib-kube.sh
-source "kubee-lib.sh"
 
 if [[ "${1:-}" == "synopsis" ]]; then
   synopsis
@@ -55,15 +40,15 @@ if [[ "$KUBEE_APP_NAME" =~ -h|--help|help ]]; then
   exit
 fi
 
-# Get env
-source kubee-env) || error::exit $?
 
 if [ "$KUBEE_APP_NAME" == "" ]; then
     doc::help synopsis
-    echo:err "An app name should be provided as argument or the KUBEE_APP_NAME env should not be empty"
+    echo:err "An app name should be provided as argument"
     exit 1
 fi
 
+# Kubectl utility
+kubee::set_kubeconfig_env
 
 echo::info "Searching a deployment"
 read -r DEPLOYMENT_NAME NAMESPACE  <<< "$(kube::get_resource_by_app_name "$KUBEE_APP_NAME" deployment)"

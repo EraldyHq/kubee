@@ -20,11 +20,11 @@ jb install github.com/kubernetes-monitoring/kubernetes-mixin@master # for alerts
 jb install github.com/prometheus/prometheus/documentation/prometheus-mixin@v3.1.0
 ```
 * Try it out with
-* Helm X
+* helmet
 ```bash
 # set debug (to not delete the created manifests in the jsonnet/out directory)
 export BASHLIB_ECHO_LEVEL=4
-kubee-chart -n prometheus template prometheus > /tmp/all.yaml
+kubee helmet -n prometheus template prometheus > /tmp/all.yaml
 ```
 * or Raw Jsonnet command
 ```bash

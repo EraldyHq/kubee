@@ -1,4 +1,5 @@
-jsonnet/vendor
-jsonnet/out
+.helmignore
+vendor
+out
 example
-utilities
+contrib

@@ -54,7 +54,7 @@ The Kubernetes components metrics reference list is available [here](https://kub
 
 ## Dev/Contrib
 
-If you want to contribute to the development of this chart. Check [Dev/Contrib page](contrib.md)
+If you want to contribute to the development of this chart. Check [Dev/Contrib page](contrib/contrib.md)
 
 
 

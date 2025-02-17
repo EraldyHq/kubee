@@ -17,7 +17,7 @@ jb install github.com/kubernetes-monitoring/kubernetes-mixin@af5e898 # last main
 rm -rf jsonnet/multi/manifests && mkdir -p jsonnet/multi/manifests/setup && jsonnet -J vendor --multi jsonnet/multi/manifests "jsonnet/multi/alertmanager.jsonnet" --ext-code "values={ kubee: std.parseYaml(importstr \"../../kubee/values.yaml\") }" | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
 # with helm_x to test a cluster values
 export BASHLIB_ECHO_LEVEL=4 # debug to keep the generated manifests
-kubee-chart --cluster clusterName template alertmanager > /tmp/all.yml
+kubee helmet --cluster clusterName template alertmanager > /tmp/all.yml
 # to test only helm template with -s (show-only)
 helm template -s templates/alertmanager-ingress.yaml --set 'kubee.hostname=alert.com' . | yq
 ```

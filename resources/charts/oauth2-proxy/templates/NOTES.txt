@@ -1,0 +1,6 @@
+Don't forget to restart the deployment if the configs have changed
+
+```bash
+kubee --cluster clusterName app restart oauth2-proxy
+```
+

@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "dependencies": [
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/grafana/jsonnet-libs.git",
+          "subdir": "traefik-mixin"
+        }
+      },
+      "version": "09ca0a6735fa87a36cccd2e74fb9734eb0a88ac4",
+      "sum": "HIxXn5kHKZ9QfYFKCoucICL/OA2+aMpVLGwqKFyNXD4="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/monitoring-mixins/website.git",
+          "subdir": "assets/traefik"
+        }
+      },
+      "version": "7644cfe14f8340a9657ef647606061d6356ca17b",
+      "sum": "QwnoJsC1nj5TePMTpYfhIuXDAsCrarcBnprD/MTB+Uo="
+    }
+  ],
+  "legacyImports": false
+}

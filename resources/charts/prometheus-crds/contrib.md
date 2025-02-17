@@ -20,11 +20,11 @@ jb install https://github.com/prometheus-operator/prometheus-operator/jsonnet/pr
 ### Test
 
 You can check the created manifest with:
-* Helm X
+* helmet
 ```bash
 # set debug (to not delete the created manifests in the jsonnet/out directory)
 export BASHLIB_ECHO_LEVEL=4
-kubee-chart -n prometheus template prometheus-crds > jsonnet/out/all.yaml
+kubee helmet -n prometheus template prometheus-crds > jsonnet/out/all.yaml
 ```
 * or Raw Jsonnet command
 ```bash

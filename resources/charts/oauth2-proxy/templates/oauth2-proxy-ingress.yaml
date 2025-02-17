@@ -1,0 +1,32 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "kubee-name-prefix" . }}
+  namespace: {{.Values.namespace}}
+  labels:
+    app.kubernetes.io/name: oauth2-proxy
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    {{- if not .Values.cert_manager.enabled }}
+    {{- fail "cert_manager should be enabled" }}
+    {{- end }}
+    cert-manager.io/cluster-issuer: {{.Values.cert_manager.issuer_name}}
+spec:
+  rules:
+    - host: {{ .Values.hostname}}
+      http:
+        paths:
+          - backend:
+              service:
+                name: oauth2-proxy
+                port:
+                  name: https
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - {{.Values.hostname}}
+      secretName: 'oauth2-proxy-tls'

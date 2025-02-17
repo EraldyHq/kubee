@@ -7,7 +7,7 @@ in a standalone mode.
 ## Installation
 
 ```bash
-kubee-chart --cluster cluster-name install vault
+kubee helmet --cluster cluster-name install vault
 ```
 
 ## Dev / Contrib

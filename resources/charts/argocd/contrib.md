@@ -43,7 +43,7 @@ To get the Jsonnet Manifest in `jsonnet/out`
 # Debug to not delete them on exit
 export BASHLIB_ECHO_LEVEL=4;
 # Run
-kubee-chart \
+kubee helmet \
   --cluster clusterName \
   template \
   argocd
