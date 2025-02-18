@@ -21,18 +21,10 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "7.11.0" # The chart version
+appVersion: "7.8.1" # The oauth2 proxy version
 
 
 dependencies:
-  # https://github.com/oauth2-proxy/manifests
-  - name: oauth2-proxy
-    version: 7.11.0
-    repository: https://oauth2-proxy.github.io/manifests
-    # Pfffffff
-    # We can't use a oauth2_proxy
-    # Deployment.apps "oauth2-proxy" is invalid: spec.template.spec.containers[0].name: Invalid value: "oauth2_proxy"
-    alias: oauth2-proxy
   - name: kubee
     version: 0.0.1
     #repository: file://../kubee

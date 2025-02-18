@@ -9,7 +9,7 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   forwardAuth:
-    address: "https://oauth2-proxy.{{ .Values.oauth2_proxy.namespace }}.svc.cluster.local:4443"
+    address: "https://oauth2-proxy.{{ .Values.oauth2_proxy.namespace }}.svc.cluster.local"
     # trust all X-Forwarded-* headers ???
     # trustForwardHeader: true
     authResponseHeaders:

@@ -133,6 +133,7 @@ Commands:
 * upgrade          Upgrade Kubernetes on the cluster hosts
 * inventory        Print the cluster hosts inventory file
 * ping             Verify the connection to the clusters hosts
+* shell            Start a pod and get a shell in the cluster
 
 Options:
 
@@ -225,6 +226,9 @@ case $CLUSTER_COMMAND in
     ;;
 "ping")
     ping "$@" || error::exit $?
+    ;;
+"shell")
+    source kubee-app-shell "busybox" "$@" || error::exit $?
     ;;
 *)
   doc::help synopsis

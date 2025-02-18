@@ -2,14 +2,14 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ include "kubee-name-prefix" . }}-tls
+  name: {{ include "oauth2-proxy-cert-local-name" . }}
   namespace: {{ .Values.namespace }}
 spec:
-  secretName: {{ include "kubee-name-prefix" . }}-tls-ca
+  secretName: {{ include "oauth2-proxy-cert-local-name" . }}
   issuerRef:
     kind: Issuer
     name: {{ include "kubee-name-prefix" . }}-ca
   dnsNames:
-    - oauth2-proxy
-    - oauth2-proxy.{{ .Values.namespace }}
-    - oauth2-proxy.{{ .Values.namespace }}.svc.cluster.local
+    - {{ include "oauth2-proxy-service-name" . }}
+    - {{ include "oauth2-proxy-service-name" . }}.{{ .Values.namespace }}
+    - {{ include "oauth2-proxy-service-name" . }}.{{ .Values.namespace }}.svc.cluster.local

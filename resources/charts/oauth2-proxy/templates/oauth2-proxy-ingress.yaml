@@ -21,7 +21,7 @@ spec:
         paths:
           - backend:
               service:
-                name: oauth2-proxy
+                name: {{ include "oauth2-proxy-service-name" .}}
                 port:
                   name: https
             path: /

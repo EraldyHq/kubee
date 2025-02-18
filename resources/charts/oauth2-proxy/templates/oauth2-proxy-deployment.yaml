@@ -1,0 +1,93 @@
+{{/* Because of the checksum, we needed to take over */}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kubee-name-prefix" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: oauth2-proxy
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: oauth2-proxy
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/oauth2-proxy-config-configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/oauth2-proxy-config-secret.yaml") . | sha256sum }}
+      labels:
+        app.kubernetes.io/name: oauth2-proxy
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ include "oauth2-proxy-service-account-name" . }}
+      automountServiceAccountToken: true
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "quay.io/oauth2-proxy/oauth2-proxy:{{ .Values.version }}"
+        imagePullPolicy: IfNotPresent
+        args:
+          - --config=/etc/oauth2-proxy/oauth2-proxy.cfg
+          - --authenticated-emails-file=/etc/oauth2-proxy/{{ include "oauth2-proxy-authenticated-emails-file-name" .}}
+        env:
+        - name: OAUTH2_PROXY_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name:  {{ include "oauth2-proxy-config-secret-name" .}}
+              key: client-id
+        - name: OAUTH2_PROXY_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name:  {{ include "oauth2-proxy-config-secret-name" .}}
+              key: client-secret
+        - name: OAUTH2_PROXY_COOKIE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name:  {{ include "oauth2-proxy-config-secret-name" .}}
+              key: cookie-secret
+        ports:
+          - containerPort: {{ include "oauth2-proxy-https-port" .}}
+            name: https
+            protocol: TCP
+          - containerPort: {{ include "oauth2-proxy-metrics-port" .}}
+            protocol: TCP
+            name: metrics
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: https
+            scheme: HTTPS
+          initialDelaySeconds: 0
+          timeoutSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: https
+            scheme: HTTPS
+          initialDelaySeconds: 0
+          timeoutSeconds: 5
+          successThreshold: 1
+          periodSeconds: 10
+        volumeMounts:
+        - name: {{ include "oauth2-proxy-config-map-name" .}}
+          mountPath: /etc/oauth2-proxy/oauth2-proxy.cfg
+          subPath: oauth2-proxy.cfg
+        - name: {{ include "oauth2-proxy-authenticated-emails-name" .}}
+          mountPath: /etc/oauth2-proxy/{{ include "oauth2-proxy-authenticated-emails-file-name" .}}
+          readOnly: true
+          subPath: {{ include "oauth2-proxy-authenticated-emails-file-name" .}}
+        - mountPath: /etc/oauth2-proxy/tls
+          name: tls
+      volumes:
+        - name: {{ include "oauth2-proxy-config-map-name" .}}
+          configMap:
+            defaultMode: 420
+            name: {{ include "oauth2-proxy-config-map-name" .}}
+        - name: {{ include "oauth2-proxy-authenticated-emails-name" .}}
+          configMap:
+            defaultMode: 420
+            name: {{ include "oauth2-proxy-authenticated-emails-name" .}}
+        - name: tls
+          secret:
+            secretName: {{ include "oauth2-proxy-cert-local-name" . }}

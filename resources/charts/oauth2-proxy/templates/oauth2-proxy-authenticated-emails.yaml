@@ -1,17 +1,16 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ index (index .Values "oauth2-proxy").authenticatedEmailsFile "template"}}
-  namespace: {{.Values.namespace}}
+  name: {{ include "oauth2-proxy-authenticated-emails-name" .}}
+  namespace: {{.Values.namespace }}
   labels:
-    app: oauth2-proxy
     app.kubernetes.io/name: oauth2-proxy
     app.kubernetes.io/instance: {{.Release.Name}}
 data:
   # One email by line
   # Equivalent to --authenticated-emails-file
   # https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview#proxy-options
-  {{(index .Values "oauth2-proxy").authenticatedEmailsFile.restrictedUserAccessKey}}: |-
+  {{ include "oauth2-proxy-authenticated-emails-file-name" .}}: |-
     {{.Values.kubee.auth.admin_user.email}}
     {{- if (gt (len .Values.auth.email_addresses) 0 ) }}
     {{- range $index, $emailAddress := .Values.auth.email_addresses }}

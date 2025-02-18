@@ -2,6 +2,8 @@
 enabled: false
 # The auth namespace
 namespace: 'auth'
+# The version
+version: "v7.8.1"
 # the hostname
 hostname: ''
 # Auth
