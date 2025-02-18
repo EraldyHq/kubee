@@ -4,7 +4,7 @@ we needed a `no tls transport`
 and it's not set as a label on the ingress but on the service
 We therefore needed to use a traefik IngressRoute
 
-Note that we set this value to true
+Note that we set this traefik server value to true
 with the argument --serverstransport.insecureskipverify=true
 We don't need it anymore but if the value change, it will not break.
 */}}
@@ -20,7 +20,7 @@ metadata:
 spec:
   entryPoints:
     - websecure
-  {{- if ne (((.Values.kubee).cert_manager).enabled) false}}
+  {{- if eq .Values.cert_manager.enabled true}}
   tls:
     # in the IngressRoute namespace
     secretName: '{{ include "kubernetes-dashboard-name" . }}'
@@ -28,6 +28,14 @@ spec:
   routes:
     - kind: Rule
       match: Host(`{{ .Values.hostname }}`)
+      {{- /* Auth via Dex via oAuth Proxy if enabled    */}}
+      {{- if and (eq .Values.traefik.auth.middleware_name .Values.traefik.middlewares.forward_auth.name) (eq .Values.traefik.middlewares.forward_auth.service "oauth2-proxy") }}
+      {{- if eq .Values.kubee.auth.cluster_oidc.enabled true }}
+      middlewares:
+        - name: '{{ .Values.traefik.middlewares.forward_auth.name }}'
+          namespace: '{{ .Values.traefik.namespace }}'
+      {{- end }}
+      {{- end }}
       services:
         # Ingress in front of kong
         # written here https://github.com/kubernetes/dashboard?tab=readme-ov-file#installation

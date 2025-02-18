@@ -1,8 +1,10 @@
 # Traefik Forward Auth
 
 > [!WARNING]
+> Deprecated for [oauth2-proxy](../oauth2-proxy/README.md)
+> Why?
 > Traefik Forward Auth does not support forwarding the `Authorization Header` 
-> therefore it's not possible to authenticate directly to Kubernetes Dashboard Client
+> therefore it's not possible to authenticate directly to a Kubernetes Dashboard Client
 > We recommend using [oauth2-proxy](../oauth2-proxy/README.md) instead.
 > Ref:
 > * [X-Forwarded-User is the only header](https://github.com/thomseddon/traefik-forward-auth#forwarded-headers) 

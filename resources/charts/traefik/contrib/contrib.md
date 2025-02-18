@@ -64,3 +64,8 @@ kubee -c clusterName helmet play traefik
 
 Because it's too slow to update to the last version.
 They were on 2 while traefik was already on 3.
+
+## Support
+### Why a 404?
+
+* Check the traefik dashboard for any middleware problem

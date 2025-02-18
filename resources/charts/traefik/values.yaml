@@ -106,6 +106,9 @@ traefik:
     # - '--log.level=DEBUG'
     # Logs just add too much noise on what is going on
     # - '--accesslog=false'
+    # Allow cross namespace middleware in Ingress Route
+    # https://doc.traefik.io/traefik/providers/kubernetes-crd/#allowcrossnamespace
+    - '--providers.kubernetescrd.allowCrossNamespace=true'
 
   service:
     # type: LoadBalancer

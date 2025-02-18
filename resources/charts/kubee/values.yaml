@@ -35,6 +35,11 @@ auth:
   # * and external proxy such as cloudflare
   trusted_proxies: []
 
+  # Cluster Auth
+  # Oidc Cluster Auth with dex
+  # https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens
+  cluster_oidc:
+    enabled: false
 
 # email
 email:
