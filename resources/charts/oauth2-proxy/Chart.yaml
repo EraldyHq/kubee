@@ -27,21 +27,29 @@ appVersion: "7.8.1" # The oauth2 proxy version
 dependencies:
   - name: kubee
     version: 0.0.1
-    #repository: file://../kubee
+    repository: file://../kubee
     alias: kubee
+  # For the client id and secret
   - name: kubee-dex
     version: 0.0.1
-    #repository: file://../dex
+    repository: file://../dex
     alias: dex
     condition: kubee_internal.install_cross_dependency
+  # For the scrape
   - name: kubee-prometheus
     version: 0.0.1
-    #repository: file://../prometheus
+    repository: file://../prometheus
     alias: prometheus
     condition: kubee_internal.install_cross_dependency
-  # For the ingress
+  # For the cert
   - name: kubee-cert-manager
     version: 0.0.1
-    #repository: file://../cert-manager
+    repository: file://../cert-manager
     alias: cert_manager
+    condition: kubee_internal.install_cross_dependency
+  # For the middleware
+  - name: kubee-traefik
+    version: 0.0.1
+    repository: file://../traefik
+    alias: traefik
     condition: kubee_internal.install_cross_dependency

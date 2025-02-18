@@ -4,7 +4,7 @@ enabled: false
 namespace: 'auth'
 # The version
 version: "v7.8.1"
-# the hostname
+# the hostname mandatory
 hostname: ''
 # Auth
 auth:
@@ -16,16 +16,22 @@ auth:
   # Cookie Expiration
   # Default is 168h (ie 7 days)
   cookie_expire: "168h"
+  # Add the domain of the hostname as cookie and while list domain
+  use_domain_hostname: true
+  # Optional domain of the cookie: the longest domain matching the request's host will be used (or the shortest cookie domain if there is no match).
   cookie_domains: []
+  # Whitelist domains
+  # Required to allow redirection back to original requested target
+  whitelist_domains: []
   # Email Domains
   # Only users with this domain will be let in
   # Accepted value: `*` for all emails or `your.company.com`
   email_domains: [ '*' ]
   # Authenticated email address
+  # Only users with this email addresses will be let in
   # The admin email is already taken into account
   email_addresses: []
-  # Whitelist domains
-  whitelist_domains: [ ]
+
 
 # Oauth proxy helm values
 # https://github.com/oauth2-proxy/manifests/blob/main/helm/oauth2-proxy/values.yaml

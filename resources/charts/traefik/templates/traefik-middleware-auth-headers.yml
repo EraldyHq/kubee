@@ -1,4 +1,5 @@
-# Headers to be applied on auth
+# Headers to be applied on any website with a authentication form
+# Idea: https://github.com/oauth2-proxy/oauth2-proxy/blob/2d29cee51e7e26daf9021685369c58822b8e2dc2/contrib/local-environment/traefik/dynamic.yaml#L35
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:

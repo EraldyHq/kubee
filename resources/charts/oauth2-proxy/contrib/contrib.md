@@ -15,6 +15,9 @@ ln -s $(realpath ../prometheus/values.yaml) charts/kubee-prometheus/values.yaml
 mkdir "charts/kubee-cert-manager"
 ln -s $(realpath ../cert-manager/Chart.yaml) charts/kubee-cert-manager/Chart.yaml
 ln -s $(realpath ../cert-manager/values.yaml) charts/kubee-cert-manager/values.yaml
+mkdir "charts/kubee-traefik"
+ln -s $(realpath ../traefik/Chart.yaml) charts/kubee-traefik/Chart.yaml
+ln -s $(realpath ../traefik/values.yaml) charts/kubee-traefik/values.yaml
 ```
 
 Pull the original helm chart to get the original Helm template and get the logic
@@ -29,6 +32,11 @@ helm pull https://github.com/oauth2-proxy/manifests/releases/download/oauth2-pro
 * Traefik Forward Auth example:
   * https://oauth2-proxy.github.io/oauth2-proxy/configuration/integration#forwardauth-with-401-errors-middleware 
   * https://github.com/oauth2-proxy/oauth2-proxy/blob/master/contrib/local-environment/traefik/dynamic.yaml
+
+## How to logout
+
+* Delete the `_oauth2_proxy` cookie
+* Or it the [logout endpoint](#test-endpoints)
 
 ## Support
 

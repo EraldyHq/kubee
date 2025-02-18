@@ -35,12 +35,16 @@ data:
     skip_provider_button = true
 
     # Auth
-    {{- if (gt (len .Values.auth.email_domains) 0 ) }}
+    {{- if (gt (len .Values.auth.email_domains) 0 )}}
     email_domains = [ {{ range $index, $emailDomain := .Values.auth.email_domains }}{{if $index}},{{end}}"{{$emailDomain}}"{{end}} ]
     {{- end }}
-    {{- if (gt (len .Values.auth.whitelist_domains) 0 ) }}
+    {{- if or (gt (len .Values.auth.whitelist_domains) 0 ) (eq .Values.auth.use_domain_hostname true)}}
+      {{- $whiteListDomains := .Values.auth.whitelist_domains }}
+      {{- if .Values.auth.use_domain_hostname }}
+        {{- $whiteListDomains = append $whiteListDomains (printf ".%s" (include "kubee-get-apex-domain" .Values.hostname)) }}
+      {{- end }}
     # Required to allow redirection back to original requested target
-    whitelist_domains = [ {{ range $index, $whiteListDomain := .Values.auth.whitelist_domains }}{{if $index}},{{end}}"{{$whiteListDomain}}"{{end}} ]
+    whitelist_domains = [ {{ range $index, $whiteListDomain := $whiteListDomains }}{{if $index}},{{end}}"{{$whiteListDomain}}"{{end}} ]
     {{- end }}
 
     # Traefik
@@ -63,13 +67,24 @@ data:
     tls_key_file = "/etc/oauth2-proxy/tls/tls.key"
 
     # Cookie
+    # https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/#cookie-options
     cookie_expire = "{{.Values.auth.cookie_expire}}"
     cookie_secure = true
-    {{- if (gt (len .Values.auth.cookie_domains) 0 ) }}
+    {{- if or (gt (len .Values.auth.cookie_domains) 0 ) (eq .Values.auth.use_domain_hostname true) }}
+        {{- $cookieDomains := .Values.auth.cookie_domains }}
+        {{- if .Values.auth.use_domain_hostname }}
+          {{- $cookieDomains = append $cookieDomains (printf ".%s" (include "kubee-get-apex-domain" .Values.hostname)) }}
+        {{- end }}
     # Optional domain of the cookie: the longest domain matching the request's host will be used (or the shortest cookie domain if there is no match).
-    cookie_domains = [ {{ range $index, $cookieDomain := .Values.auth.cookie_domains }}{{if $index}},{{end}}"{{$cookieDomain}}"{{end}} ]
+    cookie_domains = [ {{ range $index, $cookieDomain := $cookieDomains }}{{if $index}},{{end}}"{{$cookieDomain}}"{{end}} ]
     {{- end }}
     cookie_name = "_oauth2_proxy"
+    cookie_httponly = true
+
+    # Csrf Cookie
+    # https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/#cookie-options
+    cookie_csrf_per_request = true
+    cookie_csrf_expire = "5m"
 
     # Dex
     provider = "oidc"
