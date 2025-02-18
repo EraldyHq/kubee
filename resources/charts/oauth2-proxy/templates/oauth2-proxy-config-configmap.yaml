@@ -17,7 +17,9 @@ data:
   #    https://github.com/oauth2-proxy/oauth2-proxy/blob/master/contrib/oauth2-proxy.cfg.example
   #    https://github.com/oauth2-proxy/oauth2-proxy/blob/2d29cee51e7e26daf9021685369c58822b8e2dc2/contrib/local-environment/kubernetes/values.yaml#L50
   # Doc: https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview
-  # Traefik Config: https://oauth2-proxy.github.io/oauth2-proxy/configuration/integration#configuring-for-use-with-the-traefik-v2-forwardauth-middleware
+  # Traefik Config:
+  #   Doc: https://oauth2-proxy.github.io/oauth2-proxy/configuration/integration#configuring-for-use-with-the-traefik-v2-forwardauth-middleware
+  #   File: https://github.com/oauth2-proxy/oauth2-proxy/blob/master/contrib/local-environment/oauth2-proxy-traefik.cfg
   oauth2-proxy.cfg: |-
 
     # Endpoints
@@ -28,12 +30,16 @@ data:
     # Flow
     # Redirect URL
     redirect_url = "https://{{required "oauth2_proxy.hostname is required" .Values.hostname}}/oauth2/callback"
+    # The following option skip the page requesting the user to click on a button to be redirected to the identity provider
+    # It can be activated only when traefik is not configure with the error redirection middleware
+    skip_provider_button = true
 
     # Auth
     {{- if (gt (len .Values.auth.email_domains) 0 ) }}
     email_domains = [ {{ range $index, $emailDomain := .Values.auth.email_domains }}{{if $index}},{{end}}"{{$emailDomain}}"{{end}} ]
     {{- end }}
     {{- if (gt (len .Values.auth.whitelist_domains) 0 ) }}
+    # Required to allow redirection back to original requested target
     whitelist_domains = [ {{ range $index, $whiteListDomain := .Values.auth.whitelist_domains }}{{if $index}},{{end}}"{{$whiteListDomain}}"{{end}} ]
     {{- end }}
 
@@ -60,6 +66,7 @@ data:
     cookie_expire = "{{.Values.auth.cookie_expire}}"
     cookie_secure = true
     {{- if (gt (len .Values.auth.cookie_domains) 0 ) }}
+    # Optional domain of the cookie: the longest domain matching the request's host will be used (or the shortest cookie domain if there is no match).
     cookie_domains = [ {{ range $index, $cookieDomain := .Values.auth.cookie_domains }}{{if $index}},{{end}}"{{$cookieDomain}}"{{end}} ]
     {{- end }}
     cookie_name = "_oauth2_proxy"

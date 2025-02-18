@@ -24,8 +24,11 @@ helm pull https://github.com/oauth2-proxy/manifests/releases/download/oauth2-pro
 
 ## Doc
 
-Oauth2-proxy Dex Config: https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/openid_connect
-Example: https://github.com/oauth2-proxy/oauth2-proxy/tree/master/contrib/local-environment/kubernetes
+* Oauth2-proxy Dex Config: https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/openid_connect
+* Example: https://github.com/oauth2-proxy/oauth2-proxy/tree/master/contrib/local-environment/kubernetes
+* Traefik Forward Auth example:
+  * https://oauth2-proxy.github.io/oauth2-proxy/configuration/integration#forwardauth-with-401-errors-middleware 
+  * https://github.com/oauth2-proxy/oauth2-proxy/blob/master/contrib/local-environment/traefik/dynamic.yaml
 
 ## Support
 
@@ -47,6 +50,42 @@ We don't use the [Helm Chart](https://github.com/oauth2-proxy/manifests) for the
   version: 7.11.0
   repository: https://oauth2-proxy.github.io/manifests
   alias: oauth2-proxy
+```
+
+### Test 302 Redirect
+
+Works with both
+```bash
+curl -I  -k https://oauth2-bcf52bfa.nip.io
+curl -I  -k https://oauth2-proxy.auth.svc.cluster.local
+curl -H "X-Forwarded-For: 10.42.0.220" -H "X-Forwarded-Host: up.nip.io" -H "X-Forwarded-Proto: https" -I  -k https://oauth2-bcf52bfa.nip.io
+```
+You should get:
+```bash
+HTTP/2 302 
+```
+```
+https://dex-xxx.nip.io/auth?
+approval_prompt=force&
+client_id=oauth2-proxy&
+redirect_uri=https%3A%2F%2Foauth2-bcf52bfa.nip.io%2Foauth2%2Fcallback&
+response_type=code&
+scope=openid+email+profile&
+state=d5vV1_Hde0ZIYqnOutEOThC5qeEJW_AKFp55SiC6WTk%3A%2F
+```
+
+### Test Endpoints
+https://oauth2-proxy.github.io/oauth2-proxy/features/endpoints
+```bash
+curl -I  -k https://oauth2-bcf52bfa.nip.io/ # got 403 lack of permissions
+# for nginx
+curl -I  -k https://oauth2-bcf52bfa.nip.io/oauth2/auth # got 401 missing or invalid authentication
+
+curl -I  -k https://oauth2-bcf52bfa.nip.io/ready
+curl -I  -k https://oauth2-bcf52bfa.nip.io/oauth2/start
+
+
+curl -H "X-Forwarded-For: 10.42.0.220" -H "X-Forwarded-Host: example.com" -H "X-Forwarded-Proto: https" -I  -k https://oauth2-bcf52bfa.nip.io/oauth2/auth
 ```
 
 ### 403

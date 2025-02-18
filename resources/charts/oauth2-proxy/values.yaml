@@ -25,7 +25,7 @@ auth:
   # The admin email is already taken into account
   email_addresses: []
   # Whitelist domains
-  whitelist_domains: []
+  whitelist_domains: [ ]
 
 # Oauth proxy helm values
 # https://github.com/oauth2-proxy/manifests/blob/main/helm/oauth2-proxy/values.yaml
