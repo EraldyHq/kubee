@@ -38,11 +38,13 @@ secret_synopsis(){
   echo '```'
   echo "where: command may be:"
   # shellcheck disable=SC2016
-  echo '  * `n` : The namespace (default to KUBEE_APP_NAMESPACE)'
+  echo '  * `n` : The namespace (default to KUBEE_CONNECTION_NAMESPACE)'
   # shellcheck disable=SC2016
   echo '  * `name` : The secret name'
   # shellcheck disable=SC2016
-  echo '  * `-t|--type` : The type tls or ca'
+  echo '  * `-t|--type` : The type of cert in the secret: tls or ca cert'
+  # shellcheck disable=SC2016
+  echo '  * `-p|--public-key` : Print only the public key in pem format'
 
 }
 
@@ -71,7 +73,10 @@ function print_cert_secret(){
   # no quote in jsonpath, not jsonpath='{.data.tls\.crt}' otherwise we get the quotes '' in the output
   local GET_TLS_SECRET_COMMAND=("kubectl" "get" "secret" )
   local args
-  args=$(getopt -l "namespace:type" -o "n:t:" -- "$@")
+  if ! args=$(getopt -l "namespace:,type:,public-key" -o "n:t:p" -- "$@"); then
+    echo::err "Error while parsing the option"
+    return 1
+  fi
   # eval set to set the positional arguments back to $args
   eval set -- "$args"
   while [[ $# -gt 0 ]]
@@ -114,15 +119,15 @@ function print_cert_secret(){
 
   local CERT
   CERT=$(echo::eval "${GET_TLS_SECRET_COMMAND[*]} | base64 -d" )
-  # <() is a https://en.wikipedia.org/wiki/Process_substitution to give a file (ie URI)
   case "$PRINT_OBJECT" in
     "cert")
     echo "Print $TYPE_CERT cert"
+    # <() is a https://en.wikipedia.org/wiki/Process_substitution to give a file (ie URI)
     openssl storeutl -noout -text <(echo "$CERT")
     ;;
     "public-key")
-    echo "Print public key of $TYPE_CERT cert"
-    openssl x509 -pubkey -noout <(echo "$CERT")
+    echo "Print public key of $TYPE_CERT cert in pem format"
+    openssl x509 -pubkey -noout <<< "$CERT"
     ;;
     *)
       echo:err "Print object $PRINT_OBJECT is unknown"
@@ -146,38 +151,7 @@ function print_cert_cluster_kubeconfig(){
   openssl storeutl -noout -text <(kubectl config view --minify --raw --output 'jsonpath={..cluster.certificate-authority-data}' | base64 -d)
 }
 
-function verify_jwt(){
 
-  local secret
-  local JWT="$2"
-
-  # Extract JWT from Authorization header
-  #AUTH_HEADER="Authorization: Bearer your.jwt.token.here"
-  #JWT=$(echo "$AUTH_HEADER" | awk '{print $3}')
-
-  # Extract the header and payload
-  # Header  = {
-  #  "alg": "RS256",
-  #  "kid": "5c6097630863e16d9eb72adf2c6f4624aeb1f6aa"
-  #}
-  local HEADER
-  HEADER=$(echo "$JWT" | cut -d "." -f1 | base64 -d 2>/dev/null | jq -r .)
-  local ALG
-  ALG=$(echo "$HEADER" | jq -r .alg)
-  KID=$(echo "$HEADER" | jq -r .kid)
-
-  # Extract the signature
-  # The third and last part of JWT
-  SIGNATURE=$(echo "$JWT" | cut -d "." -f3 | tr '_-' '/+' | base64 -d 2>/dev/null)
-
-  # Get the public key from the CA cert
-  openssl x509 -in "$CA_CERT" -pubkey -noout > pubkey.pem
-
-  # Verify the signature
-  echo -n "$(echo "$JWT" | cut -d "." -f1,2 | tr -d '\n' | base64 -d 2>/dev/null)" | \
-      openssl dgst -sha256 -verify pubkey.pem -signature <(echo -n "$SIGNATURE")
-
-}
 
 COMMAND=${1:-}
 if [ "$COMMAND" == "" ]; then
@@ -210,7 +184,7 @@ case "$COMMAND" in
   ;;
   *)
     doc::help synopsis
-    echo::err "command $1 not found"
+    echo::err "command $COMMAND not found"
     exit 1
 esac
 

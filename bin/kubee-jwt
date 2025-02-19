@@ -1,0 +1,118 @@
+#!/bin/bash
+
+
+# shellcheck source=./bashlib-doc.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+
+synopsis(){
+
+  echo "Usage:"
+  echo ''
+  echo 'Jwt command'
+  echo ''
+  echo '```bash'
+  # shellcheck disable=SC2005
+  echo "kubee jwt command JwtToken"
+  echo '```'
+  echo "where: command may be:"
+  # shellcheck disable=SC2016
+  echo '  * `verify` : Print the client certificate chain found in the kubeconfig file'
+  # shellcheck disable=SC2016
+  echo '  * `print` : Print the Jwt in text format'
+
+
+}
+
+
+
+HELP=${1:-}
+if [[ $HELP == "synopsis" ]]; then
+  doc::help synopsis
+  exit
+fi
+
+if [[ $HELP =~ -h|--help|help ]]; then
+  doc::help synopsis
+  exit
+fi
+
+
+function print_jwt(){
+
+    local JWT="$1"
+
+    # Extract the header
+    # Header  = {
+    #  "alg": "RS256",
+    #  "kid": "5c6097630863e16d9eb72adf2c6f4624aeb1f6aa"
+    #}
+    local ENCODED_HEADER
+    ENCODED_HEADER=$(echo "$JWT" | cut -d "." -f1)
+    #echo "Encoded Header: $ENCODED_HEADER"
+    echo "Data Header:"
+    echo "$ENCODED_HEADER" | base64 -d 2>/dev/null | jq -r .
+
+    # Extract the payload
+    local ENCODED_PAYLOAD;
+    ENCODED_PAYLOAD=$(echo "$JWT" | cut -d "." -f2 )
+    #echo "Encoded Payload: $ENCODED_PAYLOAD"
+    echo "Data Payload:"
+    echo "$ENCODED_PAYLOAD" | base64 -d 2>/dev/null | jq -r .
+
+
+    # Extract the signature
+    # The third and last part of JWT
+    local ENCODED_SIGNATURE;
+    ENCODED_SIGNATURE=$(echo "$JWT" | cut -d "." -f3)
+    echo "$ENCODED_SIGNATURE"
+    #| tr '_-' '/+' | base64 -d 2>/dev/null
+
+}
+
+
+
+function verify_jwt(){
+
+  local secret
+  local JWT="$2"
+
+
+
+
+  # Get the public key from the CA cert
+  openssl x509 -in "$CA_CERT" -pubkey -noout > pubkey.pem
+
+  # Verify the signature
+  echo -n "$(echo "$JWT" | cut -d "." -f1,2 | tr -d '\n' | base64 -d 2>/dev/null)" | \
+      openssl dgst -sha256 -verify pubkey.pem -signature <(echo -n "$SIGNATURE")
+
+}
+
+COMMAND=${1:-}
+if [ "$COMMAND" == "" ]; then
+    doc::help synopsis
+    echo::err "A command is mandatory"
+    exit 1
+fi
+shift
+
+
+case "$COMMAND" in
+  "verify")
+    verify_jwt "$@"
+  ;;
+  "print")
+    print_jwt "$@"
+  ;;
+  *)
+    doc::help synopsis
+    echo::err "command $COMMAND not found"
+    exit 1
+esac
+
+
+
+
+
+
+

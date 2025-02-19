@@ -23,11 +23,12 @@ where:
 
 * \`command\` is one of:
   * \`app\`                      : Application scoped commands
-  * \`cert\`                     : Cert management
+  * \`cert\`                     : Cert commands
   * \`cluster\`                  : Kubernetes cluster hosts installation and configuration
   * \`kubectl\`                  : Kubectl Kubee scluster aware
   * \`helmet\`                   : Kubee Package Manager
   * \`helm\`                     : Helm Package Manager
+  * \`jwt\`                      : Jwt commands
 
 * \`kubee options\` are:
   * \`-n|--namespace name\`    : the \`connection namespace name\` default to \`KUBEE_CONNECTION_NAMESPACE\`, ultimately to \`default\`.
@@ -138,6 +139,9 @@ case "$KUBEE_COMMAND" in
   "cert")
     source kubee-cert "$@" || error::exit $?
     ;;
+  "jwt")
+      source kubee-jwt "$@" || error::exit $?
+      ;;
   *)
     doc::help synopsis
     echo::err  "Command $KUBEE_COMMAND is unknown"
