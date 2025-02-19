@@ -6,6 +6,11 @@ namespace: 'kubernetes-dashboard'
 # Example: hostname: 'dash.kubee.dev'
 # If set, an ingress will be created
 hostname: ''
+# Auth
+# By default, you need to enter a service account token
+# But if the oauth2-proxy, dex and cluster oidc connect are installed and configured
+# you can use a middleware to authenticate the users
+use_auth_middleware: false
 
 # Default of
 # https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml

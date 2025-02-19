@@ -42,7 +42,7 @@ auth:
   # example for a home ip: 143.176.206.80/32
   private_networks: [ ]
 
-# List of middlewares used in Kubee chart
+# List of middlewares used in Kubee charts
 # https://doc.traefik.io/traefik/middlewares
 middlewares:
   # A basic Auth Middleware
@@ -63,12 +63,11 @@ middlewares:
   git_hooks:
     name: 'git-hooks'
     service: 'github' # only supported for now
-  # Forward Auth to oauth2
+  # Forward Auth to oauth2-proxy
   # https://doc.traefik.io/traefik/middlewares/http/forwardauth/
-  # Traefik-forward-auth should be installed for this auth to work
   forward_auth:
     name: 'forward-auth'
-  # Forward Auth middleware to oauth2 that pass through a signed bearer
+  # Forward Auth middleware to oauth2-proxy that pass through a signed bearer
   # It can be applied on Kube API client such as Kubernetes Dashboard'
   forward_auth_bearer:
     name: 'forward-auth-bearer'
