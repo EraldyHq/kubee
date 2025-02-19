@@ -18,7 +18,8 @@ metadata:
     {{- end }}
 spec:
   rules:
-    {{- range $hostname := .Values.hostnames }}
+    {{ $hostnames := list .Values.hostname}}
+    {{- range $hostname := $hostnames }}
     - host: '{{ $hostname }}'
       http:
         paths:
@@ -30,9 +31,9 @@ spec:
             path: /
             pathType: Prefix
     {{- end }}
-  {{- if ne (((.Values.kubee).cert_manager).enabled) false }}
+  {{- if ne .Values.cert_manager.enabled false }}
   tls:
-    {{- range $i, $hostname := .Values.hostnames }}
+    {{- range $i, $hostname := $hostnames }}
     - hosts:
         - '{{ $hostname }}'
       secretName: '{{ include "whoami-name" (dict "Release" $.Release ) }}-{{ $i }}'

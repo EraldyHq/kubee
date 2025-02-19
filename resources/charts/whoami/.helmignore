@@ -1,2 +1,4 @@
+.helmignore
 out
 vendors
+contrib
