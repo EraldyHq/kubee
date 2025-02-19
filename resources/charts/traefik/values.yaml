@@ -63,15 +63,16 @@ middlewares:
   git_hooks:
     name: 'git-hooks'
     service: 'github' # only supported for now
-  # Forward Auth
+  # Forward Auth to oauth2
   # https://doc.traefik.io/traefik/middlewares/http/forwardauth/
   # Traefik-forward-auth should be installed for this auth to work
   forward_auth:
     name: 'forward-auth'
-    # The auth middleware
-    # Possible values: oauth2-proxy or traefik-forward-auth
-    service: 'oauth2-proxy'
-  # Middleware to apply headers on forwarded auth
+  # Forward Auth middleware to oauth2 that pass through a signed bearer
+  # It can be applied on Kube API client such as Kubernetes Dashboard'
+  forward_auth_bearer:
+    name: 'forward-auth-bearer'
+  # Middleware to apply auth headers on website with an authentication form
   auth_headers:
     name: 'auth-headers'
 

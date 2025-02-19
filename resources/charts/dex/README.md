@@ -11,7 +11,7 @@
 
 By default,
 * the admin user is created with its email as login.
-* [traefik-forward-auth](../traefik-forward-auth/README.md) is added as client if enabled
+* [oauth2-proxy](../oauth2-proxy/README.md) is added as client if enabled
 
 ## Cluster Values Example
 
@@ -22,16 +22,16 @@ dex:
   enabled: true
   hostname: 'dex.example.com'
   clients:
-    traefik_forward_auth:
-      secret: '${DEX_TRAEFIK_FORWARD_AUTH_CLI_SECRET}'
+    oauth2_proxy:
+      secret: '${DEX_FORWARD_AUTH_CLI_SECRET}'
 ```
 
-In the cluster `.envrc` file, set the env `DEX_TRAEFIK_FORWARD_AUTH_CLI_SECRET` with your favorite identity store.
+In the cluster `.envrc` file, set the env `DEX_FORWARD_AUTH_CLI_SECRET` with your favorite identity store.
 
 Example with `pass`
 ```bash
-export DEX_TRAEFIK_FORWARD_AUTH_CLI_SECRET
-DEX_TRAEFIK_FORWARD_AUTH_CLI_SECRET=$(pass "cluster_name/dex/traefik-forward-auth-cli-secret")
+export DEX_FORWARD_AUTH_CLI_SECRET
+DEX_FORWARD_AUTH_CLI_SECRET=$(pass "cluster_name/dex/forward-auth-cli-secret")
 ```
 
 

@@ -1,0 +1,111 @@
+# Traefik Forward Auth
+
+> [!WARNING]
+> Deprecated for [oauth2-proxy](../../charts/oauth2-proxy/README.md)
+> Why?
+> * Traefik Forward Auth does not support forwarding the `Authorization Header` 
+> therefore it's not possible to authenticate directly to a Kubernetes Dashboard Client
+> * Big lack of documentation and support
+> Ref:
+> * [X-Forwarded-User is the only header](https://github.com/thomseddon/traefik-forward-auth#forwarded-headers) 
+> * [Issue](https://github.com/thomseddon/traefik-forward-auth/issues/30)
+> 
+> We let it here so that others that still want to use it have a reference
+
+
+This kubee chart will:
+* install [traefik-forward-auth](https://github.com/thomseddon/traefik-forward-auth).
+* to forward ingress authentication to [dex](../../charts/dex/README.md)
+
+## Mode
+
+`Traefik Forward Auth` works in [2 modes](https://github.com/thomseddon/traefik-forward-auth#operation-modes)
+* the `auth host mode` (aka Single SignOn by domain) where:
+  * The `Traefik Forward Auth` has a hostname `name.apex.tld`
+  * All protected apps should have the same apex domain `apex.tld` as the hostname
+  * This chart uses this `mode` if the hostname value is not empty.
+* the `overlay mode`, where you need to register in [Dex](../../charts/dex/values.yaml) all protected apps in the redirect callback of the `traefik forward auth` client ie
+  * `traefik.xxx.tld`
+  * `prometheus.xxx.tld`
+  * `alertmanager.xxx.tld`
+  * ...
+
+
+  
+## Installation Steps for the Auth Host Mode
+
+### Dependency Chart
+
+* The following chart should be enabled and installed:
+  * [dex chart](../../charts/dex/README.md)
+  * [cert-manager](../../charts/cert-manager/README.md)
+  * [traefik](../../charts/traefik/README.md)
+  
+### Creation of Middleware
+
+```gotemplate
+# Forward authentication Middleware
+# Traefik Doc: https://doc.traefik.io/traefik/middlewares/http/forwardauth/#configuration-examples
+# Based on the traefik_forward_auth example: https://github.com/thomseddon/traefik-forward-auth/blob/master/examples/traefik-v2/kubernetes/advanced-separate-pod/traefik-forward-auth/middleware.yaml
+# For info:
+#  * Authentic supports forward auth https://docs.goauthentik.io/docs/add-secure-apps/providers/proxy/server_traefik
+#  * oauth2-proxy also as Middleware: https://oauth2-proxy.github.io/oauth2-proxy/
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: 'forward-auth-traefik'
+  namespace: {{ .Values.namespace }}
+spec:
+  forwardAuth:
+    address: "http://{{ .Values.traefik_forward_auth.service }}.{{ .Values.traefik_forward_auth.namespace }}.svc.cluster.local:4181"
+    authResponseHeaders:
+      {{- /* The authenticated user is set in the X-Forwarded-User header */}}
+      {{- /* https://github.com/thomseddon/traefik-forward-auth#forwarded-headers */}}
+      - X-Forwarded-User
+```
+
+### Creation of Dex Client
+
+In dex config, add `Traefik Forward Auth` as client
+```gotemplate
+staticClients:
+    {{- /* This is internal client config for traefik-forward-auth. */}}
+    - name: Traefik Forward Auth
+      id: {{ required "dex.clients.traefik_forward_auth.client_id is required" .Values.clients.traefik_forward_auth.client_id }}
+      # Shared Secret
+      secret: {{ required "dex.clients.traefik_forward_auth.secret is required" .Values.clients.traefik_forward_auth.secret }}
+      redirectURIs:
+      {{- if ne .Values.traefik_forward_auth.hostname "" }}
+        - 'https://{{ .Values.traefik_forward_auth.hostname }}/_oauth' # _oauth is the default
+      {{- end }}
+      {{- if and (eq .Values.traefik_forward_auth.hostname "") (gt (len .Values.clients.traefik_forward_auth.redirect_domains) 0 ) }}
+        {{- range $appDomain := .Values.clients.traefik_forward_auth.redirect_domains }}
+        - 'https://{{ $appDomain }}/_oauth'
+        {{- end }}
+      {{- end }}
+```
+
+### Cluster Values file
+
+* You should set at minimal the following values in your [Cluster Values file](../../../docs/site/cluster-values.md)
+```yaml
+traefik_forward_auth:
+  enabled: true
+  # For Host mode, the callback hostname (All protected apps should have the same apex domain)
+  # https://github.com/thomseddon/traefik-forward-auth#auth-host-mode
+  hostname: 'forward-auth.example.com'
+  auth:
+    # The encryption secret
+    cookie_secret: 'xxxx'
+```
+### Installing it
+
+```bash
+kubee -cluster clusterName helmet play traefik-forward-auth
+```
+
+### Apply middleware
+
+Once installed, you can apply the middleware on your route.
+
+

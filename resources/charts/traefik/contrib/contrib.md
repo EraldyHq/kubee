@@ -14,9 +14,6 @@ ln -s $(realpath ../prometheus/values.yaml) charts/kubee-prometheus/values.yaml
 mkdir "charts/kubee-grafana"
 ln -s $(realpath ../grafana/Chart.yaml) charts/kubee-grafana/Chart.yaml
 ln -s $(realpath ../grafana/values.yaml) charts/kubee-grafana/values.yaml
-mkdir "charts/kubee-traefik-forward-auth"
-ln -s $(realpath ../traefik-forward-auth/Chart.yaml) charts/kubee-traefik-forward-auth/Chart.yaml
-ln -s $(realpath ../traefik-forward-auth/values.yaml) charts/kubee-traefik-forward-auth/values.yaml
 mkdir "charts/kubee-oauth2-proxy"
 ln -s $(realpath ../oauth2-proxy/Chart.yaml) charts/kubee-oauth2-proxy/Chart.yaml
 ln -s $(realpath ../oauth2-proxy/values.yaml) charts/kubee-oauth2-proxy/values.yaml
