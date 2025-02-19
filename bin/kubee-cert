@@ -121,12 +121,12 @@ function print_cert_secret(){
   CERT=$(echo::eval "${GET_TLS_SECRET_COMMAND[*]} | base64 -d" )
   case "$PRINT_OBJECT" in
     "cert")
-    echo "Print $TYPE_CERT cert"
+    echo "Cert $SECRET_NAME/$TYPE_CERT.cert: Print all"
     # <() is a https://en.wikipedia.org/wiki/Process_substitution to give a file (ie URI)
     openssl storeutl -noout -text <(echo "$CERT")
     ;;
     "public-key")
-    echo "Print public key of $TYPE_CERT cert in pem format"
+    echo "Cert $SECRET_NAME/$TYPE_CERT.cert: Print public key in pem format"
     openssl x509 -pubkey -noout <<< "$CERT"
     ;;
     *)

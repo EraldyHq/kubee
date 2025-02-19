@@ -37,33 +37,47 @@ if [[ $HELP =~ -h|--help|help ]]; then
 fi
 
 
+# Function to decode JWT parts
+decode_base64_url() {
+    local len=$((${#1} % 4))
+    local result="$1"
+    if [ $len -eq 2 ]; then result="$1"'=='
+    elif [ $len -eq 3 ]; then result="$1"'='
+    fi
+    echo "$result" | tr '_-' '/+' | base64 -d
+}
+
 function print_jwt(){
 
     local JWT="$1"
+
+    # Split JWT into parts
+    IFS='.' read -r ENCODED_HEADER ENCODED_PAYLOAD ENCODED_SIGNATURE <<< "$JWT"
+
+    if [ -z "$ENCODED_HEADER" ] || [ -z "$ENCODED_HEADER" ] || [ -z "$ENCODED_SIGNATURE" ]; then
+        echo "Error: Invalid JWT format"
+        exit 1
+    fi
 
     # Extract the header
     # Header  = {
     #  "alg": "RS256",
     #  "kid": "5c6097630863e16d9eb72adf2c6f4624aeb1f6aa"
     #}
-    local ENCODED_HEADER
-    ENCODED_HEADER=$(echo "$JWT" | cut -d "." -f1)
     #echo "Encoded Header: $ENCODED_HEADER"
     echo "Data Header:"
-    echo "$ENCODED_HEADER" | base64 -d 2>/dev/null | jq -r .
+    JSON_HEADER=$(decode_base64_url "$ENCODED_HEADER" 2>/dev/null)
+    echo "$JSON_HEADER" | jq -r .
 
     # Extract the payload
-    local ENCODED_PAYLOAD;
-    ENCODED_PAYLOAD=$(echo "$JWT" | cut -d "." -f2 )
     #echo "Encoded Payload: $ENCODED_PAYLOAD"
     echo "Data Payload:"
-    echo "$ENCODED_PAYLOAD" | base64 -d 2>/dev/null | jq -r .
+    JSON_PAYLOAD=$(decode_base64_url "$ENCODED_PAYLOAD" 2>/dev/null)
+    echo "$JSON_PAYLOAD" | jq -r .
 
 
     # Extract the signature
     # The third and last part of JWT
-    local ENCODED_SIGNATURE;
-    ENCODED_SIGNATURE=$(echo "$JWT" | cut -d "." -f3)
     echo "$ENCODED_SIGNATURE"
     #| tr '_-' '/+' | base64 -d 2>/dev/null
 
