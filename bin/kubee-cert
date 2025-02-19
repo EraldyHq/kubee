@@ -1,11 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=./bashlib-error.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
-error::set_strict_mode
-error::set_trap
-# shellcheck source=./bashlib-echo.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+
 # shellcheck source=./bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 
@@ -25,7 +20,9 @@ synopsis(){
   # shellcheck disable=SC2016
   echo '  * `config-cluster` : Print the cluster certificate authority in the kubeconfig file'
   # shellcheck disable=SC2016
-  echo '  * `secret` : Print the client certificate in a secret'
+  echo '  * `secret-tls` : Print the tls certificate stored in a secret in plain text'
+  # shellcheck disable=SC2016
+  echo '  * `secret-ca`  : Print the ca certificate stored in a secret in plain text'
 
 }
 
@@ -44,6 +41,8 @@ secret_synopsis(){
   echo '  * `n` : The namespace (default to KUBEE_APP_NAMESPACE)'
   # shellcheck disable=SC2016
   echo '  * `name` : The secret name'
+  # shellcheck disable=SC2016
+  echo '  * `-t|--type` : The type tls or ca'
 
 }
 
@@ -58,14 +57,21 @@ if [[ $HELP =~ -h|--help|help ]]; then
   exit
 fi
 
+# Print the CA and TLS cert of a secret in plain text
 function print_cert_secret(){
 
-  SECRET_NAME=""
-  SECRET_NAMESPACE=${KUBEE_APP_NAMESPACE:-}
+  # This is a kubectl command - set kubeconfig
+  kubee::set_kubeconfig_env
+
+  local SECRET_NAME=""
+  local SECRET_NAMESPACE=${KUBEE_CONNECTION_NAMESPACE}
+  local TYPE_CERT="tls"
+  local PRINT_OBJECT="cert"
   # The get secret command
   # no quote in jsonpath, not jsonpath='{.data.tls\.crt}' otherwise we get the quotes '' in the output
-  GET_SECRET_COMMAND=("kubectl" "get" "secret" "-o" "jsonpath={.data.tls\.crt}")
-  args=$(getopt -l "namespace:" -o "n:" -- "$@")
+  local GET_TLS_SECRET_COMMAND=("kubectl" "get" "secret" )
+  local args
+  args=$(getopt -l "namespace:type" -o "n:t:" -- "$@")
   # eval set to set the positional arguments back to $args
   eval set -- "$args"
   while [[ $# -gt 0 ]]
@@ -74,6 +80,15 @@ function print_cert_secret(){
       "-n"|"--namespace")
         shift
         SECRET_NAMESPACE="$1"
+        shift
+        ;;
+      "-t"|"--type")
+        shift
+        TYPE_CERT="$1"
+        shift
+        ;;
+      "-p"|"--public-key")
+        PRINT_OBJECT="public-key"
         shift
         ;;
       "--")
@@ -85,20 +100,37 @@ function print_cert_secret(){
      esac
   done
 
-  if [ "$SECRET_NAMESPACE" != "" ]; then
-      GET_SECRET_COMMAND+=("-n" "$SECRET_NAMESPACE")
-  fi
+  GET_TLS_SECRET_COMMAND+=("-o" "jsonpath=\"{.data.$TYPE_CERT\.crt}\"")
+  GET_TLS_SECRET_COMMAND+=("-n" "$SECRET_NAMESPACE")
+
   if [ "$SECRET_NAME" == "" ]; then
     doc::help secret_synopsis
     echo::err "A secret name is mandatory"
     return 1
   fi
-  GET_SECRET_COMMAND+=("$SECRET_NAME")
+  GET_TLS_SECRET_COMMAND+=("$SECRET_NAME")
 
-  # <() is a https://en.wikipedia.org/wiki/Process_substitution to give a file (ie URI)
+
+
   local CERT
-  CERT=$("${GET_SECRET_COMMAND[@]}" | base64 -d)
-  openssl storeutl -noout -text <(echo "$CERT")
+  CERT=$(echo::eval "${GET_TLS_SECRET_COMMAND[*]} | base64 -d" )
+  # <() is a https://en.wikipedia.org/wiki/Process_substitution to give a file (ie URI)
+  case "$PRINT_OBJECT" in
+    "cert")
+    echo "Print $TYPE_CERT cert"
+    openssl storeutl -noout -text <(echo "$CERT")
+    ;;
+    "public-key")
+    echo "Print public key of $TYPE_CERT cert"
+    openssl x509 -pubkey -noout <(echo "$CERT")
+    ;;
+    *)
+      echo:err "Print object $PRINT_OBJECT is unknown"
+      return 1
+  esac
+
+
+
 
 }
 
@@ -114,6 +146,39 @@ function print_cert_cluster_kubeconfig(){
   openssl storeutl -noout -text <(kubectl config view --minify --raw --output 'jsonpath={..cluster.certificate-authority-data}' | base64 -d)
 }
 
+function verify_jwt(){
+
+  local secret
+  local JWT="$2"
+
+  # Extract JWT from Authorization header
+  #AUTH_HEADER="Authorization: Bearer your.jwt.token.here"
+  #JWT=$(echo "$AUTH_HEADER" | awk '{print $3}')
+
+  # Extract the header and payload
+  # Header  = {
+  #  "alg": "RS256",
+  #  "kid": "5c6097630863e16d9eb72adf2c6f4624aeb1f6aa"
+  #}
+  local HEADER
+  HEADER=$(echo "$JWT" | cut -d "." -f1 | base64 -d 2>/dev/null | jq -r .)
+  local ALG
+  ALG=$(echo "$HEADER" | jq -r .alg)
+  KID=$(echo "$HEADER" | jq -r .kid)
+
+  # Extract the signature
+  # The third and last part of JWT
+  SIGNATURE=$(echo "$JWT" | cut -d "." -f3 | tr '_-' '/+' | base64 -d 2>/dev/null)
+
+  # Get the public key from the CA cert
+  openssl x509 -in "$CA_CERT" -pubkey -noout > pubkey.pem
+
+  # Verify the signature
+  echo -n "$(echo "$JWT" | cut -d "." -f1,2 | tr -d '\n' | base64 -d 2>/dev/null)" | \
+      openssl dgst -sha256 -verify pubkey.pem -signature <(echo -n "$SIGNATURE")
+
+}
+
 COMMAND=${1:-}
 if [ "$COMMAND" == "" ]; then
     doc::help synopsis
@@ -122,9 +187,6 @@ if [ "$COMMAND" == "" ]; then
 fi
 shift
 
-# Get env
-# Get env
-source kubee-env || error::exit $?
 
 case "$COMMAND" in
   "config-client")
@@ -133,11 +195,19 @@ case "$COMMAND" in
   "config-cluster")
     print_cert_cluster_kubeconfig
     ;;
-  "secret")
-    print_cert_secret "$@" || error::exit $?
+  "secret-ca")
+    print_cert_secret -t "ca" "$@"
     # see also
     # kubectl describe certificate xxxx
     ;;
+  "secret-tls")
+    print_cert_secret -t "tls" "$@"
+    # see also
+    # kubectl describe certificate xxxx
+    ;;
+  "verify_jwt")
+    verify_jwt "$@"
+  ;;
   *)
     doc::help synopsis
     echo::err "command $1 not found"

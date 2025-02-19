@@ -23,6 +23,7 @@ where:
 
 * \`command\` is one of:
   * \`app\`                      : Application scoped commands
+  * \`cert\`                     : Cert management
   * \`cluster\`                  : Kubernetes cluster hosts installation and configuration
   * \`kubectl\`                  : Kubectl Kubee scluster aware
   * \`helmet\`                   : Kubee Package Manager
@@ -133,6 +134,9 @@ case "$KUBEE_COMMAND" in
     ;;
   "kubectl")
     source kubee-kubectl "$@" || error::exit $?
+    ;;
+  "cert")
+    source kubee-cert "$@" || error::exit $?
     ;;
   *)
     doc::help synopsis
