@@ -1,12 +1,11 @@
 # Bootstrap and common cluster values (ie global)
-
 # Cluster Wide variables
-cluster:
-  # The cluster name
-  # used:
-  # * to identify the cluster (for instance, on prometheus remote-write metrics, the name is added as label)
-  # * as default first instance name for operator (for instance, prometheus operator allows to install multiple prometheus that needs to be unique. Kube-prometheus asks for a unique name)
-  name: 'kubee'
+
+# The cluster name
+# used:
+# * to identify the cluster (for instance, on prometheus remote-write metrics, the name is added as label)
+# * as default first instance name for operator (for instance, prometheus operator allows to install multiple prometheus that needs to be unique. Kube-prometheus asks for a unique name)
+name: 'kubee'
 
 # Authentication
 auth:

@@ -30,10 +30,10 @@ dependencies:
     repository: https://traefik.github.io/charts
     alias: traefik
     #condition: certManager.enabled
-  - name: kubee
+  - name: kubee-cluster
     version: 0.0.1
-    #repository: file://../kubee
-    alias: kubee
+    #repository: file://../cluster
+    alias: cluster
   # For the dashboard
   - name: kubee-grafana
     version: 0.0.1

@@ -15,7 +15,7 @@ is a controller that continuously monitors running applications and compares the
 
 By default, `kubectl-parallelism-limit` is set to `1` in a `kubee` cluster. 
 
-You can change it via the `kubee.argocd.conf.controller_kubectl_parallelism_limit` [conf](../../kubee/values.yaml)
+You can change it via the `argocd.conf.controller_kubectl_parallelism_limit` [conf](../values.yaml)
 
 Other important Perf Flags:
 * `--status-processors`: Number of application status processors (default 1)

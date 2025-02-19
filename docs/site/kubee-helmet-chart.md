@@ -5,7 +5,7 @@ A `Kubee Helmet Chart`:
     * that installs only one application
     * with the name of the app installed (ie grafana, not grafana operator)
     * that depends on:
-        * the [kubee Library Chart](../../resources/charts/kubee/README.md) to share cluster and installation wide
+        * the [kubee Cluster Library Chart](../../resources/charts/cluster/README.md) to share cluster and installation wide
             * `values.yaml` file
             * and `library`
         * and optionally:
@@ -45,11 +45,11 @@ The values file should contain different nodes for:
 ## FAQ: Why not multiple sub-chart by umbrella chart?
 
 SubChart cannot by default be installed in another namespace than the umbrella chart.
-This is a [known issue with helm and subcharts](https://github.com/helm/helm/issues/5358)
+This is a [known issue with helm and sub-charts](https://github.com/helm/helm/issues/5358)
 
 That's why:
 * the unit of execution is one sub-chart by umbrella chart
-* `kubee` is a common sub-chart of all umbrella chart
+* `kubee-cluster` is a common sub-chart of all umbrella chart
 
 
 ## Dev: Cross dependency

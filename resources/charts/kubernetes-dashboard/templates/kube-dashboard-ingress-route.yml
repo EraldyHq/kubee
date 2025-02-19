@@ -30,7 +30,7 @@ spec:
       match: Host(`{{ .Values.hostname }}`)
       {{- /* Auth via Dex via oAuth Proxy if enabled    */}}
       {{- if and (eq .Values.traefik.auth.middleware_name .Values.traefik.middlewares.forward_auth.name) (eq .Values.traefik.middlewares.forward_auth.service "oauth2-proxy") }}
-      {{- if eq .Values.kubee.auth.cluster_oidc.enabled true }}
+      {{- if eq .Values.cluster.auth.cluster_oidc.enabled true }}
       middlewares:
         - name: '{{ .Values.traefik.middlewares.forward_auth.name }}'
           namespace: '{{ .Values.traefik.namespace }}'

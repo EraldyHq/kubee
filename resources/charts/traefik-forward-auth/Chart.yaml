@@ -21,9 +21,9 @@ version: 0.0.1
 appVersion: "34.3.0" # Traefik Version
 
 dependencies:
-  - name: kubee
+  - name: kubee-cluster
     version: 0.0.1
-    alias: kubee
+    alias: cluster
   - name: kubee-dex
     version: 0.0.1
     alias: dex

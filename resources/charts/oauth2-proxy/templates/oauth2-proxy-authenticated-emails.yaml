@@ -11,7 +11,7 @@ data:
   # Equivalent to --authenticated-emails-file
   # https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview#proxy-options
   {{ include "oauth2-proxy-authenticated-emails-file-name" .}}: |-
-    {{.Values.kubee.auth.admin_user.email}}
+    {{.Values.cluster.auth.admin_user.email}}
     {{- if (gt (len .Values.auth.email_addresses) 0 ) }}
     {{- range $index, $emailAddress := .Values.auth.email_addresses }}
     {{$emailAddress}}

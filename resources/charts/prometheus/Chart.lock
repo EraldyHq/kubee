@@ -1,6 +1,6 @@
 dependencies:
-- name: kubee
-  repository: file://../kubee
+- name: kubee-cluster
+  repository: file://../cluster
   version: 0.0.1
 - name: kubee-cert-manager
   repository: file://../cert-manager

@@ -15,7 +15,7 @@ metadata:
     cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuer_name }}'
     {{- end }}
     {{- /* Only from Github or our network */}}
-    {{- if and (not (empty (.Values.kubee.auth.private_networks))) ( eq .Values.git.webhook.service "github") }}
+    {{- if and (not (empty (.Values.cluster.auth.private_networks))) ( eq .Values.git.webhook.service "github") }}
     traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.traefik.namespace }}-{{ .Values.traefik.middlewares.git_hooks.name }}@kubernetescrd
     {{- end}}
 spec:

@@ -23,9 +23,9 @@ spec:
             # Bootstrap user
             # https://www.keycloak.org/server/configuration#_creating_the_initial_admin_user
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
-              value: "{{ .Values.kubee.auth.admin_user.username }}"
+              value: "{{ .Values.cluster.auth.admin_user.username }}"
             - name: KC_BOOTSTRAP_ADMIN_PASSWORD
-              value: "{{ .Values.kubee.auth.admin_user.password }}"
+              value: "{{ .Values.cluster.auth.admin_user.password }}"
             - name: KC_PROXY
               value: "edge"
             # Enable health and metrics support

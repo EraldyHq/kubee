@@ -78,7 +78,7 @@ spec:
               value: '/_oauth'
             # Only allow given email addresses, can be set multiple times
             - name: WHITELIST
-              value: '{{.Values.kubee.auth.admin_user.email}},{{.Values.auth.whitelist_email_addresses}}'
+              value: '{{.Values.cluster.auth.admin_user.email}},{{.Values.auth.whitelist_email_addresses}}'
             # Only allow given email domains, can be set multiple times
             - name: DOMAIN
               value: '{{.Values.auth.whitelist_email_domains}}'

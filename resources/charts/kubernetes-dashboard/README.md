@@ -42,7 +42,7 @@ To access your dashboard, you need a `token`.
 
 This chart creates an account for your admin user defined in the [kubee values](../kubee/values.yaml)
 
-* Get the `kubee.auth.admin_user` value in your cluster file. If empty, the default is [admin](../kubee/values.yaml))
+* Get the `cluster.auth.admin_user` value in your cluster file. If empty, the default is [admin](../kubee/values.yaml))
 ```bash
 kubectl -n kubernetes-dashboard create token ACCOUNT_NAME --duration=8400h
 # with admin

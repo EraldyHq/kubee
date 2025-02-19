@@ -13,15 +13,10 @@
 // for file in manifests/*.json; do \
 //  yq eval -P "$file" > "${file%.json}.yaml"; \
 // done && rm -rf manifests/*.json
-
+local extValues = std.extVar('values');
 local values =  {
-    kubee: {
-        prometheus_adapter: {
-            // The error is triggered as access time, not build time
-            namespace: error 'must provide namespace',
-        }
-    }
-} + (std.extVar('values'));
+    prometheus_adapter_namespace: extValues.namespace,
+};
 
 
 local kp =
@@ -38,7 +33,7 @@ local kp =
     // kube-prometheus use `values` as this is similar to helm
     values+:: {
       common+: {
-        namespace: values.kubee.prometheus.namespace,
+        namespace: values.prometheus_adapter_namespace,
       },
       prometheusAdapter+:{
         resources:: {

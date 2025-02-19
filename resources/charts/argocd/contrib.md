@@ -18,7 +18,7 @@ Run [utilties/dl-dependency-scripts](utilties/dl-dependency-scripts) to update t
 * With helm
 ```bash
 helm template -s templates/patches/argocd-secret-patch.yaml \
-  --set 'kubee.auth.admin_user.password=welcome'  \
+  --set 'cluster.auth.admin_user.password=welcome'  \
   . | yq
 ```
 

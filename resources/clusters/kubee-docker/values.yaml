@@ -24,12 +24,12 @@ kubee:
       # The PEM content file
       # Not a path to the cert file relatif to the working directory (ie cluster directory)
       # Set with `KUBEE_HELM_INSTALL_OPTIONS`
-      # --set-file kubee.traefik.defaultCertificate.cert=cert/kubee.dev+1.pem
+      # --set-file traefik.default_certificate.cert=cert/kubee.dev+1.pem
       cert: ''
       # The PEM content file
       # Not a path to the key file relatif to the working directory (ie cluster directory)
       # Set with `KUBEE_HELM_INSTALL_OPTIONS`
-      # --set-file kubee.traefik.defaultCertificate.key=cert/kubee.dev+1-key.pem
+      # --set-file traefik.default_certificate.key=cert/kubee.dev+1-key.pem
       key: ''
     dashboard:
       # The FQDN for the traefik dashboard

@@ -1,7 +1,7 @@
 {{/*
   Test:
   helm template -s templates/traefik-middleware-allow-github-ip-hooks.yml \
-    --set 'kubee.auth.private_networks={143.55.64.3/20}'  \
+    --set 'cluster.auth.private_networks={143.55.64.3/20}'  \
     . | yq
 */}}
 apiVersion: traefik.io/v1alpha1

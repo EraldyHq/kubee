@@ -2,8 +2,8 @@ dependencies:
 - name: traefik
   repository: https://traefik.github.io/charts
   version: 34.3.0
-- name: kubee
-  repository: file://../kubee
+- name: kubee-cluster
+  repository: file://../cluster
   version: 0.0.1
 - name: kubee-grafana
   repository: file://../grafana

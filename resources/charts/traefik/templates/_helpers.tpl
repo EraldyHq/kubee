@@ -20,7 +20,7 @@ https://dexidp.io/docs/connectors/local/
 {{- define "basic-auth-list-base64-encode" }}
 {{- $result := list }}
 {{/* Add the admin user */}}
-{{- $result = append $result (htpasswd .Values.kubee.auth.admin_user.email .Values.kubee.auth.admin_user.password | b64enc)}}
+{{- $result = append $result (htpasswd .Values.cluster.auth.admin_user.email .Values.cluster.auth.admin_user.password | b64enc)}}
 {{/* See https://github.com/helm/helm/issues/7533#issuecomment-1039521776 */}}
 {{- range $email, $password := .Values.middlewares.basic_auth.users }}
 {{- $result = append $result (htpasswd $email $password | b64enc) }}

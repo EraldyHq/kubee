@@ -3,7 +3,7 @@ Used as default cert
 https://doc.traefik.io/traefik/https/tls/#default-certificate
 
 Test:
-helm template --debug -s templates/traefik-default-certificate.yml --set 'kubee.traefik.defaultCertificate.cert=yolo' .
+helm template --debug -s templates/traefik-default-certificate.yml --set 'default_certificate.cert=yolo' .
 
 */}}
 {{- if ne .Values.default_certificate.cert ""  -}}
@@ -17,9 +17,9 @@ metadata:
 type: kubernetes.io/tls
 data:
   tls.crt: |
-    {{ .Values.kubee.traefik.defaultCertificate.cert | b64enc }}
+    {{ .Values.default_certificate.cert | b64enc }}
   tls.key: |
-    {{ .Values.kubee.traefik.defaultCertificate.key | b64enc }}
+    {{ .Values.default_certificate.key | b64enc }}
 ---
 apiVersion: traefik.io/v1alpha1
 kind: TLSStore

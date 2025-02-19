@@ -7,7 +7,7 @@
 
 ```bash
 mkdir "charts"
-ln -s $(realpath ../kubee) charts/kubee
+ln -s $(realpath ../cluster) charts/kubee-cluster
 mkdir "charts/kubee-prometheus"
 ln -s $(realpath ../prometheus/Chart.yaml) charts/kubee-prometheus/Chart.yaml
 ln -s $(realpath ../prometheus/values.yaml) charts/kubee-prometheus/values.yaml

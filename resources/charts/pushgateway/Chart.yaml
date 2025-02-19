@@ -24,10 +24,10 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 appVersion: "v1.10.0" # The version of pushgateway
 
 dependencies:
-  - name: kubee
+  - name: kubee-cluster
     version: 0.0.1
-    repository: file://../kubee
-    alias: kubee
+    repository: file://../cluster
+    alias: cluster
   - name: kubee-cert-manager
     version: 0.0.1
     repository: file://../cert-manager

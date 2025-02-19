@@ -1,7 +1,7 @@
 {{/*#
 
 Test:
-helm template -s templates/traefik-dashboard-certificate.yml --set 'kubee.cert_manager.enabled=true' .
+helm template -s templates/traefik-dashboard-certificate.yml --set 'cert_manager.enabled=true' .
 
 The certificate
 Because Traefik dashboard needs to use the Traefik IngressRoute CRD

@@ -1,104 +1,103 @@
-# Common Kubee values used in sub-charts
-kubee:
-  # Cluster Wide Variables
-  cluster:
+
+# Cluster Wide Variables
+cluster:
+  auth:
     # The admin user of the cluster
-    adminUser:
-      username: "nico"
+    admin_user:
+      username: "admin"
       password: "${KUBEE_CLUSTER_ADMIN_PASSWORD}"
-      email: "nico@eraldy.com"
+      email: "admin@example.com"
     private_networks:
-      - '143.176.206.82/32'
-    # Default email
-    email:
-      smtp:
-        host: 'smtp.gmail.com'
-        port: '587'
-        from: 'nico@eraldy.com'
-        username: 'nico@eraldy.com'
-        password: "${KUBEE_CLUSTER_EMAIL_SMTP_PASSWORD}"
-  # Kubee Prometheus
-  prometheus:
-    # Not a string, a boolean so no quote
-    enabled: false
-    # Installation namespace
-    namespace: 'kube-prometheus'
-  # Kubee Dashboard Variables
-  kubernetes_dashboard:
-    # The external DNS
-    hostname: 'kube.i.eraldy.com'
-  # Whoami
-  whoami:
-    hostname: 'whoami.eraldy.com'
-  # Kubee Traefik Variables
-  traefik:
-    namespace: 'kube-system'
-    defaultCertificate:
-      # The PEM content file
-      # Not a path to the cert file relatif to the working directory (ie cluster directory)
-      # Set with `KUBEE_HELM_INSTALL_OPTIONS`
-      # --set-file kubee.traefik.defaultCertificate.cert=cert/kubee.dev+1.pem
-      cert: ''
-      # The PEM content file
-      # Not a path to the key file relatif to the working directory (ie cluster directory)
-      # Set with `KUBEE_HELM_INSTALL_OPTIONS`
-      # --set-file kubee.traefik.defaultCertificate.key=cert/kubee.dev+1-key.pem
-      key: ''
-    dashboard:
-      # The FQDN for the traefik dashboard
-      hostname: 'traefik.i.eraldy.com'
-  cert_manager:
-    # Not enabled by default
-    # This is the kubee template condition used to create certificate for ingress route
-    # when disabled, the default traefik certificate is used
-    enabled: true
+      - '143.176.207.82/32'
+  # Default email
+  email:
+    smtp:
+      host: 'smtp.gmail.com'
+      port: '587'
+      from: 'admin@example.com'
+      username: 'admin@example.com'
+      password: "${KUBEE_CLUSTER_EMAIL_SMTP_PASSWORD}"
 
-    # The issuer used in all certificate request of kubee.
-    defaultIssuerName: 'letsencrypt-prod'
-
-    # Dns01 challenge
-    dns01:
-      cloudflare:
-        # See cert-manager/README.md on how to get cloudflare api key
-        # A secret or external secret can be created
-        secret:
-          # A Kubernetes secret will be created if not empty
-          cloudflareApiToken: '${KUBEE_CERT_MANAGER_API_TOKEN}'
-        # The dns Zones that are managed by cloudflare, mandatory
-        dnsZones:
-          - tabulify.com
-          - eraldy.com
-          - datacadamia.com
-          - combostrap.com
-          - gerardnico.com
-          - bytle.net
-  grafana:
-    instance:
-      target: cluster
-      hostname: grafana.eraldy.com
-  vault:
-    enabled: true
-  external_secrets:
-    store:
-      name: 'vault-external-secret-store'
-      vault:
-        apiToken: '${KUBEE_EXTERNAL_SECRETS_VAULT_API_TOKEN}'
-  argocd:
-    hostname: 'argocd.i.eraldy.com'
-    git:
-      repo:
-        url: 'https://github.com/gerardnico/kube-argocd.git'
-        username: 'whatever'
-        password: '${KUBEE_ARGOCD_GITHUB_TOKEN}'
-      webhook:
-        service: 'github'
-        secret: '${KUBEE_ARGOCD_WEBHOOK_SECRET}'
-
-# Helm Traefik Chart Values
-# https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
+# Kubee Dashboard Variables
+kubernetes_dashboard:
+  # The external DNS
+  hostname: 'kube-xxx.nip.io'
+# Whoami
+whoami:
+  hostname: 'whoami-xxx.nip.io'
+# Kubee Traefik Variables
 traefik:
-  additionalArguments:
-  # Debug
-  # - '--log.level=DEBUG'
-  # Logs just add too much noise on what is going on
-  # - '--accesslog=false'
+  default_certificate:
+    # The PEM content file
+    # Not a path to the cert file relative to the working directory (ie cluster directory)
+    # Set with `KUBEE_HELM_INSTALL_OPTIONS`
+    # --set-file traefik.default_certificate.cert=cert/kubee.dev+1.pem
+    cert: ''
+    # The PEM content file
+    # Not a path to the key file relative to the working directory (ie cluster directory)
+    # Set with `KUBEE_HELM_INSTALL_OPTIONS`
+    # --set-file traefik.default_certificate.key=cert/kubee.dev+1-key.pem
+    key: ''
+  # The FQDN for the traefik dashboard
+  hostname: 'traefik-xxx.nip.io'
+  # Helm Traefik Chart Values
+  # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
+  traefik:
+    additionalArguments:
+    # Debug
+    # - '--log.level=DEBUG'
+    # Logs just add too much noise on what is going on
+    # - '--accesslog=false'
+# Cert Manager
+cert_manager:
+
+  # This is the kubee template condition used to create certificate for ingress route
+  # when disabled, the default traefik certificate is used
+  enabled: true
+
+  # The issuer used in all certificate request of kubee.
+  issuer_name: 'letsencrypt-prod'
+
+  # Dns01 challenge
+  dns01:
+    cloudflare:
+      # See cert-manager/README.md on how to get cloudflare api key
+      # A secret or external secret can be created
+      secret:
+        # A Kubernetes secret will be created if not empty
+        cloudflareApiToken: '${KUBEE_CERT_MANAGER_API_TOKEN}'
+      # The dns Zones that are managed by cloudflare, mandatory
+      dnsZones:
+        - example.com
+        - foo.com
+        - bar.com
+
+# Kubee Prometheus
+prometheus:
+  # Not a string, a boolean so no quote
+  enabled: true
+# Grafana
+grafana:
+  enabled: true
+  hostname: grafana-xxx.nip.io
+
+# External Secrets for Gitops
+external_secrets:
+  enabled: true
+  store:
+    name: 'vault-external-secret-store'
+    vault:
+      apiToken: '${KUBEE_EXTERNAL_SECRETS_VAULT_API_TOKEN}'
+
+# Argo Cd for Gitops
+argocd:
+  hostname: 'argocd-xxx.nip.io'
+  git:
+    repo:
+      url: 'https://github.com/org/repo.git'
+      username: 'whatever'
+      password: '${KUBEE_ARGOCD_GITHUB_TOKEN}'
+    webhook:
+      service: 'github'
+      secret: '${KUBEE_ARGOCD_WEBHOOK_SECRET}'
+

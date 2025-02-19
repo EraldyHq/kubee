@@ -5,7 +5,7 @@
 
 ```bash
 mkdir "charts"
-ln -s $(realpath ../kubee) charts/kubee
+ln -s $(realpath ../cluster) charts/kubee-cluster
 mkdir "charts/kubee-dex"
 ln -s $(realpath ../dex/Chart.yaml) charts/kubee-dex/Chart.yaml
 ln -s $(realpath ../dex/values.yaml) charts/kubee-dex/values.yaml

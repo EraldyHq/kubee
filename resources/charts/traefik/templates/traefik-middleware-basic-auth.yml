@@ -4,12 +4,12 @@ https://doc.traefik.io/traefik/middlewares/http/basicauth/
 Enable only when the admin password is not empty
 
 Test:
-helm template -s templates/traefik-middleware-basic-auth.yml --set 'kubee.auth.admin_user.password=yolo' .
+helm template -s templates/traefik-middleware-basic-auth.yml --set 'cluster.auth.admin_user.password=yolo' .
 
 Note: Operators are functions (ne is a function with 2 args)
 https://helm.sh/docs/chart_template_guide/functions_and_pipelines/#operators-are-functions
 */}}
-{{- if ne .Values.kubee.auth.admin_user.password "" }}
+{{- if ne .Values.cluster.auth.admin_user.password "" }}
 apiVersion: v1
 kind: Secret
 metadata:

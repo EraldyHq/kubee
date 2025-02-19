@@ -11,7 +11,7 @@ local values = std.extVar('values');
   spec: node {
     // https://github.com/prometheus/node_exporter/blob/master/docs/node-mixin/config.libsonnet
     _config+:: {
-      clusterLabel: values.kubee.cluster.name,
+      clusterLabel: values.cluster.name,
       # This selector is added to all alerts
       nodeExporterSelector: 'service="node-exporter"',
     },

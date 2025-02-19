@@ -1,4 +1,4 @@
-# Kubee library chart
+# Kubee Cluster library chart
 
 
 ## About

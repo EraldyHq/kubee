@@ -14,7 +14,7 @@ local kxExtValues = std.extVar('values');
 local kxValues = {
 
   // Cluster
-  cluster_name: validation.notNullOrEmpty(kxExtValues, 'kubee.cluster.name'),
+  cluster_name: validation.notNullOrEmpty(kxExtValues, 'cluster.name'),
 
   // Secret Kind
   secret_type: validation.notNullOrEmpty(kxExtValues, 'secret.kind'),

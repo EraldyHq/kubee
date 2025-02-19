@@ -47,9 +47,9 @@ Test:
     --set 'hostname=grafana.bar.com'  \
     --set 'cert_manager.enabled=true'  \
     --set 'prometheus.enabled=true'  \
-    --set 'kubee.auth.admin_user.username=xxxx'  \
-    --set 'kubee.auth.admin_user.password=xxxx'  \
-    --set 'kubee.auth.admin_user.email=xxxx'  \
+    --set 'cluster.auth.admin_user.username=xxxx'  \
+    --set 'cluster.auth.admin_user.password=xxxx'  \
+    --set 'cluster.auth.admin_user.email=xxxx'  \
     . | yq
 */}}
 {{- else -}}
@@ -104,7 +104,7 @@ Test:
     auth:
       disable_login_form: "false"
     security:
-      admin_user: {{ required "kubee.auth.admin_user.username is required for a local grafana instance" .Values.kubee.auth.admin_user.username }}
-      admin_password: {{ required "kubee.auth.admin_user.password is required for a local grafana instance" .Values.kubee.auth.admin_user.password }}
-      admin_email: {{ required "kubee.auth.admin_user.email is required for a local grafana instance" .Values.kubee.auth.admin_user.email }}
+      admin_user: {{ required "cluster.auth.admin_user.username is required for a local grafana instance" .Values.cluster.auth.admin_user.username }}
+      admin_password: {{ required "cluster.auth.admin_user.password is required for a local grafana instance" .Values.cluster.auth.admin_user.password }}
+      admin_email: {{ required "cluster.auth.admin_user.email is required for a local grafana instance" .Values.cluster.auth.admin_user.email }}
 {{- end -}}

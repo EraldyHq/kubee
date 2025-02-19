@@ -1,5 +1,5 @@
 dependencies:
-- name: kubee
+- name: kubee-cluster
   repository: file://../kubee
   version: 0.0.1
 digest: sha256:9d5e1dd5498ccd47afcd7bcf05f66553c5498deb9260440523f8874bb3e874a2

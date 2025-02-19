@@ -8,13 +8,13 @@ local validation = import './kubee/validation.libsonnet';
 
 local values = {
 
-  admin_user_email: validation.getNestedPropertyOrThrow(extValues, 'kubee.auth.admin_user.email'),
-  smtp_host: validation.getNestedPropertyOrThrow(extValues, 'kubee.email.smtp.host'),
-  smtp_port: validation.getNestedPropertyOrThrow(extValues, 'kubee.email.smtp.port'),
-  smtp_from: validation.getNestedPropertyOrThrow(extValues, 'kubee.email.smtp.from'),
-  smtp_username: validation.getNestedPropertyOrThrow(extValues, 'kubee.email.smtp.username'),
-  smtp_password: validation.getNestedPropertyOrThrow(extValues, 'kubee.email.smtp.password'),
-  smtp_hello: validation.getNestedPropertyOrThrow(extValues, 'kubee.email.smtp.hello'),
+  admin_user_email: validation.getNestedPropertyOrThrow(extValues, 'cluster.auth.admin_user.email'),
+  smtp_host: validation.getNestedPropertyOrThrow(extValues, 'cluster.email.smtp.host'),
+  smtp_port: validation.getNestedPropertyOrThrow(extValues, 'cluster.email.smtp.port'),
+  smtp_from: validation.getNestedPropertyOrThrow(extValues, 'cluster.email.smtp.from'),
+  smtp_username: validation.getNestedPropertyOrThrow(extValues, 'cluster.email.smtp.username'),
+  smtp_password: validation.getNestedPropertyOrThrow(extValues, 'cluster.email.smtp.password'),
+  smtp_hello: validation.getNestedPropertyOrThrow(extValues, 'cluster.email.smtp.hello'),
   alert_manager_name: validation.notNullOrEmpty(extValues, 'name'),
   alert_manager_version: validation.notNullOrEmpty(extValues, 'version'),
   alert_manager_namespace: validation.notNullOrEmpty(extValues, 'namespace'),

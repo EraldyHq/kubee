@@ -18,7 +18,7 @@ local smtpFromEmail = function(values) (
   if values.smtp_from != '' then
     values.smtp_from else if values.admin_user_email != '' then
     values.admin_user_email else
-    error 'No email could be determined for the `for` email header. Set at least: kubee.auth.admin_user.email'
+    error 'No email could be determined for the `for` email header. Set at least: cluster.auth.admin_user.email'
 );
 
 

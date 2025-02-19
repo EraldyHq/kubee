@@ -9,11 +9,11 @@
 
 Test:
 helm template -s templates/argocd-notifications-config-map-patch.yml \
-  --set 'kubee.email.smtp.host=smtp.gmail.com'  \
-  --set 'kubee.email.smtp.port=587'  \
-  --set 'kubee.email.smtp.username=nico'  \
-  --set 'kubee.email.smtp.password=welcome'  \
-  --set 'kubee.auth.admin_user.email=foo@gmail.com' \
+  --set 'cluster.email.smtp.host=smtp.gmail.com'  \
+  --set 'cluster.email.smtp.port=587'  \
+  --set 'cluster.email.smtp.username=nico'  \
+  --set 'cluster.email.smtp.password=welcome'  \
+  --set 'cluster.auth.admin_user.email=foo@gmail.com' \
   . | yq
 
 */}}
@@ -36,11 +36,11 @@ data:
   # Email
   # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/email/
 */}}
-  {{- if ne .Values.kubee.email.smtp.host ""}}
+  {{- if ne .Values.cluster.email.smtp.host ""}}
   service.email: |
-    host: {{ .Values.kubee.email.smtp.host }}
-    port: {{ required ".Values.kubee.email.smtp.port is required" .Values.kubee.email.smtp.port }}
-    from: {{ required "kubee.auth.admin_user.email or kubee.email.smtp.from is requried" (default .Values.kubee.auth.admin_user.email .Values.kubee.email.smtp.from) }}
+    host: {{ .Values.cluster.email.smtp.host }}
+    port: {{ required ".Values.cluster.email.smtp.port is required" .Values.cluster.email.smtp.port }}
+    from: {{ required "cluster.auth.admin_user.email or cluster.email.smtp.from is requried" (default .Values.cluster.auth.admin_user.email .Values.cluster.email.smtp.from) }}
     username: ${{ template "kubee-argocd-email-username-variable-name" }}
     password: ${{ template "kubee-argocd-email-password-variable-name" }}
     html: true
@@ -83,12 +83,12 @@ data:
     # Global Subscriptions
     ##############################
   */}}
-  {{- if ne .Values.kubee.auth.admin_user.email "" }}
+  {{- if ne .Values.cluster.auth.admin_user.email "" }}
   subscriptions: |
-    {{- if ne .Values.kubee.auth.admin_user.email "" }}
+    {{- if ne .Values.cluster.auth.admin_user.email "" }}
     # Global Subscription for on-deployed trigger notifications
     - recipients:
-        - "email:{{ .Values.kubee.auth.admin_user.email }}"
+        - "email:{{ .Values.cluster.auth.admin_user.email }}"
       triggers:
         - on-deployed
     {{- end }}

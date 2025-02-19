@@ -22,9 +22,9 @@ appVersion: "v1.10.3" # Whoami version
 
 
 dependencies:
-  - name: kubee
+  - name: kubee-cluster
     version: 0.0.1
-    alias: kubee
+    alias: cluster
   - name: kubee-cert-manager
     version: 0.0.1
     alias: cert_manager

@@ -25,10 +25,10 @@ appVersion: "7.8.1" # The oauth2 proxy version
 
 
 dependencies:
-  - name: kubee
+  - name: kubee-cluster
     version: 0.0.1
-    repository: file://../kubee
-    alias: kubee
+    repository: file://../cluster
+    alias: cluster
   # For the client id and secret
   - name: kubee-dex
     version: 0.0.1

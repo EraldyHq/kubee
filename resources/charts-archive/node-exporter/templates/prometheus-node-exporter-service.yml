@@ -1,4 +1,4 @@
-{{- if eq .Values.kubee.prometheus.node_exporter.enabled true }}
+{{- if eq .Values.cluster.prometheus.node_exporter.enabled true }}
 apiVersion: v1
 kind: Service
 metadata:

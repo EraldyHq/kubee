@@ -22,10 +22,10 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 appVersion: "v0.28.0"
 
 dependencies:
-  - name: kubee
+  - name: kubee-cluster
     version: 0.0.1
-    repository: file://../../charts/kubee
-    alias: kubee
+    repository: file://../cluster
+    alias: cluster
   # For the ingress
   - name: kubee-cert-manager
     version: 0.0.1

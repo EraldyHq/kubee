@@ -19,7 +19,7 @@ rm -rf jsonnet/multi/manifests && mkdir -p jsonnet/multi/manifests/setup && json
 export BASHLIB_ECHO_LEVEL=4 # debug to keep the generated manifests
 kubee helmet --cluster clusterName template alertmanager > /tmp/all.yml
 # to test only helm template with -s (show-only)
-helm template -s templates/alertmanager-ingress.yaml --set 'kubee.hostname=alert.com' . | yq
+helm template -s templates/alertmanager-ingress.yaml --set 'hostname=alert.com' . | yq
 ```
 
 ## How 

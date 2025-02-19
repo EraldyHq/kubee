@@ -24,7 +24,7 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 appVersion: "0.76.2" # The version of prometheus operator
 
 dependencies:
-  - name: kubee
+  - name: kubee-cluster
     version: 0.0.1
-    repository: file://../../charts/kubee
-    alias: kubee
+    repository: file://../../charts/cluster
+    alias: cluster
