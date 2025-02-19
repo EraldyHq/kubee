@@ -47,14 +47,21 @@ decode_base64_url() {
     echo "$result" | tr '_-' '/+' | base64 -d
 }
 
+# Function to base64url encode
+base64url_encode() {
+    echo -n "$1" | base64 | tr '+/' '-_' | tr -d '='
+}
+
 function print_jwt(){
 
-    local JWT="$1"
+    local JWT_BASE64_URL="$1"
+
+
 
     # Split JWT into parts
-    IFS='.' read -r ENCODED_HEADER ENCODED_PAYLOAD ENCODED_SIGNATURE <<< "$JWT"
+    IFS='.' read -r HEADER_BASE_64 ENCODED_PAYLOAD ENCODED_SIGNATURE <<< "$JWT_BASE_64"
 
-    if [ -z "$ENCODED_HEADER" ] || [ -z "$ENCODED_HEADER" ] || [ -z "$ENCODED_SIGNATURE" ]; then
+    if [ -z "$HEADER_BASE_64" ] || [ -z "$HEADER_BASE_64" ] || [ -z "$ENCODED_SIGNATURE" ]; then
         echo "Error: Invalid JWT format"
         exit 1
     fi
@@ -64,9 +71,9 @@ function print_jwt(){
     #  "alg": "RS256",
     #  "kid": "5c6097630863e16d9eb72adf2c6f4624aeb1f6aa"
     #}
-    #echo "Encoded Header: $ENCODED_HEADER"
+    #echo "Encoded Header: $HEADER_BASE_64"
     echo "Data Header:"
-    JSON_HEADER=$(decode_base64_url "$ENCODED_HEADER" 2>/dev/null)
+    JSON_HEADER=$(decode_base64_url "$HEADER_BASE_64" 2>/dev/null)
     echo "$JSON_HEADER" | jq -r .
 
     # Extract the payload
@@ -83,22 +90,64 @@ function print_jwt(){
 
 }
 
+sign(){
+  # Create JWT header
+  HEADER='{
+      "alg": "RS256",
+      "typ": "JWT"
+  }'
+
+  # Encode header and payload
+  HEADER_BASE_64=$(base64url_encode "$HEADER")
+  ENCODED_PAYLOAD=$(base64url_encode "$(cat "$PAYLOAD_FILE")")
+
+  # Create signing input
+  SIGNING_INPUT="${HEADER_BASE_64}.${ENCODED_PAYLOAD}"
+
+  # Create signature
+  SIGNATURE=$(echo -n "$SIGNING_INPUT" | openssl dgst -sha256 -sign "$PRIVATE_KEY" | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+}
 
 
 function verify_jwt(){
 
-  local secret
+  local secret="$1"
   local JWT="$2"
 
+  # Split JWT into parts
+  IFS='.' read -r HEADER_BASE_64 ENCODED_PAYLOAD ENCODED_SIGNATURE <<< "$JWT"
 
+  JSON_HEADER=$(decode_base64_url "$HEADER_BASE_64" 2>/dev/null)
+  JSON_PAYLOAD=$(decode_base64_url "$ENCODED_PAYLOAD" 2>/dev/null)
+  # Create signing input
+  SIGNING_INPUT="${JSON_HEADER}.${JSON_PAYLOAD}"
 
+  # Decode signature
+  DECODED_SIGNATURE=$(decode_base64_url "$ENCODED_SIGNATURE")
 
   # Get the public key from the CA cert
-  openssl x509 -in "$CA_CERT" -pubkey -noout > pubkey.pem
+  # pubkey.pem
+  PUB_KEY=$(openssl x509 -pubkey -noout)
 
   # Verify the signature
-  echo -n "$(echo "$JWT" | cut -d "." -f1,2 | tr -d '\n' | base64 -d 2>/dev/null)" | \
-      openssl dgst -sha256 -verify pubkey.pem -signature <(echo -n "$SIGNATURE")
+  #echo -n "$(echo "$JWT" | cut -d "." -f1,2 | tr -d '\n' | base64 -d 2>/dev/null)" | \
+  #    openssl dgst -sha256 -verify pubkey.pem -signature <(echo -n "$SIGNATURE")
+
+
+  # Verify signature
+  echo -n "$SIGNING_INPUT" | \
+    openssl dgst -sha256 \
+      -verify <(echo "$PUB_KEY") \
+      -signature <(echo -n "$DECODED_SIGNATURE" | base64 -d) \
+      2>/dev/null
+
+  if [ $? -eq 0 ]; then
+      echo -e "\nSignature verification: SUCCESS"
+      exit 0
+  else
+      echo -e "\nSignature verification: FAILED"
+      exit 1
+  fi
 
 }
 
