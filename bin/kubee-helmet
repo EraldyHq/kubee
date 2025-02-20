@@ -16,10 +16,10 @@ $CLI_NAME command options
 
 where:
 * \`command\` can be:
-  * \`play packageName\`     - Upgrade or install a Kubee Chart if not present
+  * \`play packageName\`     - Upgrade or install a Kubee Chart
   * \`upgrade packageName\`  - Upgrade a Kubee Chart
   * \`install packageName\`  - Install a Kubee Chart
-  * \`template packageName\` - Output the manifests of a Chart
+  * \`template packageName\` - Template a Kubee Chart
      * The following template options are supported
        * \`-s, --show-only\`     : Show only one template
        * \`--output-dir string\` : Writes the executed templates to files in output-dir instead of stdout
@@ -217,6 +217,12 @@ apply(){
   if [[ "$COMMAND" =~ 'play'|'install' ]]; then
     # Create namespace only on install
     HELM_COMMAND+=("--create-namespace");
+  fi
+
+  # Cluster chart
+  # A Hack to template the Ansible Inventory
+  if [ "$COMMAND" == "template" ] && [ "$CHART_NAME" == "cluster" ]; then
+    HELM_COMMAND+=("--set" "cluster_template_command=true");
   fi
 
   # Install CRD first
@@ -519,7 +525,7 @@ print_values(){
 ##########################
 ## Collect the options
 ##########################
-args=$(getopt -l "skip-schema-validation,output-dir:,out,show-only" -o "o:s:" -- "$@")
+args=$(getopt -l "skip-schema-validation,output-dir:,out,show-only,help" -o "o:s:h" -- "$@")
 # eval set to set the positional arguments back to $args
 eval set -- "$args"
 KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
@@ -544,9 +550,13 @@ do
         ;;
       "--show-only"|"-s")
         shift
-        SHOW_ONLY=${1}
+        OPTION_SHOW_ONLY=${1}
         shift
-      ;;
+        ;;
+      "--help"|"-h")
+        synopsis
+        exit
+        ;;
       "--")
         shift
         break;
@@ -689,15 +699,19 @@ if ! print_values >| "$CHART_VALUES_PATH"; then
   exit 1
 fi
 
-# Package Namespace
-VALUES_NAMESPACE_PATH=".namespace"
-CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$CHART_VALUES_PATH")
-if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
-  echo::error "No namespace found at $VALUES_NAMESPACE_PATH"
-  exit 1
+# Chart Namespace
+if [ "$CHART_NAME" == "cluster" ]; then
+  CHART_NAMESPACE="default"
+  echo::info "Default Namespace ($CHART_NAMESPACE)"
+else
+  VALUES_NAMESPACE_PATH=".namespace"
+  CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$CHART_VALUES_PATH")
+  if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
+    echo::err "No namespace found at $VALUES_NAMESPACE_PATH"
+    exit 1
+  fi
+  echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
 fi
-echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
-
 
 
 case "$COMMAND" in

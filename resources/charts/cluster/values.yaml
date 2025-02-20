@@ -1,3 +1,4 @@
+
 # Bootstrap and common cluster values (ie global)
 # Cluster Wide variables
 
@@ -7,7 +8,7 @@
 # * as default first instance name for operator (for instance, prometheus operator allows to install multiple prometheus that needs to be unique. Kube-prometheus asks for a unique name)
 name: 'kubee'
 
-# Authentication
+# App Authentication
 auth:
 
   # The admin user
@@ -20,7 +21,7 @@ auth:
     # Kubernetes clusterRole
     # * `cluster-admin` has full access
     # * `admin` does not have access to node and cluster scope related object such as ClusterRoleBinding
-    clusterRole: 'cluster-admin'
+    cluster_role: 'cluster-admin'
     # The email
     # It's used by default in apps. For instance:
     # * letsencrypt registration email
@@ -32,7 +33,7 @@ auth:
   # You should set the CIDR value of:
   # * internal proxy such as traefik
   # * and external proxy such as cloudflare
-  trusted_proxies: []
+  trusted_proxies: [ ]
 
   # Cluster Auth
   # Oidc Cluster Auth with dex
@@ -58,3 +59,49 @@ email:
     password: ''
     # hello (used to present itself, normally the email apex domain name)
     hello: ''
+
+# K3s
+k3s:
+  # Token
+  # Mandatory
+  token: ''
+  # Version
+  version: 'v1.32.0+k3s1'
+  # Server Args
+  # https://docs.k3s.io/cli/server
+  server_args: [ ]
+
+# Hosts
+hosts:
+  # Extra admin user added to the Host OS if the name and public key are not empty
+  # (ie in the wheel group)
+  admin_user:
+    # The name
+    username: ''
+    # The public key of the private key
+    public_key: ''
+  # Servers
+  servers:
+    - # The full qualified name (Mandatory)
+      # ie kubee-loc-server-01.example.com
+      fqdn: ''
+      # The Ip
+      # Mandatory for a ssh/vps cluster
+      ip: ''
+      # The name
+      # For a docker cluster, this is the container name and is mandatory
+      name: ''
+  # Agents
+  agents: [ ]
+
+
+# Ansible
+ansible:
+  # Ansible User used for the connection
+  # ie ansible_user
+  # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#connecting-to-hosts-behavioral-inventory-parameters
+  user: 'root'
+  # Ansible connection type
+  # ie ansible_connection
+  # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#connecting-to-hosts-behavioral-inventory-parameters
+  connection: 'ansible.builtin.ssh'

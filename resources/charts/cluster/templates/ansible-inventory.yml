@@ -1,3 +1,5 @@
+{{/* A hack to output this only when this is a template run of the cluster chart */}}
+{{- if eq (.Values).cluster_template_command true }}
 # Default Inventory Template
 k3s_cluster:
   children:
@@ -34,7 +36,7 @@ k3s_cluster:
     ansible_user: "$KUBEE_CLUSTER_SERVER_CONNECTION_USER"
     # ANSIBLE_HOST_KEY_CHECKING
     # See also https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_HOST_KEY_CHECKING
-    k3s_version: "$KUBEE_CLUSTER_K3S_VERSION"
+    k3s_version: "{{.Values.k3s.version}}"
     #
     # By default, K3s uses a single static token for both servers and agents.
     # This token cannot be changed once the cluster has been created.
@@ -58,11 +60,17 @@ k3s_cluster:
     #
     # Don't change the token as the cluster data is encrypted with it
     #
-    k3s_token: "$KUBEE_CLUSTER_K3S_TOKEN"
+    k3s_token: "{{.Values.k3s.token}}"
+
+    # https://docs.k3s.io/cli/server
+    # --kube-apiserver-arg="admission-control-config-file=/var/lib/rancher/k3s/server/psa.yaml"
+    # --datastore-endpoint=postgres://username:password@hostname:port/database-name
+    k3s_extra_server_args: "$KUBEE_CLUSTER_K3S_EXTRA_SERVER_ARGS"
     # Admin user
     # An admin is created on the server if these values are not empty
     # The admin username
-    kubee_os_admin_username: "$KUBEE_CLUSTER_SERVER_ADMIN_USERNAME"
+    kubee_os_admin_username: "{{.Values.hosts.admin_user}}"
     # The admin user Public key that is added to the `authorized_keys`
     # The key is mandatory if the admin username is not empty
-    kubee_os_admin_public_key: "$KUBEE_CLUSTER_SERVER_ADMIN_PUBLIC_KEY"
+    kubee_os_admin_public_key: "{{.Values.hosts.admin_user}}"
+{{- end}}

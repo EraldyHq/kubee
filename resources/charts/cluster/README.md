@@ -1,4 +1,4 @@
-# Kubee Cluster library chart
+# Kubee Cluster Chart
 
 
 ## About
@@ -7,6 +7,8 @@ This chart is a [library chart](https://helm.sh/docs/topics/library_charts/)
 that adds support for:
 * a [cluster scoped values file](values.yaml)
 * a [cluster scoped library](templates/_helpers.tpl)
+* and the rendering of the [Ansible Inventory file](templates/ansible-inventory.yml)
+
 
 This chart is a dependency of all [Kubee charts](../../../docs/bin/kubee-helmet.md)
 
@@ -17,3 +19,5 @@ This chart is a dependency of all [Kubee charts](../../../docs/bin/kubee-helmet.
 * admin credentials
 * email smtp configuration
 * trusted proxies
+* k3s
+* hosts os

@@ -4,7 +4,7 @@
 
 A cluster is a directory that contains the following files:
 * `values.yaml`: the `helmet` cluster values file
-* `inventory.yml`: the ansible cluster host files (default to [inventory](../../resources/ansible/inventory.yml)
+* `inventory.yml`: the ansible cluster host files (default to [inventory](../../resources/charts/cluster/templates/inventory.yml)
 * `.envrc`: the env file. Environment variables can be used both in `values.yaml` and `inventory.yml`
 
 ## Example
