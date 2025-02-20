@@ -9,4 +9,4 @@ This is a modified configuration of [Kube-Prometheus](https://github.com/prometh
 * allow access to all namespaces by default. 
 
 
-For dev info, see [contrib](../contrib.md)
+For dev info, see [contrib](../contrib/contrib.md)

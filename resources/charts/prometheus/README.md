@@ -38,4 +38,4 @@ kubee helmet -n prometheus -c clusterName template prometheus > /tmp/all.yaml
 
 ## Dev/Contrib
 
-See [](contrib.md)
+See [](contrib/contrib.md)

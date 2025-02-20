@@ -59,13 +59,9 @@ dependencies:
     repository: file://../traefik
     alias: traefik
     condition: kubee_internal.install_cross_dependency
-  # Not sure
-  - name: kubee-prometheus-crds
-    version: 0.0.1
-    repository: file://../prometheus-crds
-    condition: kubee_internal.install_cross_dependency
 
 
+# noinspection HelmChartUnknownKeys
 kubee:
   versions:
     # Used to download the library with kube-prometheus-downloader-helper

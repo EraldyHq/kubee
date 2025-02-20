@@ -53,7 +53,7 @@ local kxValues = {
   // New Relic
   new_relic_enabled: validation.notNullOrEmpty(kxExtValues, 'new_relic.enabled'),
   new_relic_bearer: validation.notNullOrEmpty(kxExtValues, 'new_relic.bearer'),
-  new_relic_relabel_keep_regexp: validation.getNestedPropertyOrThrow(kxExtValues, 'new_relic.relabel_keep_regex'),
+  new_relic_relabel_keep_regex: validation.getNestedPropertyOrThrow(kxExtValues, 'new_relic.relabel_keep_regex'),
   // Grafana Instance
   grafana_enabled: validation.notNullOrEmpty(kxExtValues, 'grafana.enabled'),
   grafana_name: validation.notNullOrEmpty(kxExtValues, 'grafana.name'),

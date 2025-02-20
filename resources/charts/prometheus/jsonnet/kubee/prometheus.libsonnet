@@ -42,7 +42,6 @@ local kxDefaults = {
   new_relic_enabled: error 'new_relic_enabled value property should be provided',
   new_relic_bearer: error 'new_relic_bearer value property should be provided',
   new_relic_relabel_keep_regex: error 'new_relic_relabel_keep_regex value property should be provided',
-  new_relic_keep_regex: error 'new_relic_keep_regex value property should be provided',
   grafana_enabled: error 'grafana_enabled value property should be provided',
   grafana_folder: 'Prometheus',
   grafana_name: error 'grafana_name value property should be provided',
