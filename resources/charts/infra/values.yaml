@@ -11,6 +11,9 @@ k3s:
   version: 'v1.32.0+k3s1'
   # Server Args
   # https://docs.k3s.io/cli/server
+  # Example:
+  # --kube-apiserver-arg="admission-control-config-file=/var/lib/rancher/k3s/server/psa.yaml"
+  # --datastore-endpoint=postgres://username:password@hostname:port/database-name
   server_args: [ ]
 
 # Hosts
