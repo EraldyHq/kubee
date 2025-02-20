@@ -219,12 +219,6 @@ apply(){
     HELM_COMMAND+=("--create-namespace");
   fi
 
-  # Cluster chart
-  # A Hack to template the Ansible Inventory
-  if [ "$COMMAND" == "template" ] && [ "$CHART_NAME" == "cluster" ]; then
-    HELM_COMMAND+=("--set" "cluster_template_command=true");
-  fi
-
   # Install CRD first
   if ! install_crd_first; then
     echo::err "An error has occurred while installing the CRD chart"
@@ -274,7 +268,7 @@ apply(){
 
   # Silence for template command
   # wrote out/xxx/templates/xxx.yml
-  if [ "$COMMAND" == "template" ]; then
+  if [ "$COMMAND" == "template" ] && [ "$OPTION_OUTPUT_DIR" != "" ]; then
     HELM_COMMAND+=("1>$COMMAND_STDOUT_FD")
   fi
 
@@ -676,7 +670,7 @@ CLEAN_OUT_COMMAND="rm -rf $CHART_OUTPUT_DIR"
 # In debug mode, we don't delete it to be able to check each file
 if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ] && [ "$OPTION_OUTPUT_DIR" == "" ]; then
   # cleaning on exit because we may have secret in their
-  bash::trap "echo 'Cleaning' > $(echo::get_file_descriptor);$CLEAN_OUT_COMMAND" EXIT
+  bash::trap "echo 'Cleaning' > $COMMAND_STDOUT_FD;$CLEAN_OUT_COMMAND" EXIT
 else
   # To not kept old manifests, we clean
   echo::eval "$CLEAN_OUT_COMMAND"

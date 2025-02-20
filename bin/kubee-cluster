@@ -9,74 +9,29 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
 inventory_file(){
 
    # Inventory
-   local KUBEE_INVENTORY_FILE="${KUBEE_CLUSTER_INVENTORY_FILE:-"$KUBEE_CLUSTER_DIR/ansible-inventory.yml"}"
+   local KUBEE_INVENTORY_FILE="${KUBEE_INFRA_INVENTORY_FILE:-"$KUBEE_CLUSTER_DIR/ansible-inventory.yml"}"
+
+   # If there is non, we generate one with the kubee infra chart
    if [ ! -f "$KUBEE_INVENTORY_FILE" ]; then
-     echo::info "Cluster ansible inventory file $KUBEE_INVENTORY_FILE does not exist, using the kubee inventory file"
-     SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-     KUBEE_INVENTORY_FILE="${SCRIPT_DIR}/../resources/ansible/inventory.yml"
-     echo::debug "Kubee inventory file $KUBEE_INVENTORY_FILE"
 
-     if [ ! -f "$KUBEE_INVENTORY_FILE" ]; then
-       echo::err "Internal error: The kubee default ansible inventory.yml could not be found at $KUBEE_INVENTORY_FILE"
+     echo::debug "Cluster ansible inventory file $KUBEE_INVENTORY_FILE does not exist, using the kubee inventory chart output"
+     KUBEE_INVENTORY_FILE="/dev/shm/kubee-infra-inventory.yml"
+     # Log level of the sub command
+     local BASHLIB_INFRA_TEMPLATE_LEVEL=$BASHLIB_ECHO_WARNING_LEVEL
+     # If command or debug message, log also them in the template
+     if [ "$BASHLIB_ECHO_LEVEL" -ge "$BASHLIB_ECHO_COMMAND_LEVEL" ]; then
+       BASHLIB_INFRA_TEMPLATE_LEVEL=$BASHLIB_ECHO_LEVEL
+     fi
+     if ! echo::eval "BASHLIB_ECHO_LEVEL=$BASHLIB_INFRA_TEMPLATE_LEVEL; source kubee-helmet template -s templates/ansible-inventory.yml infra 2>$COMMAND_STDOUT_FD >| $KUBEE_INVENTORY_FILE"; then
+       echo::err "An error occurred while templating the infra chart"
        return 1
      fi
+     echo "$KUBEE_INVENTORY_FILE"
+     return
 
-     # Default to root
-     export KUBEE_CLUSTER_SERVER_CONNECTION_USER=${KUBEE_CLUSTER_SERVER_CONNECTION_USER:-root}
-
-     # k3s version
-     # https://github.com/k3s-io/k3s/releases
-     export KUBEE_CLUSTER_K3S_VERSION=${KUBEE_CLUSTER_K3S_VERSION:-"v1.32.0+k3s1"}
-
-     # Empty by default
-     export KUBEE_CLUSTER_SERVER_ADMIN_USERNAME=${KUBEE_CLUSTER_SERVER_ADMIN_USERNAME:-""}
-     export KUBEE_CLUSTER_SERVER_ADMIN_PUBLIC_KEY=${KUBEE_CLUSTER_SERVER_ADMIN_PUBLIC_KEY:-""}
-
-     # Connection type to the host. This can be the name of any Ansible connection plugin.
-     # The default is ssh
-     # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#connecting-to-hosts-behavioral-inventory-parameters
-     # See connection: ansible-doc -t connection -l
-     export KUBEE_CLUSTER_CONNECTION=${KUBEE_CLUSTER_CONNECTION:-ssh}
-
-     # FQDN
-     export KUBEE_CLUSTER_SERVER_01_FQDN="${KUBEE_CLUSTER_SERVER_01_FQDN:-}"
-     if [ "$KUBEE_CLUSTER_SERVER_01_FQDN" == "" ]; then
-       echo::err "The env KUBEE_CLUSTER_SERVER_01_FQDN is mandatory for a SSH connection"
-       echo::err "It's the full qualified hostname (FQDN) that you have in your DNS zone"
-       echo::err "Example: kube-master-01.example.com"
-       return 1
-     fi
-
-     # The host
-     export KUBEE_CLUSTER_SERVER_01_ANSIBLE_HOST;
-     case $KUBEE_CLUSTER_CONNECTION in
-       "ssh"|"ansible.builtin.ssh")
-         local KUBEE_CLUSTER_SERVER_01_IP="${KUBEE_CLUSTER_SERVER_01_IP:-}"
-         if [ "$KUBEE_CLUSTER_SERVER_01_IP" == "" ]; then
-           echo::err "The env KUBEE_CLUSTER_SERVER_01_IP is mandatory for a ssh connection"
-           echo::err "This the IP of the server"
-           return 1
-         fi
-         KUBEE_CLUSTER_SERVER_01_ANSIBLE_HOST=$KUBEE_CLUSTER_SERVER_01_IP
-         ;;
-       "docker"|"community.docker.docker")
-         local KUBEE_CLUSTER_SERVER_01_NAME="${KUBEE_CLUSTER_SERVER_01_NAME:-}"
-         if [ "$KUBEE_CLUSTER_SERVER_01_NAME" == "" ]; then
-           echo::err "The env KUBEE_CLUSTER_SERVER_01_NAME is mandatory for a docker connection"
-           echo::err "This the name of the container"
-           return 1
-         fi
-         KUBEE_CLUSTER_SERVER_01_ANSIBLE_HOST=$KUBEE_CLUSTER_SERVER_01_NAME
-         ;;
-       *)
-         echo::err "Connection $KUBEE_CLUSTER_CONNECTION is not yet supported"
-         return 1
-         ;;
-     esac
    fi
 
-
-
+   # Minimal templating with envsubst
    # Check the variables
    if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBEE_INVENTORY_FILE"); then
      # Should exit because of the strict mode
@@ -86,9 +41,9 @@ inventory_file(){
    fi
    local SHM_INVENTORY_FILE="/dev/shm/kubee-ansible-inventory.yml"
 
-   envsubst < "$KUBEE_INVENTORY_FILE" >| "$SHM_INVENTORY_FILE"
-   #bash::trap "rm $SHM_INVENTORY_FILE" EXIT
+   echo::eval "envsubst < $KUBEE_INVENTORY_FILE >| $SHM_INVENTORY_FILE"
    echo "$SHM_INVENTORY_FILE"
+
 
 }
 
@@ -190,21 +145,33 @@ if ! SHM_INVENTORY_FILE=$(inventory_file); then
  echo::err "Inventory file has errors"
  return 1
 fi
-bash::trap "rm $SHM_INVENTORY_FILE" EXIT
 
-# Key file
-if [ "${KUBEE_CLUSTER_SERVER_CONNECTION_PRIVATE_KEY_FILE:-""}" != "" ]; then
-  export ANSIBLE_PRIVATE_KEY_FILE="${KUBEE_CLUSTER_SERVER_CONNECTION_PRIVATE_KEY_FILE}"
-else
-  if [ "${KUBEE_CLUSTER_SERVER_CONNECTION_PRIVATE_KEY:-""}" != "" ]; then
-    export ANSIBLE_PRIVATE_KEY_FILE="/dev/shm/ssh-key"
-    echo "$KUBEE_CLUSTER_SERVER_CONNECTION_PRIVATE_KEY" >| "$ANSIBLE_PRIVATE_KEY_FILE"
-    bash::trap "rm $ANSIBLE_PRIVATE_KEY_FILE" EXIT
+# Private Key file
+export ANSIBLE_PRIVATE_KEY_FILE="${ANSIBLE_PRIVATE_KEY_FILE:-}"
+if [ "$ANSIBLE_PRIVATE_KEY_FILE" == "" ]; then
+  if [ "${KUBEE_INFRA_CONNECTION_PRIVATE_KEY_FILE:-""}" != "" ]; then
+    export ANSIBLE_PRIVATE_KEY_FILE="${KUBEE_CLUSTER_SERVER_CONNECTION_PRIVATE_KEY_FILE}"
   else
-    echo::warn "No server connection private key defined."
-    echo::warn "The env KUBEE_CLUSTER_SERVER_CONNECTION_PRIVATE_KEY_FILE and KUBEE_CLUSTER_SERVER_CONNECTION_PRIVATE_KEY were empty"
-    echo::warn "Ssh will try to connect with the default key file in ~/.ssh"
-    echo::warn "If there is none, the connection will failed"
+    if [ "${KUBEE_INFRA_CONNECTION_PRIVATE_KEY:-""}" != "" ]; then
+
+      export ANSIBLE_PRIVATE_KEY_FILE="/dev/shm/ssh-key"
+      echo "$KUBEE_INFRA_CONNECTION_PRIVATE_KEY" >| "$ANSIBLE_PRIVATE_KEY_FILE"
+
+    else
+
+      echo::warn "No server connection private key found in env"
+      echo::warn ""
+      echo::warn "Ssh will try to connect with"
+      echo::warn " * the ssh agent keys if running"
+      echo::warn " * the default ssh keys in ~/.ssh"
+      echo::warn "If there is none, the connection will failed"
+      echo::warn ""
+      echo::warn "The following environment variables were empty"
+      echo::warn "  * ANSIBLE_PRIVATE_KEY_FILE"
+      echo::warn "  * KUBEE_INFRA_CONNECTION_PRIVATE_KEY_FILE"
+      echo::warn "  * KUBEE_INFRA_CONNECTION_PRIVATE_KEY"
+
+    fi
   fi
 fi
 if [ "${ANSIBLE_PRIVATE_KEY_FILE:-""}" != "" ]; then

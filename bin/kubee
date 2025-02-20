@@ -148,3 +148,7 @@ case "$KUBEE_COMMAND" in
     exit 1
 esac
 
+# Cleaning
+if [ "$BASHLIB_ECHO_LEVEL" -gt "$BASHLIB_ECHO_COMMAND_LEVEL" ]; then
+  echo::eval "echo 'Cleaning Shm' > $COMMAND_STDOUT_FD; rm -f /dev/shm/*"
+fi

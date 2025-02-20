@@ -258,7 +258,7 @@ kubee::print_connection_env(){
   echo::err "Data Connection Values:"
   echo::err "KUBEE_USER_NAME             : $KUBEE_USER_NAME"
   echo::err "KUBEE_CLUSTER_NAME          : $KUBEE_CLUSTER_NAME"
-  echo::err "KUBEE_CLUSTER_SERVER_01_IP  : ${KUBEE_CLUSTER_SERVER_01_IP:-}"
+  echo::err "KUBEE_CLUSTER_SERVER_IP  : ${KUBEE_CLUSTER_SERVER_IP:-}"
   echo::err ""
   echo::err "Did you set the cluster name or a KUBECONFIG env?"
 }
@@ -308,16 +308,16 @@ fi
 
 
 if ! KUBEE_CLUSTER_SERVER=$(pass "$PASS_CLUSTER_SERVER_PATH" 2>/dev/null); then
-  KUBEE_CLUSTER_SERVER_01_IP=${KUBEE_CLUSTER_SERVER_01_IP:-}
-  if [ "$KUBEE_CLUSTER_SERVER_01_IP" == "" ]; then
+  KUBEE_CLUSTER_SERVER_IP=${KUBEE_CLUSTER_SERVER_IP:-}
+  if [ "$KUBEE_CLUSTER_SERVER_IP" == "" ]; then
     echo::err "No cluster server could found"
     echo::err "  No server data has been found in pass at $PASS_CLUSTER_PASS_CLUSTER_SERVER_PATH"
-    echo::err "  No server ip was defined for the env KUBEE_CLUSTER_SERVER_01_IP"
+    echo::err "  No server ip was defined for the env KUBEE_CLUSTER_SERVER_IP"
     kubee::print_connection_env
     return 1
   fi
-  KUBEE_CLUSTER_SERVER="https://$KUBEE_CLUSTER_SERVER_01_IP:6443"
-  echo::debug "KUBEE_CLUSTER_SERVER ($KUBEE_CLUSTER_SERVER) built from KUBEE_CLUSTER_SERVER_01_IP"
+  KUBEE_CLUSTER_SERVER="https://$KUBEE_CLUSTER_SERVER_IP:6443"
+  echo::debug "KUBEE_CLUSTER_SERVER ($KUBEE_CLUSTER_SERVER) built from KUBEE_CLUSTER_SERVER_IP"
 else
   echo::debug "KUBEE_CLUSTER_SERVER ($KUBEE_CLUSTER_SERVER) built from pass $PASS_CLUSTER_SERVER_PATH"
 fi
@@ -396,11 +396,11 @@ kubee::set_kubeconfig_env(){
   # Note: On kubectl, we could also just pass the data but we should
   # do that for all kubernetes clients (promtool, ...) and this is pretty hard
   KUBECONFIG="/dev/shm/kubee-config" # we create a shared memory file because we test the presence of the file
-  chmod 0600 /dev/shm/kubee-config # same permission as ssh key
-  if ! kubee::print_kubeconfig_from_pass >| /dev/shm/kubee-config; then
+  if ! kubee::print_kubeconfig_from_pass >| "$KUBECONFIG"; then
     echo::err "Error while generating the config file with pass"
     return 1
   fi
+  chmod 0600 "$KUBECONFIG" # same permission as ssh key
 
 }
 

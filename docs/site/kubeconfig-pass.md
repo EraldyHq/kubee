@@ -1,4 +1,4 @@
-# KUBECONFIG 
+# KUBECONFIG with pass
 
 `kubee` will generate a kube config file dynamically if
 * the `KUBECONFIG` env is not set 
@@ -22,7 +22,7 @@ It's a `zero-trust` connection tool.
 ## Env
 
 * `KUBEE_CLUSTER_NAME`: The cluster to connect (default to `default`)
-* `KUBEE_CLUSTER_SERVER_01_IP`: the server ip used by default
+* `KUBEE_CLUSTER_SERVER_IP`: the server ip used by default
 * `KUBEE_USER_NAME`: The user to connect with (default to `default`)
 * `KUBEE_PASS_HOME`: The directory where to store `kubee` pass information (default to `kubee`)
 * `KUBEE_CONNECTION_NAMESPACE`: the connection namespace (default to the app namespace or to the KUBEE_DEFAULT_NAMESPACE)
@@ -45,7 +45,7 @@ It's a `zero-trust` connection tool.
  kubectl config view --minify --raw --output 'jsonpath={$.users[0].client-certificate-data}' | pass insert -m "$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-certificate-data"
  kubectl config view --minify --raw --output 'jsonpath={$.users[0].client-key-data}' | pass insert -m "$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-key-data"
  kubectl config view --minify --raw --output 'jsonpath={$.clusters[0].certificate-authority-data}' | pass insert -m "$KUBEE_PASS_HOME/clusters/$KUBEE_CLUSTER_NAME/certificate-authority-data"
- # The server URI is derived from KUBEE_CLUSTER_SERVER_01_IP
+ # The server URI is derived from KUBEE_CLUSTER_SERVER_IP
  ```
 ## How to see the generated config file
 

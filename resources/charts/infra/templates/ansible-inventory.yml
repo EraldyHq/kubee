@@ -1,42 +1,46 @@
-{{/* A hack to output this only when this is a template run of the cluster chart */}}
-{{- if eq (.Values).cluster_template_command true }}
-# Default Inventory Template
 k3s_cluster:
   children:
+    # Server hosts
+    # Number of hosts server must be odd to avoid split brain issues
+    # with etcd and the recommended number is 3.
     server:
-      # Number of hosts server must be odd to avoid split brain issues
-      # with etcd and the recommended number is 3.
       hosts:
+        {{- if eq (len .Values.hosts.servers) 0 }}
+        {{ fail "No server host found at infra.hosts.servers. The list of servers is empty"}}
+        {{- end }}
         # The ansible host name
         # Used by k3s as the FQDN when creating the kubeconfig file
-        $KUBEE_CLUSTER_SERVER_01_FQDN:
-          # The name of the host (dns or ip) to connect to,
-          # if different from the inventory hostname.
-          ansible_host: "$KUBEE_CLUSTER_SERVER_01_ANSIBLE_HOST"
-          # The FQDN to avoid: # https://docs.k3s.io/networking/basic-network-options#nodes-without-a-hostname
-          # Some cloud providers, such as Linode, will create machines with "localhost" as the hostname
-          # and others may not have a hostname set at all.
-          # This can cause problems with domain name resolution.
-          # You can run K3s with the --node-name flag or K3S_NODE_NAME environment variable
-          # and this will pass the node name to resolve this issue.
-          kubee_os_hostname: "$KUBEE_CLUSTER_SERVER_01_FQDN"
+        {{- range $i, $server := .Values.hosts.servers }}
+        {{ required (printf "The %s hosts.servers server should have a fqdn" $i) $server.fqdn }}:
+            # The name of the host (dns or ip) to connect to,
+            # if different from the inventory hostname.
+            ansible_host: "{{if contains $.Values.ansible.connection "ssh"}}{{$server.ip}}{{else}}{{$server.name}}{{end}}"
+            # The FQDN to avoid: https://docs.k3s.io/networking/basic-network-options#nodes-without-a-hostname
+            # Some cloud providers, such as Linode, will create machines with "localhost" as the hostname
+            # and others may not have a hostname set at all.
+            # This can cause problems with domain name resolution.
+            {{- /* Note: You can run K3s with the --node-name flag or K3S_NODE_NAME environment variable */}}
+            {{- /* and this will pass the node name to resolve this issue. */}}
+            kubee_os_hostname: "{{$server.fqdn}}"
+        {{- end }}
 
-#    agent:
-#      hosts:
-#        192.16.35.12:
-#        192.16.35.13:
+    # No agent yet
+    agent:
+      # Empty map (not an empty array as this is map)
+      hosts:
+
   vars:
     # With the host-specific parameter ansible_connection=<connector>
     # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#non-ssh-connection-types
     # see connection: ansible-doc -t connection -l
-    ansible_connection: "$KUBEE_CLUSTER_CONNECTION"
+    ansible_connection: "{{ required "The ansible.connection is mandatory" .Values.ansible.connection}}"
     # The default username to use for log in. Most plugins default to the ‘current user running Ansible’.
     # Can be set via ANSIBLE_REMOTE_USER (default to the user executing Ansible)
     # https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_REMOTE_USER
-    ansible_user: "$KUBEE_CLUSTER_SERVER_CONNECTION_USER"
-    # ANSIBLE_HOST_KEY_CHECKING
+    ansible_user: "{{ required "The ansible.user is mandatory" .Values.ansible.username}}"
+
     # See also https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_HOST_KEY_CHECKING
-    k3s_version: "{{.Values.k3s.version}}"
+    k3s_version: "{{ required "The k3s.version is mandatory" .Values.k3s.version}}"
     #
     # By default, K3s uses a single static token for both servers and agents.
     # This token cannot be changed once the cluster has been created.
@@ -60,17 +64,21 @@ k3s_cluster:
     #
     # Don't change the token as the cluster data is encrypted with it
     #
-    k3s_token: "{{.Values.k3s.token}}"
+    k3s_token: "{{ required "The infra.k3s.token is required" .Values.k3s.token}}"
 
     # https://docs.k3s.io/cli/server
     # --kube-apiserver-arg="admission-control-config-file=/var/lib/rancher/k3s/server/psa.yaml"
     # --datastore-endpoint=postgres://username:password@hostname:port/database-name
-    k3s_extra_server_args: "$KUBEE_CLUSTER_K3S_EXTRA_SERVER_ARGS"
+    {{- if gt (len .Values.k3s.server_args) 0 }}
+    k3s_extra_server_args:
+{{.Values.k3s.server_args | toYaml | indent 6}}
+    {{- else }}
+    k3s_extra_server_args: []
+    {{- end }}
     # Admin user
     # An admin is created on the server if these values are not empty
     # The admin username
-    kubee_os_admin_username: "{{.Values.hosts.admin_user}}"
+    kubee_os_admin_username: "{{.Values.hosts.admin_user.username}}"
     # The admin user Public key that is added to the `authorized_keys`
     # The key is mandatory if the admin username is not empty
-    kubee_os_admin_public_key: "{{.Values.hosts.admin_user}}"
-{{- end}}
+    kubee_os_admin_public_key: "{{.Values.hosts.admin_user.public_key}}"

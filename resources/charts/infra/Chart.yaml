@@ -1,10 +1,11 @@
 apiVersion: v2
-name: kubee-cluster
-description: A library chart of common values and helpers for a kubee cluster
+name: kubee-infra
+description: The infra as code Kubee Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
-type: library
+# Application because you can't use the template function as a library
+type: application
 
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
