@@ -12,6 +12,7 @@
 By default,
 * the admin user is created with its email as login.
 * [oauth2-proxy](../oauth2-proxy/README.md) is added as client if enabled
+* `kubectl` is added as client if its secret value is not empty
 
 ## Cluster Values Example
 
@@ -22,11 +23,15 @@ dex:
   enabled: true
   hostname: 'dex.example.com'
   clients:
+    # for traefik forward auth
     oauth2_proxy:
-      secret: '${DEX_FORWARD_AUTH_CLI_SECRET}'
+      secret: '${DEX_OAUTH_CLI_SECRET}'
+    # for kubectl
+    kubectl:
+      secret: '${DEX_KUBECTL_CLI_SECRET}'
 ```
 
-In the cluster `.envrc` file, set the env `DEX_FORWARD_AUTH_CLI_SECRET` with your favorite identity store.
+In the cluster `.envrc` file, set the env `DEX_OAUTH_CLI_SECRET` and `DEX_KUBECTL_CLI_SECRET` with your favorite identity store.
 
 Example with `pass`
 ```bash
@@ -35,23 +40,6 @@ DEX_FORWARD_AUTH_CLI_SECRET=$(pass "cluster_name/dex/forward-auth-cli-secret")
 ```
 
 
-## FAQ
-### How to I check the installation
-
-Once installed, you should be able to query the discovery endpoint
-https://hostname/.well-known/openid-configuration
-
-### Why do I get a 404 Not Found on the hostname
-
-https://hostname/ is not an entrypoint and returns `404`
-Check the [discovery file](#how-to-i-check-the-installation) for all endpoints.
-
-### Why do i need to restart after a config change?
-
-The [Helm Chart Roll Deployment](https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments)
-is on the Dex Helm deployment chart.
-
-We can't trick it to apply the checksum on our configuration.
 
 ## Contrib / Dec
 
