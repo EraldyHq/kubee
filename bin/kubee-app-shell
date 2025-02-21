@@ -15,7 +15,7 @@ cat <<EOF
 Get a shell into your application pod or your cluster with busybox
 
 \`\`\`bash
-$CLI_COMMANDS [--shell|-s shellName <app name>
+$CLI_COMMANDS [--shell|-s shellName] <app name>
 \`\`\`
 
 where:
@@ -26,6 +26,8 @@ where:
 * \`--shell|-s shell name\` may be:'
   * a shell path (ie \`bash\`, \`sh\`, \`bin/bash\`)
   * or \`ephemeral\` to add busybox as an ephemeral container if your container app has no shell
+
+Note: the Kubernetes app will run the busybox pod.
 EOF
 }
 
@@ -39,7 +41,7 @@ if [[ "${1:-}" == "synopsis" ]]; then
 fi
 
 # Set
-APP_NAME=""
+KUBEE_APP_NAME=""
 SHELL_NAME=""
 
 # Normalization
@@ -67,7 +69,7 @@ do
       shift
       ;;
     *)
-      APP_NAME=$1
+      KUBEE_APP_NAME=$1
       shift
       ;;
   esac
@@ -80,7 +82,7 @@ kubee::set_kubeconfig_env
 
 # Set the known default shell
 if [ "$SHELL_NAME" == "" ]; then
-  case "$APP_NAME" in
+  case "$KUBEE_APP_NAME" in
     "prometheus"|"vault")
       SHELL_NAME=/bin/sh;
       ;;
@@ -90,16 +92,11 @@ if [ "$SHELL_NAME" == "" ]; then
   esac
 fi
 
-# Busybox is not a real app
-KUBEE_APP_NAME=""
-if [ "$APP_NAME" != "busybox" ]; then
-  KUBEE_APP_NAME=$APP_NAME
-fi
 
-
-# Busy box is a special kind of app
+# Busy box and kubernetes are a special kind of app
 # That does have any pod or directory
-if [ "$APP_NAME" == "busybox" ]; then
+# Busybox is not a real app
+if [ "$KUBEE_APP_NAME" == "busybox" ] || [ "$KUBEE_APP_NAME" == "kubernetes" ]; then
 
     echo::info "Starting busybox ${KUBEE_BUSYBOX_IMAGE} in the namespace ${KUBEE_CONNECTION_NAMESPACE}"
     # --image-pull-policy Always will check the latest sha

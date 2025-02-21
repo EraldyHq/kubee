@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+set -TCEeuo pipefail
 
 # shellcheck source=../../bash-lib/lib/bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
@@ -16,15 +17,19 @@ $CLI_NAME command options
 
 where:
 * \`command\` can be:
-  * \`play packageName\`     - Upgrade or install a Kubee Chart
-  * \`upgrade packageName\`  - Upgrade a Kubee Chart
-  * \`install packageName\`  - Install a Kubee Chart
-  * \`template packageName\` - Template a Kubee Chart
+  * \`install chartName\`  - Install a Kubee Chart
+  * \`ping\`                - Verify the connection
+                                  * to the hosts for the kubernetes chart
+                                  * to the cluster api for the other charts
+  * \`play chartName\`     - Upgrade or install a Kubee Chart
+  * \`template chartName\` - Template a Kubee Chart
      * The following template options are supported
        * \`-s, --show-only\`     : Show only one template
        * \`--output-dir string\` : Writes the executed templates to files in output-dir instead of stdout
        * \`--out string\`        : Writes the executed templates to the \`out\` relative directory
+  * \`upgrade chartName\`  - Upgrade a Kubee Chart
   * \`values\`               - Shows the values content
+
 
 EOF
 
@@ -63,7 +68,46 @@ get_chart_directory(){
 
 }
 
+ansible_inventory_file(){
 
+   # Inventory
+   local KUBEE_INVENTORY_FILE="${KUBEE_INFRA_INVENTORY_FILE:-"$KUBEE_CLUSTER_DIR/ansible-inventory.yml"}"
+
+   # If there is non, we generate one with the kubee infra chart
+   if [ ! -f "$KUBEE_INVENTORY_FILE" ]; then
+
+     echo::debug "Cluster ansible inventory file $KUBEE_INVENTORY_FILE does not exist, using the kubee inventory chart output"
+     KUBEE_INVENTORY_FILE="/dev/shm/kubee-infra-inventory.yml"
+     # Log level of the sub command
+     local BASHLIB_INFRA_TEMPLATE_LEVEL=$BASHLIB_ECHO_WARNING_LEVEL
+     # If command or debug message, log also them in the template
+     if [ "$BASHLIB_ECHO_LEVEL" -ge "$BASHLIB_ECHO_COMMAND_LEVEL" ]; then
+       BASHLIB_INFRA_TEMPLATE_LEVEL=$BASHLIB_ECHO_LEVEL
+     fi
+     if ! echo::eval "BASHLIB_ECHO_LEVEL=$BASHLIB_INFRA_TEMPLATE_LEVEL; source kubee-helmet template -s templates/ansible-inventory.yml kubernetes 2>$COMMAND_STDOUT_FD >| $KUBEE_INVENTORY_FILE"; then
+       echo::err "An error occurred while templating the infra chart"
+       return 1
+     fi
+     echo "$KUBEE_INVENTORY_FILE"
+     return
+
+   fi
+
+   # Minimal templating with envsubst
+   # Check the variables
+   if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBEE_INVENTORY_FILE"); then
+     # Should exit because of the strict mode
+     # but it was not working
+     echo::err "Inventory variables missing: ${UNDEFINED_VARS[*]}"
+     return 1
+   fi
+   local SHM_INVENTORY_FILE="/dev/shm/kubee-ansible-inventory.yml"
+
+   echo::eval "envsubst < $KUBEE_INVENTORY_FILE >| $SHM_INVENTORY_FILE"
+   echo "$SHM_INVENTORY_FILE"
+
+
+}
 
 # @description
 #     Return if the chart is already installed
@@ -201,7 +245,6 @@ apply(){
         if [ "$OPTION_SHOW_ONLY" != "" ]; then
           HELM_COMMAND+=("--show-only" "$OPTION_SHOW_ONLY")
         fi
-
         ;;
       *)
         echo::err "The command $COMMAND is unknown"
@@ -285,15 +328,22 @@ apply(){
       HELM_STD="$COMMAND_STDOUT_FD"
   fi
   echo::debug "Output Helm to $HELM_STD"
-  # We use printf because in the template, we may backtick
+
+  # Color the Yaml output?
+  # If template command without output option to /std/devout not in a pipeline
+  local HELM_OUTPUT_COLORED=0
+  if [ "$COMMAND" == "template" ] && [ "$OPTION_OUTPUT_DIR" == "" ] && [ "$HELM_STD" == "/dev/stdout" ] && [ -t 1 ]; then
+    HELM_OUTPUT_COLORED=1
+  fi
+  # In the below if statement, we use printf to output the result because in the template, we may backtick
   # that has special meaning for bash
-  if [ "$COMMAND" == "template" ] && [ "$OPTION_OUTPUT_DIR" == "" ] && [ "$HELM_STD" == "/dev/stdout" ]; then
-    # Template are automatically yaml file
-    # Colored, for what ever reason, if the original command is redirected
-    # to a file, yq does not apply any color
-    printf "%s" "$HELM_OUTPUT" | yq .
+  if [ "$HELM_OUTPUT_COLORED" == "1" ]; then
+    # Template are yaml file
+    # We send the output to yq to color it on the terminal
+    # Even if yq does not apply any color if the initiator kubee command is redirected to a file, we test for it with [ -t 1 ]
+    printf "%s\n" "$HELM_OUTPUT" | yq .
   else
-    printf "%s" "$HELM_OUTPUT" >"$HELM_STD"
+    printf "%s\n" "$HELM_OUTPUT" >| "$HELM_STD"
   fi
 
 
@@ -379,7 +429,27 @@ get_cluster_values_files(){
 }
 
 
+ping(){
 
+  if [ "$CHART_NAME" == "kubernetes" ]; then
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/ping_module.html
+    if ! inventory=$(ansible_inventory_file); then
+      echo::err "Error while generating the ansible inventory file"
+      return 1
+    fi
+    if ! ansible -i "$inventory" all -m ping; then
+      echo::err "Hosts unreachable"
+      return 1
+    fi
+    return
+  fi
+
+  # Kubectl env
+  kubee::set_kubeconfig_env_and_check
+  echo::eval "kubectl cluster-info"
+
+
+}
 
 # @description
 #     Print the kubee values file for the chart
@@ -530,6 +600,11 @@ print_values(){
 
 }
 
+##########################
+## Global Constant Variables
+##########################
+# The name of the special kubernetes chart
+KUBERNETES_CHART_NAME="kubernetes"
 
 ##########################
 ## Collect the options
@@ -724,7 +799,29 @@ fi
 
 
 case "$COMMAND" in
-  "install"|"template"|"upgrade"|"play")
+  "template")
+    apply "$COMMAND" "$@" || error::exit $?
+    ;;
+  "install"|"play")
+    if [ "$CHART_NAME" == "$KUBERNETES_CHART_NAME" ]; then
+      if ! inventory=$(ansible_inventory_file); then
+        echo::err "Error while generating the ansible inventory file"
+        return 1
+      fi
+      ansible-playbook -i "$inventory" ans_e.ans_e_base.kubee_site.yml
+      return
+    fi
+    apply "$COMMAND" "$@" || error::exit $?
+    ;;
+  "upgrade")
+    if [ "$CHART_NAME" == "$KUBERNETES_CHART_NAME" ]; then
+      if ! inventory=$(ansible_inventory_file); then
+        echo::err "Error while generating the ansible inventory file"
+        return 1
+      fi
+      ansible-playbook -i "$inventory" k3s.orchestration.upgrade.yml
+      return
+    fi
     apply "$COMMAND" "$@" || error::exit $?
     ;;
   "values")
@@ -736,6 +833,9 @@ case "$COMMAND" in
       exit 0
     fi
     cat "$CHART_VALUES_PATH"
+    ;;
+  "ping")
+    ping || error::exit $?
     ;;
   *)
     doc::help synopsis

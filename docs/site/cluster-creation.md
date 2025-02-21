@@ -3,9 +3,9 @@
 ## About
 
 A cluster is a directory that contains the following files:
-* `values.yaml`: the `helmet` cluster values file
-* `inventory.yml`: the ansible cluster host files (default to [inventory](../../resources/charts/cluster/templates/inventory.yml)
-* `.envrc`: the env file. Environment variables can be used both in `values.yaml` and `inventory.yml`
+* `.envrc`: the env file 
+* `values.yaml`: the `helmet` cluster values file where environment variables literal such as `${MY_ENV}` can be used.
+
 
 ## Example
 
@@ -36,10 +36,10 @@ KUBEE_CLUSTER_NAME=my-cluster
 mkdir -p "$KUBEE_CLUSTERS_PATH/$KUBEE_CLUSTER_NAME"
 ```
 
-#### Create the default values files
+#### Create a cluster values files
 
 ```bash
-kubee helmet values > "$MY_CLUSTER_PATH/values.yaml" 
+touch "$MY_CLUSTER_PATH/values.yaml" 
 ```
 
 #### Create your environment
@@ -69,24 +69,25 @@ export KUBEE_INFRA_K3S_TOKEN='bib7F0biIxpUUuOJJpjs9EgzqViHjAVna3MyxGbTq++gjXf6tm
 # With a password manager such as pass or gopass
 export KUBEE_INFRA_K3S_TOKEN=$(pass kubee/k3s/token) 
 ```
-* Set the value in your cluster values file
+* Set the values in your cluster values file
 ```yaml
-infra:
+kubernetes:
   k3s:
     token: '${KUBEE_INFRA_K3S_TOKEN}'
   hosts:
     servers:
       - fqdn: 'server-01.example.com'
         ip: '188.245.43.202'
-  ansible:
-    username: root
-    connection: 'ssh'
+    all:
+      connection:
+        username: root
+        type: 'ssh'
 ```
 
 
 * Check that all cluster infra values has been set by printing the inventory
 ```bash
-kubee --cluster "$KUBEE_CLUSTER_NAME" cluster inventory
+kubee --cluster "$KUBEE_CLUSTER_NAME" helmet template kubernetes
 ```
 ```yaml
 k3s_cluster:
@@ -121,7 +122,7 @@ KUBEE_INFRA_CONNECTION_PRIVATE_KEY=$(pass cluster_name/ssh/private_key)
 
 You can check that you can connect to your cluster by pinging it
 ```bash
-kubee --cluster "$KUBEE_CLUSTER_NAME" cluster ping
+kubee --cluster "$KUBEE_CLUSTER_NAME" helmet ping kubernetes
 ```
 You should get
 ```
@@ -140,17 +141,17 @@ Once, you can connect to your cluster, you can install it with the `ping` comman
 
 Example:
 ```bash
-kubee --cluster "$KUBEE_CLUSTER_NAME" cluster play
+kubee --cluster "$KUBEE_CLUSTER_NAME" helmet play kubernetes
 ```
 
 The `play` command is idempotent, meaning that you can run it multiple times. 
 
-If the kubernetes app or an operating system package is:
+If the app is:
 * not installed, it will install and configure it 
 * installed, it will configure it
 
 
-### Install applications in the Kubernetes cluster
+### Install applications in the Kubernetes app
 
 
 With `kubee helmet`, you can install apps with any [kubee charts](kubee-helmet-chart.md)

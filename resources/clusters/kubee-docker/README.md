@@ -30,7 +30,7 @@ dock-x run
 ### Check inv
 
 ```bash
-kubee-cluster inv
+kubee helmet template kubernetes
 ```
 
 ### DNS
@@ -59,13 +59,13 @@ More info: see [cert](cert/README.md)
 
 Create a k3s cluster
 ```bash
-kubee-cluster play
+kubee helmet play kubernetes
 ```
 
 ### Kubee Chart Installation
 
 ```bash
-kubee helmet install traefik
+kubee helmet play traefik
 ```
 
 

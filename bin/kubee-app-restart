@@ -12,11 +12,13 @@
 synopsis(){
 
   echo ""
-  echo "Restart an app (ie rollout restart a deployment or statefulset)"
+  echo "Restart an app"
   echo ""
   echo '```bash'
-  echo "$(basename "$0") [app name]"
+  echo "$(basename "$0") appName"
   echo '```'
+  echo ""
+  echo "* rollout restart a deployment or statefulset"
 
 
 

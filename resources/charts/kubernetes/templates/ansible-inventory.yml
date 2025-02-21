@@ -15,7 +15,7 @@ k3s_cluster:
         {{ required (printf "The %s hosts.servers server should have a fqdn" $i) $server.fqdn }}:
             # The name of the host (dns or ip) to connect to,
             # if different from the inventory hostname.
-            ansible_host: "{{if contains $.Values.ansible.connection "ssh"}}{{$server.ip}}{{else}}{{$server.name}}{{end}}"
+            ansible_host: "{{if contains $.Values.hosts.all.connection.type "ssh"}}{{$server.ip}}{{else}}{{$server.name}}{{end}}"
             # The FQDN to avoid: https://docs.k3s.io/networking/basic-network-options#nodes-without-a-hostname
             # Some cloud providers, such as Linode, will create machines with "localhost" as the hostname
             # and others may not have a hostname set at all.
@@ -34,11 +34,11 @@ k3s_cluster:
     # With the host-specific parameter ansible_connection=<connector>
     # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#non-ssh-connection-types
     # see connection: ansible-doc -t connection -l
-    ansible_connection: "{{ required "The hosts.connection.type is mandatory" .Values.hosts.connection.type}}"
+    ansible_connection: "{{ required "The hosts.connection.type is mandatory" .Values.hosts.all.connection.type}}"
     # The default username to use for log in. Most plugins default to the ‘current user running Ansible’.
     # Can be set via ANSIBLE_REMOTE_USER (default to the user executing Ansible)
     # https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_REMOTE_USER
-    ansible_user: "{{ required "The hosts.connection.username is mandatory" .Values.hosts.connection.username}}"
+    ansible_user: "{{ required "The hosts.connection.username is mandatory" .Values.hosts.all.connection.username}}"
 
     # See also https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_HOST_KEY_CHECKING
     k3s_version: "{{ required "The kubernetes k3s version is mandatory" .Values.version}}"

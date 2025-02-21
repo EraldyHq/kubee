@@ -1,3 +1,11 @@
+kubernetes:
+  hosts:
+    servers:
+      - fqdn: hostname.example.com
+        ip: 78.46.190.60
+    all:
+      connection:
+        type: ssh
 
 # Cluster Wide Variables
 cluster:
@@ -20,13 +28,16 @@ cluster:
 
 # Kubee Dashboard Variables
 kubernetes_dashboard:
+  enabled: true
   # The external DNS
   hostname: 'kube-xxx.nip.io'
 # Whoami
 whoami:
+  enabled: true
   hostname: 'whoami-xxx.nip.io'
 # Kubee Traefik Variables
 traefik:
+  enabled: true
   default_certificate:
     # The PEM content file
     # Not a path to the cert file relative to the working directory (ie cluster directory)
@@ -91,6 +102,7 @@ external_secrets:
 
 # Argo Cd for Gitops
 argocd:
+  enabled: true
   hostname: 'argocd-xxx.nip.io'
   git:
     repo:
@@ -100,4 +112,3 @@ argocd:
     webhook:
       service: 'github'
       secret: '${KUBEE_ARGOCD_WEBHOOK_SECRET}'
-

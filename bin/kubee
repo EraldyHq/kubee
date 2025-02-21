@@ -22,13 +22,11 @@ $(basename "$0") [kubee options] command args
 where:
 
 * \`command\` is one of:
-  * \`app\`                      : Application scoped commands
+  * \`app\`                      : App Commands (based on the app label)
   * \`cert\`                     : Cert commands
-  * \`cluster\`                  : Kubernetes cluster hosts installation and configuration
   * \`kubectl\`                  : Kubectl Kubee scluster aware
   * \`helmet\`                   : Kubee Package Manager
   * \`helm\`                     : Helm Package Manager
-  * \`jwt\`                      : Jwt commands
 
 * \`kubee options\` are:
   * \`-n|--namespace name\`    : the \`connection namespace name\` default to \`KUBEE_CONNECTION_NAMESPACE\`, ultimately to \`default\`.

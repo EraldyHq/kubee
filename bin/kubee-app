@@ -16,7 +16,7 @@ $CLI_NAME command options appName
 where:
 * \`command\` can be:
   * \`restart\`      - Restart an app
-  * \`service\`      - List services for an app
+  * \`service\`      - List the services for an app
   * \`shell\`        - Get a shell into a app pod
 
 \`appName\` is used to select resources via the labels:

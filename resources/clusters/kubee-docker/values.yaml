@@ -1,55 +1,70 @@
-# Common Kubee values used in sub-charts
-kubee:
-  # Cluster Wide Variables
-  cluster:
-    # The admin user of the cluster
-    adminUser:
+
+# Cluster Wide Variables
+cluster:
+  # The admin user of the cluster
+  auth:
+    admin_user:
       username: "admin"
       password: "${KUBEE_CLUSTER_ADMIN_PASSWORD}"
       email: "foo@bar.com"
-  # Kubee Prometheus
-  prometheus:
-    # Not a string, a boolean so no quote
-    enabled: false
-  # Kubee Dashboard Variables
-  kubernetes_dashboard:
-    # The external DNS
-    hostname: 'dash.kubee.dev'
-  # Whoami
-  whoami:
-    hostname: 'whoami.kubee.dev'
-  # Kubee Traefik Variables
-  traefik:
-    defaultCertificate:
-      # The PEM content file
-      # Not a path to the cert file relatif to the working directory (ie cluster directory)
-      # Set with `KUBEE_HELM_INSTALL_OPTIONS`
-      # --set-file traefik.default_certificate.cert=cert/kubee.dev+1.pem
-      cert: ''
-      # The PEM content file
-      # Not a path to the key file relatif to the working directory (ie cluster directory)
-      # Set with `KUBEE_HELM_INSTALL_OPTIONS`
-      # --set-file traefik.default_certificate.key=cert/kubee.dev+1-key.pem
-      key: ''
-    dashboard:
-      # The FQDN for the traefik dashboard
-      hostname: 'traefik.kubee.dev'
 
-# Traefik Values
-# https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
+kubernetes:
+  version: 'v1.31.2+k3s1'
+  k3s:
+    token: "${KUBEE_CLUSTER_K3S_TOKEN}"
+  hosts:
+    servers:
+      - name: kubee-local-server-01
+    all:
+      connection:
+        type: docker
+
+# Kubee Prometheus
+prometheus:
+  # Not a string, a boolean so no quote
+  enabled: true
+# Kubee Dashboard Variables
+kubernetes_dashboard:
+  enabled: true
+  # The external DNS
+  hostname: 'dash.kubee.dev'
+# Whoami
+whoami:
+  enabled: true
+  hostname: 'whoami.kubee.dev'
+# Kubee Traefik Variables
 traefik:
-  # Traefik experimental features
-  experimental:
-    # Equivalent to the cli flag (passed in additionalArguments)
-    # - `--experimental.plugins.sablier.modulename=github.com/acouvreur/sablier'
-    # - `--experimental.plugins.sablier.version=v1.7.0'
-    plugins:
-      sablier:
-        moduleName: github.com/acouvreur/sablier
-        version: v1.7.0
+  enabled: true
+  # The FQDN for the traefik dashboard
+  hostname: 'traefik.kubee.dev'
+  default_certificate:
+    # The PEM content file
+    # Not a path to the cert file relatif to the working directory (ie cluster directory)
+    # Set with `KUBEE_HELM_INSTALL_OPTIONS`
+    # --set-file traefik.default_certificate.cert=cert/kubee.dev+1.pem
+    cert: ''
+    # The PEM content file
+    # Not a path to the key file relatif to the working directory (ie cluster directory)
+    # Set with `KUBEE_HELM_INSTALL_OPTIONS`
+    # --set-file traefik.default_certificate.key=cert/kubee.dev+1-key.pem
+    key: ''
+  # Traefik Values
+  # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
+  traefik:
+    # Traefik experimental features
+    experimental:
+      # Equivalent to the cli flag (passed in additionalArguments)
+      # - `--experimental.plugins.sablier.modulename=github.com/acouvreur/sablier'
+      # - `--experimental.plugins.sablier.version=v1.7.0'
+      plugins:
+        sablier:
+          moduleName: github.com/acouvreur/sablier
+          version: v1.7.0
 
-  additionalArguments:
-    # Debug
-    - '--log.level=DEBUG'
-    # Logs just add too much noise on what is going on
-    - '--accesslog=true'
+    additionalArguments:
+      # Debug
+      - '--log.level=DEBUG'
+      # Logs just add too much noise on what is going on
+      - '--accesslog=true'
+
+
