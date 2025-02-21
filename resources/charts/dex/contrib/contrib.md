@@ -26,3 +26,9 @@ ln -s $(realpath ../oauth2-proxy/values.yaml) charts/kubee-oauth2-proxy/values.y
 # Pull
 helm pull https://github.com/dexidp/helm-charts/releases/download/dex-0.20.0/dex-0.20.0.tgz -d charts --untar
 ```
+
+## FAQ
+
+### No groups for static users
+
+https://github.com/dexidp/dex/issues/1080

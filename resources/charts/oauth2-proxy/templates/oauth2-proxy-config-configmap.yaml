@@ -93,9 +93,15 @@ data:
     # populate login_url, redeem_url, and oidc_jwks_url using https://{{.Values.dex.hostname}}/.well-known/openid-configuration
     # The only problem is that the pod does not start if dex is down
     skip_oidc_discovery = false
-    # scope
-    # Trusted peers to get the audience as kubernetes
-    # https://dexidp.io/docs/configuration/custom-scopes-claims-clients/#cross-client-trust-and-authorized-party
-    scope = "openid email profile audience:server:client_id:{{ .Values.dex.clients.kubernetes.client_id }}"
+    # Scope
+    # This settings control the Grant Access page. ie
+    # Oauth2 Proxy would like to:
+    #   View basic profile information
+    #   View your email address
+    #   View your groups
+    # openid scope is mandatory
+    # audience:server:client_id is a scope to get kubernetes as an extra audience to be able to login to kubernetes api (See https://dexidp.io/docs/configuration/custom-scopes-claims-clients/#cross-client-trust-and-authorized-party)
+    # For all scopes, see https://dexidp.io/docs/configuration/custom-scopes-claims-clients/
+    scope = "openid email profile groups audience:server:client_id:{{ .Values.dex.clients.kubernetes.client_id }}"
 
 
