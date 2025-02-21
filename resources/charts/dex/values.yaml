@@ -23,11 +23,13 @@ clients:
     client_id: 'oauth2-proxy'
     # The oidc client secret (used to exchange the code between oauth2-proxy and dex)
     secret: ''
-  # Kubectl oidc-login
+  # Kubernetes (ie kubectl oidc-login)
   # Added if the secret is not empty
-  kubectl:
+  kubernetes:
     # The id
     client_id: 'kubernetes'
+  kubectl:
+    client_id: 'kubectl'
     # The oidc client secret (used to exchange the code between kubectl and dex)
     secret: ''
 

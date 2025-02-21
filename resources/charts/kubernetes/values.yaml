@@ -26,7 +26,7 @@ hosts:
   # Number of hosts server must be odd to avoid split brain issues with etcd
   # The minimum number is:
   # - 1 for a single server cluster
-  # - 3 for a high availability cluster
+  # - 3 for a high availability cluster - https://docs.k3s.io/datastore/ha-embedded
   servers: []
     # Example:
     # - fqdn: '' # The full qualified name (Mandatory) ie kubee-loc-server-01.example.com

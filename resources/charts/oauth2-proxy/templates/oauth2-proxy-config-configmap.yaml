@@ -93,3 +93,9 @@ data:
     # populate login_url, redeem_url, and oidc_jwks_url using https://{{.Values.dex.hostname}}/.well-known/openid-configuration
     # The only problem is that the pod does not start if dex is down
     skip_oidc_discovery = false
+    # scope
+    # Trusted peers to get the audience as kubernetes
+    # https://dexidp.io/docs/configuration/custom-scopes-claims-clients/#cross-client-trust-and-authorized-party
+    scope = "openid email profile audience:server:client_id:{{ .Values.dex.clients.kubernetes.client_id }}"
+
+

@@ -45,10 +45,6 @@ dependencies:
     version: 0.0.1
     alias: oauth2_proxy
     condition: kubee_internal.install_cross_dependency
-  - name: kubee-traefik-forward-auth
-    version: 0.0.1
-    alias: traefik_forward_auth
-    condition: kubee_internal.install_cross_dependency
   - name: kubee-cert-manager
     version: 0.0.1
     alias: cert_manager
