@@ -44,6 +44,20 @@ kubee helmet -c clusertName play kubernetes-dashboard
 The ingress cannot be protected with an authentication mechanism that uses the `Authenticate` HTTP header
 such as the `basic auth` otherwise they conflict, and you get a `401` not authorized.
 
+### How to access the dashboard without Ingress
+* Via Port forwarding
+
+```bash
+kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443  
+```
+You can then access the dashboard at: https://localhost:8443
+
+*  Via Proxy: Via API Service Proxy
+```bash
+kubectl proxy
+```
+You can then access the dashboard at http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard-kong-proxy:443/proxy/#/login
+
 
 ## Ref
 
