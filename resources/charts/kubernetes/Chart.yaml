@@ -1,6 +1,6 @@
 apiVersion: v2
-name: kubee-infra
-description: The infra as code Kubee Chart
+name: kubee-kubernetes
+description: Kubernetes Kubee Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #

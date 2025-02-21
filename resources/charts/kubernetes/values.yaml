@@ -1,0 +1,65 @@
+
+# The actual Kubernetes distribution installed
+# Only k3s is supported for now
+# This value is used by other kubee chart such as kubernetes-monitoring
+# to apply conditional logic
+distribution: 'k3s'
+
+# Version
+version: 'v1.32.0+k3s1'
+
+
+# K3s
+k3s:
+  # Token
+  # Mandatory
+  # A random secret value that should not change ever
+  # because it's used to encrypt the data on disk
+  # You can generate one with `openssl rand -base64 64 | tr -d '\n'`)
+  token: ''
+  # Server Args
+  # https://docs.k3s.io/cli/server
+  # Example:
+  # --kube-apiserver-arg="admission-control-config-file=/var/lib/rancher/k3s/server/psa.yaml"
+  # --datastore-endpoint=postgres://username:password@hostname:port/database-name
+  server_args: [ ]
+
+# Hosts
+hosts:
+  # Connection
+  connection:
+    # User used for the connection
+    # ie ansible_user
+    # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#connecting-to-hosts-behavioral-inventory-parameters
+    username: 'root'
+    # Connection type
+    # For ansible, ansible_connection. Example of values: ansible.builtin.ssh, community.docker.docker, ...
+    # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#connecting-to-hosts-behavioral-inventory-parameters
+    type: 'ssh'
+  # List of Servers
+  # Number of hosts server must be odd to avoid split brain issues with etcd
+  # The minimum number is 3 for a high availability cluster
+  servers: []
+    # Example:
+    # - fqdn: '' # The full qualified name (Mandatory) ie kubee-loc-server-01.example.com
+    #   ip: ''   # The Ip Mandatory for an ssh/vps cluster
+    #   name: '' # The name Mandatory for a docker cluster (ie the container name)
+  # Agents
+  agents: [ ]
+  # Configuration for all hosts
+  all:
+    # Optional Extra admin user added to the Host OS if the name and public key are not empty
+    # (ie in the wheel group, used when ssh was hardened by banning root connection)
+    admin_user:
+      # The name
+      username: ''
+      # The public key of the private key
+      public_key: ''
+
+
+# Provisioner
+# Only ansible is supported for now
+provisioner: 'ansible'
+
+# Hack as it's mandatory for a kubee chart
+namespace: default

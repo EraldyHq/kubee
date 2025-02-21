@@ -1,3 +1,4 @@
+{{- if and (eq .Values.provisioner "ansible") (eq .Values.distribution "k3s") }}
 k3s_cluster:
   children:
     # Server hosts
@@ -6,7 +7,7 @@ k3s_cluster:
     server:
       hosts:
         {{- if eq (len .Values.hosts.servers) 0 }}
-        {{ fail "No server host found at infra.hosts.servers. The list of servers is empty"}}
+        {{ fail "No server host found at kubernetes.hosts.servers. The list of servers is empty. Did you set a cluster name?"}}
         {{- end }}
         # The ansible host name
         # Used by k3s as the FQDN when creating the kubeconfig file
@@ -33,14 +34,14 @@ k3s_cluster:
     # With the host-specific parameter ansible_connection=<connector>
     # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#non-ssh-connection-types
     # see connection: ansible-doc -t connection -l
-    ansible_connection: "{{ required "The ansible.connection is mandatory" .Values.ansible.connection}}"
+    ansible_connection: "{{ required "The hosts.connection.type is mandatory" .Values.hosts.connection.type}}"
     # The default username to use for log in. Most plugins default to the ‘current user running Ansible’.
     # Can be set via ANSIBLE_REMOTE_USER (default to the user executing Ansible)
     # https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_REMOTE_USER
-    ansible_user: "{{ required "The ansible.user is mandatory" .Values.ansible.username}}"
+    ansible_user: "{{ required "The hosts.connection.username is mandatory" .Values.hosts.connection.username}}"
 
     # See also https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_HOST_KEY_CHECKING
-    k3s_version: "{{ required "The k3s.version is mandatory" .Values.k3s.version}}"
+    k3s_version: "{{ required "The kubernetes k3s version is mandatory" .Values.version}}"
     #
     # By default, K3s uses a single static token for both servers and agents.
     # This token cannot be changed once the cluster has been created.
@@ -64,7 +65,7 @@ k3s_cluster:
     #
     # Don't change the token as the cluster data is encrypted with it
     #
-    k3s_token: "{{ required "The infra.k3s.token is required" .Values.k3s.token}}"
+    k3s_token: "{{ required "The kubernetes.k3s.token is required" .Values.k3s.token}}"
 
     # https://docs.k3s.io/cli/server
     # --kube-apiserver-arg="admission-control-config-file=/var/lib/rancher/k3s/server/psa.yaml"
@@ -78,7 +79,8 @@ k3s_cluster:
     # Admin user
     # An admin is created on the server if these values are not empty
     # The admin username
-    kubee_os_admin_username: "{{.Values.hosts.admin_user.username}}"
+    kubee_os_admin_username: "{{.Values.hosts.all.admin_user.username}}"
     # The admin user Public key that is added to the `authorized_keys`
     # The key is mandatory if the admin username is not empty
-    kubee_os_admin_public_key: "{{.Values.hosts.admin_user.public_key}}"
+    kubee_os_admin_public_key: "{{.Values.hosts.all.admin_user.public_key}}"
+{{- end }}

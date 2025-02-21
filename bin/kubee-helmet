@@ -266,21 +266,36 @@ apply(){
   echo::eval "pushd $KUBEE_CLUSTER_DIR 1>$COMMAND_STDOUT_FD"
   bash::trap "popd 1>$COMMAND_STDOUT_FD" EXIT
 
-  # Silence for template command
-  # wrote out/xxx/templates/xxx.yml
-  if [ "$COMMAND" == "template" ] && [ "$OPTION_OUTPUT_DIR" != "" ]; then
-    HELM_COMMAND+=("1>$COMMAND_STDOUT_FD")
-  fi
-
-  # Silence or no output
-  HELM_COMMAND+=("2>$COMMAND_STDOUT_FD")
 
   echo::info "Executing Helm $COMMAND"
-  if ! echo::eval "${HELM_COMMAND[*]}"; then
+  # /dev/stdout Redirect the error to stdout to capture it
+  if ! HELM_OUTPUT=$(echo::eval "${HELM_COMMAND[*]}" "/dev/stdout"); then
     echo::err "An error occurs during the command $COMMAND."
-    echo::err "Uses the --debug flag for more information (ie kubee --debug helmet $COMMAND)"
+    echo::err "Output:"
+    echo::err "$HELM_OUTPUT"
     return 1
   fi
+
+  # Where to send the output (by default stdout)
+  local HELM_STD="/dev/stdout"
+  if [ "$COMMAND" == "template" ] && [ "$OPTION_OUTPUT_DIR" != "" ]; then
+      # Silence for template command
+      # wrote out/xxx/templates/xxx.yml
+      echo::debug "Silence Template command with output dir option"
+      HELM_STD="$COMMAND_STDOUT_FD"
+  fi
+  echo::debug "Output Helm to $HELM_STD"
+  # We use printf because in the template, we may backtick
+  # that has special meaning for bash
+  if [ "$COMMAND" == "template" ] && [ "$OPTION_OUTPUT_DIR" == "" ] && [ "$HELM_STD" == "/dev/stdout" ]; then
+    # Template are automatically yaml file
+    # Colored, for what ever reason, if the original command is redirected
+    # to a file, yq does not apply any color
+    printf "%s" "$HELM_OUTPUT" | yq .
+  else
+    printf "%s" "$HELM_OUTPUT" >"$HELM_STD"
+  fi
+
 
   # Can we Wait with that?
   # kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator
@@ -710,7 +725,7 @@ fi
 
 case "$COMMAND" in
   "install"|"template"|"upgrade"|"play")
-    apply "$COMMAND" "$@"
+    apply "$COMMAND" "$@" || error::exit $?
     ;;
   "values")
     # The -t test checks if the file descriptor is connected to a terminal.
