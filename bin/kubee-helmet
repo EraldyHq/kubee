@@ -324,11 +324,16 @@ apply(){
 
 
   echo::info "Executing Helm $COMMAND"
-  # /dev/stdout Redirect the error to stdout to capture it
-  if ! HELM_OUTPUT=$(echo::eval "${HELM_COMMAND[*]}" "/dev/stdout"); then
+  # Redirect the error to capture it
+  # We don't redirect to stdout because Helm put it also warning (ie without failing the command)
+  # The output is then no more yaml compliant
+  # Example: walk.go:75: found symbolic link in path: /home/admin/code/kubee/resources/charts/mailu/charts/kubee-cluster resolves to /home/admin/code/kubee/resources/charts/cluster. Contents of linked file included and used
+  local STDERR_FD=/dev/shm/helm_stderr.log
+  rm -rf "$STDERR_FD"
+  if ! HELM_OUTPUT=$(echo::eval "${HELM_COMMAND[*]}" "$STDERR_FD"); then
     echo::err "An error occurs during the command $COMMAND."
     echo::err "Output:"
-    echo::err "$HELM_OUTPUT"
+    echo::err "$(cat $STDERR_FD)"
     return 1
   fi
 
@@ -354,8 +359,10 @@ apply(){
     # Template are yaml file
     # We send the output to yq to color it on the terminal
     # Even if yq does not apply any color if the initiator kubee command is redirected to a file, we test for it with [ -t 1 ]
+    echo::debug "Colored Helm Output"
     printf "%s\n" "$HELM_OUTPUT" | yq .
   else
+    echo::debug "Raw Helm Output"
     printf "%s\n" "$HELM_OUTPUT" >| "$HELM_STD"
   fi
 
@@ -481,10 +488,10 @@ print_values(){
     return 1
   fi
 
-  # Default values
-  #
+  # All Chart values files to merge
   local CHART_VALUES_FILES=()
 
+  # Add dependencies
   local DEPENDENCIES;
   DEPENDENCIES="$(yq -r '.dependencies[] | [ (.name // "") + "," + (.alias // "") + "," + (.repository // "") + "," + ( .version // "")] | join("\n")' "$ACTUAL_CHART_FILE")"
   if [ "$DEPENDENCIES" != "" ]; then
@@ -558,20 +565,21 @@ print_values(){
 
               # Scoping (ie adding the alias to the dependency values file)
               # The default value should be under the alias key (ie scoped)
-              local SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default.yml"
+              local DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default.yml"
               # --null-input flag: does not have any input as we create a new file
-              if ! echo::eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$SHM_DEPENDENCY_CHART_VALUES_FILE\"))' >| $SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE"; then
+              if ! echo::eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$SHM_DEPENDENCY_CHART_VALUES_FILE\"))' >| $DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE"; then
                 echo::err "Error while processing the chart values file $SHM_DEPENDENCY_CHART_VALUES_FILE"
                 return 1
               fi
               rm "$SHM_DEPENDENCY_CHART_VALUES_FILE"
-              CHART_VALUES_FILES+=("$SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE")
-              echo::debug "Values file generated: ${SHM_DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE}"
+              CHART_VALUES_FILES+=("$DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE")
+              echo::debug "Values file generated: ${DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE}"
     done <<< "$DEPENDENCIES"
   fi
 
 
   # Chart Own values files
+  # Should be after the dependency so that in the merge they have priorities
   local CHART_VALUES_FILE="$CHART_DIRECTORY/values.yaml"
   if [[ "$CHART_NAME" == *"$CRD_SUFFIX" ]]; then
       local PARENT_CHART_NAME;
@@ -592,7 +600,8 @@ print_values(){
   fi
   CHART_VALUES_FILES+=("$CHART_VALUES_FILE")
 
-
+  # The cluster values files should be last to be added in the set
+  # as it has the higher priorities
   if ! CLUSTER_VALUE_FILES=$(get_cluster_values_files); then
     echo::err "Error while creating the values file"
     return 1
@@ -610,6 +619,14 @@ print_values(){
     echo::err "Error while merging the yaml files"
     return 1
   fi
+  # values are merged from left to right
+  # helm install [name] [chart] --dry-run --debug -f <your_values_file>
+  # the merged list of values will be available in a section called COMPUTED VALUES
+  # creating a dedicated chart with one template like {{ toYaml .Values }} works again for capturing the full set of values.
+  # example: https://github.com/helm/helm/files/11402407/mergevalues.tar.gz
+  # https://github.com/helm/helm/issues/6772
+  # https://github.com/helm/helm/issues/12007
+  # helm template my-release . -f values1.yaml -f values2.yaml -f values3.yaml --show-only values
 
 }
 
