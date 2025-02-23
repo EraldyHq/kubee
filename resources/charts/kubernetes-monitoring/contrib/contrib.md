@@ -150,3 +150,21 @@ We prefer the grafana operator because:
 * we can control grafana cloud instance
 * `kubernetes-grafana` has already some [issues](https://github.com/prometheus-operator/kube-prometheus/issues/1735) and has not seen a commit for 2 years.
 
+### Why Bucket are dropped by default
+
+Bucket are used for analytics query.
+
+For instance: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeapierrorbudgetburn/
+
+The following metrics are dropped (on all scrape job - ie in the `kubelet` and `api server` job)
+```
+apiserver_request_duration_seconds_bucket{}	32809
+apiserver_request_body_size_bytes_bucket{}	15744
+apiserver_response_sizes_bucket{}	6176
+apiserver_watch_events_sizes_bucket{}	2682
+apiserver_request_sli_duration_seconds_bucket{}	26092
+etcd_request_duration_seconds_bucket{}	22320
+workqueue_work_duration_seconds_bucket{}	2002
+workqueue_queue_duration_seconds_bucket{} 2002
+```
+
