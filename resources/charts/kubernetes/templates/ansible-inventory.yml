@@ -70,9 +70,16 @@ k3s_cluster:
     # https://docs.k3s.io/cli/server
     # --kube-apiserver-arg="admission-control-config-file=/var/lib/rancher/k3s/server/psa.yaml"
     # --datastore-endpoint=postgres://username:password@hostname:port/database-name
-    {{- if gt (len .Values.k3s.server_args) 0 }}
+    {{- $k3sServerArgs := .Values.k3s.server_args }}
+    {{- if and (eq .Values.dex.enabled true) (eq .Values.distribution "k3s") }}
+    {{- $k3sServerArgs = append $k3sServerArgs (printf "--kube-apiserver-arg=\"oidc-issuer-url=https://%s\"" .Values.dex.hostname) }}
+    {{- $k3sServerArgs = append $k3sServerArgs "--kube-apiserver-arg=\"oidc-client-id=kubernetes\"" }}
+    {{- $k3sServerArgs = append $k3sServerArgs "--kube-apiserver-arg=\"oidc-username-claim=email\"" }}
+    {{- $k3sServerArgs = append $k3sServerArgs "--kube-apiserver-arg=\"oidc-groups-claim=groups\"" }}
+    {{- end }}
+    {{- if gt (len $k3sServerArgs) 0 }}
     k3s_extra_server_args:
-{{.Values.k3s.server_args | toYaml | indent 6}}
+{{ $k3sServerArgs | toYaml | indent 6}}
     {{- else }}
     k3s_extra_server_args: []
     {{- end }}

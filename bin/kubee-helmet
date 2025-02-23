@@ -206,6 +206,19 @@ install_crd_first(){
 
 }
 
+uninstall(){
+  if [ "$CHART_NAME" == "$KUBERNETES_CHART_NAME" ]; then
+      if ! inventory=$(ansible_inventory_file); then
+        echo::err "Error while generating the ansible inventory file"
+        return 1
+      fi
+      ansible-playbook -i "$inventory" k3s.orchestration.reset.yml
+      return
+  fi
+  kubee::set_kubeconfig_env_and_check
+  echo::eval "helm --namespace $CHART_NAMESPACE uninstall --wait $CHART_NAME"
+}
+
 apply(){
 
   # The final helm command (installation, or template)
@@ -824,6 +837,9 @@ case "$COMMAND" in
     fi
     apply "$COMMAND" "$@" || error::exit $?
     ;;
+  "uninstall")
+      uninstall || error::exit $?
+      ;;
   "values")
     # The -t test checks if the file descriptor is connected to a terminal.
     # When in a pipeline, stdout is redirected and not connected to a terminal.
