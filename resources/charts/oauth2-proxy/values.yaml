@@ -13,9 +13,7 @@ auth:
   # Example command: dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_' ; echo
   # https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview#generating-a-cookie-secret
   cookie_secret: ''
-  # Cookie Expiration
-  # Default is 168h (ie 7 days)
-  cookie_expire: "168h"
+  # Cookie Expiration is controlled by Oidc Token expiration
   # Add the domain of the hostname as cookie and while list domain
   use_domain_hostname: true
   # Optional domain of the cookie: the longest domain matching the request's host will be used (or the shortest cookie domain if there is no match).

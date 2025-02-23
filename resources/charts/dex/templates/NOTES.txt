@@ -1,5 +1,5 @@
 Don't forget to restart the deployment if the configs have changed
 
 ```bash
-kubee -cluster clusterName app restart dex
+kubee --cluster clusterName app restart dex
 ```

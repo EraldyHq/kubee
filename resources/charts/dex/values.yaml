@@ -29,6 +29,7 @@ clients:
     # If changed, all kubee charts that depends on should be deployed again
     client_id: 'oauth2-proxy'
     # The oidc client secret (used to exchange the code between oauth2-proxy and dex)
+    # openssl rand -base64 32
     secret: ''
   # Kubectl (ie kubectl oidc-login)
   # Added if the secret is not empty
@@ -38,11 +39,29 @@ clients:
     # and all kubee charts that depends on should be deployed again
     client_id: 'kubectl'
     # The oidc client secret (used to exchange the code between kubectl and dex)
+    # paopenssl rand -base64 32
     secret: ''
 
   # Other client
   # https://dexidp.io/docs/guides/using-dex/#configuring-your-app
   others: []
+
+# Expiration settings
+# https://dexidp.io/docs/configuration/tokens/#expiration-and-rotation-settings
+# It's possible to specify units using only s, m and h suffixes.
+# This configuration are used by Oauth proxy to set cookie expiration settings
+expiration:
+  # The access token lifetime
+  # 24h is the [default](https://github.com/dexidp/dex/blob/65814bbd7746611a359408bb355fb4e12d6e2c14/config.yaml.dist#L89),
+  # 10m is the [recommended doc setting](https://dexidp.io/docs/configuration/tokens/#expiration-and-rotation-settings)
+  # 1m is the [recommended setting of Oauth proxy](https://oauth2-proxy.github.io/oauth2-proxy/configuration/session_storage)
+  # You can set the real value with the exp field of the JWS token
+  access_token_lifetime: "10m"
+  # The refresh token lifetime, it forces users to reauthenticate
+  # 3960h (165 days) is the [dex default](https://github.com/dexidp/dex/blob/65814bbd7746611a359408bb355fb4e12d6e2c14/config.yaml.dist#L89),
+  # 168h (7 days) is the [default cookie_expire value](https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview?_highlight=cookie_expire#cookie-options)
+  # You can see the real value in the cookie lifetime of oauth
+  refresh_token_lifetime: "168h"
 
 
 # Dex Chart Values

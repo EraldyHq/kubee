@@ -68,7 +68,6 @@ data:
 
     # Cookie
     # https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/#cookie-options
-    cookie_expire = "{{.Values.auth.cookie_expire}}"
     cookie_secure = true
     {{- if or (gt (len .Values.auth.cookie_domains) 0 ) (eq .Values.auth.use_domain_hostname true) }}
         {{- $cookieDomains := .Values.auth.cookie_domains }}
@@ -80,6 +79,18 @@ data:
     {{- end }}
     cookie_name = "_oauth2_proxy"
     cookie_httponly = true
+    # cookie_refresh to prevent that Oauth serve expired token
+    #  Issue: https://github.com/oauth2-proxy/oauth2-proxy/issues/1285
+    #  Issue: https://github.com/oauth2-proxy/oauth2-proxy/issues/1836
+    # The "cookie-refresh" value controls when OAuth2 Proxy tries to refresh an Access-Token.
+    # Recommended setting: cookie_refresh := Access-Token lifespan - 1m
+    cookie_refresh = "{{.Values.dex.expiration.access_token_lifetime }}"
+    # The "cookie-expire" value should be equal to the lifetime of the Refresh-Token
+    # that is issued by the OAuth2 authorization server.
+    # Default is 168h (ie 7 days)
+    # Recommended setting: cookie_expire := Refresh-Token lifespan (i.e. Keycloak client_session_idle)
+    # It forces users to reauthenticate and obtain a new refresh token.
+    cookie_expire = "{{.Values.dex.expiration.refresh_token_lifetime }}"
 
     # Csrf Cookie
     # https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/#cookie-options
