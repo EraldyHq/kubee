@@ -4,6 +4,8 @@ set -TCEeuo pipefail
 
 # shellcheck source=../../bash-lib/lib/bashlib-doc.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+# shellcheck source=../../bash-lib/lib/bashlib-array.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-array.sh"
 
 # The synopsis function is required by the doc::usage
 synopsis(){
@@ -303,6 +305,9 @@ apply(){
     "--post-renderer-args" "$CHART_OUTPUT_DIR"
     )
 
+  # Update dependencies if they are missing in the charts dir
+  HELM_COMMAND+=("--dependency-update")
+
   # Debug
   if [ "${#HELM_EXTRA_FLAGS[*]}" != "0" ]; then
     HELM_COMMAND+=("${HELM_EXTRA_FLAGS[@]}")
@@ -504,6 +509,18 @@ print_values(){
                     return 1
               fi
 
+              # We don't add external values files
+              # They may use template:
+              # name: {{ include "mailu.database.roundcube.secretName" . }}
+              # and we get the error: error calling include: template: no template "mailu.database.roundcube.secretName" associated with template "gotpl"
+              # Ref: https://github.com/Mailu/helm-charts/blob/98da259e46bf366ca03d7a9d3352d74c5bff7c66/mailu/values.yaml#L376
+              # Otherwise we would need to create a copy of this chart with only the `values.yaml` template of the values chart
+              if [[ $DEPENDENCY_CHART_NAME != kubee* ]]; then
+                echo::debug "Skipped non kubee dependency chart $DEPENDENCY_CHART_NAME"
+                continue;
+              fi
+
+
               # Alias is not mandatory and sometimes
               # You can't even change it (ie kubernetes-dashboard)
               # We generate a kubee alias
@@ -612,17 +629,20 @@ print_values(){
 
 
   ###########################
-  # Merge
+  # Merge with helm itself
   # shellcheck disable=SC2016
   # https://mikefarah.gitbook.io/yq/commands/evaluate-all
-  if ! echo::eval "yq eval-all '. as \$item ireduce ({}; . * \$item )' ${CHART_VALUES_FILES[*]}"; then
-    echo::err "Error while merging the yaml files"
-    return 1
+  # Old command was echo::eval "yq eval-all '. as \$item ireduce ({}; . * \$item )' ${CHART_VALUES_FILES[*]}"
+  # Values are merged from left to right
+  local PATH_VALUES_CHART
+  if ! PATH_VALUES_CHART=$(get_chart_directory "values"); then
+      echo::debug "Internal error no chart directory found with the names values"
+      return
   fi
-  # values are merged from left to right
-  # helm install [name] [chart] --dry-run --debug -f <your_values_file>
-  # the merged list of values will be available in a section called COMPUTED VALUES
-
+  if ! echo::eval "helm template fake-release-name $PATH_VALUES_CHART -f $(array::join --sep ' -f ' "${CHART_VALUES_FILES[@]}")"; then
+     echo::err "Error while merging the yaml files"
+     return 1
+  fi
 
 }
 
@@ -817,7 +837,7 @@ else
   VALUES_NAMESPACE_PATH=".namespace"
   CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$CHART_VALUES_PATH")
   if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
-    echo::err "No namespace found at $VALUES_NAMESPACE_PATH"
+    echo::err "No namespace found at path $VALUES_NAMESPACE_PATH on the file $CHART_VALUES_PATH"
     exit 1
   fi
   echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"

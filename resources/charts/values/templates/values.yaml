@@ -1,2 +1,2 @@
-# We have added tpl to resolve the template values
-{{- tpl (toYaml .Values) . -}}
+{{/*# We have added tpl to resolve the template values*/}}
+{{ tpl (toYaml .Values) . -}}

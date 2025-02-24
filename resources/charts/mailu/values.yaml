@@ -1,6 +1,6 @@
 enabled: false
 
-namespace: mail
+namespace: 'mail'
 
 hostname: ''
 
