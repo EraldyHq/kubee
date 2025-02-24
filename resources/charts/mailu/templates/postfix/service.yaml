@@ -1,0 +1,31 @@
+---
+# Source: kubee-mailu/charts/mailu/templates/postfix/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailu-postfix
+  namespace: "mail"
+  labels:
+    app.kubernetes.io/name: mailu
+    helm.sh/chart: mailu-2.1.2
+    app.kubernetes.io/instance: mailu
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: postfix
+spec:
+  selector:
+    app.kubernetes.io/name: mailu
+    app.kubernetes.io/instance: mailu
+    app.kubernetes.io/component: postfix
+  ports:
+    - name: smtp
+      port: 25
+      protocol: TCP
+    - name: smtp-ssl
+      port: 465
+      protocol: TCP
+    - name: smtp-starttls
+      port: 587
+      protocol: TCP
+    - name: smtp-auth
+      port: 10025
+      protocol: TCP

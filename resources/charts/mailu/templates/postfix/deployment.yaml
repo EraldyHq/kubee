@@ -1,0 +1,116 @@
+---
+# Source: kubee-mailu/charts/mailu/templates/postfix/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailu-postfix
+  namespace: "mail"
+  labels:
+    app.kubernetes.io/name: mailu
+    helm.sh/chart: mailu-2.1.2
+    app.kubernetes.io/instance: mailu
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: postfix
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mailu
+      app.kubernetes.io/instance: mailu
+      app.kubernetes.io/component: postfix
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mailu
+        helm.sh/chart: mailu-2.1.2
+        app.kubernetes.io/instance: mailu
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: postfix
+    spec:
+      
+      terminationGracePeriodSeconds: 2
+      containers:
+        - name: postfix
+          image: ghcr.io/mailu/postfix:2024.06.10
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /queue
+              name: data
+              subPath: mailqueue
+          env:
+            - name: LOG_LEVEL
+              value: WARNING
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mailu-secret
+                  key: secret-key
+            - name: INITIAL_ADMIN_PW
+              valueFrom:
+                secretKeyRef:
+                  name: mailu-initial-account
+                  key: initial-account-password
+            - name: ROUNDCUBE_DB_PW
+              valueFrom:
+                secretKeyRef:
+                  name: mailu-roundcube
+                  key: roundcube-db-password
+          envFrom:
+            - configMapRef:
+                name: mailu-envvars
+          ports:
+            - name: smtp
+              containerPort: 25
+              protocol: TCP
+            - name: smtp-ssl
+              containerPort: 465
+              protocol: TCP
+            - name: smtp-starttls
+              containerPort: 587
+              protocol: TCP
+            - name: smtp-auth
+              containerPort: 10025
+              protocol: TCP
+          resources:
+            limits: {}
+            requests: {}
+          startupProbe:
+            failureThreshold: 30
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+            exec:
+              command:
+                - sh
+                - -c
+                - '! /usr/libexec/postfix/master -t'
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+            exec:
+              command:
+                - sh
+                - -c
+                - '! /usr/libexec/postfix/master -t'
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+            exec:
+              command:
+                - sh
+                - -c
+                - '! /usr/libexec/postfix/master -t'
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: mailu-storage

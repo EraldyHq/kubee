@@ -26,10 +26,10 @@ mailu:
   front:
     hostPort:
       enabled: false
-  externalService:
-    enabled: true
-    type: LoadBalancer
-    externalTrafficPolicy: Local
+    externalService:
+      enabled: true
+      type: LoadBalancer
+      externalTrafficPolicy: Local
 
 
 
