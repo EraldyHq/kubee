@@ -2,30 +2,35 @@ enabled: false
 
 namespace: mail
 
-hostname: &mailuHostname ''
+hostname: ''
 
-domain: &mailuDomain ''
+domain: ''
+
 
 mailu:
   ## hostnames:
   ##   - mail.example.com
   ##   - imap.example.com
   hostnames:
-    - *mailuHostname
+    - '{{ .Values.hostname }}'
   # Mail Domain
-  domain: *mailuDomain
+  domain: '{{ .Values.domain }}'
   # Initial Account
   initialAccount:
     enabled: true
-    username: "{{ $.Values.cluster.auth.admin_user.username }}"
-    password: "{{ $.Values.cluster.auth.admin_user.password }}"
+    username: "{{ .Values.cluster.auth.admin_user.username }}"
+    password: "{{ .Values.cluster.auth.admin_user.password }}"
 
   # Running on bare metal with k3s and klipper-lb
   # https://github.com/Mailu/helm-charts/tree/master/mailu#running-on-bare-metal-with-k3s-and-klipper-lb
-  front.hostPort.enabled: false
-  externalService.enabled: true
-  externalService.type: LoadBalancer
-  externalService.externalTrafficPolicy: Local
+  front:
+    hostPort:
+      enabled: false
+  externalService:
+    enabled: true
+    type: LoadBalancer
+    externalTrafficPolicy: Local
+
 
 
 # Don't change, don't touch

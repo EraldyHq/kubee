@@ -622,11 +622,7 @@ print_values(){
   # values are merged from left to right
   # helm install [name] [chart] --dry-run --debug -f <your_values_file>
   # the merged list of values will be available in a section called COMPUTED VALUES
-  # creating a dedicated chart with one template like {{ toYaml .Values }} works again for capturing the full set of values.
-  # example: https://github.com/helm/helm/files/11402407/mergevalues.tar.gz
-  # https://github.com/helm/helm/issues/6772
-  # https://github.com/helm/helm/issues/12007
-  # helm template my-release . -f values1.yaml -f values2.yaml -f values3.yaml --show-only values
+
 
 }
 
