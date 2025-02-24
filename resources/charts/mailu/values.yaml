@@ -20,6 +20,12 @@ mailu:
     username: "{{ $.Values.cluster.auth.admin_user.username }}"
     password: "{{ $.Values.cluster.auth.admin_user.password }}"
 
+  # Running on bare metal with k3s and klipper-lb
+  # https://github.com/Mailu/helm-charts/tree/master/mailu#running-on-bare-metal-with-k3s-and-klipper-lb
+  front.hostPort.enabled: false
+  externalService.enabled: true
+  externalService.type: LoadBalancer
+  externalService.externalTrafficPolicy: Local
 
 
 # Don't change, don't touch
