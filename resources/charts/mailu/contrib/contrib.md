@@ -1,10 +1,5 @@
 
 
-## Test
-### Open Relay Checker
-
-https://mxtoolbox.com/diagnostic.aspx
-
 
 ## Bootstrap
 
