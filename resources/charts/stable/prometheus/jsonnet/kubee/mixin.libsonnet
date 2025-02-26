@@ -25,20 +25,21 @@ function(params)
 
   local values = defaultValues + params;
 
+  local ruleGroups = if std.objectHasAll(values.mixin, 'prometheusRules') then values.mixin.prometheusRules.groups else [];
+  local alertGroups = if std.objectHasAll(values.mixin, 'prometheusAlerts') then values.mixin.prometheusAlerts.groups else [];
+  local totalRules = ruleGroups+alertGroups;
 
   // Returned object
   {
-    [values.mixin_name+'-prometheus-rules']: {
+    [if std.length(totalRules) != 0 then values.mixin_name+'-prometheus-rules' else null]: {
       apiVersion: 'monitoring.coreos.com/v1',
       kind: 'PrometheusRule',
       metadata: {
         name: values.mixin_name + '-monitoring-rules',
       },
       spec: {
-        local r = if std.objectHasAll(values.mixin, 'prometheusRules') then values.mixin.prometheusRules.groups else [],
-        local a = if std.objectHasAll(values.mixin, 'prometheusAlerts') then values.mixin.prometheusAlerts.groups else [],
-        groups: a + r,
+        groups: totalRules,
       },
     },
-  }
+}
   + if !values.grafana_enabled then {} else (import 'mixin-grafana.libsonnet')(values)

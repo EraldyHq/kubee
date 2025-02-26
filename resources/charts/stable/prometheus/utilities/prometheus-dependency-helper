@@ -89,7 +89,7 @@ for FILE in "$@"; do
   # directory needs to exists
   mkdir -p "$(dirname "$DEST")"
   echo::info "Download the Kube Prometheus Jsonnet lib $FILE with version $KUBE_PROMETHEUS_VERSION"
-  URL="https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/refs/tags/$KUBE_PROMETHEUS_VERSION/jsonnet/kube-prometheus/$FILE"
+  URL="https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/refs/tags/v$KUBE_PROMETHEUS_VERSION/jsonnet/kube-prometheus/$FILE"
   echo::info "$URL"
   if ! curl -s -o "$DEST" --fail "$URL"; then
     # If an error occurred do it again without silent (-s)

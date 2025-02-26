@@ -63,4 +63,4 @@ dependencies:
 # Used to download the library with kube-prometheus-downloader-helper
 # https://github.com/prometheus-operator/kube-prometheus/releases
 annotations:
-  kube-prometheus/version: "v0.14.0"
+  kube-prometheus/version: "0.14.0"
