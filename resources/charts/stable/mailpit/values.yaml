@@ -1,0 +1,39 @@
+enabled: false
+
+namespace: 'mail'
+
+hostname: ''
+
+domain: ''
+
+
+mailu:
+  ## hostnames:
+  ##   - mail.example.com
+  ##   - imap.example.com
+  hostnames:
+    - '{{ .Values.hostname }}'
+  # Mail Domain
+  domain: '{{ .Values.domain }}'
+  # Initial Account
+  initialAccount:
+    enabled: true
+    username: "{{ .Values.cluster.auth.admin_user.username }}"
+    password: "{{ .Values.cluster.auth.admin_user.password }}"
+
+  # Running on bare metal with k3s and klipper-lb
+  # https://github.com/Mailu/helm-charts/tree/master/mailu#running-on-bare-metal-with-k3s-and-klipper-lb
+  front:
+    hostPort:
+      enabled: false
+    externalService:
+      enabled: true
+      type: LoadBalancer
+      externalTrafficPolicy: Local
+
+
+
+# Don't change, don't touch
+# Used to not output template from cross dependency in Chart.yaml
+kubee_internal:
+  install_cross_dependency: false
