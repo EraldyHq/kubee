@@ -54,7 +54,7 @@ get_chart_directory(){
   # All packages directories in an array
   local KUBEE_CHARTS_DIRS=()
   IFS=":" read -ra KUBEE_CHARTS_DIRS <<< "${KUBEE_CHARTS_PATH:-}"
-  local KUBEE_CHARTS_DIRS+=("$KUBEE_RESOURCE_CHARTS_DIR")
+  local KUBEE_CHARTS_DIRS+=("$KUBEE_RESOURCE_STABLE_CHARTS_DIR")
   for KUBEE_PACKAGES_DIR in "${KUBEE_CHARTS_DIRS[@]}"; do
       if [ ! -d "$KUBEE_PACKAGES_DIR" ]; then
         echo::warn "The path ($KUBEE_PACKAGES_DIR) set in KUBEE_CHARTS_PATH does not exist or is not a directory"
@@ -603,7 +603,7 @@ print_values(){
       PARENT_CHART_NAME=${CHART_NAME%"$CRD_SUFFIX"};
       if ! PARENT_CHART_DIRECTORY=$(get_chart_directory "$PARENT_CHART_NAME"); then
         echo::err "The parent chart ($PARENT_CHART_NAME) of the CRD chart ($PARENT_CHART_NAME) was not found"
-        echo::err "  * the cluster resources directory (${KUBEE_RESOURCE_CHARTS_DIR}) " # the /resources/charts dir
+        echo::err "  * the cluster resources directory (${KUBEE_RESOURCE_STABLE_CHARTS_DIR}) " # the /resources/charts dir
         echo::err "  * or the paths of the KUBEE_CHARTS_PATH variable (${KUBEE_CHARTS_PATH:-'not set'})"
         exit 1
       fi
@@ -760,16 +760,16 @@ else
 fi
 
 
-# KUBEE_RESOURCE_CHARTS_DIR is not local in the get_chart_directory function
+# KUBEE_RESOURCE_STABLE_CHARTS_DIR is not function local in the get_chart_directory function
 # because we use it just below in case of error in the message
 # this works for executed script or sourced script
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-KUBEE_RESOURCE_CHARTS_DIR=$(realpath "$SCRIPT_DIR/../resources/charts")
+KUBEE_RESOURCE_STABLE_CHARTS_DIR=$(realpath "$SCRIPT_DIR/../resources/charts/stable")
 
 # Chart Directory
 if ! CHART_DIRECTORY=$(get_chart_directory "$CHART_NAME"); then
   echo::err "No chart directory found with the name ($CHART_NAME) in"
-  echo::err "  * in the Kubee chart directory  (${KUBEE_RESOURCE_CHARTS_DIR}) " # the /resources/charts dir
+  echo::err "  * in the Kubee stable chart directory  (${KUBEE_RESOURCE_STABLE_CHARTS_DIR}) " # the /resources/charts/stable dir
   echo::err "  * or the paths of the KUBEE_CHARTS_PATH variable (${KUBEE_CHARTS_PATH:-'not set'})"
   exit 1
 fi
