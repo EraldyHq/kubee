@@ -153,19 +153,27 @@ traefik:
       allowEmptyServices: true
 
   ports:
+    # Redirections
     web:
       # https://doc.traefik.io/traefik/routing/entrypoints/#redirection
       redirections:
         entryPoint:
           to: websecure
           scheme: https
+    # Add the smtp port
+    # It creates the smtp [entrypoint](https://doc.traefik.io/traefik/routing/entrypoints/)
+    # - "--entryPoints.smtp.address=:8025/tcp"
+    smtp:
+      # Container port
+      port: 8025
+      # Port on the host
+      exposedPort: 25
+      # Defines whether the port is listed in the service if service.type is LoadBalancer or NodePort.
+      expose:
+        default: true
+      # Protocol
+      protocol: TCP
 
-      #websecure:
-      # # Use it to add trusted proxy
-      # Enable X-Headers from Cloudflare
-      # https://doc.traefik.io/traefik/v2.3/routing/entrypoints/#forwarded-headers
-      # forwardedHeaders:
-      #  trustedIPs: "{{ cloudflare_cidr | join(',') }}"
 
   # persistence:
   # -- Enable persistence using Persistent Volume Claims

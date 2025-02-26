@@ -6,10 +6,8 @@ The `Kubee Traefik Chart` will install:
 * Traefik
 * and the [Traefik Dashboard](https://monitoring.mixins.dev/traefik/)
 
-## Prerequisite
-
-* [traefik-crds](../traefik-crds/README.md)
-
+The [traefik-crds chart](../traefik-crds/README.md) are installed automatically if
+not found.
 
 
 ## FAQ
@@ -28,6 +26,9 @@ traefik:
         forwardedHeaders:
           trustedIPs: ['173.245.48.0/20','103.21.244.0/22','103.22.200.0/22']
 ```
+
+It enables the forwarding of X-Headers 
+[Doc](https://doc.traefik.io/traefik/v2.3/routing/entrypoints/#forwarded-headers)
 
 ### Where can I set the Values of the Traefik Helm Chart?
 
