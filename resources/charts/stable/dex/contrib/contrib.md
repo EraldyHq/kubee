@@ -31,7 +31,12 @@ helm pull https://github.com/dexidp/helm-charts/releases/download/dex-0.20.0/dex
 
 ### Why? No groups for static users
 
-https://github.com/dexidp/dex/issues/1080
+Not supported https://github.com/dexidp/dex/issues/1080
+
+Solution:
+* Waiting for the merge
+* [kanidm](https://kanidm.github.io/kanidm/stable/examples/kubernetes_ingress.html) implementation (as they state to be low memory)
+
 
 ### How to I check the installation
 
