@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: '{{ include "mailpit-name" . }}'
+  namespace: '{{ .Values.namespace }}'
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.traefik.namespace }}-{{ .Values.traefik.auth.middleware_name }}@kubernetescrd'
+spec:
+  rules:
+    - host: '{{ required "mailpit hostname is required" .Values.hostname }}'
+      http:
+        paths:
+          - backend:
+              service:
+                name: 'mailpit-http'
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - '{{ .Values.hostname }}'
+      secretName: '{{ .Values.mailpit.mailpit.smtp.tls.secretName }}'

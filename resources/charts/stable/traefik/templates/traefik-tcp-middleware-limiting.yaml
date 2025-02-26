@@ -1,0 +1,10 @@
+{{/* Limiting the Number of Simultaneous connections. */}}
+{{/* Number of allowed simultaneous connections by IP  */}}
+{{/* https://doc.traefik.io/traefik/middlewares/tcp/inflightconn/ */}}
+apiVersion: traefik.io/v1alpha1
+kind: MiddlewareTCP
+metadata:
+  name: inflight-conn
+spec:
+  inFlightConn:
+    amount: 10

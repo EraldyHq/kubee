@@ -283,14 +283,6 @@ apply(){
     return 1
   fi
 
-  # To get the dependency chart, you need to run helm dependency update or build
-  # To update the kubee helm
-  # 2>COMMAND_STDOUT_FD to silence: walk.go:75: found symbolic link in path
-  # echo::info "Executing Helm Dependency Update"
-  # echo::eval "helm dependency update ${HELM_EXTRA_FLAGS[*]} $CHART_DIRECTORY 1>$COMMAND_STDOUT_FD 2>$COMMAND_STDOUT_FD"
-  # Note that helm has also a flag
-  # HELM_COMMAND+=( "--dependency-update" )
-
   # Options ???
   if [ "${KUBEE_HELM_INSTALL_OPTIONS:-}" != "" ]; then
     HELM_COMMAND+=("${KUBEE_HELM_INSTALL_OPTIONS[@]}")
@@ -306,6 +298,7 @@ apply(){
     )
 
   # Update dependencies if they are missing in the charts dir
+  # It will create the Chart.lock
   HELM_COMMAND+=("--dependency-update")
 
   # Debug

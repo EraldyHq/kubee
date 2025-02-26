@@ -1,0 +1,17 @@
+{{- if gt (len .Values.auth.private_networks) 0 }}
+apiVersion: traefik.io/v1alpha1
+kind: MiddlewareTCP
+metadata:
+  name: '{{ .Values.middlewares.private_network.name }}'
+  namespace: '{{ .Values.namespace }}'
+  annotations:
+    description: |
+      This middleware allows only connection from the private network CIDR
+spec:
+  {{- /* https://doc.traefik.io/traefik/middlewares/tcp/ipallowlist/ */}}
+  ipAllowList:
+    sourceRange:
+      {{- range .Values.auth.private_networks }}
+      - {{ . }}
+      {{- end }}
+{{- end }}

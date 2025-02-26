@@ -1,0 +1,15 @@
+dependencies:
+- name: mailpit
+  repository: https://jouve.github.io/charts/
+  version: 0.22.2
+- name: kubee-cluster
+  repository: file://../cluster
+  version: 0.0.1
+- name: kubee-traefik
+  repository: file://../traefik
+  version: 0.0.1
+- name: kubee-cert-manager
+  repository: file://../cert-manager
+  version: 0.0.1
+digest: sha256:34390434c40d369b37073ae78768437117f8e8471c0e0ec9df3b3f1bf958796f
+generated: "2025-02-26T23:17:58.984396734+01:00"

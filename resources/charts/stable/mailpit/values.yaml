@@ -1,37 +1,29 @@
+# Enable/Disable
 enabled: false
 
+# Namespace
 namespace: 'mail'
 
+# Hostname
 hostname: ''
 
-domain: ''
-
-
-mailu:
-  ## hostnames:
-  ##   - mail.example.com
-  ##   - imap.example.com
-  hostnames:
-    - '{{ .Values.hostname }}'
-  # Mail Domain
-  domain: '{{ .Values.domain }}'
-  # Initial Account
-  initialAccount:
-    enabled: true
-    username: "{{ .Values.cluster.auth.admin_user.username }}"
-    password: "{{ .Values.cluster.auth.admin_user.password }}"
-
-  # Running on bare metal with k3s and klipper-lb
-  # https://github.com/Mailu/helm-charts/tree/master/mailu#running-on-bare-metal-with-k3s-and-klipper-lb
-  front:
-    hostPort:
-      enabled: false
-    externalService:
-      enabled: true
-      type: LoadBalancer
-      externalTrafficPolicy: Local
-
-
+# Mail Pit Values
+mailpit:
+  image:
+    # https://github.com/axllent/mailpit/releases
+    tag: "v1.22.3"
+  service:
+    smtp:
+      port: 465
+      #externalTrafficPolicy: Local
+  args:
+    # https://mailpit.axllent.org/docs/configuration/smtp/#smtp-with-ssltls
+    - '--smtp-require-tls'
+  mailpit:
+    smtp:
+      tls:
+        enabled: true
+        secretName: "mailpit-cert"
 
 # Don't change, don't touch
 # Used to not output template from cross dependency in Chart.yaml

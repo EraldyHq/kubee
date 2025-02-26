@@ -18,7 +18,8 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "v5.16.0" # The hash version of kubernetes mixin
+# https://github.com/axllent/mailpit/releases
+appVersion: "v1.22.3" # The mail pit version
 
 
 dependencies:
@@ -26,3 +27,17 @@ dependencies:
     version: 0.22.2
     repository: https://jouve.github.io/charts/
     alias: mailpit
+  - name: kubee-cluster
+    version: 0.0.1
+    repository: file://../cluster
+    alias: cluster
+  - name: kubee-traefik
+    version: 0.0.1
+    repository: file://../traefik
+    alias: traefik
+    condition: kubee_internal.install_cross_dependency
+  - name: kubee-cert-manager
+    version: 0.0.1
+    repository: file://../cert-manager
+    alias: cert_manager
+    condition: kubee_internal.install_cross_dependency

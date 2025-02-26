@@ -1,0 +1,38 @@
+{{/*https://doc.traefik.io/traefik/routing/providers/kubernetes-crd/#kind-ingressroutetcp*/}}
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: mailpit-{{.Values.traefik.entrypoints.smtps.name}}
+  namespace: {{ .Values.namespace }}
+spec:
+  entryPoints:
+    - {{.Values.traefik.entrypoints.smtps.name}}
+  routes:
+    - match: HostSNI(`{{ required "mailpit hostname is required" .Values.hostname }}`)
+      priority: 10
+      middlewares:
+        - name: {{ .Values.traefik.middlewares.private_network.name }}
+          namespace: {{ .Values.traefik.namespace }}
+      services:
+        - name: mailpit-smtp          # Kubernetes Service
+          port: smtp                  # Kubernetes Service Port
+          weight: 10
+          proxyProtocol:
+            version: 2 # comes from
+          # serversTransport: transport
+          # nativeLB: true
+          # nodePortLB: true
+          tls: true                   # Use TLS with the service
+
+  tls:                            # [17]
+    #secretName: supersecret       # [18]
+    #options:                      # [19]
+    #  name: opt                   # [20]
+    #  namespace: default          # [21]
+    #certResolver: foo             # [22]
+    #domains:                      # [23]
+    #  - main: example.net           # [24]
+    #    sans:                       # [25]
+    #      - a.example.net
+    #      - b.example.net
+    passthrough: true

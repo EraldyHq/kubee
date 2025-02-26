@@ -74,7 +74,16 @@ middlewares:
   # Middleware to apply auth headers on website with an authentication form
   auth_headers:
     name: 'auth-headers'
+  # Private Network to allow only connection from known ip
+  # Ip are given via the auth.private_networks
+  private_network:
+    name: 'private-network'
 
+# Name of entrypoint
+# Used by template that creates IngressRoute (http and tcp)
+entrypoints:
+  smtps:
+    name: 'smtps'
 
 # Traefik Helm Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
@@ -168,6 +177,17 @@ traefik:
       port: 8025
       # Port on the host
       exposedPort: 25
+      # Defines whether the port is listed in the service if service.type is LoadBalancer or NodePort.
+      expose:
+        default: true
+      # Protocol
+      protocol: TCP
+    # SMTP submission over TLS
+    smtps:
+      # Container port
+      port: 8465
+      # Port on the host
+      exposedPort: 465
       # Defines whether the port is listed in the service if service.type is LoadBalancer or NodePort.
       expose:
         default: true
