@@ -133,11 +133,11 @@ traefik:
     # We use the ServiceLB (Klipper) label "svccontroller.k3s.cattle.io/enablelb"=true
     # so that Traefik and the load balancer controller pods are always collocated
     #
-    # ie with the following label applied on `kube-server-01.eraldy.com`
+    # ie with the following label applied on the server node
     #
-    # kubectl label nodes kube-server-01.eraldy.com svccontroller.k3s.cattle.io/enablelb=true
+    # kubectl label nodes kube-server-01.example.com svccontroller.k3s.cattle.io/enablelb=true
     #
-    # Traefik would be installed on kube-server-01.eraldy.com
+    # Traefik would be installed on kube-server-01.example.com
     # The node should have the label: https://docs.k3s.io/advanced#node-labels-and-taints
     # "svccontroller.k3s.cattle.io/enablelb": "true"
   }

@@ -60,10 +60,7 @@ dependencies:
     alias: traefik
     condition: kubee_internal.install_cross_dependency
 
-
-# noinspection HelmChartUnknownKeys
-kubee:
-  versions:
-    # Used to download the library with kube-prometheus-downloader-helper
-    # https://github.com/prometheus-operator/kube-prometheus/releases
-    kube-prometheus: 'v0.14.0'
+# Used to download the library with kube-prometheus-downloader-helper
+# https://github.com/prometheus-operator/kube-prometheus/releases
+annotations:
+  kube-prometheus/version: "v0.14.0"

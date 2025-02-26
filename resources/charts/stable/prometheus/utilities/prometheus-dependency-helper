@@ -75,7 +75,7 @@ if [ ! -f "$PROMETHEUS_CHART_FILE" ]; then
 fi
 
 # Get the Kube-Prometheus version
-KUBE_PROMETHEUS_VERSION=$(yq '.kubee.versions.kube-prometheus' "$PROMETHEUS_CHART_FILE" | tr -d '~')
+KUBE_PROMETHEUS_VERSION=$(yq '.annotations.kube-prometheus/version' "$PROMETHEUS_CHART_FILE" | tr -d '~')
 
 if [ "$KUBE_PROMETHEUS_VERSION" == "" ] || [ "$KUBE_PROMETHEUS_VERSION" == "null" ]; then
   echo::err "Unable to retrieve the kube prometheus version (the value was empty) in $PROMETHEUS_CHART_FILE"
