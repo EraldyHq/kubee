@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+
+
+# shellcheck source=../../bash-lib/lib/bashlib-template.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
+
+
+
+
+
+
+
+
+# @internal
+synopsis(){
+
+local CLI_NAME;
+CLI_NAME=$(basename "$(script::get_actual_script)" | tr "-" " ")
+cat << EOT
+
+$CLI_NAME - Cluster Hosts Management
+
+Usage:
+\`\`\`bash
+$CLI_NAME [options] command args
+\`\`\`
+
+Commands:
+
+* play             Deploy Kubernetes on the cluster hosts (Repeatable install and configuration)
+* upgrade          Upgrade Kubernetes on the cluster hosts
+* inventory        Print the cluster hosts inventory file
+* ping             Verify the connection to the clusters hosts
+* shell            Start a pod and get a shell in the cluster
+
+Options:
+
+* -h --help        Show this help message
+
+
+EOT
+}
+
+
+
+# Assign the first argument to a string
+CLUSTER_COMMAND="${1:-}"
+if [ "$CLUSTER_COMMAND" = "" ]; then
+    synopsis
+    echo::err "A command is mandatory"
+    exit 1
+fi
+shift  # Remove the first argument from the argument list
+
+# Help Asked should not fail for the doc
+# We test if before the error warning
+if [[ $CLUSTER_COMMAND =~ help|-h|--help ]]; then
+  doc::help synopsis
+  exit
+fi
+
+if [[ $CLUSTER_COMMAND == "synopsis" ]]; then
+  synopsis
+  exit
+fi
+
+# Cluster Directory
+if [ "$KUBEE_CLUSTER_NAME" == "" ]; then
+  echo::err "The cluster is mandatory"
+  exit 1
+fi
+
+KUBEE_CLUSTER_DIR=$(kubee::get_cluster_directory "$KUBEE_CLUSTER_NAME")
+# Envrc
+# Used in all function
+KUBEE_ENV_FILE="${KUBEE_CLUSTER_ENV_FILE:-"$KUBEE_CLUSTER_DIR/.envrc"}"
+if [ -f "$KUBEE_ENV_FILE" ]; then
+   echo::debug "Sourcing cluster env file $KUBEE_ENV_FILE"
+   # shellcheck disable=SC1090
+   if ! source "$KUBEE_ENV_FILE"; then
+     echo::err "Error while importing the envrc file $KUBEE_ENV_FILE"
+     exit 1
+   fi
+fi
+
+# Inventory
+if ! SHM_INVENTORY_FILE=$(inventory_file); then
+ echo::err "Inventory file has errors"
+ return 1
+fi
+
+
+
+
+case $CLUSTER_COMMAND in
+"play")
+    play "$@" || error::exit $?
+    ;;
+"inventory"|"inv")
+    yq "$SHM_INVENTORY_FILE"
+    ;;
+"upgrade")
+    upgrade "$@" || error::exit $?
+    ;;
+"ping")
+    ping "$@" || error::exit $?
+    ;;
+"shell")
+    source kubee-app-shell "busybox" "$@" || error::exit $?
+    ;;
+*)
+  doc::help synopsis
+  echo::err "Command $CLUSTER_COMMAND is unknown"
+  exit 1
+esac

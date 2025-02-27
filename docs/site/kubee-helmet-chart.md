@@ -1,5 +1,12 @@
 # Kubee Helmet Chart
 
+
+A Kubee Chart may be:
+* a Helm Chart
+* a [Jsonnet Chart](jsonnet-chart.md)
+* a [Kustomize Chart](kustomize-project.md)
+* a [Cluster Chart](cluster-chart.md)
+
 A `Kubee Helmet Chart`:
 * is a Chart
     * that installs only one application

@@ -1,10 +1,10 @@
 apiVersion: v2
-name: kubee-kubernetes
-description: Kubernetes Kubee Chart
+name: kubee-k3s-ansible
+description: K3s Ansible Kubee Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
-# Application because you can't use the template function as a library
+# Application because you can't use the template function with a library type
 type: application
 
 # This is the chart version. This version number should be incremented each time you make changes
@@ -17,3 +17,8 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "0.0.1" # The version of the app packaged
+
+# Annotation
+annotations:
+  # Kubee Chart Type
+  kubee/type: 'cluster'

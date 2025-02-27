@@ -1,6 +1,4 @@
-
-# Bootstrap and common cluster values (ie global)
-# Cluster Wide variables
+# Cluster app values (ie global/shared)
 
 # The cluster name
 # used:
@@ -8,9 +6,11 @@
 # * as default first instance name for operator (for instance, prometheus operator allows to install multiple prometheus that needs to be unique. Kube-prometheus asks for a unique name)
 name: 'kubee'
 
-# App Authentication
-auth:
+# The cluster chart
+chart: 'k3s-ansible'
 
+# Cluster Auth
+auth:
   # The admin user
   #  * created as admin user in Kubernetes and other app
   #  * added in basicAuth
@@ -33,17 +33,13 @@ auth:
   # You should set the CIDR value of:
   # * internal proxy such as traefik
   # * and external proxy such as cloudflare
+  # It's used by Traefik and all auth application that needs the real ip
+  # and trust the X-forward headers
   trusted_proxies: [ ]
 
-  # Cluster Auth
-  # Oidc Cluster Auth with dex
-  # https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens
-  cluster_oidc:
-    enabled: false
 
-# email
+# Default smtp server parameters
 email:
-  # Default smtp server parameters
   smtp:
     # The smtp host
     # if the host is not empty, smtp configuration are added

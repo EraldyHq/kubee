@@ -4,20 +4,19 @@
 # https://github.com/k3s-io/k3s/releases
 version: 'v1.32.1+k3s1'
 
-# K3s
-k3s:
-  # Token
-  # Mandatory
-  # A random secret value that should not change ever
-  # because it's used to encrypt the data on disk
-  # You can generate one with `openssl rand -base64 64 | tr -d '\n'`)
-  token: ''
-  # Server Args
-  # https://docs.k3s.io/cli/server
-  # Example:
-  # --kube-apiserver-arg="admission-control-config-file=/var/lib/rancher/k3s/server/psa.yaml"
-  # --datastore-endpoint=postgres://username:password@hostname:port/database-name
-  server_args: [ ]
+# k3s Token
+# Mandatory
+# A random secret value that should not change ever
+# because it's used to encrypt the data on disk
+# You can generate one with `openssl rand -base64 64 | tr -d '\n'`)
+token: ''
+
+# k3s Server Args
+# https://docs.k3s.io/cli/server
+# Example:
+# --kube-apiserver-arg="admission-control-config-file=/var/lib/rancher/k3s/server/psa.yaml"
+# --datastore-endpoint=postgres://username:password@hostname:port/database-name
+server_args: [ ]
 
 # Hosts
 hosts:
@@ -53,17 +52,3 @@ hosts:
       username: ''
       # The public key of the private key
       public_key: ''
-
-
-# Provisioner
-# Only ansible is supported for now
-provisioner: 'ansible'
-
-# The actual Kubernetes distribution installed
-# Only k3s is supported for now
-# This value is used by other kubee chart such as kubernetes-monitoring
-# to apply conditional logic
-distribution: 'k3s'
-
-# Hack as it's mandatory for a kubee chart
-namespace: default

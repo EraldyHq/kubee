@@ -1,11 +1,11 @@
-# Kubee Cluster Chart
+# Kubee Common Chart
 
 
 ## About
 
 This chart is a [library chart](https://helm.sh/docs/topics/library_charts/)
 that adds support for:
-* a [cluster scoped values file](values.yaml)
+* a [common app values file](values.yaml)
 * a [cluster scoped library](templates/_helpers.tpl)
 
 

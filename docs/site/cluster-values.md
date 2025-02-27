@@ -3,7 +3,7 @@
 
 The Cluster values file:
 * is a file named `values.yaml` 
-* located in a [cluster directory](cluster-creation.md) 
+* located in a [cluster directory](cluster.md) 
 * that contains the chart configuration for the whole cluster.
 
 

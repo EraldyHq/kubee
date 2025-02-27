@@ -1,4 +1,3 @@
-{{- if and (eq .Values.provisioner "ansible") (eq .Values.distribution "k3s") }}
 k3s_cluster:
   children:
     # Server hosts
@@ -65,13 +64,13 @@ k3s_cluster:
     #
     # Don't change the token as the cluster data is encrypted with it
     #
-    k3s_token: "{{ required "The kubernetes.k3s.token is required" .Values.k3s.token}}"
+    k3s_token: "{{ required "The kubernetes.k3s.token is required" .Values.token}}"
 
     # https://docs.k3s.io/cli/server
     # --kube-apiserver-arg="admission-control-config-file=/var/lib/rancher/k3s/server/psa.yaml"
     # --datastore-endpoint=postgres://username:password@hostname:port/database-name
-    {{- $k3sServerArgs := .Values.k3s.server_args }}
-    {{- if and (eq .Values.dex.enabled true) (eq .Values.distribution "k3s") }}
+    {{- $k3sServerArgs := .Values.server_args }}
+    {{- if and (eq .Values.dex.enabled true) }}
     {{- $k3sServerArgs = append $k3sServerArgs (printf "--kube-apiserver-arg=\"oidc-issuer-url=https://%s\"" .Values.dex.hostname) }}
     {{- $k3sServerArgs = append $k3sServerArgs "--kube-apiserver-arg=\"oidc-client-id=kubernetes\"" }}
     {{- $k3sServerArgs = append $k3sServerArgs "--kube-apiserver-arg=\"oidc-username-claim=email\"" }}
@@ -90,4 +89,3 @@ k3s_cluster:
     # The admin user Public key that is added to the `authorized_keys`
     # The key is mandatory if the admin username is not empty
     kubee_os_admin_public_key: "{{.Values.hosts.all.admin_user.public_key}}"
-{{- end }}

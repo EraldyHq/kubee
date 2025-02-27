@@ -1,0 +1,525 @@
+#!/usr/bin/env bash
+# Helm wrapper that installs Helm Chart on the steroid
+
+
+# The synopsis function is required by the doc::usage
+synopsis(){
+
+  local CLI_NAME;
+  CLI_NAME=$(basename "$(doc::get_cli_command_words)" | tr "-" " ")
+  cat << EOF
+\`\`\`bash
+$CLI_NAME command options
+\`\`\`
+
+where:
+* \`command\` can be:
+  * \`install chartName\`  - Install a Kubee Chart
+  * \`ping\`               - Verify the connection to the cluster api
+  * \`play chartName\`     - Upgrade or install a Kubee Chart
+  * \`template chartName\` - Template a Kubee Chart
+     * The following template options are supported
+       * \`-s, --show-only\`     : Show only one template
+       * \`--output-dir string\` : Writes the executed templates to files in output-dir instead of stdout
+       * \`--out string\`        : Writes the executed templates to the \`out\` relative directory
+  * \`upgrade chartName\`  - Upgrade a Kubee Chart
+  * \`values\`             - Shows the values content
+
+
+EOF
+
+}
+
+if [ "${1:-}" == "synopsis" ]; then
+   synopsis
+   exit
+fi
+
+# @description
+#     Return if the chart is already installed
+# @args $1 - the release name
+# @args $2 - the release namespace
+# @args $3 - the chart app version that should be installed
+# @exitcode 1 - if the chart is not installed or with another app version
+is_helm_chart_installed() {
+
+  local CHART_RELEASE_NAME="$1"
+  local CHART_RELEASE_NAMESPACE="$2"
+  local CHART_APP_VERSION="$3"
+
+
+  # Check if the release exists
+  # The revision may be installed in another namespace
+  if ACTUAL_NAMESPACE=$(helm list --all-namespaces --no-headers --filter "$CHART_RELEASE_NAME" | awk '{print $2}'); then
+    echo::info "Release found: $ACTUAL_NAMESPACE/$CHART_RELEASE_NAME"
+    if [ "$ACTUAL_NAMESPACE" != "" ] && [ "$ACTUAL_NAMESPACE" != "$CHART_RELEASE_NAMESPACE" ]; then
+      echo::err "The name $CHART_RELEASE_NAME was already found in the namespace ($ACTUAL_NAMESPACE) instead of the namespace $CHART_NAMESPACE"
+      exit 1
+    fi
+  fi
+
+  # Get the installed chart version
+  read -r CHART_RELEASE_APP_VERSION CHART_RELEASE_CHART <<< "$(helm list -n "$CHART_RELEASE_NAMESPACE" --filter "^$CHART_RELEASE_NAME\$" --output json | jq -r '.[0] | "\(.app_version) \(.chart)"')"
+  # We don't check on chart version
+  IFS="-" read -ra CHART_RELEASE_PARTS <<< "$CHART_RELEASE_CHART"
+  CHART_RELEASE_CHART_VERSION="${CHART_RELEASE_PARTS[-1]}"
+  CHART_RELEASE_CHART_NAME=$({
+   CHART_RELEASE_CHART_NAMES=("${CHART_RELEASE_PARTS[@]:0:${#CHART_RELEASE_PARTS[@]}-1}");
+   IFS='-';
+   echo "${CHART_RELEASE_CHART_NAMES[*]}"
+  })
+
+  if [[ "$CHART_RELEASE_APP_VERSION" != "$CHART_APP_VERSION" ]]; then
+    echo::info "Chart app version mismatch (Release App Version: $CHART_RELEASE_APP_VERSION. Chart App Version: $CHART_APP_VERSION)"
+    return 1
+  fi
+
+  echo::info "Chart $CHART_RELEASE_CHART_NAME with version $CHART_RELEASE_CHART_VERSION and app version $CHART_APP_VERSION is already installed."
+
+
+}
+
+
+
+apply(){
+
+  # The final helm command (installation, or template)
+  local HELM_COMMAND=("helm")
+
+  # Mode
+  COMMAND=${1:-}
+  if [ "$COMMAND" == "" ]; then
+    echo::err "Internal error: A command is mandatory as first argument (install or template)"
+    return 1
+  fi
+  shift
+  case "$COMMAND" in
+      "play")
+        HELM_COMMAND+=( "upgrade" "--install" )
+        echo::info "Playing package $CHART_NAME  (ie upgrade or install if not present)"
+        kubee::set_kubeconfig_env_and_check
+        ;;
+      "upgrade")
+        HELM_COMMAND+=( "upgrade" )
+        echo::info "Upgrade package $CHART_NAME"
+        kubee::set_kubeconfig_env_and_check
+        ;;
+      "install")
+        HELM_COMMAND+=( "install" )
+        echo::info "Install package $CHART_NAME"
+        kubee::set_kubeconfig_env_and_check
+        ;;
+      "template")
+        HELM_COMMAND+=( "template" )
+        echo::info "Templating package $CHART_NAME "
+        # Output
+        if [ "$OPTION_OUTPUT_DIR" != "" ]; then
+          HELM_COMMAND+=("--output-dir" "$(dirname "$CHART_OUTPUT_DIR")")
+        fi
+        # Options
+        if [ "$OPTION_SHOW_ONLY" != "" ]; then
+          HELM_COMMAND+=("--show-only" "$OPTION_SHOW_ONLY")
+        fi
+        ;;
+      *)
+        echo::err "The command $COMMAND is unknown"
+        return 1
+        ;;
+  esac
+
+
+  HELM_COMMAND+=("-f" "${CHART_VALUES_PATH}")
+
+
+  HELM_COMMAND+=("--namespace" "$CHART_NAMESPACE")
+  if [[ "$COMMAND" =~ 'play'|'install' ]]; then
+    # Create namespace only on install
+    HELM_COMMAND+=("--create-namespace");
+  fi
+
+  # Install CRD first
+  if ! install_crd_first; then
+    echo::err "An error has occurred while installing the CRD chart"
+    return 1
+  fi
+
+  # Options ???
+  if [ "${KUBEE_HELM_INSTALL_OPTIONS:-}" != "" ]; then
+    HELM_COMMAND+=("${KUBEE_HELM_INSTALL_OPTIONS[@]}")
+  fi
+
+  # Post renderer
+  HELM_COMMAND+=(
+    "--post-renderer" "kubee-helm-post-renderer"
+    "--post-renderer-args" "$CHART_DIRECTORY"
+    "--post-renderer-args" "$CHART_VALUES_PATH"
+    "--post-renderer-args" "$CHART_NAMESPACE"
+    "--post-renderer-args" "$CHART_OUTPUT_DIR"
+    )
+
+  # Update dependencies if they are missing in the charts dir
+  # It will create the Chart.lock
+  HELM_COMMAND+=("--dependency-update")
+
+  # Debug
+  if [ "${#HELM_EXTRA_FLAGS[*]}" != "0" ]; then
+    HELM_COMMAND+=("${HELM_EXTRA_FLAGS[@]}")
+  fi
+
+  # --dependency-update flag to avoid the `helm dependency build` error:
+  # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
+  # See https://github.com/helm/helm/issues/7214
+  # values.yaml file is taken by default
+  PACKAGE_RELEASE_NAME="$CHART_NAME"
+  HELM_COMMAND+=("$PACKAGE_RELEASE_NAME" "$CHART_DIRECTORY")
+
+
+  # Working directory is the cluster directory
+  # Why? To be able to set relative path to the cluster object such as certificate
+  # example: "--set-file kubee.traefik.defaultCertificate.cert=cert/kubee.dev+1.pem"
+  echo::eval "pushd $KUBEE_CLUSTER_DIR 1>$COMMAND_STDOUT_FD"
+  bash::trap "popd 1>$COMMAND_STDOUT_FD" EXIT
+
+
+  echo::info "Executing Helm $COMMAND"
+  # Redirect the error to capture it
+  # We don't redirect to stdout because Helm put it also warning (ie without failing the command)
+  # The output is then no more yaml compliant
+  # Example: walk.go:75: found symbolic link in path: /home/admin/code/kubee/resources/charts/mailu/charts/kubee-cluster resolves to /home/admin/code/kubee/resources/charts/cluster. Contents of linked file included and used
+  local STDERR_FD=/dev/shm/helm_stderr.log
+  rm -rf "$STDERR_FD"
+  if ! HELM_OUTPUT=$(echo::eval "${HELM_COMMAND[*]}" "$STDERR_FD"); then
+    echo::err "An error occurs during the command $COMMAND."
+    echo::err "Output:"
+    echo::err "$(cat $STDERR_FD)"
+    return 1
+  fi
+
+  # Where to send the output (by default stdout)
+  local HELM_STD="/dev/stdout"
+  if [ "$COMMAND" == "template" ] && [ "$OPTION_OUTPUT_DIR" != "" ]; then
+      # Silence for template command
+      # wrote out/xxx/templates/xxx.yml
+      echo::debug "Silence Template command with output dir option"
+      HELM_STD="$COMMAND_STDOUT_FD"
+  fi
+  echo::debug "Output Helm to $HELM_STD"
+
+  # Color the Yaml output?
+  # If template command without output option to /std/devout not in a pipeline
+  local HELM_OUTPUT_COLORED=0
+  if [ "$COMMAND" == "template" ] && [ "$OPTION_OUTPUT_DIR" == "" ] && [ "$HELM_STD" == "/dev/stdout" ] && [ -t 1 ]; then
+    HELM_OUTPUT_COLORED=1
+  fi
+  # In the below if statement, we use printf to output the result because in the template, we may backtick
+  # that has special meaning for bash
+  if [ "$HELM_OUTPUT_COLORED" == "1" ]; then
+    # Template are yaml file
+    # We send the output to yq to color it on the terminal
+    # Even if yq does not apply any color if the initiator kubee command is redirected to a file, we test for it with [ -t 1 ]
+    echo::debug "Colored Helm Output"
+    printf "%s\n" "$HELM_OUTPUT" | yq .
+  else
+    echo::debug "Raw Helm Output"
+    printf "%s\n" "$HELM_OUTPUT" >| "$HELM_STD"
+  fi
+
+
+  # Can we Wait with that?
+  # kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator
+  #
+  if [ "$IS_CRD_CHART" == 1 ]; then
+    echo::info "Waiting until all CRD are established in the namespace $CHART_NAMESPACE"
+    kubectl wait \
+      --for condition=Established \
+      --all CustomResourceDefinition \
+      --namespace="$CHART_NAMESPACE"
+  fi
+
+}
+
+
+
+ping(){
+
+  # Kubectl env
+  kubee::set_kubeconfig_env_and_check
+  echo::eval "kubectl cluster-info"
+
+}
+
+
+
+# Crds first
+# CRD first installation is becoming a standard
+# Example with Prometheus: https://github.com/prometheus-operator/kube-prometheus#quickstart
+# They create the namespace and CustomResourceDefinitions first
+# to avoid race conditions when deploying the components.
+#
+# We could also do
+#```bash
+# kubectl apply --server-side --force-conflicts -f https://github.com/grafana/grafana-operator/releases/download/v5.15.1/crds.yaml
+#```
+# If this is not a CRD chart that we install and that the CRD charts exists
+install_crd_first(){
+
+  PACKAGE_CRDS_NAME="$CHART_NAME$CRD_SUFFIX"
+
+  if [ "$IS_CRD_CHART" == 1 ]; then
+    echo::debug "Package is a package Crds. No extra Crd installation needed"
+    return
+  fi
+
+  if [[ ! "$COMMAND" =~ "play"|"upgrade"|"install" ]]; then
+    echo::debug "Command ($COMMAND) is not an installation command, no crds installation"
+    return
+  fi
+
+  if ! PACKAGE_CRDS_DIRECTORY=$(get_chart_directory "$PACKAGE_CRDS_NAME"); then
+    echo::debug "No CRD Chart directory for package $CHART_NAME found with the name $PACKAGE_CRDS_NAME"
+    return
+  fi
+
+  echo::debug "Chart Crds $PACKAGE_CRDS_NAME found (Directory : $PACKAGE_CRDS_DIRECTORY)"
+  CHART_APP_VERSION=$(yq '.appVersion' "$CHART_DIRECTORY/Chart.yaml")
+  if is_helm_chart_installed "$PACKAGE_CRDS_NAME" "$CHART_NAMESPACE" "$CHART_APP_VERSION"; then
+    echo::debug "CRD Chart $PACKAGE_CRDS_NAME already installed in the namespace $CHART_NAMESPACE with the appVersion $CHART_APP_VERSION"
+    return
+  fi
+
+  # recursion
+  # We don't use helm directly as we have now CRD charts that are only with Jsonnet
+  echo::info "Installing CRD Chart $PACKAGE_CRDS_NAME in namespace $CHART_NAMESPACE"
+  if ! echo::eval "kubee -n $CHART_NAMESPACE helmet play $PACKAGE_CRDS_NAME"; then
+    return 1
+  fi
+
+  # The recursion overwrite the chart values files
+  # We regenerate it
+  if ! print_values >| "$CHART_VALUES_PATH"; then
+    echo::err "An error has happened while generating the values file for the chart"
+    return 1
+  fi
+
+}
+
+uninstall(){
+  kubee::set_kubeconfig_env_and_check
+  echo::eval "helm --namespace $CHART_NAMESPACE uninstall --wait $CHART_NAME"
+}
+
+main(){
+
+  # CRD
+  CRD_SUFFIX="-crds"
+  IS_CRD_CHART=0
+  # glob match
+  if [[ $CHART_NAME == *"$CRD_SUFFIX" ]]; then
+    echo::debug "This is a CRD chart"
+    IS_CRD_CHART=1
+  else
+    echo::debug "This is not a CRD chart"
+  fi
+
+  export ACTUAL_CHART_ALIAS
+  # Alias
+  # We just get rid of the crds for the CRD chart
+  ACTUAL_CHART_ALIAS=$(echo "${CHART_NAME#"$CRD_SUFFIX"}" | tr "-" "_");
+
+  ##########################
+  ## Collect the options
+  ##########################
+  args=$(getopt -l "skip-schema-validation,output-dir:,out,show-only,help" -o "o:s:h" -- "$@")
+  # eval set to set the positional arguments back to $args
+  eval set -- "$args"
+  KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
+  HELM_EXTRA_FLAGS=()
+  OPTION_OUTPUT_DIR=""
+  OPTION_SHOW_ONLY=""
+  while [[ $# -gt 0 ]]
+  do
+     case "$1" in
+        "--output-dir"|"-o")
+          shift
+          OPTION_OUTPUT_DIR=${1}
+          shift
+          ;;
+        "--out")
+          shift
+          OPTION_OUTPUT_DIR="out"
+          ;;
+        "--skip-schema-validation")
+          shift
+          HELM_EXTRA_FLAGS+=("--skip-schema-validation")
+          ;;
+        "--show-only"|"-s")
+          shift
+          OPTION_SHOW_ONLY=${1}
+          shift
+          ;;
+        "--help"|"-h")
+          synopsis
+          exit
+          ;;
+        "--")
+          shift
+          break;
+          # from now on, $@ contains only the arguments
+          ;;
+     esac
+  done
+
+  # Debug ??
+  if [ "$BASHLIB_ECHO_LEVEL" == "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
+    HELM_EXTRA_FLAGS+=("--debug");
+  fi
+
+  # CHART_OUTPUT_DIR
+  # * Jsonnet require an output directory
+  # * Kustomize processing also: we generate the Helm templates
+  # The content is deleted at every run
+  # It's a subdirectory so that we don't do `rm -rf` on data that we don't own
+  # That's what Helm does also
+  # The name of the directory is not random
+  # It follows the usage of the output command `helm template --output-dir=xxx`
+  # KUBEE_OUTPUT_DIR
+  # * Jsonnet require an output directory
+  # * Kustomize processing also: we generate the Helm templates
+  # The content is deleted at every run
+  # It's a subdirectory so that we don't do `rm -rf` on data that we don't own
+  # That's what Helm does also
+  # The name of the directory is not random
+  # It follows the usage of the output command `helm template --output-dir=xxx`
+  CHART_OUTPUT_NAME=$(yq '.name' "$CHART_DIRECTORY/Chart.yaml")
+  CHART_OUTPUT_DIR="${OPTION_OUTPUT_DIR:-out}/$CHART_OUTPUT_NAME"
+  if [[ "$CHART_OUTPUT_DIR" != /* ]]; then
+    # For now, the output path is relative to the Chart Directory
+    # so that we get them in the IDE
+    # * pwd ?
+    # * or temp ? TEMP_OUT_DIR="$(dirname "$(mktemp -u)")/kubee"
+    CHART_OUTPUT_DIR="$CHART_DIRECTORY/$CHART_OUTPUT_DIR"
+  fi
+  # full qualified path is needed as this command is executed at the end via trap
+  CLEAN_OUT_COMMAND="rm -rf $CHART_OUTPUT_DIR"
+  # In debug mode, we don't delete it to be able to check each file
+  if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ] && [ "$OPTION_OUTPUT_DIR" == "" ]; then
+    # cleaning on exit because we may have secret in their
+    bash::trap "echo 'Cleaning' > $COMMAND_STDOUT_FD;$CLEAN_OUT_COMMAND" EXIT
+  else
+    # To not kept old manifests, we clean
+    echo::eval "$CLEAN_OUT_COMMAND"
+  fi
+
+
+  # CHART_OUTPUT_DIR
+  # * Jsonnet require an output directory
+  # * Kustomize processing also: we generate the Helm templates
+  # The content is deleted at every run
+  # It's a subdirectory so that we don't do `rm -rf` on data that we don't own
+  # That's what Helm does also
+  # The name of the directory is not random
+  # It follows the usage of the output command `helm template --output-dir=xxx`
+  # KUBEE_OUTPUT_DIR
+  # * Jsonnet require an output directory
+  # * Kustomize processing also: we generate the Helm templates
+  # The content is deleted at every run
+  # It's a subdirectory so that we don't do `rm -rf` on data that we don't own
+  # That's what Helm does also
+  # The name of the directory is not random
+  # It follows the usage of the output command `helm template --output-dir=xxx`
+  CHART_OUTPUT_NAME=$(yq '.name' "$CHART_DIRECTORY/Chart.yaml")
+  CHART_OUTPUT_DIR="${OPTION_OUTPUT_DIR:-out}/$CHART_OUTPUT_NAME"
+  if [[ "$CHART_OUTPUT_DIR" != /* ]]; then
+    # For now, the output path is relative to the Chart Directory
+    # so that we get them in the IDE
+    # * pwd ?
+    # * or temp ? TEMP_OUT_DIR="$(dirname "$(mktemp -u)")/kubee"
+    CHART_OUTPUT_DIR="$CHART_DIRECTORY/$CHART_OUTPUT_DIR"
+  fi
+  # full qualified path is needed as this command is executed at the end via trap
+  CLEAN_OUT_COMMAND="rm -rf $CHART_OUTPUT_DIR"
+  # In debug mode, we don't delete it to be able to check each file
+  if [ "$BASHLIB_ECHO_LEVEL" != "$BASHLIB_ECHO_DEBUG_LEVEL" ] && [ "$OPTION_OUTPUT_DIR" == "" ]; then
+    # cleaning on exit because we may have secret in their
+    bash::trap "echo 'Cleaning' > $COMMAND_STDOUT_FD;$CLEAN_OUT_COMMAND" EXIT
+  else
+    # To not kept old manifests, we clean
+    echo::eval "$CLEAN_OUT_COMMAND"
+  fi
+
+  # Create the output directory as it's mandatory by Jsonnet
+  # Should happen after the cleaning above
+  if [ ! -d "$CHART_OUTPUT_DIR" ]; then
+    mkdir -p "$CHART_OUTPUT_DIR"
+  fi
+  # When we manipulate values, we put them here
+  CHART_OUTPUT_VALUES_DIR="$CHART_OUTPUT_DIR/values"
+  mkdir -p "$CHART_OUTPUT_VALUES_DIR"
+
+  # The kubee values
+  # We need them to determine the namespace
+  CHART_VALUES_PATH="$CHART_OUTPUT_VALUES_DIR/values.yml"
+  if ! kubee::print_chart_values >| "$CHART_VALUES_PATH"; then
+    echo::err "An error has happened while generating the values file for the chart"
+    exit 1
+  fi
+
+  # Chart Namespace
+  if [ "$CHART_TYPE" == "driver" ]; then
+    CHART_NAMESPACE="default"
+    echo::info "Default Namespace ($CHART_NAMESPACE)"
+  else
+    VALUES_NAMESPACE_PATH=".namespace"
+    CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$CHART_VALUES_PATH")
+    if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
+      echo::err "No namespace found at path $VALUES_NAMESPACE_PATH on the file $CHART_VALUES_PATH"
+      exit 1
+    fi
+    echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
+  fi
+
+  COMMAND=${1:-}
+  if [ "$COMMAND" = "" ]; then
+      doc::help
+      echo::err "A command is mandatory"
+      exit 1
+  fi
+  echo::debug "Command Name: $COMMAND"
+  # Remove the command argument from the argument list
+  shift
+
+  case "$COMMAND" in
+    "template")
+      apply "$COMMAND" "$@" || error::exit $?
+      ;;
+    "install"|"play")
+      apply "$COMMAND" "$@" || error::exit $?
+      ;;
+    "upgrade")
+      apply "$COMMAND" "$@" || error::exit $?
+      ;;
+    "uninstall")
+      uninstall || error::exit $?
+      ;;
+    "values")
+      # The -t test checks if the file descriptor is connected to a terminal.
+      # When in a pipeline, stdout is redirected and not connected to a terminal.
+      if [ -t 1 ]; then
+        # Not in a pipeline (terminal output)
+        yq "$CHART_VALUES_PATH"
+        exit 0
+      fi
+      cat "$CHART_VALUES_PATH"
+      ;;
+    "ping")
+      ping || error::exit $?
+      ;;
+    *)
+      doc::help synopsis
+      echo::err  "Command $COMMAND is unknown"
+      exit 1
+  esac
+
+}
+
+main "$@"

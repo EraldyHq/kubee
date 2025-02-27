@@ -2,10 +2,7 @@
 
 ## About
 
-A cluster is a directory that contains the following files:
-* `.envrc`: the env file 
-* `values.yaml`: the `helmet` cluster values file where environment variables literal such as `${MY_ENV}` can be used.
-
+This page shows you how to create a [cluster](cluster.md)
 
 ## Example
 
@@ -87,7 +84,7 @@ kubernetes:
 
 * Check that all cluster infra values has been set by printing the inventory
 ```bash
-kubee --cluster "$KUBEE_CLUSTER_NAME" helmet template kubernetes
+kubee --cluster "$KUBEE_CLUSTER_NAME" cluster conf
 ```
 ```yaml
 k3s_cluster:
@@ -98,7 +95,7 @@ k3s_cluster:
            ....
 ```
 
-### Set your cluster private key file
+### Connection: Set your cluster private key file
 
 By default, `kubee` will load and use:
 * the ssh agent key if running
@@ -122,7 +119,7 @@ KUBEE_INFRA_CONNECTION_PRIVATE_KEY=$(pass cluster_name/ssh/private_key)
 
 You can check that you can connect to your cluster by pinging it
 ```bash
-kubee --cluster "$KUBEE_CLUSTER_NAME" helmet ping kubernetes
+kubee --cluster "$KUBEE_CLUSTER_NAME" cluster ping
 ```
 You should get
 ```
@@ -141,7 +138,7 @@ Once, you can connect to your cluster, you can install it with the `ping` comman
 
 Example:
 ```bash
-kubee --cluster "$KUBEE_CLUSTER_NAME" helmet play kubernetes
+kubee --cluster "$KUBEE_CLUSTER_NAME" cluster play
 ```
 
 The `play` command is idempotent, meaning that you can run it multiple times. 
@@ -166,4 +163,4 @@ kubee --cluster "$KUBEE_CLUSTER_NAME" helmet play traefik
 kubee --cluster "$KUBEE_CLUSTER_NAME" helmet play cert-manager
 ```
 
-The whole list of available `kubee charts` can be seen in the [Kubee Charts directory](../../resources/charts/README.md).
+The whole list of available `kubee charts` can be seen in the [Kubee Charts directory](../../resources/charts/stable/README.md).

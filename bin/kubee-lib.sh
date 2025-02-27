@@ -461,3 +461,266 @@ kubee::set_env(){
 
 
 }
+
+# Cluster file
+# Return the name of the values files or empty
+# @arg $1 string The cluster directory
+kubee::get_cluster_values_files(){
+
+    local KUBEE_CLUSTER_DIR=${1:-}
+    if [ "$KUBEE_CLUSTER_DIR" == "" ]; then
+      echo::err "No Cluster directory specified"
+      return 1
+    fi
+
+    local CLUSTER_FILES=()
+
+
+    local KUBEE_CLUSTER_VALUES;
+    KUBEE_CLUSTER_VALUES=$(realpath "${KUBEE_CLUSTER_DIR}/values.yaml")
+    if [ ! -f "$KUBEE_CLUSTER_VALUES" ]; then
+      echo::err "No Cluster values found at $KUBEE_CLUSTER_VALUES"
+      return
+    fi
+
+    ############################
+    # Variable Substitution
+    # Check the variables
+    if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBEE_CLUSTER_VALUES"); then
+       # Should exit because of the strict mode
+       # but it was not working
+       echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBEE_CLUSTER_VALUES"
+       return 1
+    fi
+    local SHM_CLUSTER_VALUES="$CHART_OUTPUT_VALUES_DIR/cluster-values.yml"
+    envsubst < "$KUBEE_CLUSTER_VALUES" >| "$SHM_CLUSTER_VALUES"
+    echo::debug "Returned the cluster values files $SHM_CLUSTER_VALUES"
+    CLUSTER_FILES+=("$SHM_CLUSTER_VALUES")
+
+    # Extraction of the values in the cluster values files for the current chart
+    # The cluster values need to lose their scope
+    local SHM_CLUSTER_CHART_VALUES="$CHART_OUTPUT_VALUES_DIR/cluster-chart-values.yml"
+    local CHART_VALUES;
+    CHART_VALUES=$(echo::eval "yq '.$ACTUAL_CHART_ALIAS' $SHM_CLUSTER_VALUES")
+    if [ "$CHART_VALUES" == "null" ]; then
+      # CRD chart does not have any value in the cluster values files
+      if [ "$IS_CRD_CHART" != "1" ]; then
+        echo::warn "No values found for the actual chart $ACTUAL_CHART_ALIAS in the cluster value file $KUBEE_CLUSTER_VALUES"
+      fi
+      echo "${CLUSTER_FILES[@]}"
+      return
+    fi
+    # Write the value to the file
+    echo "$CHART_VALUES" >| "$SHM_CLUSTER_CHART_VALUES";
+    CLUSTER_FILES+=("$SHM_CLUSTER_CHART_VALUES")
+    echo::debug "Returned the cluster chart values files $SHM_CLUSTER_CHART_VALUES"
+
+    echo::debug "Delete the property $ACTUAL_CHART_ALIAS of the cluster values files for cleanness"
+    yq -i "del(.$ACTUAL_CHART_ALIAS)" "$SHM_CLUSTER_VALUES"
+
+    # return
+    echo "${CLUSTER_FILES[@]}"
+
+}
+# @description
+#     Print the kubee values file for the chart
+#
+#     Chart env should have been already set
+#     ie CHART_DIRECTORY
+# @stdout - the values
+kubee::print_chart_values(){
+
+  # Context
+  local ACTUAL_CHART_FILE="$CHART_DIRECTORY/Chart.yaml";
+
+  if [ ! -f "$ACTUAL_CHART_FILE" ]; then
+    echo::err "No actual Chart file found ($ACTUAL_CHART_FILE does not exists)"
+    return 1
+  fi
+
+  # All Chart values files to merge
+  local CHART_VALUES_FILES=()
+
+  # Add dependencies
+  local DEPENDENCIES;
+  DEPENDENCIES="$(yq -r '.dependencies[] | [ (.name // "") + "," + (.alias // "") + "," + (.repository // "") + "," + ( .version // "")] | join("\n")' "$ACTUAL_CHART_FILE")"
+  if [ "$DEPENDENCIES" != "" ]; then
+    # Loop over the dependencies
+    while IFS=, read -r DEPENDENCY_CHART_NAME DEPENDENCY_CHART_ALIAS DEPENDENCY_CHART_REPOSITORY DEPENDENCY_CHART_VERSION; do
+
+              if [ "$DEPENDENCY_CHART_NAME" == "" ] || [ "$DEPENDENCY_CHART_NAME" == "null" ]; then
+                    echo::err "All dependency should have an name"
+                    echo::err "The repository $DEPENDENCY_CHART_REPOSITORY does not have one"
+                    return 1
+              fi
+
+              # We don't add external values files
+              # They may use template:
+              # name: {{ include "mailu.database.roundcube.secretName" . }}
+              # and we get the error: error calling include: template: no template "mailu.database.roundcube.secretName" associated with template "gotpl"
+              # Ref: https://github.com/Mailu/helm-charts/blob/98da259e46bf366ca03d7a9d3352d74c5bff7c66/mailu/values.yaml#L376
+              # Otherwise we would need to create a copy of this chart with only the `values.yaml` template of the values chart
+              if [[ $DEPENDENCY_CHART_NAME != kubee* ]]; then
+                echo::debug "Skipped non kubee dependency chart $DEPENDENCY_CHART_NAME"
+                continue;
+              fi
+
+
+              # Alias is not mandatory and sometimes
+              # You can't even change it (ie kubernetes-dashboard)
+              # We generate a kubee alias
+              if [ "$DEPENDENCY_CHART_ALIAS" == "" ] || [ "$DEPENDENCY_CHART_ALIAS" == "null" ]; then
+                DEPENDENCY_CHART_ALIAS="$(echo "$DEPENDENCY_CHART_NAME" | tr "-" "_")"
+                echo::debug "No alias found for the chart $DEPENDENCY_CHART_NAME. Alias generated to $DEPENDENCY_CHART_ALIAS"
+              fi
+              # The non-scoped dependency value file
+              local SHM_DEPENDENCY_CHART_VALUES_FILE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default_non_scoped.yml"
+              # In case of a symlink, the values file is in the charts directory
+              local LOCAL_DEPENDENCY_CHART_PATH="$CHART_DIRECTORY/charts/$DEPENDENCY_CHART_NAME"
+              if [ -d "$LOCAL_DEPENDENCY_CHART_PATH" ]; then
+                local LOCAL_DEPENDENCY_CHART_VALUES_FILE="$LOCAL_DEPENDENCY_CHART_PATH/values.yaml"
+                if [ -f "$LOCAL_DEPENDENCY_CHART_VALUES_FILE" ]; then
+                  cp -f "$LOCAL_DEPENDENCY_CHART_VALUES_FILE" "$SHM_DEPENDENCY_CHART_VALUES_FILE"
+                else
+                  echo::warn "The dependency chart $DEPENDENCY_CHART_NAME found in charts/ has no values file"
+                  touch "$SHM_DEPENDENCY_CHART_VALUES_FILE"
+                fi
+              else
+                echo::debug "The dependency chart $DEPENDENCY_CHART_NAME was not found locally at $LOCAL_DEPENDENCY_CHART_PATH"
+                # Retrieve the value file with the show values command
+                local HELM_SHOW_VALUE_COMMAND=(
+                  'helm' 'show' 'values'
+                )
+                if [ "$DEPENDENCY_CHART_REPOSITORY" == "" ]; then
+                  echo::err "The dependency chart $DEPENDENCY_CHART_NAME has no repository"
+                  echo::err "A dependency that is not in the charts/ directory should have a repository or be pullet into charts/"
+                  return 1
+                fi
+                case "$DEPENDENCY_CHART_REPOSITORY" in
+                  file://.*)
+                    # Local
+                    # The name of the chart is the path to the chart directory
+                    # Delete the file scheme (not supported by `helm get values`)
+                    DEPENDENCY_CHART="$CHART_DIRECTORY/${DEPENDENCY_CHART_REPOSITORY#"file://"}"
+                    HELM_SHOW_VALUE_COMMAND+=("$DEPENDENCY_CHART")
+                  ;;
+                  *)
+                    # Other scheme: Http, Oci scheme, ...
+                    HELM_SHOW_VALUE_COMMAND+=("--repo" "$DEPENDENCY_CHART_REPOSITORY")
+                    HELM_SHOW_VALUE_COMMAND+=("--version" "$DEPENDENCY_CHART_VERSION")
+                    HELM_SHOW_VALUE_COMMAND+=("$DEPENDENCY_CHART_NAME")
+                  ;;
+                esac
+
+                HELM_SHOW_VALUE_COMMAND+=(">| $SHM_DEPENDENCY_CHART_VALUES_FILE")
+                # 2>COMMAND_STDOUT_FD to silence: walk.go:75: found symbolic link in path
+                HELM_SHOW_VALUE_COMMAND+=("2>$COMMAND_STDOUT_FD")
+                # In the following command, we cd in tempdir
+                # because when the current directory is a Chart directory such as dex
+                # We get: Error: Chart.yaml file is missing
+                # No idea why???
+                if ! echo::eval "cd ${TMPDIR};${HELM_SHOW_VALUE_COMMAND[*]}"; then
+                  echo::err "Error while trying to the get values for the Chart $DEPENDENCY_CHART_ALIAS"
+                  return 1
+                fi
+              fi
+
+              # Scoping (ie adding the alias to the dependency values file)
+              # The default value should be under the alias key (ie scoped)
+              local DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default.yml"
+              # --null-input flag: does not have any input as we create a new file
+              if ! echo::eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$SHM_DEPENDENCY_CHART_VALUES_FILE\"))' >| $DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE"; then
+                echo::err "Error while processing the chart values file $SHM_DEPENDENCY_CHART_VALUES_FILE"
+                return 1
+              fi
+              rm "$SHM_DEPENDENCY_CHART_VALUES_FILE"
+              CHART_VALUES_FILES+=("$DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE")
+              echo::debug "Values file generated: ${DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE}"
+    done <<< "$DEPENDENCIES"
+  fi
+
+
+  # Chart Own values files
+  # Should be after the dependency so that in the merge they have priorities
+  local CHART_VALUES_FILE="$CHART_DIRECTORY/values.yaml"
+  if [[ "$CHART_NAME" == *"$CRD_SUFFIX" ]]; then
+      local PARENT_CHART_NAME;
+      PARENT_CHART_NAME=${CHART_NAME%"$CRD_SUFFIX"};
+      if ! PARENT_CHART_DIRECTORY=$(kubee::get_chart_directory "$PARENT_CHART_NAME"); then
+        echo::err "The parent chart ($PARENT_CHART_NAME) of the CRD chart ($PARENT_CHART_NAME) was not found"
+        echo::err "  * the cluster resources directory (${KUBEE_RESOURCE_STABLE_CHARTS_DIR}) " # the /resources/charts dir
+        echo::err "  * or the paths of the KUBEE_CHARTS_PATH variable (${KUBEE_CHARTS_PATH:-'not set'})"
+        exit 1
+      fi
+      CHART_VALUES_FILE="$PARENT_CHART_DIRECTORY/values.yaml"
+  fi
+  if [ ! -f "$CHART_VALUES_FILE" ]; then
+    echo::err "Values files ($CHART_VALUES_FILE) should exist"
+    echo::err "Every kubee chart should have a values file to set the enabled and namespace properties"
+    # mandatory because sometimes it's written values.yml and
+    return 1
+  fi
+  CHART_VALUES_FILES+=("$CHART_VALUES_FILE")
+
+  # The cluster values files should be last to be added in the set
+  # as it has the higher priorities
+  if ! CLUSTER_VALUE_FILES=$(kubee::get_cluster_values_files "$KUBEE_CLUSTER_DIR"); then
+    echo::err "Error while creating the values file"
+    echo::err "Note: Cluster file is mandatory because installing without it would delete resources such as Ingress"
+    return 1
+  fi
+  echo::debug "Adding cluster files: $CLUSTER_VALUE_FILES"
+  IFS=" " read -ra CLUSTER_VALUE_FILES_ARRAY <<< "${CLUSTER_VALUE_FILES}"
+  CHART_VALUES_FILES+=("${CLUSTER_VALUE_FILES_ARRAY[@]}")
+
+
+  ###########################
+  # Merge with helm itself
+  # shellcheck disable=SC2016
+  # https://mikefarah.gitbook.io/yq/commands/evaluate-all
+  # Old command was echo::eval "yq eval-all '. as \$item ireduce ({}; . * \$item )' ${CHART_VALUES_FILES[*]}"
+  # Values are merged from left to right
+  local PATH_VALUES_CHART
+  if ! PATH_VALUES_CHART=$(kubee::get_chart_directory "values"); then
+      echo::debug "Internal error no chart directory found with the names values"
+      return
+  fi
+  # Note
+  # `yq --no-doc` at the end delete the doc separator `---`
+  # Otherwise it's seen in jsonnet as an array of objects
+  # By default helm adds in the head
+  # ---
+  ## Source: kubee-values/templates/values.yaml
+  if ! echo::eval "helm template fake-release-name $PATH_VALUES_CHART --show-only templates/values.yaml -f $(array::join --sep ' -f ' "${CHART_VALUES_FILES[@]}") | yq --no-doc 'select(document_index == 0)'"; then
+     echo::err "Error while merging the yaml files"
+     return 1
+  fi
+
+}
+
+
+# @description
+#     Return the directory of a chart
+# @arg $1 string The chart name
+kubee::get_chart_directory(){
+
+  local CHART_NAME="$1"
+  # All packages directories in an array
+  local KUBEE_CHARTS_DIRS=()
+  IFS=":" read -ra KUBEE_CHARTS_DIRS <<< "${KUBEE_CHARTS_PATH:-}"
+  local KUBEE_CHARTS_DIRS+=("$KUBEE_RESOURCE_STABLE_CHARTS_DIR")
+  for KUBEE_PACKAGES_DIR in "${KUBEE_CHARTS_DIRS[@]}"; do
+      if [ ! -d "$KUBEE_PACKAGES_DIR" ]; then
+        echo::warn "The path ($KUBEE_PACKAGES_DIR) set in KUBEE_CHARTS_PATH does not exist or is not a directory"
+        continue
+      fi
+      local APP_DIR="$KUBEE_PACKAGES_DIR/${CHART_NAME}"
+      if [ -d "$APP_DIR" ]; then
+        echo "$APP_DIR"
+        return
+      fi
+  done
+  return 1
+
+}
+
