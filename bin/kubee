@@ -24,7 +24,8 @@ where:
 * \`command\` is one of:
   * \`app\`                      : App Commands (based on the app label)
   * \`cert\`                     : Cert commands
-  * \`kubectl\`                  : Kubectl Kubee scluster aware
+  * \`cluster\`                  : Cluster commands
+  * \`kubectl\`                  : Kubectl cluster aware command
   * \`helmet\`                   : Kubee Package Manager
   * \`helm\`                     : Helm Package Manager
 
@@ -138,6 +139,7 @@ case "$KUBEE_COMMAND" in
     source kubee-cert "$@" || error::exit $?
     ;;
   "jwt")
+      # Deprecated
       source kubee-jwt "$@" || error::exit $?
       ;;
   *)
@@ -148,5 +150,5 @@ esac
 
 # Cleaning
 if [ "$BASHLIB_ECHO_LEVEL" -gt "$BASHLIB_ECHO_COMMAND_LEVEL" ]; then
-  echo::eval "echo 'Cleaning Shm' > $COMMAND_STDOUT_FD; rm -f /dev/shm/*"
+  echo::eval "echo 'Cleaning Shm' > $COMMAND_STDOUT_FD; rm -f $KUBEE_RUNTIME_DIR/*"
 fi

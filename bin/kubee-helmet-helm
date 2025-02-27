@@ -186,7 +186,7 @@ apply(){
   # We don't redirect to stdout because Helm put it also warning (ie without failing the command)
   # The output is then no more yaml compliant
   # Example: walk.go:75: found symbolic link in path: /home/admin/code/kubee/resources/charts/mailu/charts/kubee-cluster resolves to /home/admin/code/kubee/resources/charts/cluster. Contents of linked file included and used
-  local STDERR_FD=/dev/shm/helm_stderr.log
+  local STDERR_FD="$KUBEE_RUNTIME_DIR"/helm_stderr.log
   rm -rf "$STDERR_FD"
   if ! HELM_OUTPUT=$(echo::eval "${HELM_COMMAND[*]}" "$STDERR_FD"); then
     echo::err "An error occurs during the command $COMMAND."
@@ -311,7 +311,6 @@ uninstall(){
 main(){
 
   # CRD
-  CRD_SUFFIX="-crds"
   IS_CRD_CHART=0
   # glob match
   if [[ $CHART_NAME == *"$CRD_SUFFIX" ]]; then
@@ -321,10 +320,6 @@ main(){
     echo::debug "This is not a CRD chart"
   fi
 
-  export ACTUAL_CHART_ALIAS
-  # Alias
-  # We just get rid of the crds for the CRD chart
-  ACTUAL_CHART_ALIAS=$(echo "${CHART_NAME#"$CRD_SUFFIX"}" | tr "-" "_");
 
   ##########################
   ## Collect the options
@@ -459,7 +454,7 @@ main(){
   # The kubee values
   # We need them to determine the namespace
   CHART_VALUES_PATH="$CHART_OUTPUT_VALUES_DIR/values.yml"
-  if ! kubee::print_chart_values >| "$CHART_VALUES_PATH"; then
+  if ! kubee::print_chart_values "$CHART_NAME" >| "$CHART_VALUES_PATH"; then
     echo::err "An error has happened while generating the values file for the chart"
     exit 1
   fi

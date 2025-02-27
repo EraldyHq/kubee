@@ -7,14 +7,12 @@
 # The synopsis function is required by the doc::usage
 synopsis(){
 
-  local CLI_NAME;
-  CLI_NAME=$(basename "$(doc::get_cli_command_words)" | tr "-" " ")
   cat << EOF
 
   Manage a k3s cluster with k3s-ansible (https://github.com/k3s-io/k3s-ansible)
 
 \`\`\`bash
-$CLI_NAME command
+kubee-driver command
 \`\`\`
 
 where:
@@ -176,7 +174,7 @@ set_private_key_file(){
 
 main(){
 
-  echo::debug "Starting k3s-ansible driver with $*"
+  echo::debug "Starting k3s-ansible driver with the args: $*"
 
   while [[ $# -gt 0 ]]
     do
@@ -201,6 +199,10 @@ main(){
             reboot
             return
             ;;
+          "ping")
+            ping
+            return
+          ;;
           "--help"|"-h"|"help")
             synopsis
             return
@@ -208,8 +210,8 @@ main(){
        esac
        shift
     done
-    echo::err "No known command found"
     synopsis
+    echo::err "No known command found"
     return 1
 }
 

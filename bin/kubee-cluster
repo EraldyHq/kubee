@@ -6,11 +6,6 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
 
 
 
-
-
-
-
-
 # @internal
 synopsis(){
 
@@ -18,20 +13,22 @@ local CLI_NAME;
 CLI_NAME=$(basename "$(script::get_actual_script)" | tr "-" " ")
 cat << EOT
 
-$CLI_NAME - Cluster Hosts Management
+$CLI_NAME - Cluster Management
 
 Usage:
 \`\`\`bash
-$CLI_NAME [options] command args
+$CLI_NAME command
 \`\`\`
 
 Commands:
 
-* play             Deploy Kubernetes on the cluster hosts (Repeatable install and configuration)
-* upgrade          Upgrade Kubernetes on the cluster hosts
-* inventory        Print the cluster hosts inventory file
+* conf             Print the cluster configuration
 * ping             Verify the connection to the clusters hosts
-* shell            Start a pod and get a shell in the cluster
+* play             Deploy Kubernetes on the cluster hosts
+* reboot           Reboot the clusters host operating system
+* shell            Get a shell in the cluster
+* upgrade          Upgrade Kubernetes on the cluster hosts
+* uninstall        Uninstall Kubernetes on the cluster hosts
 
 Options:
 
@@ -64,46 +61,22 @@ if [[ $CLUSTER_COMMAND == "synopsis" ]]; then
   exit
 fi
 
-# Cluster Directory
-if [ "$KUBEE_CLUSTER_NAME" == "" ]; then
-  echo::err "The cluster is mandatory"
-  exit 1
-fi
-
-KUBEE_CLUSTER_DIR=$(kubee::get_cluster_directory "$KUBEE_CLUSTER_NAME")
-# Envrc
-# Used in all function
-KUBEE_ENV_FILE="${KUBEE_CLUSTER_ENV_FILE:-"$KUBEE_CLUSTER_DIR/.envrc"}"
-if [ -f "$KUBEE_ENV_FILE" ]; then
-   echo::debug "Sourcing cluster env file $KUBEE_ENV_FILE"
-   # shellcheck disable=SC1090
-   if ! source "$KUBEE_ENV_FILE"; then
-     echo::err "Error while importing the envrc file $KUBEE_ENV_FILE"
-     exit 1
-   fi
-fi
-
-# Inventory
-if ! SHM_INVENTORY_FILE=$(inventory_file); then
- echo::err "Inventory file has errors"
- return 1
-fi
-
-
 
 
 case $CLUSTER_COMMAND in
-"play")
-    play "$@" || error::exit $?
-    ;;
-"inventory"|"inv")
-    yq "$SHM_INVENTORY_FILE"
-    ;;
-"upgrade")
-    upgrade "$@" || error::exit $?
-    ;;
-"ping")
-    ping "$@" || error::exit $?
+"play"|"conf"|"inv"|"inventory"|"upgrade"|"ping"|"reboot"|"uninstall")
+
+    # K3s Cluster Chart Values
+    CLUSTER_CHART=$(kubee::print_chart_values "cluster" | yq '.chart')
+
+    if [ "$CLUSTER_CHART" == "" ] || [ "$CLUSTER_CHART" == "null" ]; then
+      echo::err "The cluster.chart property is missing or empty"
+      echo::err "The cluster chart could not be determined"
+      exit 1
+    fi
+
+    echo::eval "source kubee-helmet $* $CLUSTER_COMMAND $CLUSTER_CHART" || error::exit $?
+
     ;;
 "shell")
     source kubee-app-shell "busybox" "$@" || error::exit $?

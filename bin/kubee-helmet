@@ -82,12 +82,6 @@ fi
 
 ACTUAL_CHART_DRIVER="kubee-helmet-helm";
 export CHART_TYPE="helm"
-# KUBEE_RESOURCE_STABLE_CHARTS_DIR is not function local in the get_chart_directory function
-# because we use it in case of error in the message
-# this works for executed script or sourced script
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-export KUBEE_RESOURCE_STABLE_CHARTS_DIR
-KUBEE_RESOURCE_STABLE_CHARTS_DIR=$(realpath "$SCRIPT_DIR/../resources/charts/stable")
 
 export CHART_DIRECTORY
 if ! CHART_DIRECTORY=$(kubee::get_chart_directory "$CHART_NAME"); then

@@ -37,7 +37,7 @@ check_prometheus_rule(){
   fi
 
   # Create and mount the file
-  RULE_LOCAL_SHM_PATH=/dev/shm/prometheus-rule
+  RULE_LOCAL_SHM_PATH="$KUBEE_RUNTIME_DIR"/prometheus-rule
   RULE_DOCKER_PATH=/tmp/prometheus-rule
   DOCKER_OPTIONS+=("-v" "$RULE_LOCAL_SHM_PATH:$RULE_DOCKER_PATH")
   # Extract the rule from spec to create the rule file
@@ -62,7 +62,7 @@ test_prometheus_rule(){
   fi
 
   # Create and mount the file
-  RULE_LOCAL_SHM_PATH=/dev/shm/prometheus-rules.yml
+  RULE_LOCAL_SHM_PATH="$KUBEE_RUNTIME_DIR"/prometheus-rules.yml
   # Reset it, create it emtpy
   cat /dev/null >| $RULE_LOCAL_SHM_PATH
 
@@ -85,7 +85,7 @@ test_prometheus_rule(){
 
   # Update the test file with the rule_files property
   TEST_BASE_NAME=$(basename "$TEST_FILE_PATH")
-  TEST_LOCAL_SHM_PATH="/dev/shm/$TEST_BASE_NAME"
+  TEST_LOCAL_SHM_PATH="$KUBEE_RUNTIME_DIR/$TEST_BASE_NAME"
   # Reset it, create it emtpy
   cat "$TEST_FILE_PATH" >| "$TEST_LOCAL_SHM_PATH"
   # Add the rule_files
@@ -206,7 +206,7 @@ EOF
 )
     # Creating the config file in memory
     # and mounting it into docker
-    LOCAL_PATH=/dev/shm/promtool-config-file
+    LOCAL_PATH="$KUBEE_RUNTIME_DIR"/promtool-config-file
     DOCKER_PATH=/tmp/promtool-config-file
     echo "$CONFIG_FILE" >| $LOCAL_PATH
     DOCKER_OPTIONS+=("-v" "$LOCAL_PATH:$DOCKER_PATH")

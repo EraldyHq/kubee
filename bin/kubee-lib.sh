@@ -5,6 +5,8 @@
 #
 #
 
+# shellcheck source=./bashlib-array.sh
+source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-array.sh"
 # shellcheck source=./bashlib-echo.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
 # shellcheck source=./bashlib-command.sh
@@ -395,7 +397,7 @@ kubee::set_kubeconfig_env(){
   # We just output the trap statement
   # Note: On kubectl, we could also just pass the data but we should
   # do that for all kubernetes clients (promtool, ...) and this is pretty hard
-  KUBECONFIG="/dev/shm/kubee-config" # we create a shared memory file because we test the presence of the file
+  KUBECONFIG="$KUBEE_RUNTIME_DIR/kubee-config" # we create a shared memory file because we test the presence of the file
   if ! kubee::print_kubeconfig_from_pass >| "$KUBECONFIG"; then
     echo::err "Error while generating the config file with pass"
     return 1
@@ -411,6 +413,23 @@ kubee::set_env(){
   # Tmp dir
   # TMPDIR, TEMP and TMP may not be always set at the same time
   TMPDIR=${TMPDIR:-${TEMP:-${TMP:-/tmp}}}
+
+  # The root directory where to store temporary files
+  # This files are deleted
+  KUBEE_RUNTIME_DIR="/dev/shm/kubee"
+  mkdir -p "$KUBEE_RUNTIME_DIR"
+
+  # Chart
+  # This is a global constant because it's used by the kubee-cluster and kubee-helmet command as a cluster is also a chart
+  CRD_SUFFIX="-crds"
+
+  # KUBEE_RESOURCE_STABLE_CHARTS_DIR is not function local in the get_chart_directory function
+  # because we use it in case of error in the message
+  # this works for executed script or sourced script
+  # This is a global constant because it's used by the kubee-cluster and kubee-helmet command as a cluster is also a chart
+  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  export KUBEE_RESOURCE_STABLE_CHARTS_DIR
+  KUBEE_RESOURCE_STABLE_CHARTS_DIR=$(realpath "$SCRIPT_DIR/../resources/charts/stable")
 
   # The cluster
   KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
@@ -462,46 +481,69 @@ kubee::set_env(){
 
 }
 
-# Cluster file
-# Return the name of the values files or empty
-# @arg $1 string The cluster directory
-kubee::get_cluster_values_files(){
+# Return the cluster files with all variables expanded
+kubee::get_cluster_values_file(){
 
-    local KUBEE_CLUSTER_DIR=${1:-}
+  local KUBEE_CLUSTER_VALUES;
+  KUBEE_CLUSTER_VALUES=$(realpath "${KUBEE_CLUSTER_DIR}/values.yaml")
+  if [ ! -f "$KUBEE_CLUSTER_VALUES" ]; then
+    echo::err "No Cluster values found at $KUBEE_CLUSTER_VALUES"
+    return
+  fi
+
+  ############################
+  # Variable Substitution
+  # Check the variables
+  if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBEE_CLUSTER_VALUES"); then
+     # Should exit because of the strict mode
+     # but it was not working
+     echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBEE_CLUSTER_VALUES"
+     return 1
+  fi
+  local OUTPUT_DIR;
+  OUTPUT_DIR=${CHART_OUTPUT_VALUES_DIR:-$KUBEE_RUNTIME_DIR}
+  local CLUSTER_VALUES_FILE="$OUTPUT_DIR/cluster-values.yml"
+  envsubst < "$KUBEE_CLUSTER_VALUES" >| "$CLUSTER_VALUES_FILE"
+  echo::debug "Returned the cluster values files $CLUSTER_VALUES_FILE"
+  echo "$CLUSTER_VALUES_FILE"
+
+}
+
+# Return the name of the values files or empty
+#
+# Return 2 values files adapted for Chart execution:
+# * the cluster values files without the chart values
+# * the chart values
+#
+# @env The cluster directory: KUBEE_CLUSTER_DIR
+kubee::get_cluster_values_files_for_chart(){
+
+    local KUBEE_CLUSTER_DIR=${KUBEE_CLUSTER_DIR:-}
     if [ "$KUBEE_CLUSTER_DIR" == "" ]; then
-      echo::err "No Cluster directory specified"
+      echo::err "No Cluster specified"
+      echo::debug "The Cluster env KUBEE_CLUSTER_DIR is empty"
       return 1
     fi
 
+    # Alias
+    # We just get rid of the crds for the CRD chart
+    local ACTUAL_CHART_ALIAS
+    ACTUAL_CHART_ALIAS=$(echo "${CHART_NAME#"$CRD_SUFFIX"}" | tr "-" "_");
+
     local CLUSTER_FILES=()
 
+    # Cluster files
+    local CLUSTER_VALUES_FILE
+    CLUSTER_VALUES_FILE=$(kubee::get_cluster_values_file)
+    CLUSTER_FILES+=("$CLUSTER_VALUES_FILE")
 
-    local KUBEE_CLUSTER_VALUES;
-    KUBEE_CLUSTER_VALUES=$(realpath "${KUBEE_CLUSTER_DIR}/values.yaml")
-    if [ ! -f "$KUBEE_CLUSTER_VALUES" ]; then
-      echo::err "No Cluster values found at $KUBEE_CLUSTER_VALUES"
-      return
-    fi
-
-    ############################
-    # Variable Substitution
-    # Check the variables
-    if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBEE_CLUSTER_VALUES"); then
-       # Should exit because of the strict mode
-       # but it was not working
-       echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBEE_CLUSTER_VALUES"
-       return 1
-    fi
-    local SHM_CLUSTER_VALUES="$CHART_OUTPUT_VALUES_DIR/cluster-values.yml"
-    envsubst < "$KUBEE_CLUSTER_VALUES" >| "$SHM_CLUSTER_VALUES"
-    echo::debug "Returned the cluster values files $SHM_CLUSTER_VALUES"
-    CLUSTER_FILES+=("$SHM_CLUSTER_VALUES")
-
+    local OUTPUT_DIR;
+    OUTPUT_DIR=${CHART_OUTPUT_VALUES_DIR:-$KUBEE_RUNTIME_DIR}
     # Extraction of the values in the cluster values files for the current chart
     # The cluster values need to lose their scope
-    local SHM_CLUSTER_CHART_VALUES="$CHART_OUTPUT_VALUES_DIR/cluster-chart-values.yml"
+    local CLUSTER_CHART_VALUES_FILE="$OUTPUT_DIR/cluster-chart-values.yml"
     local CHART_VALUES;
-    CHART_VALUES=$(echo::eval "yq '.$ACTUAL_CHART_ALIAS' $SHM_CLUSTER_VALUES")
+    CHART_VALUES=$(echo::eval "yq '.$ACTUAL_CHART_ALIAS' $CLUSTER_VALUES_FILE")
     if [ "$CHART_VALUES" == "null" ]; then
       # CRD chart does not have any value in the cluster values files
       if [ "$IS_CRD_CHART" != "1" ]; then
@@ -511,24 +553,34 @@ kubee::get_cluster_values_files(){
       return
     fi
     # Write the value to the file
-    echo "$CHART_VALUES" >| "$SHM_CLUSTER_CHART_VALUES";
-    CLUSTER_FILES+=("$SHM_CLUSTER_CHART_VALUES")
-    echo::debug "Returned the cluster chart values files $SHM_CLUSTER_CHART_VALUES"
+    echo "$CHART_VALUES" >| "$CLUSTER_CHART_VALUES_FILE";
+    CLUSTER_FILES+=("$CLUSTER_CHART_VALUES_FILE")
+    echo::debug "Returned the cluster chart values files $CLUSTER_CHART_VALUES_FILE"
 
+    # Delete the properties in the cluster values file
     echo::debug "Delete the property $ACTUAL_CHART_ALIAS of the cluster values files for cleanness"
-    yq -i "del(.$ACTUAL_CHART_ALIAS)" "$SHM_CLUSTER_VALUES"
+    yq -i "del(.$ACTUAL_CHART_ALIAS)" "$CLUSTER_VALUES_FILE"
 
     # return
     echo "${CLUSTER_FILES[@]}"
 
 }
+
+
 # @description
 #     Print the kubee values file for the chart
 #
-#     Chart env should have been already set
-#     ie CHART_DIRECTORY
+#
 # @stdout - the values
+# @args $1 - the chart name
 kubee::print_chart_values(){
+
+  local CHART_NAME="$1"
+  local CHART_DIRECTORY;
+  if ! CHART_DIRECTORY=$(kubee::get_chart_directory "$CHART_NAME"); then
+    echo::err "The chart $CHART_NAME could not be found"
+    exit 1
+  fi
 
   # Context
   local ACTUAL_CHART_FILE="$CHART_DIRECTORY/Chart.yaml";
@@ -664,7 +716,7 @@ kubee::print_chart_values(){
 
   # The cluster values files should be last to be added in the set
   # as it has the higher priorities
-  if ! CLUSTER_VALUE_FILES=$(kubee::get_cluster_values_files "$KUBEE_CLUSTER_DIR"); then
+  if ! CLUSTER_VALUE_FILES=$(kubee::get_cluster_values_files_for_chart); then
     echo::err "Error while creating the values file"
     echo::err "Note: Cluster file is mandatory because installing without it would delete resources such as Ingress"
     return 1
