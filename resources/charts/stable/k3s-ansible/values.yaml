@@ -6,8 +6,7 @@ version: 'v1.32.1+k3s1'
 
 # k3s Token
 # Mandatory
-# A random secret value that should not change ever
-# because it's used to encrypt the data on disk
+# A random secret value that should not change ever because it's used to encrypt the data on disk
 # You can generate one with `openssl rand -base64 64 | tr -d '\n'`)
 token: ''
 
@@ -15,7 +14,6 @@ token: ''
 # https://docs.k3s.io/cli/server
 # Example:
 # --kube-apiserver-arg="admission-control-config-file=/var/lib/rancher/k3s/server/psa.yaml"
-# --datastore-endpoint=postgres://username:password@hostname:port/database-name
 server_args: [ ]
 
 # Hosts
@@ -32,7 +30,7 @@ hosts:
     #   ip: ''   # The Ip Mandatory for an ssh/vps cluster
     #   name: '' # The name Mandatory for a docker cluster (ie the container name)
   # Agents
-  agents: [ ]
+  agents: []
   # Configuration for all hosts
   all:
     # Connection

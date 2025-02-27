@@ -17,22 +17,14 @@ spec:
         - name: mailpit-smtp          # Kubernetes Service
           port: smtp                  # Kubernetes Service Port
           weight: 10
-          proxyProtocol:
-            version: 2 # comes from
+          # With the proxy proxyProtocol the termination happens at traefik
+          # and no certificate is shown
+          # proxyProtocol:
+          #  version: 2 # comes from
+          tls: false # Should be false with a tls passthrough
           # serversTransport: transport
           # nativeLB: true
           # nodePortLB: true
-          tls: true                   # Use TLS with the service
-
-  tls:                            # [17]
-    #secretName: supersecret       # [18]
-    #options:                      # [19]
-    #  name: opt                   # [20]
-    #  namespace: default          # [21]
-    #certResolver: foo             # [22]
-    #domains:                      # [23]
-    #  - main: example.net           # [24]
-    #    sans:                       # [25]
-    #      - a.example.net
-    #      - b.example.net
+  tls:
+    #secretName: supersecret
     passthrough: true

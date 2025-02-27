@@ -20,3 +20,14 @@ helm repo add jouve https://jouve.github.io/charts//
 helm pull https://github.com/jouve/charts/releases/download/mailpit-0.22.2/mailpit-0.22.2.tgz -d charts --untar
 ```
 
+
+## Test
+
+* From a cluster shell:
+```bash
+openssl s_client -connect mailpit-smtp.mail:465 
+```
+* From the outside world:
+```bash
+openssl s_client -connect mailpit-bcf52bfa.nip.io:465
+```
