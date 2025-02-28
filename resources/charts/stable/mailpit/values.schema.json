@@ -1,43 +1,172 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "additionalProperties": true,
-    "properties": {
-        "enable_private_network_middleware": {
-            "description": "Applied the private network middleware",
-            "title": "Private Network Authentication",
-            "type": "boolean"
-        },
-        "enabled": {
-            "description": "Boolean to enable this chart in the cluster",
-            "title": "Enable",
-            "type": "boolean"
-        },
-        "hostname": {
-            "description": "The hostname",
-            "minLength": 1,
-            "title": "Hostname",
-            "type": "string"
-        },
-        "kubee_internal": {
-            "properties": {
-                "install_cross_dependency": {
-                    "type": "boolean"
-                }
-            },
-            "type": "object"
-        },
-        "namespace": {
-            "description": "The installation namespace",
-            "minLength": 1,
-            "title": "Namespace",
-            "type": "string"
-        }
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "enable_private_network_middleware": {
+      "default": "false",
+      "description": " If true, only the IP from the private network will be able to pass email to the SMTP server The private network is defined in Traefik",
+      "required": [],
+      "title": "enable_private_network_middleware"
     },
-    "required": [
-        "enabled",
-        "namespace",
-        "hostname",
-        "enable_private_network_middleware"
-    ],
-    "type": "object"
+    "enabled": {
+      "default": false,
+      "description": "Boolean to enable this chart in the cluster",
+      "required": [],
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "hostname": {
+      "default": "",
+      "description": "Hostname",
+      "required": [],
+      "title": "hostname"
+    },
+    "kubee_internal": {
+      "additionalProperties": false,
+      "description": " Used to not output template from cross dependency in Chart.yaml",
+      "properties": {
+        "install_cross_dependency": {
+          "default": false,
+          "required": [],
+          "title": "install_cross_dependency",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "install_cross_dependency"
+      ],
+      "title": "kubee_internal"
+    },
+    "mailpit": {
+      "additionalProperties": false,
+      "description": "Mail Pit Values",
+      "properties": {
+        "args": {
+          "items": {
+            "anyOf": [
+              {
+                "required": [],
+                "type": "string"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "args",
+          "type": "array"
+        },
+        "image": {
+          "additionalProperties": false,
+          "properties": {
+            "tag": {
+              "default": "v1.22.3",
+              "description": "https://github.com/axllent/mailpit/releases",
+              "required": [],
+              "title": "tag",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tag"
+          ],
+          "title": "image",
+          "type": "object"
+        },
+        "mailpit": {
+          "additionalProperties": false,
+          "properties": {
+            "smtp": {
+              "additionalProperties": false,
+              "properties": {
+                "tls": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "default": true,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    },
+                    "secretName": {
+                      "default": "mailpit-cert",
+                      "required": [],
+                      "title": "secretName",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "enabled",
+                    "secretName"
+                  ],
+                  "title": "tls",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "tls"
+              ],
+              "title": "smtp",
+              "type": "object"
+            }
+          },
+          "required": [
+            "smtp"
+          ],
+          "title": "mailpit",
+          "type": "object"
+        },
+        "service": {
+          "additionalProperties": false,
+          "properties": {
+            "smtp": {
+              "additionalProperties": false,
+              "properties": {
+                "port": {
+                  "default": 465,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "port"
+              ],
+              "title": "smtp",
+              "type": "object"
+            }
+          },
+          "required": [
+            "smtp"
+          ],
+          "title": "service",
+          "type": "object"
+        }
+      },
+      "required": [
+        "image",
+        "service",
+        "args",
+        "mailpit"
+      ],
+      "title": "mailpit",
+      "type": "object"
+    },
+    "namespace": {
+      "default": "mail",
+      "description": "Namespace",
+      "required": [],
+      "title": "namespace"
+    }
+  },
+  "required": [
+    "enabled",
+    "mailpit"
+  ],
+  "type": "object"
 }

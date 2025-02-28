@@ -1,0 +1,591 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "auth": {
+      "additionalProperties": false,
+      "description": "Ingress Auth Configuration",
+      "properties": {
+        "middleware_name": {
+          "default": "basic-auth",
+          "description": " That's applied for internal web app (such as Traefik Dashboard, Prometheus, Alert Manager, ...) The app or api endpoints are still available from an internal container The supported auth are basic-auth and forward-auth Before changing to forward-auth, you should test it with the whoami chart",
+          "required": [],
+          "title": "middleware_name"
+        },
+        "private_networks": {
+          "description": " used for Ingress Ip restrictions (Traefik IpAllowList) example for a home ip: 143.176.206.80/32",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "private_networks"
+        }
+      },
+      "required": [],
+      "title": "auth",
+      "type": "object"
+    },
+    "default_certificate": {
+      "additionalProperties": false,
+      "description": " Set the default certificate as default traefik cert Mandatory for kubernetes-dashboard on a local development The rootCA should be added to the OS/Browser as trusted root CA https://doc.traefik.io/traefik/https/tls/#default-certificate",
+      "properties": {
+        "cert": {
+          "default": "",
+          "description": "set-file KUBEE.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem",
+          "required": [],
+          "title": "cert"
+        },
+        "key": {
+          "default": "",
+          "description": "set-file KUBEE.traefik.defaultCertificate.key=cert/kube-x.dev+1-key.pem",
+          "required": [],
+          "title": "key"
+        }
+      },
+      "required": [],
+      "title": "default_certificate"
+    },
+    "enabled": {
+      "default": "false",
+      "description": " Enabled Not a string, no quote",
+      "required": [],
+      "title": "enabled"
+    },
+    "entrypoints": {
+      "additionalProperties": false,
+      "description": " Used by template that creates IngressRoute (http and tcp)",
+      "properties": {
+        "smtps": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "default": "smtps",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "title": "smtps",
+          "type": "object"
+        }
+      },
+      "required": [
+        "smtps"
+      ],
+      "title": "entrypoints"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "hostname": {
+      "default": "",
+      "description": " The FQDN is dnsName.apexDomain If not empty, an ingress is created example: hostname: 'traefik-haship.nip.io'",
+      "required": [],
+      "title": "hostname"
+    },
+    "kubee_internal": {
+      "additionalProperties": false,
+      "description": "Don't change",
+      "properties": {
+        "install_cross_dependency": {
+          "default": false,
+          "required": [],
+          "title": "install_cross_dependency",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "install_cross_dependency"
+      ],
+      "title": "kubee_internal",
+      "type": "object"
+    },
+    "middlewares": {
+      "additionalProperties": false,
+      "description": " https://doc.traefik.io/traefik/middlewares",
+      "properties": {
+        "auth_headers": {
+          "additionalProperties": false,
+          "description": "Middleware to apply auth headers on website with an authentication form",
+          "properties": {
+            "name": {
+              "default": "auth-headers",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "title": "auth_headers",
+          "type": "object"
+        },
+        "basic_auth": {
+          "additionalProperties": false,
+          "description": " With the email as main identifier https://doc.traefik.io/traefik/middlewares/http/basicauth/ The admin user is added",
+          "properties": {
+            "name": {
+              "default": "basic-auth",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            },
+            "users": {
+              "default": "",
+              "description": "List of extra users alongside the admin user",
+              "required": [],
+              "title": "users",
+              "type": "null"
+            }
+          },
+          "required": [
+            "name",
+            "users"
+          ],
+          "title": "basic_auth"
+        },
+        "forward_auth": {
+          "additionalProperties": false,
+          "description": " https://doc.traefik.io/traefik/middlewares/http/forwardauth/",
+          "properties": {
+            "name": {
+              "default": "forward-auth",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "title": "forward_auth"
+        },
+        "forward_auth_bearer": {
+          "additionalProperties": false,
+          "description": " It can be applied on Kube API client such as Kubernetes Dashboard'",
+          "properties": {
+            "name": {
+              "default": "forward-auth-bearer",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "title": "forward_auth_bearer"
+        },
+        "git_hooks": {
+          "additionalProperties": false,
+          "description": " Used in Gitops app such as Argocd https://doc.traefik.io/traefik/middlewares/http/ipallowlist/",
+          "properties": {
+            "name": {
+              "default": "git-hooks",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            },
+            "service": {
+              "default": "github",
+              "required": [],
+              "title": "service",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "service"
+          ],
+          "title": "git_hooks"
+        },
+        "private_network": {
+          "additionalProperties": false,
+          "description": " Ip are given via the auth.private_networks",
+          "properties": {
+            "name": {
+              "default": "private-network",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "title": "private_network"
+        }
+      },
+      "required": [
+        "auth_headers"
+      ],
+      "title": "middlewares"
+    },
+    "namespace": {
+      "default": "kube-system",
+      "description": " The kube-system namespace tells kubernetes that this app has a higher priority",
+      "required": [],
+      "title": "namespace"
+    },
+    "traefik": {
+      "additionalProperties": false,
+      "description": " https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml",
+      "properties": {
+        "additionalArguments": {
+          "items": {
+            "anyOf": [
+              {
+                "required": [],
+                "type": "string"
+              },
+              {
+                "required": [],
+                "type": "string"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "additionalArguments",
+          "type": "array"
+        },
+        "ingressRoute": {
+          "additionalProperties": false,
+          "description": " https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#access-traefik-dashboard-without-exposing-it",
+          "properties": {
+            "dashboard": {
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "default": false,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "title": "dashboard",
+              "type": "object"
+            }
+          },
+          "required": [
+            "dashboard"
+          ],
+          "title": "ingressRoute"
+        },
+        "metrics": {
+          "additionalProperties": false,
+          "properties": {
+            "prometheus": {
+              "additionalProperties": false,
+              "description": "Prometheus is enabled by default",
+              "properties": {
+                "service": {
+                  "additionalProperties": false,
+                  "description": " This value creates a dedicated metrics service to use with ServiceMonitor Enable Prometheus Metrics https://doc.traefik.io/traefik/observability/metrics/prometheus/ Metrics Info: https://doc.traefik.io/traefik/observability/metrics/overview/#global-metrics",
+                  "properties": {
+                    "enabled": {
+                      "default": false,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "enabled"
+                  ],
+                  "title": "service"
+                }
+              },
+              "required": [],
+              "title": "prometheus",
+              "type": "object"
+            }
+          },
+          "required": [
+            "prometheus"
+          ],
+          "title": "metrics",
+          "type": "object"
+        },
+        "nodeSelector": {
+          "additionalProperties": false,
+          "description": "nodeSelector is the simplest recommended form of node selection constraint.",
+          "required": [],
+          "title": "nodeSelector"
+        },
+        "ports": {
+          "additionalProperties": false,
+          "properties": {
+            "smtp": {
+              "additionalProperties": false,
+              "description": " It creates the smtp [entrypoint](https://doc.traefik.io/traefik/routing/entrypoints/) - \"--entryPoints.smtp.address=:8025/tcp\"",
+              "properties": {
+                "expose": {
+                  "additionalProperties": false,
+                  "description": "Defines whether the port is listed in the service if service.type is LoadBalancer or NodePort.",
+                  "properties": {
+                    "default": {
+                      "default": true,
+                      "required": [],
+                      "title": "default",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "default"
+                  ],
+                  "title": "expose",
+                  "type": "object"
+                },
+                "exposedPort": {
+                  "default": 25,
+                  "description": "Port on the host",
+                  "required": [],
+                  "title": "exposedPort",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 8025,
+                  "description": "Container port",
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "protocol": {
+                  "default": "TCP",
+                  "description": "Protocol",
+                  "required": [],
+                  "title": "protocol",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "port",
+                "exposedPort",
+                "expose",
+                "protocol"
+              ],
+              "title": "smtp"
+            },
+            "smtps": {
+              "additionalProperties": false,
+              "description": "SMTP submission over TLS",
+              "properties": {
+                "expose": {
+                  "additionalProperties": false,
+                  "description": "Defines whether the port is listed in the service if service.type is LoadBalancer or NodePort.",
+                  "properties": {
+                    "default": {
+                      "default": true,
+                      "required": [],
+                      "title": "default",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "default"
+                  ],
+                  "title": "expose",
+                  "type": "object"
+                },
+                "exposedPort": {
+                  "default": 465,
+                  "description": "Port on the host",
+                  "required": [],
+                  "title": "exposedPort",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 8465,
+                  "description": "Container port",
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "protocol": {
+                  "default": "TCP",
+                  "description": "Protocol",
+                  "required": [],
+                  "title": "protocol",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "port",
+                "exposedPort",
+                "expose",
+                "protocol"
+              ],
+              "title": "smtps",
+              "type": "object"
+            },
+            "web": {
+              "additionalProperties": false,
+              "description": "Redirections",
+              "properties": {
+                "redirections": {
+                  "additionalProperties": false,
+                  "description": "https://doc.traefik.io/traefik/routing/entrypoints/#redirection",
+                  "properties": {
+                    "entryPoint": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "scheme": {
+                          "default": "https",
+                          "required": [],
+                          "title": "scheme",
+                          "type": "string"
+                        },
+                        "to": {
+                          "default": "websecure",
+                          "required": [],
+                          "title": "to",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "to",
+                        "scheme"
+                      ],
+                      "title": "entryPoint",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "entryPoint"
+                  ],
+                  "title": "redirections",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "redirections"
+              ],
+              "title": "web",
+              "type": "object"
+            }
+          },
+          "required": [
+            "web",
+            "smtps"
+          ],
+          "title": "ports",
+          "type": "object"
+        },
+        "providers": {
+          "additionalProperties": false,
+          "properties": {
+            "kubernetesCRD": {
+              "additionalProperties": false,
+              "properties": {
+                "allowEmptyServices": {
+                  "default": "true",
+                  "description": " https://acouvreur.github.io/sablier/#/guides/code-server-traefik-kubernetes?id=_3-deploy-traefik-using-helm",
+                  "required": [],
+                  "title": "allowEmptyServices"
+                }
+              },
+              "required": [],
+              "title": "kubernetesCRD",
+              "type": "object"
+            },
+            "kubernetesIngress": {
+              "additionalProperties": false,
+              "properties": {
+                "allowEmptyServices": {
+                  "default": true,
+                  "description": "return 503, needed to start stopped container with sablier",
+                  "required": [],
+                  "title": "allowEmptyServices",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "allowEmptyServices"
+              ],
+              "title": "kubernetesIngress",
+              "type": "object"
+            }
+          },
+          "required": [
+            "kubernetesCRD",
+            "kubernetesIngress"
+          ],
+          "title": "providers",
+          "type": "object"
+        },
+        "service": {
+          "additionalProperties": false,
+          "properties": {
+            "ipFamilies": {
+              "items": {
+                "anyOf": [
+                  {
+                    "required": [],
+                    "type": "string"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "ipFamilies",
+              "type": "array"
+            },
+            "ipFamilyPolicy": {
+              "default": "SingleStack",
+              "description": " You can't set up a nodePort because the port is a high-end port between 30000-32767 You can install it as DaemonSet + Node port ? https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#install-as-a-daemonset",
+              "required": [],
+              "title": "ipFamilyPolicy"
+            },
+            "spec": {
+              "additionalProperties": false,
+              "properties": {
+                "externalTrafficPolicy": {
+                  "default": "Local",
+                  "description": "Allow Origin Remote IP to be forwarded",
+                  "required": [],
+                  "title": "externalTrafficPolicy",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "externalTrafficPolicy"
+              ],
+              "title": "spec",
+              "type": "object"
+            }
+          },
+          "required": [
+            "ipFamilies",
+            "spec"
+          ],
+          "title": "service",
+          "type": "object"
+        }
+      },
+      "required": [
+        "metrics",
+        "additionalArguments",
+        "service",
+        "providers",
+        "ports"
+      ],
+      "title": "traefik"
+    }
+  },
+  "required": [
+    "auth",
+    "kubee_internal"
+  ],
+  "type": "object"
+}

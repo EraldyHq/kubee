@@ -1,5 +1,11 @@
-# -- enable / disable
-enabled: false # @schema title: Enable ; description: Boolean to enable this chart in the cluster ; required: true
+# yaml-language-server: $schema=values.schema.json
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# @schema
+# -- Boolean to enable this chart in the cluster
+enabled: false #
 
 # -- Namespace
 namespace: 'mail' # @schema title: Namespace ; description: The installation namespace ; required: true; minLength:1

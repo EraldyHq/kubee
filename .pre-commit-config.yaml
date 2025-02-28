@@ -1,0 +1,23 @@
+---
+repos:
+  - repo: https://github.com/dadav/helm-schema
+    rev: 0.18.1
+    hooks:
+      - id: helm-schema
+        # for all available options: helm-schema -h
+        args:
+          # directory to search recursively within for charts
+          - --chart-search-root=resources/charts/stable/mailpit
+
+          # don't analyze dependencies
+          - --no-dependencies
+
+          # add references to values file if not exist
+          - --add-schema-reference
+
+          # helm docs compat
+          - --helm-docs-compatibility-mode
+
+          # list of fields to skip from being created by default
+          # e.g. generate a relatively permissive schema
+          # - "--skip-auto-generation=required,additionalProperties"
