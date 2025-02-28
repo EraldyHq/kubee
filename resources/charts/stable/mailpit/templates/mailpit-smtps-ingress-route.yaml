@@ -10,9 +10,11 @@ spec:
   routes:
     - match: HostSNI(`{{ required "mailpit hostname is required" .Values.hostname }}`)
       priority: 10
+      {{- if eq .Values.enable_private_network_middleware true }}
       middlewares:
         - name: {{ .Values.traefik.middlewares.private_network.name }}
           namespace: {{ .Values.traefik.namespace }}
+      {{- end }}
       services:
         - name: mailpit-smtp          # Kubernetes Service
           port: smtp                  # Kubernetes Service Port
@@ -22,9 +24,6 @@ spec:
           # proxyProtocol:
           #  version: 2 # comes from
           tls: false # Should be false with a tls passthrough
-          # serversTransport: transport
-          # nativeLB: true
-          # nodePortLB: true
   tls:
-    #secretName: supersecret
+    # Tls termination happens on the service/pods side
     passthrough: true

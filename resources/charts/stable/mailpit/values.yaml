@@ -1,14 +1,20 @@
-# Enable/Disable
-enabled: false
+# -- enable / disable
+enabled: false # @schema title: Enable ; description: Boolean to enable this chart in the cluster ; required: true
 
-# Namespace
-namespace: 'mail'
+# -- Namespace
+namespace: 'mail' # @schema title: Namespace ; description: The installation namespace ; required: true; minLength:1
 
-# Hostname
-hostname: ''
+# -- Hostname
+hostname: '' # @schema title: Hostname ; description: The hostname ; required:true; minLength:1
+
+# Enable private network
+# If true, only the IP from the private network
+# will be able to pass email to the SMTP server
+# The private network is defined in Traefik
+enable_private_network_middleware: false # @schema title: Private Network Authentication ; description: Applied the private network middleware ; required: true
 
 # Mail Pit Values
-mailpit:
+mailpit: # @schema hidden: true; $ref: https://raw.githubusercontent.com/jouve/charts/refs/heads/main/charts/mailpit/values.schema.json
   image:
     # https://github.com/axllent/mailpit/releases
     tag: "v1.22.3"

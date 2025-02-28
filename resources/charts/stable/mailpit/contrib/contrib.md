@@ -21,8 +21,9 @@ helm pull https://github.com/jouve/charts/releases/download/mailpit-0.22.2/mailp
 ```
 
 
-## Test
+## Test With OpenSsl
 
+Connect
 * From a cluster shell:
 ```bash
 openssl s_client -crlf -connect mailpit-smtp.mail:465 
@@ -31,6 +32,7 @@ openssl s_client -crlf -connect mailpit-smtp.mail:465
 ```bash
 openssl s_client -crlf -connect mailpit-bcf52bfa.nip.io:465 -servername mailpit-bcf52bfa.nip.io
 ```
+and start a transaction.
 
 ## Support
 ### can_renegotiate:wrong

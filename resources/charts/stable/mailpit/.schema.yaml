@@ -1,0 +1,13 @@
+# https://github.com/losisin/helm-values-schema-json#configuration-file
+
+input:
+  - values.yaml
+  # Does not add any scope we can't merge them
+  # For sub-chart, use the ref or hidden property
+  #- charts/mailpit/values.yaml
+output: values.schema.json
+schemaRoot:
+  # Because we path the whole cluster merged data
+  # we need to generate the schema for the whole cluster or at least for the dependency
+  # to set it to false
+  additionalProperties: true
