@@ -1,0 +1,3 @@
+{{- if not .Values.enabled }}
+{{- fail "postal should be enabled in the cluster file" }}
+{{- end }}

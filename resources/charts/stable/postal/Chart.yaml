@@ -22,6 +22,9 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 appVersion: "v3.3.4" # The postal version
 
 
+annotations:
+  app.kubernetes.io/name: postal
+
 dependencies:
   - name: kubee-cluster
     version: 0.0.1

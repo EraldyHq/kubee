@@ -8,3 +8,7 @@ Helper to print the basic name for consitency
     }}
 {{- end }}
 
+{{/* Config name*/}}
+{{- define "postal-name-config" }}
+{{- printf "%s" (include "kubee-name" (merge . (dict "component" "config")))}}
+{{- end }}

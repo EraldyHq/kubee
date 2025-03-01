@@ -1,17 +1,13 @@
+{{ $ := mergeOverwrite $ (dict "component" "web") }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "postal-name" . }}-web
+  name: {{ include "kubee-name" . }}
   labels:
-    app.kubernetes.io/name: postal
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    component: postal
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    {{- include "kubee-manifest-labels" . | indent 4}}
 spec:
   selector:
-    app: {{ template "postal.name" . }}
-    component: web
+    {{- include "kubee-pod-labels" . | indent 4}}
   ports:
   - name: web
     port: 5000

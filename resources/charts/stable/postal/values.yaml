@@ -22,21 +22,37 @@ namespace: 'mail'
 # description: The hostname
 # required: true
 # minLength: 1
+# format: hostname
 # @schema
 # -- The hostname
 hostname: ''
 
 # @schema
-# title: Private Network Restriction
-# description: Applied the private network middleware
+# title: Version
+# description: The postal version
 # required: true
-# type: boolean
 # @schema
-# Enable private network
-# If true and a private network has been defined in Traefik,
-# only the IP from the private network will be able to
-# connect to the SMTP server
-enable_private_network_middleware: true
+# -- The postal version, https://github.com/postalserver/postal/releases
+version: 'v3.3.4'
+
+
+# @schema
+# title: Components
+# description: The components
+# @schema
+components:
+  smtp:
+    resource:
+      memory: ''
+      cpu: ''
+  web:
+    resource:
+      memory: ''
+      cpu: ''
+  worker:
+    resource:
+      memory: ''
+      cpu: ''
 
 
 

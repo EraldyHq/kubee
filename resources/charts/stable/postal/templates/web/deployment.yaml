@@ -1,37 +1,26 @@
+{{ $ := mergeOverwrite $ (dict "component" "web") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "postal.fullname" . }}-web
+  name: {{ include "kubee-name" . }}
   labels:
-    app.kubernetes.io/name: postal
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    component: web
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    {{- include "kubee-manifest-labels" . | indent 4}}
 spec:
   selector:
     matchLabels:
-      app: {{ template "postal.name" . }}
-      component: web
-  # at the moment, we only support one replica
-  replicas: {{ .Values.web.replicas }}
-  strategy:
-    type: Recreate
+      {{- include "kubee-pod-labels" . | indent 6}}
   template:
     metadata:
       labels:
-        app: {{ template "postal.name" . }}
-        component: web
+        {{- include "kubee-manifest-labels" . | indent 8}}
       annotations:
-        checksum/secret: {{ include (print .Template.BasePath "/secret.yaml") . | sha256sum }}  # Checksum annotation
+        checksum/secret: {{ include (print .Template.BasePath "/config/secret.yaml") . | sha256sum }}  # Checksum annotation
     spec:
       containers:
       - name: web
-        image: "{{ .Values.image }}:{{ .Values.imageTag }}"
-        imagePullPolicy: "{{ .Values.imagePullPolicy }}"
+        image: "ghcr.io/postalserver/postal:{{ .Values.version }}"
         command: ["postal", "web-server"]
-        resources:
-{{ toYaml .Values.resources | indent 10 }}          
+        {{- /* resources: {{ toYaml .Values.resources | nindent 10 }} */}}
         ports:
         - name: web
           containerPort: 5000
@@ -42,4 +31,4 @@ spec:
       volumes:
       - name: config
         secret:
-          secretName: {{ template "postal.fullname" . }}
+          secretName: {{ include "postal-name-config" . }}

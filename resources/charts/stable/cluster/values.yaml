@@ -22,7 +22,10 @@ auth:
     # * `cluster-admin` has full access
     # * `admin` does not have access to node and cluster scope related object such as ClusterRoleBinding
     cluster_role: 'cluster-admin'
-    # The email
+    # @schema
+    # format: email
+    # @schema
+    # -- The email
     # It's used by default in apps. For instance:
     # * letsencrypt registration email
     # * alert notifications: prometheus, argocd
@@ -41,11 +44,23 @@ auth:
 # Default smtp server parameters
 email:
   smtp:
+    # @schema
+    # title: Smtp host
+    # description: The smtp hostname
+    # required: true
+    # format: hostname
+    # @schema
     # The smtp host
     # if the host is not empty, smtp configuration are added
     # for example for argocd email notifications
     host: ''
-    # the smtp port
+    # @schema
+    # title: Smtp Port
+    # description: The Smtp port
+    # type: integer
+    # required: true
+    # @schema
+    # -- the smtp port
     port: ''
     # the default from
     from: ''

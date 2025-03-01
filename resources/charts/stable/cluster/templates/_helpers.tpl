@@ -11,6 +11,11 @@ https://helm.sh/docs/chart_template_guide/named_templates/#declaring-and-using-t
 {{- define "kubee-prefix" }}
 {{- printf "kubee" }}
 {{- end }}
+
+
+
+
+
 {{/*
 Return a name prefix created from the release
 Usage in a sub-chart
@@ -36,3 +41,43 @@ include "kubee-name-prefix" (dict "Release" $.Release )
 {{- end }}
 
 
+
+{{/*
+    Return the labels for a manifest
+    https://helm.sh/docs/chart_best_practices/labels/#standard-labels
+    Component name should be a property
+    Usage Example:
+    {{- include "kubee-manifest-labels" (merge . (dict "component" "web")) }}
+*/}}
+{{- define "kubee-manifest-labels" }}
+{{ printf "app.kubernetes.io/name: %s" (required "app.kubernetes.io/name chart annotation is required " (index .Chart.Annotations "app.kubernetes.io/name")) }}
+{{ printf "app.kubernetes.io/component: %s" (required "component property is required " .component)}}
+{{ printf "app.kubernetes.io/instance: %s" .Release.Name }}
+{{ printf "app.kubernetes.io/version: %s" .Chart.AppVersion }}
+{{ printf "app.kubernetes.io/managed-by: %s" .Release.Service }}
+{{ printf "helm.sh/chart: %s-%s" .Chart.Name (.Chart.Version | replace "+" "_") }}
+{{- end }}
+
+{{/*
+    Return the labels for a pod
+    https://helm.sh/docs/chart_best_practices/labels/#standard-labels
+    Component name should be a property
+    App version is not needed to make the pod unique as it's part of the Release Name
+    Usage Example:
+    {{- include "kubee-pod-labels" (merge . (dict "component" "web")) }}
+*/}}
+{{- define "kubee-pod-labels" }}
+{{ printf "app.kubernetes.io/name: %s" (required "app.kubernetes.io/name chart annotation is required " (index .Chart.Annotations "app.kubernetes.io/name")) }}
+{{ printf "app.kubernetes.io/component: %s" (required "component property is required " .component)}}
+{{ printf "app.kubernetes.io/instance: %s" .Release.Name }}
+{{- end }}
+
+{{/*
+    Return the name of an object
+    Component name should be a property
+    Usage Example:
+    {{- include "kubee-name" (merge . (dict "component" "web")) }}
+*/}}
+{{- define "kubee-name" }}
+{{- printf "%s-%s-%s" (required "app.kubernetes.io/name chart annotation is required " (index .Chart.Annotations "app.kubernetes.io/name")) (required "component property is required " .component) (include "kubee-prefix" .)}}
+{{- end }}

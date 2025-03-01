@@ -446,9 +446,16 @@ kubee::set_env(){
        # shellcheck disable=SC1090
        if ! source "$KUBEE_ENV_FILE"; then
          echo::err "Error while importing the envrc file $KUBEE_ENV_FILE"
-         exit 1
+         return 1
        fi
     fi
+
+    KUBEE_CLUSTER_VALUES_FILE="$KUBEE_CLUSTER_DIR/values.yaml"
+    if [ ! -f "$KUBEE_CLUSTER_VALUES_FILE" ]; then
+       echo::err "Cluster values file does not exist $KUBEE_CLUSTER_VALUES_FILE"
+       return 1
+    fi
+
   fi
 
 
@@ -484,27 +491,21 @@ kubee::set_env(){
 # Return the cluster files with all variables expanded
 kubee::get_cluster_values_file(){
 
-  local KUBEE_CLUSTER_VALUES;
-  KUBEE_CLUSTER_VALUES=$(realpath "${KUBEE_CLUSTER_DIR}/values.yaml")
-  if [ ! -f "$KUBEE_CLUSTER_VALUES" ]; then
-    echo::err "No Cluster values found at $KUBEE_CLUSTER_VALUES"
-    return
-  fi
 
   ############################
   # Variable Substitution
   # Check the variables
-  if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBEE_CLUSTER_VALUES"); then
+  if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBEE_CLUSTER_VALUES_FILE"); then
      # Should exit because of the strict mode
      # but it was not working
-     echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBEE_CLUSTER_VALUES"
+     echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBEE_CLUSTER_VALUES_FILE"
      return 1
   fi
   local OUTPUT_DIR;
   OUTPUT_DIR=${CHART_OUTPUT_VALUES_DIR:-$KUBEE_RUNTIME_DIR}
-  local CLUSTER_VALUES_FILE="$OUTPUT_DIR/cluster-values.yml"
-  envsubst < "$KUBEE_CLUSTER_VALUES" >| "$CLUSTER_VALUES_FILE"
-  echo::debug "Returned the cluster values files $CLUSTER_VALUES_FILE"
+  local CLUSTER_VALUES_FILE="$OUTPUT_DIR/cluster-values-after-env-expansion.yml"
+  envsubst < "$KUBEE_CLUSTER_VALUES_FILE" >| "$CLUSTER_VALUES_FILE"
+  echo::debug "Cluster values files after env expansion: $CLUSTER_VALUES_FILE"
   echo "$CLUSTER_VALUES_FILE"
 
 }
@@ -547,7 +548,7 @@ kubee::get_cluster_values_files_for_chart(){
     if [ "$CHART_VALUES" == "null" ]; then
       # CRD chart does not have any value in the cluster values files
       if [ "$IS_CRD_CHART" != "1" ]; then
-        echo::warn "No values found for the actual chart $ACTUAL_CHART_ALIAS in the cluster value file $KUBEE_CLUSTER_VALUES"
+        echo::warn "No values found for the actual chart $ACTUAL_CHART_ALIAS in the cluster value file $KUBEE_CLUSTER_VALUES_FILE"
       fi
       echo "${CLUSTER_FILES[@]}"
       return

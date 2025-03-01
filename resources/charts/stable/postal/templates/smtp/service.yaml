@@ -1,19 +1,15 @@
+{{ $ := mergeOverwrite $ (dict "component" "smtp") }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "postal.fullname" . }}-smtp
+  name: {{ include "kubee-name" . }}
   labels:
-    app.kubernetes.io/name: postal
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    component: postal
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    {{- include "kubee-manifest-labels" . | indent 4}}
 spec:
   selector:
-    app: {{ template "postal.name" . }}
-    component: smtp
+    {{- include "kubee-pod-labels" . | indent 6}}
   ports:
   - name: smtp
     port: 25
     targetPort: smtp
-  type: {{ .Values.smtp.service.type }}
+
