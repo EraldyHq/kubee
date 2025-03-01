@@ -1,23 +1,42 @@
 # yaml-language-server: $schema=values.schema.json
+
 # @schema
 # title: Enabled
 # type: boolean
 # required: true
 # @schema
-# -- Boolean to enable this chart in the cluster
-enabled: false #
+# -- Boolean to indicate that this chart is or will be installed in the cluster
+enabled: false
 
-# -- Namespace
-namespace: 'mail' # @schema title: Namespace ; description: The installation namespace ; required: true; minLength:1
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation Namespace
+namespace: 'mail'
 
-# -- Hostname
-hostname: '' # @schema title: Hostname ; description: The hostname ; required:true; minLength:1
+# @schema
+# title: Hostname
+# description: The hostname
+# required: true
+# minLength: 1
+# @schema
+# -- The hostname
+hostname: ''
 
+# @schema
+# title: Private Network Restriction
+# description: Applied the private network middleware
+# required: true
+# type: boolean
+# @schema
 # Enable private network
-# If true, only the IP from the private network
-# will be able to pass email to the SMTP server
-# The private network is defined in Traefik
-enable_private_network_middleware: false # @schema title: Private Network Authentication ; description: Applied the private network middleware ; required: true
+# If true and a private network has been defined in Traefik,
+# only the IP from the private network will be able to
+# connect to the SMTP server
+enable_private_network_middleware: true
 
 # Mail Pit Values
 mailpit: # @schema hidden: true; $ref: https://raw.githubusercontent.com/jouve/charts/refs/heads/main/charts/mailpit/values.schema.json
@@ -37,7 +56,12 @@ mailpit: # @schema hidden: true; $ref: https://raw.githubusercontent.com/jouve/c
         enabled: true
         secretName: "mailpit-cert"
 
-# Don't change, don't touch
-# Used to not output template from cross dependency in Chart.yaml
+
+# Internal Kubee constant
 kubee_internal:
+  # @schema
+  # const: false
+  # @schema
+  # Constant used to not output template from kubee cross dependency in Chart.yaml
+  # Don't change, don't touch
   install_cross_dependency: false

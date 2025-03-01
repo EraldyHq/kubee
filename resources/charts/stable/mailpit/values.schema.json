@@ -1,16 +1,250 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "additionalProperties": false,
   "properties": {
-    "enable_private_network_middleware": {
-      "default": "false",
-      "description": " If true, only the IP from the private network will be able to pass email to the SMTP server The private network is defined in Traefik",
+    "cert_manager": {
+      "description": "The cert manager kubee chart",
+      "properties": {
+        "acme_issuers": {
+          "description": "Issuers endpoint",
+          "properties": {
+            "prod": {
+              "properties": {
+                "name": {
+                  "default": "letsencrypt-prod",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "url": {
+                  "default": "https://acme-v02.api.letsencrypt.org/directory",
+                  "required": [],
+                  "title": "url",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "prod",
+              "type": "object"
+            },
+            "staging": {
+              "properties": {
+                "name": {
+                  "default": "letsencrypt-staging",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "url": {
+                  "default": "https://acme-staging-v02.api.letsencrypt.org/directory",
+                  "required": [],
+                  "title": "url",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "staging",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "acme_issuers",
+          "type": "object"
+        },
+        "cert-manager": {
+          "description": " defined by either the name or alias of your dependency in Chart.yaml",
+          "properties": {
+            "clusterResourceNamespace": {
+              "default": "",
+              "description": "cluster-resource-namespace=my-namespace https://cert-manager.io/docs/configuration/#cluster-resource-namespace The Cluster Resource Namespace is defaulted as being the `cert-manager` namespace, A ClusterIssuer CA will create the certificate in this namespace https://cert-manager.io/docs/configuration/ca/#deployment",
+              "required": [],
+              "title": "clusterResourceNamespace"
+            },
+            "crds": {
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                }
+              },
+              "required": [],
+              "title": "crds",
+              "type": "object"
+            },
+            "namespace": {
+              "default": "cert-manager",
+              "description": " fixed so that we don't make any mistake",
+              "required": [],
+              "title": "namespace"
+            },
+            "prometheus": {
+              "description": " https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/README.template.md#prometheus",
+              "properties": {
+                "enabled": {
+                  "default": false,
+                  "description": "We don't create it ourselves because it's pretty hard.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "servicemonitor": {
+                  "properties": {
+                    "enabled": {
+                      "default": false,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [],
+                  "title": "servicemonitor",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "prometheus"
+            },
+            "webhook": {
+              "properties": {
+                "timeoutSeconds": {
+                  "default": 4,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [],
+              "title": "webhook",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "cert-manager"
+        },
+        "dns01": {
+          "description": " You don't need to publish a DNS A record",
+          "properties": {
+            "cloudflare": {
+              "description": " Spec: https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderCloudflare Notes: in the doc, they use an email because they show an apiKey Auth, not an apiToken `ApiToken` is now the preferred method",
+              "properties": {
+                "dns_zones": {
+                  "description": "The dns Zones that are managed by cloudflare, mandatory",
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "dns_zones",
+                  "type": "array"
+                },
+                "secret": {
+                  "description": " A secret or external secret can be created",
+                  "properties": {
+                    "cloudflare_api_token": {
+                      "default": "",
+                      "description": "A Kubernetes secret will be created if not empty",
+                      "required": [],
+                      "title": "cloudflare_api_token",
+                      "type": "string"
+                    },
+                    "external_secret_remote_ref": {
+                      "description": " if remote ref key is not empty",
+                      "properties": {
+                        "key": {
+                          "default": "",
+                          "required": [],
+                          "title": "key",
+                          "type": "string"
+                        },
+                        "property": {
+                          "default": "",
+                          "required": [],
+                          "title": "property",
+                          "type": "string"
+                        }
+                      },
+                      "required": [],
+                      "title": "external_secret_remote_ref"
+                    }
+                  },
+                  "required": [],
+                  "title": "secret"
+                }
+              },
+              "required": [],
+              "title": "cloudflare"
+            }
+          },
+          "required": [],
+          "title": "dns01"
+        },
+        "enabled": {
+          "default": "false",
+          "description": " When disabled, the default certificate specified on Traefik is used Not a string, a boolean so no quote",
+          "required": [],
+          "title": "enabled"
+        },
+        "global": {
+          "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+          "required": [],
+          "title": "global",
+          "type": "object"
+        },
+        "http01": {
+          "description": " https://cert-manager.io/docs/tutorials/acme/http-validation/ This is the default configuration if there is no DNS challenge configured for the domain, You need then to update your DNS to add an A or CNAME record to point the domain name at the correct IP address Wildcard certificates are not supported with HTTP01 validation and require DNS01. This challenge is disabled if ingressClassName is empty",
+          "properties": {
+            "ingress_class_name": {
+              "default": "traefik",
+              "description": " Used by cert manager to create ingress resource to resolve the http01 challenge A new ingress resource with a randomly generated name is created in order to solve the challenge.",
+              "required": [],
+              "title": "ingress_class_name"
+            }
+          },
+          "required": [],
+          "title": "http01"
+        },
+        "issuer_name": {
+          "default": "letsencrypt-staging",
+          "description": " of kubee by default Should be changed to 'letsencrypt-prod' when validated",
+          "required": [],
+          "title": "issuer_name"
+        },
+        "kubee_internal": {
+          "description": "Don't touch, used to block template output of cross dependency",
+          "properties": {
+            "install_cross_dependency": {
+              "default": false,
+              "required": [],
+              "title": "install_cross_dependency",
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "title": "kubee_internal",
+          "type": "object"
+        },
+        "namespace": {
+          "default": "cert-manager",
+          "description": "Namespace",
+          "required": [],
+          "title": "namespace",
+          "type": "string"
+        }
+      },
       "required": [],
-      "title": "enable_private_network_middleware"
+      "title": "kubee-cert-manager",
+      "type": "object"
+    },
+    "enable_private_network_middleware": {
+      "default": true,
+      "description": " title: Private Network Restriction description: Applied the private network middleware required: true type: boolean @schema Enable private network If true and a private network has been defined in Traefik, only the IP from the private network will be able to connect to the SMTP server",
+      "required": [],
+      "title": "Private Network Restriction",
+      "type": "boolean"
     },
     "enabled": {
       "default": false,
-      "description": "Boolean to enable this chart in the cluster",
+      "description": "Boolean to indicate that this chart is or will be installed in the cluster",
       "required": [],
       "title": "Enabled",
       "type": "boolean"
@@ -23,150 +257,1277 @@
     },
     "hostname": {
       "default": "",
-      "description": "Hostname",
+      "description": "The hostname",
+      "minLength": 1,
       "required": [],
-      "title": "hostname"
+      "title": "Hostname"
     },
     "kubee_internal": {
-      "additionalProperties": false,
-      "description": " Used to not output template from cross dependency in Chart.yaml",
+      "description": "Internal Kubee constant",
       "properties": {
         "install_cross_dependency": {
-          "default": false,
+          "const": false,
+          "default": "false",
+          "description": " const: false @schema Constant used to not output template from kubee cross dependency in Chart.yaml Don't change, don't touch",
           "required": [],
-          "title": "install_cross_dependency",
-          "type": "boolean"
+          "title": "install_cross_dependency"
         }
       },
-      "required": [
-        "install_cross_dependency"
-      ],
-      "title": "kubee_internal"
+      "required": [],
+      "title": "kubee_internal",
+      "type": "object"
     },
     "mailpit": {
-      "additionalProperties": false,
-      "description": "Mail Pit Values",
+      "description": "An email and SMTP testing tool with API for developers",
       "properties": {
+        "affinity": {
+          "description": " # ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity #",
+          "required": [],
+          "title": "affinity"
+        },
         "args": {
+          "description": " #",
           "items": {
-            "anyOf": [
-              {
-                "required": [],
-                "type": "string"
-              }
-            ],
             "required": []
           },
           "required": [],
-          "title": "args",
-          "type": "array"
+          "title": "args"
+        },
+        "common": {
+          "description": "A Library Helm Chart for grouping common logic between bitnami charts. This chart is not deployable by itself.",
+          "properties": {
+            "exampleValue": {
+              "default": "common-chart",
+              "description": " # It is required by CI/CD tools and processes. # @skip exampleValue #",
+              "required": [],
+              "title": "exampleValue"
+            },
+            "global": {
+              "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+              "required": [],
+              "title": "global",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "common",
+          "type": "object"
+        },
+        "commonLabels": {
+          "description": " #",
+          "properties": {
+            "app.kubernetes.io/version": {
+              "default": "{{ .Values.image.tag }}",
+              "required": [],
+              "title": "app.kubernetes.io/version",
+              "type": "string"
+            }
+          },
+          "required": [],
+          "title": "commonLabels"
+        },
+        "containerSecurityContext": {
+          "description": " # ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/ #",
+          "properties": {
+            "allowPrivilegeEscalation": {
+              "default": false,
+              "required": [],
+              "title": "allowPrivilegeEscalation",
+              "type": "boolean"
+            },
+            "capabilities": {
+              "properties": {
+                "drop": {
+                  "items": {
+                    "anyOf": [
+                      {
+                        "required": [],
+                        "type": "string"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "drop",
+                  "type": "array"
+                }
+              },
+              "required": [],
+              "title": "capabilities",
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "readOnlyRootFilesystem": {
+              "default": true,
+              "required": [],
+              "title": "readOnlyRootFilesystem",
+              "type": "boolean"
+            },
+            "runAsGroup": {
+              "default": 1001,
+              "required": [],
+              "title": "runAsGroup",
+              "type": "integer"
+            },
+            "runAsNonRoot": {
+              "default": true,
+              "required": [],
+              "title": "runAsNonRoot",
+              "type": "boolean"
+            },
+            "runAsUser": {
+              "default": 1001,
+              "required": [],
+              "title": "runAsUser",
+              "type": "integer"
+            },
+            "seccompProfile": {
+              "properties": {
+                "type": {
+                  "default": "RuntimeDefault",
+                  "required": [],
+                  "title": "type",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "seccompProfile",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "containerSecurityContext"
+        },
+        "extraEnvVars": {
+          "description": " # e.g: # extraEnvVars: #   - name: FOO #     value: \"bar\" #",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnvVars"
+        },
+        "extraEnvVarsSecret": {
+          "default": "",
+          "description": " #",
+          "required": [],
+          "title": "extraEnvVarsSecret"
+        },
+        "global": {
+          "description": " # @param global.imagePullSecrets Global Docker registry secret names as an array # @param global.storageClass Global StorageClass for Persistent Volume(s) #",
+          "properties": {
+            "imagePullSecrets": {
+              "description": " # imagePullSecrets: #   - myRegistryKeySecretName #",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "imagePullSecrets"
+            },
+            "imageRegistry": {
+              "default": "",
+              "required": [],
+              "title": "imageRegistry",
+              "type": "string"
+            },
+            "storageClass": {
+              "default": "",
+              "required": [],
+              "title": "storageClass",
+              "type": "string"
+            }
+          },
+          "required": [],
+          "title": "global"
         },
         "image": {
-          "additionalProperties": false,
+          "description": " # # Bitnami image # ref: https://hub.docker.com/r/bitnami/image/tags/ # @param image.registry image registry # @param image.repository image repository # @param image.tag image tag (immutable tags are recommended) # @param image.digest image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended) # @param image.pullPolicy image pull policy # @param image.pullSecrets image pull secrets # @param image.debug Enable image debug mode #",
           "properties": {
+            "debug": {
+              "default": "false",
+              "description": " #",
+              "required": [],
+              "title": "debug"
+            },
+            "digest": {
+              "default": "",
+              "required": [],
+              "title": "digest",
+              "type": "string"
+            },
+            "pullPolicy": {
+              "default": "IfNotPresent",
+              "description": " # Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent' # ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images #",
+              "required": [],
+              "title": "pullPolicy"
+            },
+            "pullSecrets": {
+              "description": " # Secrets must be manually created in the namespace. # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ # e.g: # pullSecrets: #   - myRegistryKeySecretName #",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "pullSecrets"
+            },
+            "registry": {
+              "default": "docker.io",
+              "required": [],
+              "title": "registry",
+              "type": "string"
+            },
+            "repository": {
+              "default": "axllent/mailpit",
+              "required": [],
+              "title": "repository",
+              "type": "string"
+            },
             "tag": {
-              "default": "v1.22.3",
-              "description": "https://github.com/axllent/mailpit/releases",
+              "default": "v1.22.2",
               "required": [],
               "title": "tag",
               "type": "string"
             }
           },
-          "required": [
-            "tag"
-          ],
-          "title": "image",
+          "required": [],
+          "title": "image"
+        },
+        "ingress": {
+          "description": " # ref: http://kubernetes.io/docs/user-guide/ingress/ #",
+          "properties": {
+            "annotations": {
+              "description": " # Use this parameter to set the required annotations for cert-manager, see # ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations # e.g: # annotations: #   kubernetes.io/ingress.class: nginx #   cert-manager.io/cluster-issuer: cluster-issuer-name #",
+              "required": [],
+              "title": "annotations"
+            },
+            "enabled": {
+              "default": "false",
+              "description": " #",
+              "required": [],
+              "title": "enabled"
+            },
+            "extraHosts": {
+              "description": " # Most likely the hostname above will be enough, but in the event more hosts are needed, this is an array # extraHosts: # - name: nginx.local #   path: / #",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "extraHosts"
+            },
+            "extraTls": {
+              "description": " # see: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls # extraTls: # - hosts: #     - nginx.local #   secretName: nginx.local-tls #",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "extraTls"
+            },
+            "hostname": {
+              "default": "hostname.local",
+              "description": " #",
+              "required": [],
+              "title": "hostname"
+            },
+            "ingressClassName": {
+              "default": "",
+              "description": " # This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster . # ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/ #",
+              "required": [],
+              "title": "ingressClassName"
+            },
+            "path": {
+              "default": "/",
+              "description": " # NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers #",
+              "required": [],
+              "title": "path"
+            },
+            "pathType": {
+              "default": "ImplementationSpecific",
+              "description": " #",
+              "required": [],
+              "title": "pathType"
+            },
+            "tls": {
+              "default": "false",
+              "description": " # TLS certificates will be retrieved from a TLS secret # You can: #   - Rely on cert-manager to create it by setting the corresponding annotations #",
+              "required": [],
+              "title": "tls"
+            }
+          },
+          "required": [],
+          "title": "ingress"
+        },
+        "livenessProbe": {
+          "description": "#",
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "failureThreshold": {
+              "default": 5,
+              "required": [],
+              "title": "failureThreshold",
+              "type": "integer"
+            },
+            "initialDelaySeconds": {
+              "default": 2,
+              "required": [],
+              "title": "initialDelaySeconds",
+              "type": "integer"
+            },
+            "periodSeconds": {
+              "default": 10,
+              "required": [],
+              "title": "periodSeconds",
+              "type": "integer"
+            },
+            "successThreshold": {
+              "default": 1,
+              "required": [],
+              "title": "successThreshold",
+              "type": "integer"
+            },
+            "timeoutSeconds": {
+              "default": 5,
+              "required": [],
+              "title": "timeoutSeconds",
+              "type": "integer"
+            }
+          },
+          "required": [],
+          "title": "livenessProbe",
           "type": "object"
         },
         "mailpit": {
-          "additionalProperties": false,
+          "description": " https://github.com/axllent/mailpit/wiki/HTTPS",
           "properties": {
-            "smtp": {
-              "additionalProperties": false,
+            "relay": {
               "properties": {
-                "tls": {
-                  "additionalProperties": false,
+                "config": {
+                  "required": [],
+                  "title": "config",
+                  "type": "object"
+                },
+                "enabled": {
+                  "default": "false",
+                  "description": " # @param mailpit.relay.config Mailpit SMTP relay configuration # @param mailpit.relay.relayAll Relay all messages to relay",
+                  "required": [],
+                  "title": "enabled"
+                },
+                "relayAll": {
+                  "default": false,
+                  "required": [],
+                  "title": "relayAll",
+                  "type": "boolean"
+                }
+              },
+              "required": [],
+              "title": "relay",
+              "type": "object"
+            },
+            "smtp": {
+              "properties": {
+                "authFile": {
+                  "description": " # @param mailpit.smtp.authFile.htpasswd htpasswd content # @param mailpit.smtp.authFile.existingSecret Secret containing htpasswd content",
                   "properties": {
                     "enabled": {
-                      "default": true,
+                      "default": false,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    },
+                    "existingSecret": {
+                      "required": [],
+                      "title": "existingSecret",
+                      "type": "object"
+                    },
+                    "htpasswd": {
+                      "default": "",
+                      "required": [],
+                      "title": "htpasswd",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "authFile"
+                },
+                "tls": {
+                  "description": " # @param mailpit.smtp.tls.secretName tls secret for SMTP",
+                  "properties": {
+                    "enabled": {
+                      "default": false,
                       "required": [],
                       "title": "enabled",
                       "type": "boolean"
                     },
                     "secretName": {
-                      "default": "mailpit-cert",
+                      "default": "",
                       "required": [],
                       "title": "secretName",
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "enabled",
-                    "secretName"
-                  ],
-                  "title": "tls",
-                  "type": "object"
+                  "required": [],
+                  "title": "tls"
                 }
               },
-              "required": [
-                "tls"
-              ],
+              "required": [],
               "title": "smtp",
               "type": "object"
+            },
+            "ui": {
+              "properties": {
+                "authFile": {
+                  "description": " # @param mailpit.ui.authFile.htpasswd htpasswd content # @param mailpit.ui.authFile.existingSecret Secret containing htpasswd content",
+                  "properties": {
+                    "enabled": {
+                      "default": false,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    },
+                    "existingSecret": {
+                      "required": [],
+                      "title": "existingSecret",
+                      "type": "object"
+                    },
+                    "htpasswd": {
+                      "default": "",
+                      "required": [],
+                      "title": "htpasswd",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "authFile"
+                },
+                "tls": {
+                  "description": " # @param mailpit.ui.tls.secretName tls secret for web UI",
+                  "properties": {
+                    "enabled": {
+                      "default": false,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    },
+                    "secretName": {
+                      "default": "",
+                      "required": [],
+                      "title": "secretName",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "tls"
+                }
+              },
+              "required": [],
+              "title": "ui",
+              "type": "object"
+            },
+            "webroot": {
+              "default": "/",
+              "description": "#",
+              "required": [],
+              "title": "webroot",
+              "type": "string"
             }
           },
-          "required": [
-            "smtp"
-          ],
-          "title": "mailpit",
+          "required": [],
+          "title": "mailpit"
+        },
+        "nodeSelector": {
+          "description": " # Ref: https://kubernetes.io/docs/user-guide/node-selection/",
+          "required": [],
+          "title": "nodeSelector"
+        },
+        "persistence": {
+          "description": " # # Enable persistence using Persistent Volume Claims # ref: https://kubernetes.io/docs/user-guide/persistent-volumes/ #",
+          "properties": {
+            "accessModes": {
+              "description": " #",
+              "items": {
+                "anyOf": [
+                  {
+                    "required": [],
+                    "type": "string"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "accessModes"
+            },
+            "annotations": {
+              "description": " #",
+              "required": [],
+              "title": "annotations"
+            },
+            "dataSource": {
+              "description": " #",
+              "required": [],
+              "title": "dataSource"
+            },
+            "enabled": {
+              "default": "false",
+              "description": " #",
+              "required": [],
+              "title": "enabled"
+            },
+            "existingClaim": {
+              "default": "",
+              "description": " #",
+              "required": [],
+              "title": "existingClaim"
+            },
+            "labels": {
+              "description": " #",
+              "required": [],
+              "title": "labels"
+            },
+            "selector": {
+              "description": " # If set, the PVC can't have a PV dynamically provisioned for it # E.g. # selector: #   matchLabels: #     app: my-app #",
+              "required": [],
+              "title": "selector"
+            },
+            "size": {
+              "default": "8Gi",
+              "description": " #",
+              "required": [],
+              "title": "size"
+            },
+            "storageClass": {
+              "default": "",
+              "description": " # If defined, storageClassName: \u003cstorageClass\u003e # If set to \"-\", storageClassName: \"\", which disables dynamic provisioning # If undefined (the default) or set to null, no storageClassName spec is #   set, choosing the default provisioner.  (gp2 on AWS, standard on #   GKE, AWS \u0026 OpenStack) #",
+              "required": [],
+              "title": "storageClass"
+            }
+          },
+          "required": [],
+          "title": "persistence"
+        },
+        "podLabels": {
+          "description": " # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ #",
+          "properties": {
+            "helm.sh/chart": {
+              "default": "{{ .Chart.Name }}",
+              "required": [],
+              "title": "helm.sh/chart",
+              "type": "string"
+            }
+          },
+          "required": [],
+          "title": "podLabels"
+        },
+        "podSecurityContext": {
+          "description": " # ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/ #",
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "fsGroup": {
+              "default": 1001,
+              "required": [],
+              "title": "fsGroup",
+              "type": "integer"
+            }
+          },
+          "required": [],
+          "title": "podSecurityContext"
+        },
+        "readinessProbe": {
+          "description": "#",
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "failureThreshold": {
+              "default": 5,
+              "required": [],
+              "title": "failureThreshold",
+              "type": "integer"
+            },
+            "initialDelaySeconds": {
+              "default": 2,
+              "required": [],
+              "title": "initialDelaySeconds",
+              "type": "integer"
+            },
+            "periodSeconds": {
+              "default": 10,
+              "required": [],
+              "title": "periodSeconds",
+              "type": "integer"
+            },
+            "successThreshold": {
+              "default": 1,
+              "required": [],
+              "title": "successThreshold",
+              "type": "integer"
+            },
+            "timeoutSeconds": {
+              "default": 5,
+              "required": [],
+              "title": "timeoutSeconds",
+              "type": "integer"
+            }
+          },
+          "required": [],
+          "title": "readinessProbe",
           "type": "object"
         },
+        "replicaCount": {
+          "default": "1",
+          "description": " #",
+          "required": [],
+          "title": "replicaCount"
+        },
+        "resources": {
+          "description": " # @param resources [object] The resources for the containers #",
+          "required": [],
+          "title": "resources"
+        },
+        "resourcesPreset": {
+          "default": "nano",
+          "description": " # ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/ # @param resourcesPreset Set container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if resources is set (resources is recommended for production). # More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15 #",
+          "required": [],
+          "title": "resourcesPreset"
+        },
         "service": {
-          "additionalProperties": false,
+          "description": " # # service parameters #",
           "properties": {
-            "smtp": {
-              "additionalProperties": false,
+            "http": {
               "properties": {
-                "port": {
-                  "default": 465,
+                "externalTrafficPolicy": {
+                  "default": "Cluster",
+                  "description": " # ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip #",
                   "required": [],
-                  "title": "port",
-                  "type": "integer"
+                  "title": "externalTrafficPolicy"
+                },
+                "loadBalancerIP": {
+                  "default": "",
+                  "description": " # ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer #",
+                  "required": [],
+                  "title": "loadBalancerIP"
+                },
+                "loadBalancerSourceRanges": {
+                  "description": " # ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service # e.g: # loadBalancerSourceRanges: #   - 10.10.10.0/24 #",
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "loadBalancerSourceRanges"
+                },
+                "nodePort": {
+                  "default": "0",
+                  "description": " #",
+                  "required": [],
+                  "title": "nodePort"
+                },
+                "port": {
+                  "default": "80",
+                  "description": " #",
+                  "required": [],
+                  "title": "port"
+                },
+                "type": {
+                  "default": "ClusterIP",
+                  "description": " #",
+                  "required": [],
+                  "title": "type"
                 }
               },
-              "required": [
-                "port"
-              ],
+              "required": [],
+              "title": "http",
+              "type": "object"
+            },
+            "smtp": {
+              "properties": {
+                "externalTrafficPolicy": {
+                  "default": "Cluster",
+                  "description": " # ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip #",
+                  "required": [],
+                  "title": "externalTrafficPolicy"
+                },
+                "loadBalancerIP": {
+                  "default": "",
+                  "description": " # ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer #",
+                  "required": [],
+                  "title": "loadBalancerIP"
+                },
+                "loadBalancerSourceRanges": {
+                  "description": " # ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service # e.g: # loadBalancerSourceRanges: #   - 10.10.10.0/24 #",
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "loadBalancerSourceRanges"
+                },
+                "nodePort": {
+                  "default": "0",
+                  "description": " #",
+                  "required": [],
+                  "title": "nodePort"
+                },
+                "port": {
+                  "default": "25",
+                  "description": " #",
+                  "required": [],
+                  "title": "port"
+                },
+                "type": {
+                  "default": "ClusterIP",
+                  "description": " #",
+                  "required": [],
+                  "title": "type"
+                }
+              },
+              "required": [],
               "title": "smtp",
               "type": "object"
             }
           },
-          "required": [
-            "smtp"
-          ],
-          "title": "service",
-          "type": "object"
+          "required": [],
+          "title": "service"
+        },
+        "tolerations": {
+          "description": " # for example: #   tolerations: #   - key: foo.bar.com/role #     operator: Equal #     value: master #     effect: NoSchedule",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "tolerations"
+        },
+        "updateStrategy": {
+          "description": " # ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies #",
+          "properties": {
+            "type": {
+              "default": "RollingUpdate",
+              "description": " # Can be set to RollingUpdate or OnDelete #",
+              "required": [],
+              "title": "type"
+            }
+          },
+          "required": [],
+          "title": "updateStrategy"
         }
       },
-      "required": [
-        "image",
-        "service",
-        "args",
-        "mailpit"
-      ],
+      "required": [],
       "title": "mailpit",
       "type": "object"
     },
     "namespace": {
       "default": "mail",
-      "description": "Namespace",
+      "description": "The installation Namespace",
+      "minLength": 1,
       "required": [],
-      "title": "namespace"
+      "title": "Namespace"
+    },
+    "traefik": {
+      "description": "A sub-chart of Traefik",
+      "properties": {
+        "auth": {
+          "description": "Ingress Auth Configuration",
+          "properties": {
+            "middleware_name": {
+              "default": "basic-auth",
+              "description": " That's applied for internal web app (such as Traefik Dashboard, Prometheus, Alert Manager, ...) The app or api endpoints are still available from an internal container The supported auth are basic-auth and forward-auth Before changing to forward-auth, you should test it with the whoami chart",
+              "required": [],
+              "title": "middleware_name"
+            },
+            "private_networks": {
+              "description": " used for Ingress Ip restrictions (Traefik IpAllowList) example for a home ip: 143.176.206.80/32",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "private_networks"
+            }
+          },
+          "required": [],
+          "title": "auth",
+          "type": "object"
+        },
+        "default_certificate": {
+          "description": " Set the default certificate as default traefik cert Mandatory for kubernetes-dashboard on a local development The rootCA should be added to the OS/Browser as trusted root CA https://doc.traefik.io/traefik/https/tls/#default-certificate",
+          "properties": {
+            "cert": {
+              "default": "",
+              "description": "set-file KUBEE.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem",
+              "required": [],
+              "title": "cert"
+            },
+            "key": {
+              "default": "",
+              "description": "set-file KUBEE.traefik.defaultCertificate.key=cert/kube-x.dev+1-key.pem",
+              "required": [],
+              "title": "key"
+            }
+          },
+          "required": [],
+          "title": "default_certificate"
+        },
+        "enabled": {
+          "default": "false",
+          "description": " Not a string, no quote",
+          "required": [],
+          "title": "enabled"
+        },
+        "entrypoints": {
+          "description": " Used by template that creates IngressRoute (http and tcp)",
+          "properties": {
+            "smtps": {
+              "properties": {
+                "name": {
+                  "default": "smtps",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "smtps",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "entrypoints"
+        },
+        "global": {
+          "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+          "required": [],
+          "title": "global",
+          "type": "object"
+        },
+        "hostname": {
+          "default": "",
+          "description": " The FQDN is dnsName.apexDomain If not empty, an ingress is created example: hostname: 'traefik-haship.nip.io'",
+          "required": [],
+          "title": "hostname"
+        },
+        "kubee_internal": {
+          "description": "Don't change",
+          "properties": {
+            "install_cross_dependency": {
+              "default": false,
+              "required": [],
+              "title": "install_cross_dependency",
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "title": "kubee_internal",
+          "type": "object"
+        },
+        "middlewares": {
+          "description": " https://doc.traefik.io/traefik/middlewares",
+          "properties": {
+            "auth_headers": {
+              "description": "Middleware to apply auth headers on website with an authentication form",
+              "properties": {
+                "name": {
+                  "default": "auth-headers",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "auth_headers",
+              "type": "object"
+            },
+            "basic_auth": {
+              "description": " With the email as main identifier https://doc.traefik.io/traefik/middlewares/http/basicauth/ The admin user is added",
+              "properties": {
+                "name": {
+                  "default": "basic-auth",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "users": {
+                  "default": "",
+                  "description": "List of extra users alongside the admin user",
+                  "required": [],
+                  "title": "users",
+                  "type": "null"
+                }
+              },
+              "required": [],
+              "title": "basic_auth"
+            },
+            "forward_auth": {
+              "description": " https://doc.traefik.io/traefik/middlewares/http/forwardauth/",
+              "properties": {
+                "name": {
+                  "default": "forward-auth",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "forward_auth"
+            },
+            "forward_auth_bearer": {
+              "description": " It can be applied on Kube API client such as Kubernetes Dashboard'",
+              "properties": {
+                "name": {
+                  "default": "forward-auth-bearer",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "forward_auth_bearer"
+            },
+            "git_hooks": {
+              "description": " Used in Gitops app such as Argocd https://doc.traefik.io/traefik/middlewares/http/ipallowlist/",
+              "properties": {
+                "name": {
+                  "default": "git-hooks",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "service": {
+                  "default": "github",
+                  "required": [],
+                  "title": "service",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "git_hooks"
+            },
+            "private_network": {
+              "description": " Ip are given via the auth.private_networks",
+              "properties": {
+                "name": {
+                  "default": "private-network",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "private_network"
+            }
+          },
+          "required": [],
+          "title": "middlewares"
+        },
+        "namespace": {
+          "default": "kube-system",
+          "description": " The kube-system namespace tells kubernetes that this app has a higher priority",
+          "required": [],
+          "title": "namespace"
+        },
+        "traefik": {
+          "description": " https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml",
+          "properties": {
+            "additionalArguments": {
+              "items": {
+                "anyOf": [
+                  {
+                    "required": [],
+                    "type": "string"
+                  },
+                  {
+                    "required": [],
+                    "type": "string"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "additionalArguments",
+              "type": "array"
+            },
+            "ingressRoute": {
+              "description": " https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#access-traefik-dashboard-without-exposing-it",
+              "properties": {
+                "dashboard": {
+                  "properties": {
+                    "enabled": {
+                      "default": false,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [],
+                  "title": "dashboard",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "ingressRoute"
+            },
+            "metrics": {
+              "properties": {
+                "prometheus": {
+                  "description": "Prometheus is enabled by default",
+                  "properties": {
+                    "service": {
+                      "description": " This value creates a dedicated metrics service to use with ServiceMonitor Enable Prometheus Metrics https://doc.traefik.io/traefik/observability/metrics/prometheus/ Metrics Info: https://doc.traefik.io/traefik/observability/metrics/overview/#global-metrics",
+                      "properties": {
+                        "enabled": {
+                          "default": false,
+                          "required": [],
+                          "title": "enabled",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [],
+                      "title": "service"
+                    }
+                  },
+                  "required": [],
+                  "title": "prometheus",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "metrics",
+              "type": "object"
+            },
+            "nodeSelector": {
+              "description": "nodeSelector is the simplest recommended form of node selection constraint.",
+              "required": [],
+              "title": "nodeSelector"
+            },
+            "ports": {
+              "properties": {
+                "smtp": {
+                  "description": " It creates the smtp [entrypoint](https://doc.traefik.io/traefik/routing/entrypoints/) - \"--entryPoints.smtp.address=:8025/tcp\"",
+                  "properties": {
+                    "expose": {
+                      "description": "Defines whether the port is listed in the service if service.type is LoadBalancer or NodePort.",
+                      "properties": {
+                        "default": {
+                          "default": true,
+                          "required": [],
+                          "title": "default",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [],
+                      "title": "expose",
+                      "type": "object"
+                    },
+                    "exposedPort": {
+                      "default": 25,
+                      "description": "Port on the host",
+                      "required": [],
+                      "title": "exposedPort",
+                      "type": "integer"
+                    },
+                    "port": {
+                      "default": 8025,
+                      "description": "Container port",
+                      "required": [],
+                      "title": "port",
+                      "type": "integer"
+                    },
+                    "protocol": {
+                      "default": "TCP",
+                      "description": "Protocol",
+                      "required": [],
+                      "title": "protocol",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "smtp"
+                },
+                "smtps": {
+                  "description": "SMTP submission over TLS",
+                  "properties": {
+                    "expose": {
+                      "description": "Defines whether the port is listed in the service if service.type is LoadBalancer or NodePort.",
+                      "properties": {
+                        "default": {
+                          "default": true,
+                          "required": [],
+                          "title": "default",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [],
+                      "title": "expose",
+                      "type": "object"
+                    },
+                    "exposedPort": {
+                      "default": 465,
+                      "description": "Port on the host",
+                      "required": [],
+                      "title": "exposedPort",
+                      "type": "integer"
+                    },
+                    "port": {
+                      "default": 8465,
+                      "description": "Container port",
+                      "required": [],
+                      "title": "port",
+                      "type": "integer"
+                    },
+                    "protocol": {
+                      "default": "TCP",
+                      "description": "Protocol",
+                      "required": [],
+                      "title": "protocol",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "smtps",
+                  "type": "object"
+                },
+                "web": {
+                  "description": "Redirections",
+                  "properties": {
+                    "redirections": {
+                      "description": "https://doc.traefik.io/traefik/routing/entrypoints/#redirection",
+                      "properties": {
+                        "entryPoint": {
+                          "properties": {
+                            "scheme": {
+                              "default": "https",
+                              "required": [],
+                              "title": "scheme",
+                              "type": "string"
+                            },
+                            "to": {
+                              "default": "websecure",
+                              "required": [],
+                              "title": "to",
+                              "type": "string"
+                            }
+                          },
+                          "required": [],
+                          "title": "entryPoint",
+                          "type": "object"
+                        }
+                      },
+                      "required": [],
+                      "title": "redirections",
+                      "type": "object"
+                    }
+                  },
+                  "required": [],
+                  "title": "web",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "ports",
+              "type": "object"
+            },
+            "providers": {
+              "properties": {
+                "kubernetesCRD": {
+                  "properties": {
+                    "allowEmptyServices": {
+                      "default": "true",
+                      "description": " https://acouvreur.github.io/sablier/#/guides/code-server-traefik-kubernetes?id=_3-deploy-traefik-using-helm",
+                      "required": [],
+                      "title": "allowEmptyServices"
+                    }
+                  },
+                  "required": [],
+                  "title": "kubernetesCRD",
+                  "type": "object"
+                },
+                "kubernetesIngress": {
+                  "properties": {
+                    "allowEmptyServices": {
+                      "default": true,
+                      "description": "return 503, needed to start stopped container with sablier",
+                      "required": [],
+                      "title": "allowEmptyServices",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [],
+                  "title": "kubernetesIngress",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "providers",
+              "type": "object"
+            },
+            "service": {
+              "properties": {
+                "ipFamilies": {
+                  "items": {
+                    "anyOf": [
+                      {
+                        "required": [],
+                        "type": "string"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "ipFamilies",
+                  "type": "array"
+                },
+                "ipFamilyPolicy": {
+                  "default": "SingleStack",
+                  "description": " You can't set up a nodePort because the port is a high-end port between 30000-32767 You can install it as DaemonSet + Node port ? https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#install-as-a-daemonset",
+                  "required": [],
+                  "title": "ipFamilyPolicy"
+                },
+                "spec": {
+                  "properties": {
+                    "externalTrafficPolicy": {
+                      "default": "Local",
+                      "description": "Allow Origin Remote IP to be forwarded",
+                      "required": [],
+                      "title": "externalTrafficPolicy",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "spec",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "service",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "traefik"
+        }
+      },
+      "required": [],
+      "title": "kubee-traefik",
+      "type": "object"
     }
   },
   "required": [
     "enabled",
-    "mailpit"
+    "namespace",
+    "hostname",
+    "enable_private_network_middleware",
+    "mailpit",
+    "kubee_internal"
   ],
   "type": "object"
 }

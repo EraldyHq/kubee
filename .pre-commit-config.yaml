@@ -10,13 +10,16 @@ repos:
           - --chart-search-root=resources/charts/stable/mailpit
 
           # don't analyze dependencies
-          - --no-dependencies
+          # - --no-dependencies
 
-          # add references to values file if not exist
-          - --add-schema-reference
+          # Add references line as header in the values.yaml file if not exist
+          # - --add-schema-reference
 
           # helm docs compat
           - --helm-docs-compatibility-mode
+
+          # append newline to generated jsonschema at the end of the file
+          - --append-newline
 
           # list of fields to skip from being created by default
           # e.g. generate a relatively permissive schema

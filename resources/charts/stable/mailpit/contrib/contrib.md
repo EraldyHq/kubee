@@ -1,5 +1,14 @@
 
+You can use it as:
+* mail testing tool
+* or proxy cache via its relay function
 
+## FAQ
+
+### Why port 465 with TLS
+
+Because we want to be able to proxy based on SNI
+TLS is mandatory.
 
 ## Bootstrap
 
