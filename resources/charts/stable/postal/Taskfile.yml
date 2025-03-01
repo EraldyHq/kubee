@@ -1,0 +1,8 @@
+version: '3'
+
+tasks:
+  # Generate the values.schema.json
+  schema:
+    cmds:
+      # - pre-commit run helm-schema
+      - helm schema --helm-docs-compatibility-mode -k additionalProperties
