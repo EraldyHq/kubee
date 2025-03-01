@@ -1,5 +1,5 @@
-{{ $component := "smtp" }}
-{{ $ := mergeOverwrite $ (dict "component" $component) }}
+{{ $ := mergeOverwrite $ (dict "component" "smtp") }}
+{{ $tlsComponent := "tls"}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,21 +15,46 @@ spec:
       labels:
         {{- include "kubee-pod-labels" . | indent 8}}
       annotations:
-        checksum/secret: {{ include (print .Template.BasePath "/config/secret.yaml") . | sha256sum }}  # Checksum annotation
+        {{- include "postal-config-checksum-annotation" . | indent 8}}
     spec:
       containers:
-      - name: smtp
-        image: "ghcr.io/postalserver/postal:{{ .Values.version }}"
-        command: ["postal", "smtp-server"]
-        {{- /* resources: {{ toYaml .Values.resources | nindent 10 }} */}}
-        ports:
         - name: smtp
-          containerPort: 25
-        volumeMounts:
-        - name: config
-          mountPath: /config/
-          readOnly: true
+          image: "ghcr.io/postalserver/postal:{{ .Values.version }}"
+          command: [ "postal", "smtp-server" ]
+        {{- /* resources: {{ toYaml .Values.resources | nindent 10 }} */}}
+          ports:
+            - name: smtp
+              containerPort: 25
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: metrics
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: metrics
+          volumeMounts:
+            - name: postal-yml
+              mountPath: /config/postal.yml
+              subPath: postal.yml
+              readOnly: true
+            - name: signing-key
+              mountPath: /config/signing.key
+              subPath: signing.key
+              readOnly: true
+            - name: smtp-tls
+              mountPath: /config/certs
+              readOnly: true
       volumes:
-      - name: config
-        secret:
-          secretName: {{ include "postal-name-config" . }}
+        - name: postal-yml
+          secret:
+            secretName: {{ include "postal-name-postal-yml" . }}
+        - name: signing-key
+          secret:
+            secretName: '{{ include "postal-name-signing-key" . }}'
+        - name: smtp-tls
+          secret:
+            secretName: '{{ include "postal-name-tls" . }}'

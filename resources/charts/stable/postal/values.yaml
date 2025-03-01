@@ -35,6 +35,14 @@ hostname: ''
 # -- The postal version, https://github.com/postalserver/postal/releases
 version: 'v3.3.4'
 
+# @schema
+# title: Signing Key
+# description: The signing key
+# required: true
+# minLength: 5
+# @schema
+# -- The signing key
+signing_key: ''
 
 # @schema
 # title: Components
@@ -55,6 +63,28 @@ components:
       cpu: ''
 
 
+# dependencies
+# check available values here: https://artifacthub.io/packages/helm/bitnami/mariadb?modal=values-schema
+mariadb:
+
+  # -- set it to false if you want to use [operator](https://github.com/mariadb-operator/mariadb-operator/)
+  enabled: true
+  # TODO: we should switch to templating for the name to avoid using reference to fullname override everywhere
+  fullnameOverride: postal-mariadb
+  auth:
+    database: "postal"
+    username: "postal"
+    # @schema
+    # title: Database Password
+    # description: The database password
+    # required: true
+    # minLength: 5
+    # @schema
+    password: ""
+  initdbScripts:
+    # NOTE: postal is creating postal-server-* databases to handle postal mail servers configuration
+    grant_privileges.sql: |
+      GRANT ALL PRIVILEGES ON `{{ .Values.mariadb.auth.database }}%`.* TO '{{ .Values.mariadb.auth.username }}'@'%' WITH GRANT OPTION;
 
 # Internal Kubee constant
 kubee_internal:

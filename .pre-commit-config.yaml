@@ -1,5 +1,31 @@
 ---
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-executables-have-shebangs
+      - id: check-symlinks
+      - id: check-yaml
+        exclude: ^postal/templates/.*$|^chart-schema.yaml$
+      - id: detect-aws-credentials
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+      - id: no-commit-to-branch
+        args: [ --branch, main ]
+
+  - repo: https://github.com/jtyr/kubeconform-helm
+    rev: v0.1.17
+    hooks:
+      - id: kubeconform-helm
+        args:
+          - --summary
+          - --strict
+          - --values-dir postal/ci
   - repo: https://github.com/dadav/helm-schema
     rev: 0.18.1
     hooks:

@@ -14,7 +14,7 @@ spec:
       labels:
         {{- include "kubee-manifest-labels" . | indent 8}}
       annotations:
-        checksum/secret: {{ include (print .Template.BasePath "/config/secret.yaml") . | sha256sum }}  # Checksum annotation
+        {{- include "postal-config-checksum-annotation" . | indent 8}}
     spec:
       containers:
       - name: web
@@ -31,4 +31,4 @@ spec:
       volumes:
       - name: config
         secret:
-          secretName: {{ include "postal-name-config" . }}
+          secretName: {{ include "postal-name-postal-yml" . }}

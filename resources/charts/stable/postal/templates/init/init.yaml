@@ -1,0 +1,46 @@
+{{/*https://docs.postalserver.io/getting-started/installation#initializing-the-database*/}}
+{{ $ := mergeOverwrite $ (dict "component" "init") }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "kubee-name" . }}
+  namespace: '{{.Values.namespace}}'
+  labels:
+    {{- include "kubee-manifest-labels" . | indent 4}}
+  annotations:
+    helm.sh/hook: "post-install,post-upgrade"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook-weight: "1"
+spec:
+  ttlSecondsAfterFinished: 120
+  template:
+    metadata:
+      labels:
+        {{- include "kubee-pod-labels" . | indent 8}}
+    spec:
+      containers:
+        - name: postal-init
+          image: "ghcr.io/postalserver/postal:{{ .Values.version }}"
+          command:
+            - postal
+            - initialize
+          env:
+            - name: MAIN_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postal-name-config-secret" . }}
+                  key: mariadb-password
+            - name: MESSAGE_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postal-name-config-secret" . }}
+                  key: mariadb-password
+            - name: RAILS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postal-name-config-secret" . }}
+                  key: rails-secret-key
+          envFrom:
+            - configMapRef:
+                name: {{ include "postal-name-postal-yml" . }}
+      restartPolicy: Never

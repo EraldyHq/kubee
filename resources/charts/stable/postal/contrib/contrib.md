@@ -23,6 +23,14 @@ mkdir charts/kubee-cert-manager-0.0.1.tgz
 ln -s $(realpath ../cert-manager/Chart.yaml) charts/kubee-cert-manager/Chart.yaml
 ln -s $(realpath ../cert-manager/values.yaml) charts/kubee-cert-manager/values.yaml
 
+
+helm pull  oci://registry-1.docker.io/bitnamicharts/mariadb --version 20.4.1 -d charts --untar
+
+# Pull of https://github.com/hoverkraft-tech/helm-chart-postal
+# Does not work (Chart is not at the root)
+helm pull https://github.com/hoverkraft-tech/helm-chart-postal/archive/refs/tags/0.3.1.tar.gz -d charts --untar
+# Does not work (expect only one chart, chart is not at the root)
+helm pull oci://github.com/hoverkraft-tech/helm-chart-postal -d charts --untar
 ```
 
 
