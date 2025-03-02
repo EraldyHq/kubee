@@ -24,10 +24,10 @@ appVersion: "0.37.1" # The mail pit version
 
 dependencies:
   # https://mariadb-operator.github.io/mariadb-operator/index.yaml
-  - name: mariadb
+  - name: mariadb-operator
     version: 0.37.1
     repository: https://helm.mariadb.com/mariadb-operator
-    alias: mariadb
+    alias: mariadb-operator
   - name: kubee-cluster
     version: 0.0.1
     repository: file://../cluster
