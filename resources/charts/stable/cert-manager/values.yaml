@@ -7,32 +7,26 @@ enabled: false
 # Namespace
 namespace: 'cert-manager'
 
-# The issuer used in all certificate request
-# of kubee by default
-# Should be changed to 'letsencrypt-prod'
-# when validated
 issuer_name: 'letsencrypt-staging'
 
-# Issuers endpoint
-acme_issuers:
-  prod:
-    name: 'letsencrypt-prod'
-    url: 'https://acme-v02.api.letsencrypt.org/directory'
-  staging:
-    name: 'letsencrypt-staging'
-    url: 'https://acme-staging-v02.api.letsencrypt.org/directory'
 
-# Http01 challenge
-# https://cert-manager.io/docs/tutorials/acme/http-validation/
-# This is the default configuration if there is no DNS challenge configured for the domain,
-# You need then to update your DNS to add an A or CNAME record to point the domain name at the correct IP address
-# Wildcard certificates are not supported with HTTP01 validation and require DNS01.
-# This challenge is disabled if ingressClassName is empty
-http01:
-  # Default IngressClassName
-  # Used by cert manager to create ingress resource to resolve the http01 challenge
-  # A new ingress resource with a randomly generated name is created in order to solve the challenge.
-  ingress_class_name: traefik
+issuers:
+  external:
+    # @schema
+    # enum: [ 'letsencrypt-staging', 'letsencrypt-prod' ]
+    # @schema
+    # -- The acme issuer used in all ingress (external certificate request) of kubee
+    # It should be changed to 'letsencrypt-prod' when the letsencrypt-staging is working and validated
+    name: 'letsencrypt-staging'
+  internal:
+    # @schema
+    # enum: [ 'letsencrypt-staging', 'letsencrypt-prod' ]
+    # @schema
+    # -- The acme issuer used in all ingress (external certificate request) of kubee
+    # It should be changed to 'letsencrypt-prod' when the letsencrypt-staging is working and validated
+    name: 'kubee-ca'
+
+
 
 # Dns01 challenge
 # You don't need to publish a DNS A record
@@ -52,15 +46,14 @@ dns01:
       external_secret_remote_ref:
         key: ''
         property: ''
-    # The dns Zones that are managed by cloudflare, mandatory
+    # -- the dns Zones that are managed by cloudflare, mandatory (ie a list of apex domains)
     dns_zones: []
 
 # https://github.com/cert-manager/cert-manager/blob/release-1.16/deploy/charts/cert-manager/values.yaml
 # defined by either the name or alias of your dependency in Chart.yaml
 cert-manager:
   # Installation namespace
-  # fixed so that we don't make any mistake
-  namespace: 'cert-manager'
+  namespace: '{{ .Values.namespace }}'
   crds:
     enabled: true
   webhook:
@@ -72,7 +65,7 @@ cert-manager:
     enabled: false
     servicemonitor:
       enabled: false
-  # cluster resource namespace
+  # Cluster resource namespace
   # The namespace used to store cluster wide data (such as DNS provider credentials, certificate, ...)
   # Set the default namespace to search for a resource on the cert-manager controller
   # --cluster-resource-namespace=my-namespace
@@ -83,6 +76,7 @@ cert-manager:
   clusterResourceNamespace: ""
 
 
+# @ignored
 # Don't touch, used to block template output of cross dependency
 kubee_internal:
   install_cross_dependency: false

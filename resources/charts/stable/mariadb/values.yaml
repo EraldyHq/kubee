@@ -21,6 +21,8 @@ namespace: 'mariadb'
 # https://github.com/mariadb-operator/mariadb-operator/blob/main/deploy/charts/mariadb-operator/values.yaml
 # @ignored
 mariadb-operator:
+  # -- Whether the operator should watch CRDs only in its own namespace or not.
+  currentNamespaceOnly: false
   # Metrics and webhook recommended as here
   # https://github.com/mariadb-operator/mariadb-operator/blob/main/docs/HELM.md#installing-the-operator
   metrics:
@@ -35,6 +37,7 @@ mariadb-operator:
     cert:
       certManager:
         enabled: '{{if eq .Values.cert_manager.enabled true}}true{{else}}false{{end}}'
+        issuerRef: {}
     serviceMonitor:
       # -- Enable webhook ServiceMonitor. Metrics must be enabled
       enabled: '{{if eq .Values.prometheus.enabled true}}true{{else}}false{{end}}'
@@ -48,6 +51,9 @@ mariadb-operator:
       memory: 32Mi
     limits:
       memory: 32Mi
+  certController:
+    # -- Specifies whether the cert-controller should be created.
+    enabled: false
 
 
 # Internal Kubee constant

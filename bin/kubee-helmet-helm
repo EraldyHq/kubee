@@ -9,21 +9,22 @@ synopsis(){
   CLI_NAME=$(basename "$(doc::get_cli_command_words)" | tr "-" " ")
   cat << EOF
 \`\`\`bash
-$CLI_NAME command options
+$CLI_NAME command options chartName
 \`\`\`
 
 where:
 * \`command\` can be:
-  * \`install chartName\`  - Install a Kubee Chart
-  * \`ping\`               - Verify the connection to the cluster api
-  * \`play chartName\`     - Upgrade or install a Kubee Chart
-  * \`template chartName\` - Template a Kubee Chart
+  * \`install\`             - Install a Kubee Chart
+  * \`ping\`                - Verify the connection to the cluster api
+  * \`play\`                - Upgrade or install a Kubee Chart
+  * \`template\`            - Template a Kubee Chart
      * The following template options are supported
        * \`-s, --show-only\`     : Show only one template
        * \`--output-dir string\` : Writes the executed templates to files in output-dir instead of stdout
        * \`--out string\`        : Writes the executed templates to the \`out\` relative directory
-  * \`upgrade chartName\`  - Upgrade a Kubee Chart
-  * \`values\`             - Shows the values content
+  * \`update-dependencies\` - Update the charts directory with the dependencies (dev only)
+  * \`upgrade\`             - Upgrade a Kubee Chart
+  * \`values\`              - Shows the values content
 
 
 EOF
@@ -303,6 +304,80 @@ install_crd_first(){
 
 }
 
+update-dependencies(){
+
+  local ACTUAL_CHART_FILE="$CHART_DIRECTORY/Chart.yaml";
+
+  # The charts dependency directory
+  local CHART_CHARTS_DIRECTORY="$CHART_DIRECTORY/charts"
+  mkdir -p "$CHART_CHARTS_DIRECTORY"
+
+  # Add dependencies
+  local DEPENDENCIES;
+  DEPENDENCIES="$(yq -r '.dependencies[] | [ (.name // "") + "," + (.alias // "") + "," + (.repository // "") + "," + ( .version // "")] | join("\n")' "$ACTUAL_CHART_FILE")"
+  if [ "$DEPENDENCIES" != "" ]; then
+    # Loop over the dependencies
+    while IFS=, read -r DEPENDENCY_CHART_NAME DEPENDENCY_CHART_ALIAS DEPENDENCY_CHART_REPOSITORY DEPENDENCY_CHART_VERSION; do
+
+      if [ "$DEPENDENCY_CHART_NAME" == "" ] || [ "$DEPENDENCY_CHART_NAME" == "null" ]; then
+            echo::err "All dependency should have an name"
+            echo::err "The repository $DEPENDENCY_CHART_REPOSITORY does not have one"
+            return 1
+      fi
+
+      local DEPENDENCY_FQ_FILE_PATH_IN_CHARTS="$CHART_CHARTS_DIRECTORY/$DEPENDENCY_CHART_NAME-$DEPENDENCY_CHART_VERSION.tgz"
+      if [ -e "$DEPENDENCY_FQ_FILE_PATH_IN_CHARTS" ]; then
+        echo::debug "Dependency found ($DEPENDENCY_FQ_FILE_PATH_IN_CHARTS found)"
+      else
+        echo::debug "Creating Dependency ($DEPENDENCY_FQ_FILE_PATH_IN_CHARTS not found)"
+        mkdir -p "$DEPENDENCY_FQ_FILE_PATH_IN_CHARTS"
+      fi
+
+      case "$DEPENDENCY_CHART_REPOSITORY" in
+          file://.*)
+            # Local
+            # The name of the chart is the path to the chart directory
+            # Delete the file scheme (not supported by `helm get values`)
+            local LOCAL_DEPENDENCY_CHART_DIR
+            LOCAL_DEPENDENCY_CHART_DIR="$(realpath "$CHART_DIRECTORY"/"${DEPENDENCY_CHART_REPOSITORY#"file://"}")"
+            echo::info "$DEPENDENCY_CHART_NAME: Creating symlinks"
+
+            local LOCAL_DEPENDENCY_DIR_IN_CHARTS="$CHART_CHARTS_DIRECTORY/$DEPENDENCY_CHART_NAME"
+            mkdir -p "$LOCAL_DEPENDENCY_DIR_IN_CHARTS"
+
+            local LOCAL_DEPENDENCY_FILES=("Chart.yaml" "values.yaml" "values.schema.json")
+            for LOCAL_DEPENDENCY_FILE_NAME in "${LOCAL_DEPENDENCY_FILES[@]}"; do
+
+              local LOCAL_DEPENDENCY_FILE
+              LOCAL_DEPENDENCY_FILE="$(realpath "$LOCAL_DEPENDENCY_CHART_DIR/$LOCAL_DEPENDENCY_FILE_NAME")"
+              if [ ! -f "$LOCAL_DEPENDENCY_FILE" ]; then
+                echo::debug "Dependency File $LOCAL_DEPENDENCY_FILE_NAME does not exist. Skipping. ($LOCAL_DEPENDENCY_FILE not found)"
+                continue
+              fi
+
+              local SYMLINK_DEPENDENCY_FILE="$LOCAL_DEPENDENCY_DIR_IN_CHARTS/$LOCAL_DEPENDENCY_FILE_NAME"
+              if [ -f "$SYMLINK_DEPENDENCY_FILE" ]; then
+                echo::debug "Removing Symlink $SYMLINK_DEPENDENCY_FILE"
+                echo::eval "rm $SYMLINK_DEPENDENCY_FILE"
+              fi
+              echo::debug "Creating symlink for $LOCAL_DEPENDENCY_FILE_NAME"
+              echo::eval "ln -s $LOCAL_DEPENDENCY_FILE $SYMLINK_DEPENDENCY_FILE"
+
+            done
+
+            echo::debug "$DEPENDENCY_CHART_NAME: Symlinks created"
+
+          ;;
+          *)
+            echo "$DEPENDENCY_CHART_NAME: Fetch $DEPENDENCY_CHART_REPOSITORY"
+          ;;
+      esac
+
+    done <<< "$DEPENDENCIES"
+  fi
+
+}
+
 uninstall(){
   kubee::set_kubeconfig_env_and_check
   echo::eval "helm --namespace $CHART_NAMESPACE uninstall --wait $CHART_NAME"
@@ -495,6 +570,9 @@ main(){
       ;;
     "uninstall")
       uninstall || error::exit $?
+      ;;
+    "update-dependencies")
+      update-dependencies || error::exit $?
       ;;
     "values")
       # The -t test checks if the file descriptor is connected to a terminal.

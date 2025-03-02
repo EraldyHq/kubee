@@ -9,48 +9,6 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-array.sh"
 
 
 
-
-
-# The synopsis function is required by the doc::usage
-synopsis(){
-
-  local CLI_NAME;
-  CLI_NAME=$(basename "$(doc::get_cli_command_words)" | tr "-" " ")
-  cat << EOF
-
-  Manage a Helmet Kubee Chart
-
-\`\`\`bash
-$CLI_NAME [options] command chartName
-\`\`\`
-
-where:
-* \`command\` can be:
-  * \`install  chartName\`     - Install a Kubee Chart
-  * \`ping     chartName\`     - Verify the connection
-  * \`play     chartName\`     - Upgrade or install a Kubee Chart
-  * \`template chartName\`     - Template a Kubee Chart
-     * The following template options are supported
-       * \`-s, --show-only\`     : Show only one template
-       * \`--output-dir string\` : Writes the executed templates to files in output-dir instead of stdout
-       * \`--out string\`        : Writes the executed templates to the \`out\` relative directory
-  * \`upgrade  chartName\`     - Upgrade a Kubee Chart
-  * \`values\`                 - Shows the values file
-
-EOF
-
-}
-
-if [ "${1:-}" == "synopsis" ]; then
-   synopsis
-   exit
-fi
-
-
-# shellcheck source=../../bash-lib/lib/bashlib-template.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
-
-
 # Package Name
 # Come first because we use it in the log, we use it in all command
 CHART_NAME="${*: -1}"

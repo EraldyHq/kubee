@@ -6,7 +6,7 @@ This chart is an umbrella chart over:
 https://charts.dexidp.io/
 https://github.com/dexidp/helm-charts
 
-## Helm Charts Setup
+## Bootstrap Helm Charts 
 
 ```bash
 mkdir "charts"

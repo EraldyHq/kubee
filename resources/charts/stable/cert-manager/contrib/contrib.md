@@ -1,8 +1,27 @@
 # Contrib
 
- 
 
 
+## Bootstrap Helm Charts
+
+```bash
+mkdir "charts"
+ln -s $(realpath ../cluster) charts/kubee-cluster
+mkdir "charts/kubee-traefik"
+ln -s $(realpath ../traefik/Chart.yaml) charts/kubee-traefik/Chart.yaml
+ln -s $(realpath ../traefik/values.yaml) charts/kubee-traefik/values.yaml
+mkdir "charts/kubee-cert-manager"
+ln -s $(realpath ../cert-manager/Chart.yaml) charts/kubee-cert-manager/Chart.yaml
+ln -s $(realpath ../cert-manager/values.yaml) charts/kubee-cert-manager/values.yaml
+mkdir "charts/kubee-traefik-forward-auth"
+ln -s $(realpath ../traefik-forward-auth/Chart.yaml) charts/kubee-traefik-forward-auth/Chart.yaml
+ln -s $(realpath ../traefik-forward-auth/values.yaml) charts/kubee-traefik-forward-auth/values.yaml
+mkdir "charts/kubee-oauth2-proxy"
+ln -s $(realpath ../oauth2-proxy/Chart.yaml) charts/kubee-oauth2-proxy/Chart.yaml
+ln -s $(realpath ../oauth2-proxy/values.yaml) charts/kubee-oauth2-proxy/values.yaml
+# Pull
+helm pull https://github.com/dexidp/helm-charts/releases/download/dex-0.20.0/dex-0.20.0.tgz -d charts --untar
+```
 
 
 ## JsonNet Prometheus Mixin Bootstrap
@@ -23,6 +42,19 @@ kubee -c clusertName helmet template cert-manager --out
 
 
 ## FAQ
+
+### DNS01 or HTTP01?
+
+With Http01, it is your responsibility to point each domain name at the correct IP address for your ingress controller.
+
+Wildcard certificates are not supported with HTTP01 validation and require DNS01.
+
+This is the default configuration if there is no DNS challenge configured for the domain,
+You need then to update your DNS to add an A or CNAME record to point the domain name at the correct IP address
+
+
+
+
 ### Why not ingress traefik cert?
 
 
@@ -34,6 +66,7 @@ kubee -c clusertName helmet template cert-manager --out
 * HA setups without requiring you to use the enterprise version of the ingress.
     * Traefik CE (community edition) is stateless, and it's not possible to run multiple instances of Traefik CE with LetsEncrypt enabled.
 * Local CA to provision self-signed certificate
+* Database Operator such as MariaDb integrate with a cluster issuer to get the certificate
 
 ### Default cert, what happens if the secret name is omitted in an ingress?
 
@@ -84,3 +117,4 @@ Providers (Configuration Discovery):
 ### How to debug
 
 https://cert-manager.io/docs/troubleshooting/acme/
+

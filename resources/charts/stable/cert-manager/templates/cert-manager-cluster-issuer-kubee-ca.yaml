@@ -1,4 +1,6 @@
 # A self-signed issuer, used to create the dex CA private key and cert (see below Certificate)
+{{/* https://cert-manager.io/docs/usage/istio-csr/installation/ */}}
+{{/* https://raw.githubusercontent.com/cert-manager/website/7f5b2be9dd67831574b9bde2407bed4a920b691c/content/docs/tutorials/istio-csr/example/example-issuer.yaml */}}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
@@ -18,7 +20,14 @@ spec:
   secretName: {{ include "kubee-name-prefix" . }}-ca
   commonName: "{{ (include "kubee-to-camel-case" .Release.Name)}} {{ include "kubee-to-camel-case"  (include "kubee-prefix" .)}} Ca"
   isCA: true
-  duration: '87600h'  # ie 3650 days, default to 90 days
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  subject:
+    organizations:
+      - cluster.local
+      - cert-manager
+  duration: '87600h'  # ie 3650 days, 10 years,, default to 90 days
   issuerRef:
     kind: Issuer
     name: {{ include "kubee-name-prefix" . }}-self-signed
@@ -27,9 +36,10 @@ spec:
 ---
 # The dex issuer using the CA keypair (Ca certificate)
 apiVersion: cert-manager.io/v1
-kind: Issuer
+kind: ClusterIssuer
 metadata:
-  name: {{ include "kubee-name-prefix" . }}-ca
+  name: {{ .Values.issuers.kubee_ca.name }}
+  namespace: {{.Values.namespace}}
 spec:
   ca:
     {{- /* Name of the certificate (ie private key and certificate) */}}
