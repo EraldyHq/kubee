@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=values.schema.json
+
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
+enabled: false
+
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation Namespace
+namespace: 'mariadb'
+
+# -- Mariadb Operator values
+# https://github.com/mariadb-operator/mariadb-operator/blob/main/deploy/charts/mariadb-operator/values.yaml
+# @ignored
+mariadb:
+  # Metrics and webhook recommended as here
+  # https://github.com/mariadb-operator/mariadb-operator/blob/main/docs/HELM.md#installing-the-operator
+  metrics:
+    enabled: '{{if eq .Values.prometheus.enabled true}}true{{else}}false{{end}'
+    serviceMonitor:
+      # -- Enable controller ServiceMonitor
+      enabled: '{{if eq .Values.prometheus.enabled true}}true{{else}}false{{end}'
+      # -- Labels to be added to the controller ServiceMonitor
+      additionalLabels: { }
+      # release: kube-prometheus-stack
+      # --  Interval to scrape metrics
+      interval: '{{ .Values.prometheus.scrape_interval }}'
+  webhook:
+    cert:
+      certManager:
+        enabled: '{{if eq .Values.cert_manager.enabled true}}true{{else}}false{{end}'
+    serviceMonitor:
+      # -- Enable webhook ServiceMonitor. Metrics must be enabled
+      enabled: '{{if eq .Values.prometheus.enabled true}}true{{else}}false{{end}'
+      # -- Labels to be added to the webhook ServiceMonitor
+      # release: kube-prometheus-stack
+      # --  Interval to scrape metrics
+      interval: '{{ .Values.prometheus.scrape_interval }}'
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 32Mi
+
+
+# Internal Kubee constant
+# @ignored
+kubee_internal:
+  # @schema
+  # const: false
+  # @schema
+  # Constant used to not output template from kubee cross dependency in Chart.yaml
+  # Don't change, don't touch
+  install_cross_dependency: false

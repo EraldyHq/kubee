@@ -26,6 +26,14 @@ repos:
           - --summary
           - --strict
           - --values-dir postal/ci
+  # https://github.com/norwoodj/helm-docs?tab=readme-ov-file#pre-commit-hook
+  - repo: https://github.com/norwoodj/helm-docs
+    rev: ""
+    hooks:
+      - id: helm-docs-container
+        args:
+          # Make the tool search for charts only under the `charts` directory
+          - --chart-search-root=resources/charts/stable/mailpit
   - repo: https://github.com/dadav/helm-schema
     rev: 0.18.1
     hooks:

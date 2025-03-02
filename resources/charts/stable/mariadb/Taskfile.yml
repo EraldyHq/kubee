@@ -1,0 +1,11 @@
+version: '3'
+
+tasks:
+  # Generate the values.schema.json
+  schema:
+    cmds:
+      - helm schema --helm-docs-compatibility-mode -k additionalProperties
+  # Generate the docs
+  docs:
+    cmds:
+      - helm-docs
