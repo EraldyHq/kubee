@@ -7,10 +7,7 @@
 
 
 ## About
-This `kubee chart` will install `cert-manager` with:
-* letsencrypt as ACME server
-* an internal issuer for internal service certificate (mtls)
-* optional cloudflare as DNS server
+This `kubee chart` will install [cert-manager](https://cert-manager.io/) to manage certificate.
 
 
 
@@ -84,8 +81,12 @@ cert_manager:
 
 ## Features
 
+It will create:
+* [letsencrypt issuer](#letsencrypt-acme-issuers) to create external certificate (acme)
+* [kubee-ca issuer](#kubee-internal-ca) to create internal service certificate (mtls)
+* install the [cert-manager grafana dashboard and alerts](#dashboard-and-alerts)
 
-### Acme Issuers
+### Letsencrypt Acme Issuers
 
 2 `ClusterIssuers` are installed
 * `letsencrypt-staging` for the `staging environment (test)`
@@ -108,20 +109,20 @@ You can check them in the CRD of the dashboard:
 https://dashbord.example.com/#/customresourcedefinition/clusterissuers.cert-manager.io?namespace=cert-manager
 
 
-### Internal CA
+### Kubee Internal CA
 
 We use an internal CA to issue internal certificate 
 to:
 * enable SSL communication internally
 * issue certificate for auth service (database, oidc, ...)
 
-### Where are the Private Key Registration stored?
+### Dashboard and alerts
 
-The generated client registration private key is stored in a Secret with the same name
-as the issuer with `letsencrypt`, ie
+The [cert-manager mixin](https://monitoring.mixins.dev/cert-manager/) is installed
+to create:
+* [grafana dashboard](https://monitoring.mixins.dev/cert-manager/#dashboards) if the [grafana chart ](../grafana/README.md) is enabled
+* [alerts](https://monitoring.mixins.dev/cert-manager/#alerts) if the [prometheus chart](../prometheus/README.md) is enabled
 
-* `letsencrypt-staging`
-* or `letsencrypt-prod`
 
 
 {{ template "chart.valuesSection" . }}
@@ -137,6 +138,7 @@ The certificates are:
 * issued by:
     * Common Name (CN)	(STAGING) Counterfeit Cashew R10
     * Organization (O)	(STAGING) Let's Encrypt
+
 
 
 ## Contrib / Dev

@@ -81,6 +81,14 @@ you can use [Kyverno to set a default based on condition](https://cert-manager.i
 
 * [Tuto](https://cert-manager.io/docs/devops-tips/syncing-secrets-across-namespaces/#serving-a-wildcard-to-ingress-resources-in-different-namespaces-default-ssl-certificate)
 
+### Where are the Letsencrypt Private Key Registration stored?
+
+The generated client registration private key is stored in a Secret with the same name
+as the issuer with `letsencrypt`, ie
+
+* `letsencrypt-staging`
+* or `letsencrypt-prod`
+
 ## How to
 
 ### Create a certificate

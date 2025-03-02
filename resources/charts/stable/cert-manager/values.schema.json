@@ -1,0 +1,236 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "cert-manager": {
+      "description": " defined by either the name or alias of your dependency in Chart.yaml @ignored",
+      "properties": {
+        "clusterResourceNamespace": {
+          "default": "",
+          "description": "cluster-resource-namespace=my-namespace https://cert-manager.io/docs/configuration/#cluster-resource-namespace The Cluster Resource Namespace is defaulted as being the `cert-manager` namespace, A ClusterIssuer CA will create the certificate in this namespace https://cert-manager.io/docs/configuration/ca/#deployment",
+          "required": [],
+          "title": "clusterResourceNamespace"
+        },
+        "crds": {
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ],
+          "title": "crds",
+          "type": "object"
+        },
+        "namespace": {
+          "default": "{{ .Values.namespace }}",
+          "description": "Installation namespace",
+          "required": [],
+          "title": "namespace",
+          "type": "string"
+        },
+        "prometheus": {
+          "description": " https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/README.template.md#prometheus",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "description": "We don't create it ourselves because it's pretty hard.",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "servicemonitor": {
+              "properties": {
+                "enabled": {
+                  "default": false,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "title": "servicemonitor",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "servicemonitor"
+          ],
+          "title": "prometheus"
+        },
+        "webhook": {
+          "properties": {
+            "timeoutSeconds": {
+              "default": 4,
+              "required": [],
+              "title": "timeoutSeconds",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "timeoutSeconds"
+          ],
+          "title": "webhook",
+          "type": "object"
+        }
+      },
+      "required": [
+        "namespace",
+        "crds",
+        "webhook"
+      ],
+      "title": "cert-manager"
+    },
+    "dns01": {
+      "description": " You don't need to publish a DNS A record",
+      "properties": {
+        "cloudflare": {
+          "description": " Spec: https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderCloudflare Notes: in the doc, they use an email because they show an apiKey Auth, not an apiToken `ApiToken` is now the preferred method",
+          "properties": {
+            "dns_zones": {
+              "description": "the dns Zones that are managed by cloudflare, mandatory (ie a list of apex domains)",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "dns_zones"
+            },
+            "secret": {
+              "description": " A secret or external secret can be created",
+              "properties": {
+                "cloudflare_api_token": {
+                  "default": "",
+                  "description": "A Kubernetes secret will be created if not empty",
+                  "required": [],
+                  "title": "cloudflare_api_token",
+                  "type": "string"
+                },
+                "external_secret_remote_ref": {
+                  "description": " if remote ref key is not empty",
+                  "properties": {
+                    "key": {
+                      "default": "",
+                      "required": [],
+                      "title": "key",
+                      "type": "string"
+                    },
+                    "property": {
+                      "default": "",
+                      "required": [],
+                      "title": "property",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "property"
+                  ],
+                  "title": "external_secret_remote_ref"
+                }
+              },
+              "required": [
+                "cloudflare_api_token"
+              ],
+              "title": "secret"
+            }
+          },
+          "required": [],
+          "title": "cloudflare"
+        }
+      },
+      "required": [],
+      "title": "dns01"
+    },
+    "enabled": {
+      "default": "false",
+      "description": "If true, cert-manager is or will be installed on the cluster When disabled, the default ingress certificate specified on Traefik is used Not a string, a boolean so no quote",
+      "required": [],
+      "title": "enabled"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "issuer_name": {
+      "default": "letsencrypt-staging",
+      "required": [],
+      "title": "issuer_name",
+      "type": "string"
+    },
+    "issuers": {
+      "description": "The issuers",
+      "properties": {
+        "cluster": {
+          "properties": {
+            "name": {
+              "const": "kubee-cluster-ca",
+              "default": "kubee-cluster-ca",
+              "description": "The acme issuer used in all ingress (external certificate request) of kubee It should be changed to 'letsencrypt-prod' when the letsencrypt-staging is working and validated",
+              "required": [],
+              "title": "name"
+            }
+          },
+          "required": [],
+          "title": "private",
+          "type": "object"
+        },
+        "public": {
+          "description": " external certificate (ie for public domain)",
+          "properties": {
+            "name": {
+              "default": "letsencrypt-staging",
+              "description": "The acme issuer used in all ingress (external certificate request) of kubee It should be changed to `letsencrypt-prod` when the `letsencrypt-staging` is working and validated",
+              "enum": [
+                "letsencrypt-staging",
+                "letsencrypt-prod"
+              ],
+              "required": [],
+              "title": "name"
+            }
+          },
+          "required": [],
+          "title": "public"
+        }
+      },
+      "required": [
+        "cluster"
+      ],
+      "title": "issuers",
+      "type": "object"
+    },
+    "kubee_internal": {
+      "description": " Don't touch, used to block template output of cross dependency",
+      "properties": {
+        "install_cross_dependency": {
+          "default": false,
+          "required": [],
+          "title": "install_cross_dependency",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "install_cross_dependency"
+      ],
+      "title": "kubee_internal"
+    },
+    "namespace": {
+      "default": "cert-manager",
+      "description": "The installation namespace",
+      "required": [],
+      "title": "namespace"
+    }
+  },
+  "required": [
+    "issuer_name",
+    "issuers"
+  ],
+  "type": "object"
+}

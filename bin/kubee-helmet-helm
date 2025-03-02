@@ -325,22 +325,16 @@ update-dependencies(){
             return 1
       fi
 
-      local DEPENDENCY_FQ_FILE_PATH_IN_CHARTS="$CHART_CHARTS_DIRECTORY/$DEPENDENCY_CHART_NAME-$DEPENDENCY_CHART_VERSION.tgz"
-      if [ -e "$DEPENDENCY_FQ_FILE_PATH_IN_CHARTS" ]; then
-        echo::debug "Dependency found ($DEPENDENCY_FQ_FILE_PATH_IN_CHARTS found)"
-      else
-        echo::debug "Creating Dependency ($DEPENDENCY_FQ_FILE_PATH_IN_CHARTS not found)"
-        mkdir -p "$DEPENDENCY_FQ_FILE_PATH_IN_CHARTS"
-      fi
 
-      case "$DEPENDENCY_CHART_REPOSITORY" in
-          file://.*)
+      local DEPENDENCY_CHART_SCHEME="${DEPENDENCY_CHART_REPOSITORY%%:*}"
+      case "$DEPENDENCY_CHART_SCHEME" in
+          "file")
             # Local
             # The name of the chart is the path to the chart directory
             # Delete the file scheme (not supported by `helm get values`)
             local LOCAL_DEPENDENCY_CHART_DIR
             LOCAL_DEPENDENCY_CHART_DIR="$(realpath "$CHART_DIRECTORY"/"${DEPENDENCY_CHART_REPOSITORY#"file://"}")"
-            echo::info "$DEPENDENCY_CHART_NAME: Creating symlinks"
+            echo::info "$DEPENDENCY_CHART_NAME: Creating Dep with symlinks"
 
             local LOCAL_DEPENDENCY_DIR_IN_CHARTS="$CHART_CHARTS_DIRECTORY/$DEPENDENCY_CHART_NAME"
             mkdir -p "$LOCAL_DEPENDENCY_DIR_IN_CHARTS"
@@ -365,11 +359,43 @@ update-dependencies(){
 
             done
 
-            echo::debug "$DEPENDENCY_CHART_NAME: Symlinks created"
+            # The unique dir name
+            # if present, a pull will not work as it will see the dependency as present
+            local DEPENDENCY_FQ_FILE_PATH_IN_CHARTS="$CHART_CHARTS_DIRECTORY/$DEPENDENCY_CHART_NAME-$DEPENDENCY_CHART_VERSION.tgz"
+            if [ -e "$DEPENDENCY_FQ_FILE_PATH_IN_CHARTS" ]; then
+              echo::debug "Dependency directory found ($DEPENDENCY_FQ_FILE_PATH_IN_CHARTS found)"
+            else
+              echo::debug "Creating directory Dependency ($DEPENDENCY_FQ_FILE_PATH_IN_CHARTS)"
+              mkdir -p "$DEPENDENCY_FQ_FILE_PATH_IN_CHARTS"
+            fi
+
+            echo::debug "$DEPENDENCY_CHART_NAME: Dep created"
 
           ;;
-          *)
-            echo "$DEPENDENCY_CHART_NAME: Fetch $DEPENDENCY_CHART_REPOSITORY"
+        "https")
+
+          echo::info "$DEPENDENCY_CHART_NAME: Fetching https dependency ($DEPENDENCY_CHART_REPOSITORY)"
+          local REGISTRY_INDEX_YAML="$DEPENDENCY_CHART_REPOSITORY/index.yaml"
+          local DEPENDENCY_YAML_URL
+          if ! DEPENDENCY_YAML_URL=$(echo::eval "curl -s $REGISTRY_INDEX_YAML | yq '.entries[\"$DEPENDENCY_CHART_NAME\"][] | select(.appVersion == \"$DEPENDENCY_CHART_VERSION\") | .urls[0]'"); then
+            echo::err "Error while retrieving the download url of the dependency char $DEPENDENCY_CHART_NAME"
+            return 1
+          fi
+          local DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_YAML_URL";
+          if [[ "$DEPENDENCY_YAML_URL" =~ https.* ]]; then
+            DEPENDENCY_FULL_URL="$DEPENDENCY_YAML_URL";
+          fi
+          echo::eval "helm pull $DEPENDENCY_FULL_URL -d $CHART_CHARTS_DIRECTORY --untar"
+
+          ;;
+        "oci")
+
+          echo::info "$DEPENDENCY_CHART_NAME: Fetching oci dependency ($DEPENDENCY_CHART_REPOSITORY)"
+          echo::eval "helm pull $DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_CHART_NAME --version $DEPENDENCY_CHART_VERSION -d $CHART_CHARTS_DIRECTORY --untar"
+
+          ;;
+        *)
+          echo::err "$DEPENDENCY_CHART_NAME: $DEPENDENCY_CHART_SCHEME Scheme not implemented for the repo $DEPENDENCY_CHART_REPOSITORY"
           ;;
       esac
 

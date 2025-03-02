@@ -1,30 +1,32 @@
 # The cert manager with monitoring (alert and dashboard)
 
-# If true, certificate are created for ingress routes.
-# When disabled, the default certificate specified on Traefik is used
+# -- If true, cert-manager is or will be installed on the cluster
+# When disabled, the default ingress certificate specified on Traefik is used
 # Not a string, a boolean so no quote
 enabled: false
-# Namespace
+# -- The installation namespace
 namespace: 'cert-manager'
 
 issuer_name: 'letsencrypt-staging'
 
-
+# The issuers
 issuers:
-  external:
+  # The external issuer is used to create certificate for public domain name
+  public:
     # @schema
     # enum: [ 'letsencrypt-staging', 'letsencrypt-prod' ]
+    # required: true
     # @schema
     # -- The acme issuer used in all ingress (external certificate request) of kubee
-    # It should be changed to 'letsencrypt-prod' when the letsencrypt-staging is working and validated
+    # It should be changed to `letsencrypt-prod` when the `letsencrypt-staging` is working and validated
     name: 'letsencrypt-staging'
-  internal:
+  # The private issuer is used to create certificate for the private cluster.local domain
+  cluster:
     # @schema
-    # enum: [ 'letsencrypt-staging', 'letsencrypt-prod' ]
+    # const: 'kubee-ca'
     # @schema
-    # -- The acme issuer used in all ingress (external certificate request) of kubee
-    # It should be changed to 'letsencrypt-prod' when the letsencrypt-staging is working and validated
-    name: 'kubee-ca'
+    # -- The private issuer is used to issue certificate for the private cluster.local domain
+    name: 'kubee-cluster-ca'
 
 
 
@@ -51,6 +53,7 @@ dns01:
 
 # https://github.com/cert-manager/cert-manager/blob/release-1.16/deploy/charts/cert-manager/values.yaml
 # defined by either the name or alias of your dependency in Chart.yaml
+# @ignored
 cert-manager:
   # Installation namespace
   namespace: '{{ .Values.namespace }}'
