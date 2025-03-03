@@ -11,22 +11,22 @@ issuer_name: 'letsencrypt-staging'
 
 # The issuers
 issuers:
-  # The external issuer is used to create certificate for public domain name
   public:
     # @schema
     # enum: [ 'letsencrypt-staging', 'letsencrypt-prod' ]
     # required: true
     # @schema
-    # -- The acme issuer used in all ingress (external certificate request) of kubee
+    # -- The public issuer name.
+    # The public issuer is used to create certificate for public access (ie public network / public domain name)
     # It should be changed to `letsencrypt-prod` when the `letsencrypt-staging` is working and validated
     name: 'letsencrypt-staging'
-  # The private issuer is used to create certificate for the private cluster.local domain
-  cluster:
+  kubee:
     # @schema
     # const: 'kubee-ca'
     # @schema
-    # -- The private issuer is used to issue certificate for the private cluster.local domain
-    name: 'kubee-cluster-ca'
+    # -- The kubee issuer name.
+    # The kubee issuer is used to create certificates for the local private domain cluster.local
+    name: 'kubee-ca' # The name pattern follows istio with istio-ca.
 
 
 
@@ -40,13 +40,13 @@ dns01:
   cloudflare:
     # See cert-manager/README.md on how to get cloudflare api key
     # A secret or external secret can be created
-    secret:
-      # A Kubernetes secret will be created if not empty
-      cloudflare_api_token: ''
-      # An external secret will be created
-      # if remote ref key is not empty
+    api_token:
+      # -- The api token value. If not empty, a Kubernetes secret is created.
+      k8s_secret_value: ''
       external_secret_remote_ref:
+        # -- The external secret ref. If the remote ref key is not empty, an external secret is created (used for GitOps)
         key: ''
+        # -- The external secret property.
         property: ''
     # -- the dns Zones that are managed by cloudflare, mandatory (ie a list of apex domains)
     dns_zones: []
@@ -59,6 +59,7 @@ cert-manager:
   namespace: '{{ .Values.namespace }}'
   crds:
     enabled: true
+    keep: true
   webhook:
     timeoutSeconds: 4   # Example: changing the webhook timeout using a Helm parameter
   # https://cert-manager.io/docs/devops-tips/prometheus-metrics/

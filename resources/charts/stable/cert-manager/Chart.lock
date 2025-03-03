@@ -1,0 +1,18 @@
+dependencies:
+- name: cert-manager
+  repository: https://charts.jetstack.io
+  version: v1.17.1
+- name: trust-manager
+  repository: https://charts.jetstack.io
+  version: v0.16.0
+- name: kubee-cluster
+  repository: file://../cluster
+  version: 0.0.1
+- name: kubee-grafana
+  repository: file://../grafana
+  version: 0.0.1
+- name: kubee-prometheus
+  repository: file://../prometheus
+  version: 0.0.1
+digest: sha256:14b29a7d3eac0d042247ce25f4fe8433f318447b5ae571ff134441dbdd1c65a1
+generated: "2025-03-03T08:45:14.583301705+01:00"

@@ -89,6 +89,20 @@ as the issuer with `letsencrypt`, ie
 * `letsencrypt-staging`
 * or `letsencrypt-prod`
 
+### Why Cert Manager does not have a specific CRD chart
+
+They use a keep policy on each CRD to not delete them if the chart is deleted.
+Example:
+```gotemplate`
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  {{- if .Values.crds.keep }}
+  annotations:
+    helm.sh/resource-policy: keep
+  {{- end }}
+```
+
 ## How to
 
 ### Create a certificate

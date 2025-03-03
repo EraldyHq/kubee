@@ -168,22 +168,23 @@
     "issuers": {
       "description": "The issuers",
       "properties": {
-        "cluster": {
+        "kubee": {
+          "description": "The local issuer is used to create certificate for the private cluster.local domain",
           "properties": {
             "name": {
-              "const": "kubee-cluster-ca",
-              "default": "kubee-cluster-ca",
-              "description": "The acme issuer used in all ingress (external certificate request) of kubee It should be changed to 'letsencrypt-prod' when the letsencrypt-staging is working and validated",
+              "const": "kubee-ca",
+              "default": "kubee-ca",
+              "description": "The local issuer is used to issue certificate for the private cluster.local domain",
               "required": [],
               "title": "name"
             }
           },
           "required": [],
-          "title": "private",
+          "title": "kubee",
           "type": "object"
         },
         "public": {
-          "description": " external certificate (ie for public domain)",
+          "description": "The external issuer is used to create certificate for public domain name",
           "properties": {
             "name": {
               "default": "letsencrypt-staging",
@@ -196,12 +197,16 @@
               "title": "name"
             }
           },
-          "required": [],
-          "title": "public"
+          "required": [
+            "name"
+          ],
+          "title": "public",
+          "type": "object"
         }
       },
       "required": [
-        "cluster"
+        "public",
+        "kubee"
       ],
       "title": "issuers",
       "type": "object"

@@ -75,9 +75,11 @@ cert_manager:
 
 ## Features
 
-It will create:
-* [letsencrypt issuer](#letsencrypt-acme-issuers) to create external certificate (acme)
-* [kubee-ca issuer](#kubee-internal-ca) to create internal service certificate (mtls)
+It will:
+* create:
+  * the [letsencrypt issuer](#letsencrypt-acme-issuers) to create external certificate (acme)
+  * the [kubee-ca issuer](#kubee-internal-ca) to create internal service certificate (mtls)
+* install [trust-manager](#trust-distribution) to distribute certificate 
 * install the [cert-manager grafana dashboard and alerts](#dashboard-and-alerts)
 
 ### Letsencrypt Acme Issuers
@@ -107,6 +109,11 @@ to:
 * enable SSL communication internally
 * issue certificate for auth service (database, oidc, ...)
 
+### Trust Distribution
+
+[Trust-manager](https://cert-manager.io/docs/trust/trust-manager/) is installed
+to distribute publicly trusted Certificate Authority (CA) certificates inside a Kubernetes cluster.
+
 ### Dashboard and alerts
 
 The [cert-manager mixin](https://monitoring.mixins.dev/cert-manager/) is installed
@@ -119,14 +126,15 @@ to create:
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | dns01.cloudflare.dns_zones | list | `[]` | the dns Zones that are managed by cloudflare, mandatory (ie a list of apex domains) |
-| dns01.cloudflare.secret.cloudflare_api_token | string | `""` |  |
-| dns01.cloudflare.secret.external_secret_remote_ref.key | string | `""` |  |
-| dns01.cloudflare.secret.external_secret_remote_ref.property | string | `""` |  |
-| enabled | bool | `false` |  |
+| dns01.cloudflare.secret.cloudflare_api_token | string | `""` | A Kubernetes secret will be created if not empty |
+| dns01.cloudflare.secret.external_secret_remote_ref | object | `{"key":"","property":""}` | An external secret will be created if remote ref key is not empty |
+| dns01.cloudflare.secret.external_secret_remote_ref.key | string | `""` | The external secret ref. If remote ref key is not empty, an external secret is created (used for GitOps) |
+| dns01.cloudflare.secret.external_secret_remote_ref.property | string | `""` | The external secret property. |
+| enabled | bool | `false` | If true, cert-manager is or will be installed on the cluster When disabled, the default ingress certificate specified on Traefik is used Not a string, a boolean so no quote |
 | issuer_name | string | `"letsencrypt-staging"` |  |
-| issuers.external.name | string | `"letsencrypt-staging"` | The acme issuer used in all ingress (external certificate request) of kubee It should be changed to 'letsencrypt-prod' when the letsencrypt-staging is working and validated |
-| issuers.internal.name | string | `"kubee-ca"` | The acme issuer used in all ingress (external certificate request) of kubee It should be changed to 'letsencrypt-prod' when the letsencrypt-staging is working and validated |
-| namespace | string | `"cert-manager"` |  |
+| issuers.kubee.name | string | `"kubee-ca"` | The kubee issuer name. The kubee issuer is used to create certificates for the local private domain cluster.local |
+| issuers.public.name | string | `"letsencrypt-staging"` | The public issuer name. The public issuer is used to create certificate for public access (ie public network / public domain name) It should be changed to `letsencrypt-prod` when the `letsencrypt-staging` is working and validated |
+| namespace | string | `"cert-manager"` | The installation namespace |
 
 ## Support
 
