@@ -140,3 +140,31 @@ Providers (Configuration Discovery):
 
 https://cert-manager.io/docs/troubleshooting/acme/
 
+### How Trust Manager updates the latest root CA certificates
+
+It does it by using this [container](https://quay.io/repository/jetstack/trust-pkg-debian-bookworm?tab=tags) that packages the ca-certificates  from the Debian Bookworm container.
+
+This container enables the `useDefaultCAs` in Bundle
+
+This container is then run as an init container in the `trust-manager` pod.
+
+Little script to check if the last root CA bundle is up-to-date
+```bash
+ACTUAL_TAG=$(kubee -c beau helm get values --all -n cert-manager cert-manager | yq '.trust-manager.defaultPackageImage.tag')
+source <(curl -s https://raw.githubusercontent.com/cert-manager/trust-manager/refs/heads/main/make/00_debian_bookworm_version.mk)
+if [ "$DEBIAN_BUNDLE_BOOKWORM_VERSION" != "$ACTUAL_TAG" ]; then
+  echo "Debian Bundle Updated to $DEBIAN_BUNDLE_BOOKWORM_VERSION in place of $ACTUAL_TAG"
+  exit 1
+fi
+```
+
+You can override the default with this Helm chart values configuration:
+```yaml
+defaultPackageImage:
+  repository: quay.io/jetstack/trust-pkg-debian-bookworm
+  tag: "20230311.0" # quotes are important
+```
+
+Note: They update the image tag with this [script](https://github.com/cert-manager/trust-manager/blob/v0.16.0/make/debian-trust-package-fetch.sh) in this [file](https://github.com/cert-manager/trust-manager/blob/v0.16.0/make/00_debian_bookworm_version.mk)
+
+[Ref Documentation](https://cert-manager.io/docs/trust/trust-manager/#securely-maintaining-a-trust-manager-installation)
