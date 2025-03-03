@@ -30,10 +30,11 @@ where:
   * \`helm\`                     : Helm Package Manager
 
 * \`kubee options\` are:
-  * \`-n|--namespace name\`    : the \`connection namespace name\` default to \`KUBEE_CONNECTION_NAMESPACE\`, ultimately to \`default\`.
-  * \`-c|--cluster   name\`    : the \`cluster name\` default to \`KUBEE_CLUSTER_NAME\`.
-  * \`--debug\`                : Print debug statements.
-  * \`--print-commands\`       : Print the command statements.
+  * \`-n|--namespace name\`      : the \`connection namespace name\` default to \`KUBEE_CONNECTION_NAMESPACE\`, ultimately to \`default\`.
+  * \`-c|--cluster   name\`      : the \`cluster name\` default to \`KUBEE_CLUSTER_NAME\`.
+  * \`--debug\`                  : Print debug statements.
+  * \`--print-commands\`         : Print the command statements.
+  * \`--no-garbage-collection\`  : Don't delete generated artifacts
 
 
 Example:
@@ -61,6 +62,11 @@ export COMMAND_STDOUT_FD="/dev/null"
 # Default level
 export BASHLIB_ECHO_LEVEL=$BASHLIB_ECHO_INFO_LEVEL
 
+# Delete generated artifacts or not (on or off)
+# We use it to disable garbage collections on chart with CRDS
+# Why? Because we need to install crds first and then the chart
+# With garbage collection, the values files are deleted after crd installation
+export KUBEE_GARBAGE_COLLECTOR="on"
 
 # Parsing
 # Note: getopt cannot be used because of : unrecognized --out option. This is an option of a sub-command
@@ -82,6 +88,10 @@ do
     -c|--cluster)
       shift
       KUBEE_CLUSTER_NAME="$1"
+      ;;
+    "--no-garbage-collection")
+      shift
+      KUBEE_GARBAGE_COLLECTOR="off"
       ;;
     "--print-commands")
       BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_COMMAND_LEVEL";
@@ -149,6 +159,6 @@ case "$KUBEE_COMMAND" in
 esac
 
 # Cleaning
-if [ "$BASHLIB_ECHO_LEVEL" -gt "$BASHLIB_ECHO_COMMAND_LEVEL" ]; then
+if [ "$BASHLIB_ECHO_LEVEL" -gt "$BASHLIB_ECHO_COMMAND_LEVEL" ] && [ "$KUBEE_GARBAGE_COLLECTOR" == "on" ] ; then
   echo::eval "echo 'Cleaning Shm' > $COMMAND_STDOUT_FD; rm -f $KUBEE_RUNTIME_DIR/*"
 fi

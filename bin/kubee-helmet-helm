@@ -278,7 +278,7 @@ install_crd_first(){
     return
   fi
 
-  if ! PACKAGE_CRDS_DIRECTORY=$(get_chart_directory "$PACKAGE_CRDS_NAME"); then
+  if ! PACKAGE_CRDS_DIRECTORY=$(kubee::get_chart_directory "$PACKAGE_CRDS_NAME"); then
     echo::debug "No CRD Chart directory for package $CHART_NAME found with the name $PACKAGE_CRDS_NAME"
     return
   fi
@@ -293,14 +293,8 @@ install_crd_first(){
   # recursion
   # We don't use helm directly as we have now CRD charts that are only with Jsonnet
   echo::info "Installing CRD Chart $PACKAGE_CRDS_NAME in namespace $CHART_NAMESPACE"
-  if ! echo::eval "kubee -n $CHART_NAMESPACE helmet play $PACKAGE_CRDS_NAME"; then
-    return 1
-  fi
-
-  # The recursion overwrite the chart values files
-  # We regenerate it
-  if ! print_values >| "$CHART_VALUES_PATH"; then
-    echo::err "An error has happened while generating the values file for the chart"
+  # Garbage collection is disable because we install just after the chart
+  if ! echo::eval "kubee -n $CHART_NAMESPACE --no-garbage-collection helmet play $PACKAGE_CRDS_NAME"; then
     return 1
   fi
 
@@ -501,7 +495,7 @@ main(){
   HELM_EXTRA_FLAGS=()
   OPTION_OUTPUT_DIR=""
   OPTION_SHOW_ONLY=""
-  OPTION_FORCE=""
+  OPTION_FORCE="" # Option to recreate files
   while [[ $# -gt 0 ]]
   do
      case "$1" in

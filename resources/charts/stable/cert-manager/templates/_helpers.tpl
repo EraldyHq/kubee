@@ -11,3 +11,10 @@ Return the key of the cloudflare api token in the secret
 {{- define "cert-manager-cloudflare-secret-key" }}
 {{- printf "api-token" -}}
 {{- end }}
+
+{{/*
+Return the key of the cloudflare api token in the secret
+*/}}
+{{- define "cert-manager-kubee-ca-name" }}
+{{- printf "kubee-ca" -}}
+{{- end }}

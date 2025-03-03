@@ -1,1 +1,0 @@
-/home/admin/code/kubee/resources/charts/stable/cert-manager/charts/kubee-cluster/templates/_helpers.tpl

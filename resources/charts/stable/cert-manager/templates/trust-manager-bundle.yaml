@@ -10,7 +10,7 @@
 apiVersion: trust.cert-manager.io/v1alpha1
 kind: Bundle
 metadata:
-  name: public-bundle
+  name: kubee-cert-bundle
   {{- /* cluster scoped, no namespacce */}}
   labels:
     {{- include "kubee-manifest-labels" . | indent 4}}
@@ -23,7 +23,7 @@ spec:
     */}}
     - useDefaultCAs: true
     - secret:
-        name: {{ .Values.issuers.kubee.name }}
+        name: {{ include "cert-manager-kubee-ca-name" . }}
         {{- /*
             Wondering why we used tls.crt and not ca.crt?
             More details https://cert-manager.io/docs/trust/trust-manager/#preparing-for-production.
@@ -46,6 +46,6 @@ spec:
         key: "bundle.jks"
       pkcs12:
         key: "bundle.p12"
-    namespaceSelector:
-      matchLabels:
-        kubee/bundle: "enabled"
+    namespaceSelector: {}
+{{/*      matchLabels:*/}}
+{{/*        kubee/bundle: "enabled"*/}}

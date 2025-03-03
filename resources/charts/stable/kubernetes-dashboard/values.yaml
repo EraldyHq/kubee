@@ -51,6 +51,11 @@ kubernetes-dashboard:
           name: servicemonitors.monitoring.coreos.com
           #  Display name
           displayName: 'Service Monitors'
+        - kind: customresourcedefinition
+          #  Fully qualified name of a CRD
+          name: podmonitors.monitoring.coreos.com
+          #  Display name
+          displayName: 'Pod Monitors'
   auth:
     containers:
       resources:

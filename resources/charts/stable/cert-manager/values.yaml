@@ -58,8 +58,7 @@ cert-manager:
   # Installation namespace
   namespace: '{{ .Values.namespace }}'
   crds:
-    enabled: true
-    keep: true
+    enabled: false
   webhook:
     timeoutSeconds: 4   # Example: changing the webhook timeout using a Helm parameter
   # https://cert-manager.io/docs/devops-tips/prometheus-metrics/
@@ -79,8 +78,13 @@ cert-manager:
   # https://cert-manager.io/docs/configuration/ca/#deployment
   clusterResourceNamespace: ""
 
+# https://github.com/cert-manager/trust-manager/tree/v0.16.0/deploy/charts/trust-manager
 # @ignored
 trust-manager:
+  crds:
+    # We do it ourselves to avoid
+    # no matches for kind "Bundle" in version "trust.cert-manager.io/v1alpha1"
+    enabled: false
   app:
     metrics:
       service:
