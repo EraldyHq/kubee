@@ -334,28 +334,58 @@ update-dependencies(){
             # Delete the file scheme (not supported by `helm get values`)
             local LOCAL_DEPENDENCY_CHART_DIR
             LOCAL_DEPENDENCY_CHART_DIR="$(realpath "$CHART_DIRECTORY"/"${DEPENDENCY_CHART_REPOSITORY#"file://"}")"
-            echo::info "$DEPENDENCY_CHART_NAME: Creating Dep with symlinks"
+            echo::info "$DEPENDENCY_CHART_NAME: Creating Charts Dep"
 
             local LOCAL_DEPENDENCY_DIR_IN_CHARTS="$CHART_CHARTS_DIRECTORY/$DEPENDENCY_CHART_NAME"
             mkdir -p "$LOCAL_DEPENDENCY_DIR_IN_CHARTS"
 
-            local LOCAL_DEPENDENCY_FILES=("Chart.yaml" "values.yaml" "values.schema.json")
+            local LOCAL_DEPENDENCY_FILES=("Chart.yaml" "values.yaml" "values.schema.json" "templates/_helpers.tpl")
             for LOCAL_DEPENDENCY_FILE_NAME in "${LOCAL_DEPENDENCY_FILES[@]}"; do
 
               local LOCAL_DEPENDENCY_FILE
-              LOCAL_DEPENDENCY_FILE="$(realpath "$LOCAL_DEPENDENCY_CHART_DIR/$LOCAL_DEPENDENCY_FILE_NAME")"
-              if [ ! -f "$LOCAL_DEPENDENCY_FILE" ]; then
+              # Real path fail if the file directory does not exists
+              if ! LOCAL_DEPENDENCY_FILE="$(realpath "$LOCAL_DEPENDENCY_CHART_DIR/$LOCAL_DEPENDENCY_FILE_NAME" 2>"$COMMAND_STDOUT_FD" )"; then
                 echo::debug "Dependency File $LOCAL_DEPENDENCY_FILE_NAME does not exist. Skipping. ($LOCAL_DEPENDENCY_FILE not found)"
                 continue
               fi
 
-              local SYMLINK_DEPENDENCY_FILE="$LOCAL_DEPENDENCY_DIR_IN_CHARTS/$LOCAL_DEPENDENCY_FILE_NAME"
-              if [ -f "$SYMLINK_DEPENDENCY_FILE" ]; then
-                echo::debug "Removing Symlink $SYMLINK_DEPENDENCY_FILE"
-                echo::eval "rm $SYMLINK_DEPENDENCY_FILE"
+              if [ ! -e "$LOCAL_DEPENDENCY_FILE" ]; then
+                echo::debug "Local Dependency File $LOCAL_DEPENDENCY_FILE_NAME does not exist. Skipping. ($LOCAL_DEPENDENCY_FILE not found)"
+                continue
               fi
-              echo::debug "Creating symlink for $LOCAL_DEPENDENCY_FILE_NAME"
-              echo::eval "ln -s $LOCAL_DEPENDENCY_FILE $SYMLINK_DEPENDENCY_FILE"
+
+              local TARGET_DEPENDENCY_FILE="$LOCAL_DEPENDENCY_DIR_IN_CHARTS/$LOCAL_DEPENDENCY_FILE_NAME"
+
+              local TARGET_DEPENDENCY_FILE_DIR
+              TARGET_DEPENDENCY_FILE_DIR=$(dirname "$TARGET_DEPENDENCY_FILE")
+              if [ "$TARGET_DEPENDENCY_FILE_DIR" != "$LOCAL_DEPENDENCY_DIR_IN_CHARTS" ] && [ ! -e "$TARGET_DEPENDENCY_FILE_DIR" ]; then
+                # If the target dependency file path is a subdirectory
+                # it should be created first
+                echo::debug "Creating the target dir $TARGET_DEPENDENCY_FILE_DIR"
+                echo::eval "mkdir -p $TARGET_DEPENDENCY_FILE_DIR"
+              fi
+
+              if [ -f "$TARGET_DEPENDENCY_FILE" ]; then
+                echo::debug "Dependency File Target $LOCAL_DEPENDENCY_FILE_NAME exists (Skipping $TARGET_DEPENDENCY_FILE)"
+                #We need a force option to do that
+                #echo::eval "rm $TARGET_DEPENDENCY_FILE"
+                continue
+              fi
+
+              echo::debug "Creating target (Source: $LOCAL_DEPENDENCY_FILE, Target: $TARGET_DEPENDENCY_FILE)"
+              if [ "$LOCAL_DEPENDENCY_FILE_NAME" == "Chart.yaml" ]; then
+                echo::eval "cp $LOCAL_DEPENDENCY_FILE $TARGET_DEPENDENCY_FILE"
+                # Delete the dependencies to avoid a circular dependencies
+                # https://github.com/dadav/helm-schema/issues/119
+                echo::eval "yq e 'del(.dependencies)' -i $TARGET_DEPENDENCY_FILE"
+                continue;
+              fi
+
+              # Other file are symlink
+              if ! echo::eval "ln -s $LOCAL_DEPENDENCY_FILE $TARGET_DEPENDENCY_FILE"; then
+                echo::err "Unable to create the symlink"
+                return 1
+              fi
 
             done
 

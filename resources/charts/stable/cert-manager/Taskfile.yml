@@ -10,4 +10,4 @@ tasks:
   # Generate the docs
   docs:
     cmds:
-      - helm-docs
+      - helm-docs --chart-to-generate .

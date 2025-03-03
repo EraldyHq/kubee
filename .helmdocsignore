@@ -1,0 +1,3 @@
+# Should be at the root of repo
+# see issue: https://github.com/norwoodj/helm-docs/issues/206
+resources/charts/stable/cert-manager/charts

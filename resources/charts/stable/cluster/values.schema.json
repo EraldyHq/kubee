@@ -1,0 +1,148 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "auth": {
+      "description": "Cluster Auth",
+      "properties": {
+        "admin_user": {
+          "description": "  * created as admin user in Kubernetes and other app  * added in basicAuth",
+          "properties": {
+            "cluster_role": {
+              "default": "cluster-admin",
+              "description": " * `cluster-admin` has full access * `admin` does not have access to node and cluster scope related object such as ClusterRoleBinding",
+              "required": [],
+              "title": "cluster_role"
+            },
+            "email": {
+              "default": "",
+              "description": "The email It's used by default in apps. For instance: * letsencrypt registration email * alert notifications: prometheus, argocd",
+              "format": "email",
+              "required": [],
+              "title": "email"
+            },
+            "password": {
+              "default": "",
+              "description": "The password",
+              "required": [],
+              "title": "password",
+              "type": "string"
+            },
+            "username": {
+              "default": "admin",
+              "required": [],
+              "title": "username",
+              "type": "string"
+            }
+          },
+          "required": [
+            "username",
+            "password"
+          ],
+          "title": "admin_user"
+        },
+        "trusted_proxies": {
+          "description": " If trusted, reverse_proxy handler will proxy and augment the sensitive X-Forwarded-* request headers. You should set the CIDR value of: * internal proxy such as traefik * and external proxy such as cloudflare It's used by Traefik and all auth application that needs the real ip and trust the X-forward headers",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "trusted_proxies"
+        }
+      },
+      "required": [],
+      "title": "auth",
+      "type": "object"
+    },
+    "chart": {
+      "default": "k3s-ansible",
+      "description": "The cluster chart",
+      "required": [],
+      "title": "chart",
+      "type": "string"
+    },
+    "email": {
+      "description": "Default smtp server parameters",
+      "properties": {
+        "smtp": {
+          "properties": {
+            "from": {
+              "default": "",
+              "description": "the default from",
+              "required": [],
+              "title": "from",
+              "type": "string"
+            },
+            "hello": {
+              "default": "",
+              "description": "hello (used to present itself, normally the email apex domain name)",
+              "required": [],
+              "title": "hello",
+              "type": "string"
+            },
+            "host": {
+              "default": "",
+              "description": " title: Smtp host description: The smtp hostname required: true format: hostname @schema The smtp host if the host is not empty, smtp configuration are added for example for argocd email notifications",
+              "format": "hostname",
+              "required": [],
+              "title": "Smtp host"
+            },
+            "password": {
+              "default": "",
+              "description": "the auth connection password",
+              "required": [],
+              "title": "password",
+              "type": "string"
+            },
+            "port": {
+              "default": "",
+              "description": "the smtp port",
+              "required": [],
+              "title": "Smtp Port",
+              "type": "integer"
+            },
+            "username": {
+              "default": "",
+              "description": "the auth connection username",
+              "required": [],
+              "title": "username",
+              "type": "string"
+            }
+          },
+          "required": [
+            "host",
+            "port",
+            "from",
+            "username",
+            "password",
+            "hello"
+          ],
+          "title": "smtp",
+          "type": "object"
+        }
+      },
+      "required": [
+        "smtp"
+      ],
+      "title": "email",
+      "type": "object"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "name": {
+      "default": "kubee",
+      "description": " used: * to identify the cluster (for instance, on prometheus remote-write metrics, the name is added as label) * as default first instance name for operator (for instance, prometheus operator allows to install multiple prometheus that needs to be unique. Kube-prometheus asks for a unique name)",
+      "required": [],
+      "title": "name"
+    }
+  },
+  "required": [
+    "chart",
+    "auth",
+    "email"
+  ],
+  "type": "object"
+}
