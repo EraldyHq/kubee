@@ -79,6 +79,14 @@ cert-manager:
   # https://cert-manager.io/docs/configuration/ca/#deployment
   clusterResourceNamespace: ""
 
+# @ignored
+trust-manager:
+  app:
+    metrics:
+      service:
+        servicemonitor:
+          # We do it ourselves so that there is some logic
+          enabled: false
 
 # @ignored
 # Don't touch, used to block template output of cross dependency

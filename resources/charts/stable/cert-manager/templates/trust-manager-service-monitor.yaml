@@ -1,0 +1,24 @@
+{{if eq .Values.prometheus.enabled true}}
+{{ $ := mergeOverwrite $ (dict "component" "prometheus") }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: trust-manager
+  namespace: {{.Values.namespace}}
+  labels:
+    {{- include "kubee-manifest-labels" . | indent 4}}
+    app: trust-manager
+spec:
+  jobLabel: trust-manager
+  selector:
+    matchLabels:
+      app: trust-manager
+  namespaceSelector:
+    matchNames:
+      - {{.Values.namespace}}
+  endpoints:
+  - targetPort: 9402
+    path: "/metrics"
+    interval: {{.Values.prometheus.scrape_interval}}
+    scrapeTimeout: 5s
+{{- end}}

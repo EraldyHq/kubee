@@ -4,10 +4,8 @@ tasks:
   # Generate the values.schema.json
   schema:
     cmds:
-      # to avoid: Could not sort results: circular dependency detected: kubee-cert-manager
-      # we filter over the current chart
-      - helm schema --helm-docs-compatibility-mode -k additionalProperties --dependencies-filter kubee-cert-manager
+      - helm schema --helm-docs-compatibility-mode -k additionalProperties
   # Generate the docs
   docs:
     cmds:
-      - helm-docs --chart-to-generate .
+      - helm-docs

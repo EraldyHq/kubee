@@ -17,6 +17,7 @@ https://helm.sh/docs/chart_template_guide/control_structures/#looping-with-the-r
   (dict "name" "letsencrypt-prod" "url" "https://acme-v02.api.letsencrypt.org/directory")
   (dict "name" "letsencrypt-staging" "url" "https://acme-staging-v02.api.letsencrypt.org/directory")
 }}
+{{- $ := mergeOverwrite $ (dict "component" "letsencrypt") }}
 {{- range $acme_issuers}}
 ---
 {{/*# Create a ClusterIssuer (can issue cert for the whole cluster)*/}}
@@ -26,6 +27,8 @@ kind: ClusterIssuer
 metadata:
   name: '{{ .name }}'
   namespace: '{{ include "cert-manager.namespace" (dict "Values" (index $.Values "cert-manager") "Release" $.Release ) }}'
+  labels:
+      {{- include "kubee-manifest-labels" $ | indent 4}}
 spec:
   acme:
     {{- /* The ACME server URL*/}}

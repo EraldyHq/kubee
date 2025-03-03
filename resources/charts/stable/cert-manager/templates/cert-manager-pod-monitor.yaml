@@ -6,15 +6,14 @@
   # https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/README.template.md#prometheus
 */}}
 {{- if eq .Values.prometheus.enabled true }}
+{{ $ := mergeOverwrite $ (dict "component" "prometheus") }}
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
   name: cert-manager
   namespace: {{ .Values.namespace }}
   labels:
-    app: cert-manager
-    app.kubernetes.io/name: cert-manager
-    app.kubernetes.io/instance: cert-manager
+    {{- include "kubee-manifest-labels" $ | indent 4}}
 spec:
   jobLabel: app.kubernetes.io/name
   selector:

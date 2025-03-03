@@ -48,6 +48,9 @@ include "kubee-name-prefix" (dict "Release" $.Release )
     Component name should be a property
     Usage Example:
     {{- include "kubee-manifest-labels" (merge . (dict "component" "web")) }}
+    or
+    {{ $ := mergeOverwrite $ (dict "component" "cloudflare") }}
+    {{- include "kubee-manifest-labels" $ | indent 4}}
 */}}
 {{- define "kubee-manifest-labels" }}
 {{ printf "app.kubernetes.io/name: %s" (required "app.kubernetes.io/name chart annotation is required " (index .Chart.Annotations "app.kubernetes.io/name")) }}

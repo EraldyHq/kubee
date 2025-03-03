@@ -7,8 +7,10 @@ kind: Issuer
 metadata:
   name: {{ include "kubee-name" . }}
   namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "kubee-manifest-labels" $ | indent 4}}
 spec:
-  selfSigned: {}
+  selfSigned: { }
 ---
 # Create the CA cert for the dex issuer.
 apiVersion: cert-manager.io/v1
@@ -16,6 +18,8 @@ kind: Certificate
 metadata:
   name: {{ include "kubee-name" . }}
   namespace: {{ .Values.namespace }}
+  labels:
+      {{- include "kubee-manifest-labels" $ | indent 4}}
 spec:
   {{- /* Secret Name that will store the certificate (ie private key and certificate) */}}
   secretName: {{ include "kubee-name" . }}
@@ -41,6 +45,8 @@ kind: ClusterIssuer
 metadata:
   name: {{ .Values.issuers.kubee.name }}
   namespace: {{.Values.namespace}}
+  labels:
+        {{- include "kubee-manifest-labels" $ | indent 4}}
 spec:
   ca:
     {{- /* Name of the certificate (ie private key and certificate) */}}
