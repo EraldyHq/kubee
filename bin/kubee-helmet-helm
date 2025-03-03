@@ -18,11 +18,13 @@ where:
   * \`ping\`                - Verify the connection to the cluster api
   * \`play\`                - Upgrade or install a Kubee Chart
   * \`template\`            - Template a Kubee Chart
-     * The following template options are supported
+     * The following options are supported
        * \`-s, --show-only\`     : Show only one template
        * \`--output-dir string\` : Writes the executed templates to files in output-dir instead of stdout
        * \`--out string\`        : Writes the executed templates to the \`out\` relative directory
   * \`update-dependencies\` - Update the charts directory with the dependencies (dev only)
+    * The following options are supported
+       * \`-f, --force\`         : Delete all existing dependencies charts
   * \`upgrade\`             - Upgrade a Kubee Chart
   * \`values\`              - Shows the values content
 
@@ -308,9 +310,15 @@ update-dependencies(){
 
   local ACTUAL_CHART_FILE="$CHART_DIRECTORY/Chart.yaml";
 
+
   # The charts dependency directory
   local CHART_CHARTS_DIRECTORY="$CHART_DIRECTORY/charts"
+  if [ "${OPTION_FORCE:-}" != "" ]; then
+    echo::debug "Force called, deleting the charts directory"
+    echo::eval "rm -rf $CHART_CHARTS_DIRECTORY"
+  fi
   mkdir -p "$CHART_CHARTS_DIRECTORY"
+
 
   # Add dependencies
   local DEPENDENCIES;
@@ -325,7 +333,18 @@ update-dependencies(){
             return 1
       fi
 
+      # The unique path
+      # ie charts/name-version.ygz
+      # if present, a pull will not work as it will see the dependency as present
+      local DEPENDENCY_FQ_PATH_IN_CHARTS="$CHART_CHARTS_DIRECTORY/$DEPENDENCY_CHART_NAME-$DEPENDENCY_CHART_VERSION.tgz"
+      echo::debug "Full qualified dependency path: $DEPENDENCY_FQ_PATH_IN_CHARTS"
 
+      # The dir path (chart dir)
+      # ie charts/name
+      local DEPENDENCY_DIR_PATH_IN_CHARTS="$CHART_CHARTS_DIRECTORY/$DEPENDENCY_CHART_NAME"
+      echo::debug "Directory dependency path: $DEPENDENCY_DIR_PATH_IN_CHARTS"
+
+      # The repository scheme
       local DEPENDENCY_CHART_SCHEME="${DEPENDENCY_CHART_REPOSITORY%%:*}"
       case "$DEPENDENCY_CHART_SCHEME" in
           "file")
@@ -336,8 +355,8 @@ update-dependencies(){
             LOCAL_DEPENDENCY_CHART_DIR="$(realpath "$CHART_DIRECTORY"/"${DEPENDENCY_CHART_REPOSITORY#"file://"}")"
             echo::info "$DEPENDENCY_CHART_NAME: Creating Charts Dep"
 
-            local LOCAL_DEPENDENCY_DIR_IN_CHARTS="$CHART_CHARTS_DIRECTORY/$DEPENDENCY_CHART_NAME"
-            mkdir -p "$LOCAL_DEPENDENCY_DIR_IN_CHARTS"
+            # Create it if it does not exists
+            mkdir -p "$DEPENDENCY_DIR_PATH_IN_CHARTS"
 
             local LOCAL_DEPENDENCY_FILES=("Chart.yaml" "values.yaml" "values.schema.json" "templates/_helpers.tpl")
             for LOCAL_DEPENDENCY_FILE_NAME in "${LOCAL_DEPENDENCY_FILES[@]}"; do
@@ -354,11 +373,11 @@ update-dependencies(){
                 continue
               fi
 
-              local TARGET_DEPENDENCY_FILE="$LOCAL_DEPENDENCY_DIR_IN_CHARTS/$LOCAL_DEPENDENCY_FILE_NAME"
+              local TARGET_DEPENDENCY_FILE="$DEPENDENCY_DIR_PATH_IN_CHARTS/$LOCAL_DEPENDENCY_FILE_NAME"
 
               local TARGET_DEPENDENCY_FILE_DIR
               TARGET_DEPENDENCY_FILE_DIR=$(dirname "$TARGET_DEPENDENCY_FILE")
-              if [ "$TARGET_DEPENDENCY_FILE_DIR" != "$LOCAL_DEPENDENCY_DIR_IN_CHARTS" ] && [ ! -e "$TARGET_DEPENDENCY_FILE_DIR" ]; then
+              if [ "$TARGET_DEPENDENCY_FILE_DIR" != "$DEPENDENCY_DIR_PATH_IN_CHARTS" ] && [ ! -e "$TARGET_DEPENDENCY_FILE_DIR" ]; then
                 # If the target dependency file path is a subdirectory
                 # it should be created first
                 echo::debug "Creating the target dir $TARGET_DEPENDENCY_FILE_DIR"
@@ -389,14 +408,11 @@ update-dependencies(){
 
             done
 
-            # The unique dir name
-            # if present, a pull will not work as it will see the dependency as present
-            local DEPENDENCY_FQ_FILE_PATH_IN_CHARTS="$CHART_CHARTS_DIRECTORY/$DEPENDENCY_CHART_NAME-$DEPENDENCY_CHART_VERSION.tgz"
-            if [ -e "$DEPENDENCY_FQ_FILE_PATH_IN_CHARTS" ]; then
-              echo::debug "Dependency directory found ($DEPENDENCY_FQ_FILE_PATH_IN_CHARTS found)"
+            if [ -e "$DEPENDENCY_FQ_PATH_IN_CHARTS" ]; then
+              echo::debug "Dependency directory found ($DEPENDENCY_FQ_PATH_IN_CHARTS found)"
             else
-              echo::debug "Creating directory Dependency ($DEPENDENCY_FQ_FILE_PATH_IN_CHARTS)"
-              mkdir -p "$DEPENDENCY_FQ_FILE_PATH_IN_CHARTS"
+              echo::debug "Creating directory Dependency ($DEPENDENCY_FQ_PATH_IN_CHARTS)"
+              mkdir -p "$DEPENDENCY_FQ_PATH_IN_CHARTS"
             fi
 
             echo::debug "$DEPENDENCY_CHART_NAME: Dep created"
@@ -404,18 +420,38 @@ update-dependencies(){
           ;;
         "https")
 
-          echo::info "$DEPENDENCY_CHART_NAME: Fetching https dependency ($DEPENDENCY_CHART_REPOSITORY)"
+          if [ -e "$DEPENDENCY_FQ_PATH_IN_CHARTS" ]; then
+            echo::info "$DEPENDENCY_CHART_NAME: Directory path found skipping"
+            # The pull will not work
+            # we need a force option to delete
+            # Helm Error Error: failed to untar: a file or directory with the name cert-manager/charts/cert-manager-v1.17.1.tgz already exists
+            continue;
+          fi
+          # if the version has changed the directory is still there and should be deleted first
+          if [ -e "$DEPENDENCY_DIR_PATH_IN_CHARTS" ]; then
+            echo::debug "Directory dependency path found deleting ($DEPENDENCY_DIR_PATH_IN_CHARTS)"
+            echo::eval "rm -rf $DEPENDENCY_DIR_PATH_IN_CHARTS"
+          fi
+
+          echo::info "$DEPENDENCY_CHART_NAME: Fetching https dependency $DEPENDENCY_CHART_NAME"
           local REGISTRY_INDEX_YAML="$DEPENDENCY_CHART_REPOSITORY/index.yaml"
           local DEPENDENCY_YAML_URL
           if ! DEPENDENCY_YAML_URL=$(echo::eval "curl -s $REGISTRY_INDEX_YAML | yq '.entries[\"$DEPENDENCY_CHART_NAME\"][] | select(.appVersion == \"$DEPENDENCY_CHART_VERSION\") | .urls[0]'"); then
             echo::err "Error while retrieving the download url of the dependency char $DEPENDENCY_CHART_NAME"
             return 1
           fi
+          if [ "$DEPENDENCY_YAML_URL" == "" ] || [ "$DEPENDENCY_YAML_URL" == "null" ]; then
+            echo::err "No Url could be found to download $DEPENDENCY_CHART_NAME / $DEPENDENCY_CHART_VERSION in the index.yaml file ($REGISTRY_INDEX_YAML)"
+            return 1
+          fi
           local DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_YAML_URL";
           if [[ "$DEPENDENCY_YAML_URL" =~ https.* ]]; then
             DEPENDENCY_FULL_URL="$DEPENDENCY_YAML_URL";
           fi
-          echo::eval "helm pull $DEPENDENCY_FULL_URL -d $CHART_CHARTS_DIRECTORY --untar"
+          if ! echo::eval "helm pull $DEPENDENCY_FULL_URL -d $CHART_CHARTS_DIRECTORY --untar"; then
+            echo::err "Error while pulling $DEPENDENCY_CHART_NAME"
+            return 1
+          fi
 
           ;;
         "oci")
@@ -455,13 +491,14 @@ main(){
   ##########################
   ## Collect the options
   ##########################
-  args=$(getopt -l "skip-schema-validation,output-dir:,out,show-only,help" -o "o:s:h" -- "$@")
+  args=$(getopt -l "skip-schema-validation,output-dir:,out,show-only,help,force" -o "o:s:hf" -- "$@")
   # eval set to set the positional arguments back to $args
   eval set -- "$args"
   KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
   HELM_EXTRA_FLAGS=()
   OPTION_OUTPUT_DIR=""
   OPTION_SHOW_ONLY=""
+  OPTION_FORCE=""
   while [[ $# -gt 0 ]]
   do
      case "$1" in
@@ -473,6 +510,10 @@ main(){
         "--out")
           shift
           OPTION_OUTPUT_DIR="out"
+          ;;
+        "--force"|"-f")
+          shift
+          OPTION_FORCE="force"
           ;;
         "--skip-schema-validation")
           shift

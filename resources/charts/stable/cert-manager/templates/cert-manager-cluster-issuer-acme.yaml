@@ -37,7 +37,6 @@ spec:
       name: '{{ .name }}'
     {{- /* Enable the HTTP-01 challenge provider*/}}
     solvers:
-      {{- if ne $.Values.http01.ingress_class_name "" -}}
       {{- /* empty 'selector' means that this solver matches all domains*/}}
       - selector: { }
         {{- /*
@@ -67,7 +66,6 @@ spec:
         Selector: 'DnsName', `DnsZone`, `matchLabels` can be specified
         https://cert-manager.io/docs/configuration/acme/#adding-multiple-solver-types
       */}}
-      {{- end }}
       {{- if ne $.Values.dns01.cloudflare.api_token.k8s_secret_value "" }}
       - selector:
           {{- /*
