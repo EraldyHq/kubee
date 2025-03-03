@@ -322,10 +322,10 @@ update-dependencies(){
 
   # Add dependencies
   local DEPENDENCIES;
-  DEPENDENCIES="$(yq -r '.dependencies[] | [ (.name // "") + "," + (.alias // "") + "," + (.repository // "") + "," + ( .version // "")] | join("\n")' "$ACTUAL_CHART_FILE")"
+  DEPENDENCIES="$(yq -r '.dependencies[] | [ (.name // "") + "," + (.repository // "") + "," + ( .version // "")] | join("\n")' "$ACTUAL_CHART_FILE")"
   if [ "$DEPENDENCIES" != "" ]; then
     # Loop over the dependencies
-    while IFS=, read -r DEPENDENCY_CHART_NAME DEPENDENCY_CHART_ALIAS DEPENDENCY_CHART_REPOSITORY DEPENDENCY_CHART_VERSION; do
+    while IFS=, read -r DEPENDENCY_CHART_NAME DEPENDENCY_CHART_REPOSITORY DEPENDENCY_CHART_VERSION; do
 
       if [ "$DEPENDENCY_CHART_NAME" == "" ] || [ "$DEPENDENCY_CHART_NAME" == "null" ]; then
             echo::err "All dependency should have an name"
