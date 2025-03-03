@@ -418,7 +418,7 @@ update-dependencies(){
             echo::debug "$DEPENDENCY_CHART_NAME: Dep created"
 
           ;;
-        "https")
+        "https"|"oci")
 
           if [ -e "$DEPENDENCY_FQ_PATH_IN_CHARTS" ]; then
             echo::info "$DEPENDENCY_CHART_NAME: Directory path found skipping"
@@ -433,33 +433,36 @@ update-dependencies(){
             echo::eval "rm -rf $DEPENDENCY_DIR_PATH_IN_CHARTS"
           fi
 
-          echo::info "$DEPENDENCY_CHART_NAME: Fetching https dependency $DEPENDENCY_CHART_NAME"
-          local REGISTRY_INDEX_YAML="$DEPENDENCY_CHART_REPOSITORY/index.yaml"
-          local DEPENDENCY_YAML_URL
-          if ! DEPENDENCY_YAML_URL=$(echo::eval "curl -s $REGISTRY_INDEX_YAML | yq '.entries[\"$DEPENDENCY_CHART_NAME\"][] | select(.appVersion == \"$DEPENDENCY_CHART_VERSION\") | .urls[0]'"); then
-            echo::err "Error while retrieving the download url of the dependency char $DEPENDENCY_CHART_NAME"
-            return 1
+          # Get the url
+          # the url is the oci one
+          local DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_CHART_NAME";
+          # for https, there is a little bit more work
+          if [ "$DEPENDENCY_CHART_SCHEME" == "https" ]; then
+            echo::info "$DEPENDENCY_CHART_NAME: Fetching $DEPENDENCY_CHART_SCHEME dependency $DEPENDENCY_CHART_NAME"
+            local REGISTRY_INDEX_YAML="$DEPENDENCY_CHART_REPOSITORY/index.yaml"
+            local DEPENDENCY_YAML_URL
+            if ! DEPENDENCY_YAML_URL=$(echo::eval "curl -s $REGISTRY_INDEX_YAML | yq '.entries[\"$DEPENDENCY_CHART_NAME\"][] | select(.appVersion == \"$DEPENDENCY_CHART_VERSION\") | .urls[0]'"); then
+              echo::err "Error while retrieving the download url of the dependency char $DEPENDENCY_CHART_NAME"
+              return 1
+            fi
+            if [ "$DEPENDENCY_YAML_URL" == "" ] || [ "$DEPENDENCY_YAML_URL" == "null" ]; then
+              echo::err "No Url could be found to download $DEPENDENCY_CHART_NAME / $DEPENDENCY_CHART_VERSION in the index.yaml file ($REGISTRY_INDEX_YAML)"
+              return 1
+            fi
+            DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_YAML_URL";
+            if [[ "$DEPENDENCY_YAML_URL" =~ https.* ]]; then
+              DEPENDENCY_FULL_URL="$DEPENDENCY_YAML_URL";
+            fi
           fi
-          if [ "$DEPENDENCY_YAML_URL" == "" ] || [ "$DEPENDENCY_YAML_URL" == "null" ]; then
-            echo::err "No Url could be found to download $DEPENDENCY_CHART_NAME / $DEPENDENCY_CHART_VERSION in the index.yaml file ($REGISTRY_INDEX_YAML)"
-            return 1
-          fi
-          local DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_YAML_URL";
-          if [[ "$DEPENDENCY_YAML_URL" =~ https.* ]]; then
-            DEPENDENCY_FULL_URL="$DEPENDENCY_YAML_URL";
-          fi
+
+          # Pull
           if ! echo::eval "helm pull $DEPENDENCY_FULL_URL -d $CHART_CHARTS_DIRECTORY --untar"; then
             echo::err "Error while pulling $DEPENDENCY_CHART_NAME"
             return 1
           fi
 
           ;;
-        "oci")
 
-          echo::info "$DEPENDENCY_CHART_NAME: Fetching oci dependency ($DEPENDENCY_CHART_REPOSITORY)"
-          echo::eval "helm pull $DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_CHART_NAME --version $DEPENDENCY_CHART_VERSION -d $CHART_CHARTS_DIRECTORY --untar"
-
-          ;;
         *)
           echo::err "$DEPENDENCY_CHART_NAME: $DEPENDENCY_CHART_SCHEME Scheme not implemented for the repo $DEPENDENCY_CHART_REPOSITORY"
           ;;
