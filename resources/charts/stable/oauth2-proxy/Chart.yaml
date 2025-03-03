@@ -41,7 +41,7 @@ dependencies:
     repository: file://../prometheus
     alias: prometheus
     condition: kubee_internal.install_cross_dependency
-  # For the cert
+  # For the cert and the kubee ca issuer
   - name: kubee-cert-manager
     version: 0.0.1
     repository: file://../cert-manager

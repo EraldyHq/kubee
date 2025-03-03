@@ -1,4 +1,4 @@
-# TLS certificate for the Dex service, from local certificate authority.
+# TLS certificate for the Oauth service, from local certificate authority.
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -7,8 +7,8 @@ metadata:
 spec:
   secretName: {{ include "oauth2-proxy-cert-local-name" . }}
   issuerRef:
-    kind: Issuer
-    name: {{ include "kubee-name-prefix" . }}-ca
+    kind: ClusterIssuer
+    name: {{ .Values.cert_manager.issuers.kubee.name }}
   dnsNames:
     - {{ include "oauth2-proxy-service-name" . }}
     - {{ include "oauth2-proxy-service-name" . }}.{{ .Values.namespace }}

@@ -90,7 +90,6 @@ do
       KUBEE_CLUSTER_NAME="$1"
       ;;
     "--no-garbage-collection")
-      shift
       KUBEE_GARBAGE_COLLECTOR="off"
       ;;
     "--print-commands")

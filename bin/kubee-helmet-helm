@@ -73,7 +73,7 @@ is_helm_chart_installed() {
   })
 
   if [[ "$CHART_RELEASE_APP_VERSION" != "$CHART_APP_VERSION" ]]; then
-    echo::info "Chart app version mismatch (Release App Version: $CHART_RELEASE_APP_VERSION. Chart App Version: $CHART_APP_VERSION)"
+    echo::info "Chart app version mismatch for chart $CHART_RELEASE_CHART (Release App Version: $CHART_RELEASE_APP_VERSION. Chart App Version: $CHART_APP_VERSION)"
     return 1
   fi
 
@@ -435,7 +435,7 @@ update-dependencies(){
             echo::info "$DEPENDENCY_CHART_NAME: Fetching $DEPENDENCY_CHART_SCHEME dependency $DEPENDENCY_CHART_NAME"
             local REGISTRY_INDEX_YAML="$DEPENDENCY_CHART_REPOSITORY/index.yaml"
             local DEPENDENCY_YAML_URL
-            if ! DEPENDENCY_YAML_URL=$(echo::eval "curl -s $REGISTRY_INDEX_YAML | yq '.entries[\"$DEPENDENCY_CHART_NAME\"][] | select(.appVersion == \"$DEPENDENCY_CHART_VERSION\") | .urls[0]'"); then
+            if ! DEPENDENCY_YAML_URL=$(echo::eval "curl -s $REGISTRY_INDEX_YAML | yq '.entries[\"$DEPENDENCY_CHART_NAME\"][] | select(.version == \"$DEPENDENCY_CHART_VERSION\") | .urls[0]'"); then
               echo::err "Error while retrieving the download url of the dependency char $DEPENDENCY_CHART_NAME"
               return 1
             fi
@@ -533,6 +533,16 @@ main(){
      esac
   done
 
+  COMMAND=${1:-}
+  if [ "$COMMAND" = "" ]; then
+      doc::help
+      echo::err "A command is mandatory"
+      exit 1
+  fi
+  echo::debug "Command Name: $COMMAND"
+  # Remove the command argument from the argument list
+  shift
+
   # Debug ??
   if [ "$BASHLIB_ECHO_LEVEL" == "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
     HELM_EXTRA_FLAGS+=("--debug");
@@ -620,37 +630,31 @@ main(){
   CHART_OUTPUT_VALUES_DIR="$CHART_OUTPUT_DIR/values"
   mkdir -p "$CHART_OUTPUT_VALUES_DIR"
 
-  # The kubee values
-  # We need them to determine the namespace
-  CHART_VALUES_PATH="$CHART_OUTPUT_VALUES_DIR/values.yml"
-  if ! kubee::print_chart_values "$CHART_NAME" >| "$CHART_VALUES_PATH"; then
-    echo::err "An error has happened while generating the values file for the chart"
-    exit 1
+  # Values and namespace
+  if [[ ! "$COMMAND" =~ ^("update-dependencies"|"ping")$ ]]; then
+      # The kubee values
+      # We need them to determine the namespace
+      CHART_VALUES_PATH="$CHART_OUTPUT_VALUES_DIR/values.yml"
+      if ! kubee::print_chart_values "$CHART_NAME" >| "$CHART_VALUES_PATH"; then
+        echo::err "An error has happened while generating the values file for the chart"
+        exit 1
+      fi
+
+      # Chart Namespace
+      if [ "$CHART_TYPE" == "driver" ]; then
+        CHART_NAMESPACE="default"
+        echo::info "Default Namespace ($CHART_NAMESPACE)"
+      else
+        VALUES_NAMESPACE_PATH=".namespace"
+        CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$CHART_VALUES_PATH")
+        if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
+          echo::err "No namespace found at path $VALUES_NAMESPACE_PATH on the file $CHART_VALUES_PATH"
+          exit 1
+        fi
+        echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
+      fi
   fi
 
-  # Chart Namespace
-  if [ "$CHART_TYPE" == "driver" ]; then
-    CHART_NAMESPACE="default"
-    echo::info "Default Namespace ($CHART_NAMESPACE)"
-  else
-    VALUES_NAMESPACE_PATH=".namespace"
-    CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$CHART_VALUES_PATH")
-    if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
-      echo::err "No namespace found at path $VALUES_NAMESPACE_PATH on the file $CHART_VALUES_PATH"
-      exit 1
-    fi
-    echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
-  fi
-
-  COMMAND=${1:-}
-  if [ "$COMMAND" = "" ]; then
-      doc::help
-      echo::err "A command is mandatory"
-      exit 1
-  fi
-  echo::debug "Command Name: $COMMAND"
-  # Remove the command argument from the argument list
-  shift
 
   case "$COMMAND" in
     "template")

@@ -1,0 +1,12 @@
+version: '3'
+
+tasks:
+  # Generate the values.schema.json
+  schema:
+    cmds:
+      # Traefik values.schema.json should not be generated, we filter
+      - helm schema --helm-docs-compatibility-mode -k additionalProperties --dependencies-filter kubee-traefik
+  # Generate the docs
+  docs:
+    cmds:
+      - helm-docs

@@ -11,6 +11,7 @@ spec:
     address: "https://oauth2-proxy.{{ .Values.oauth2_proxy.namespace }}.svc.cluster.local"
     # https://doc.traefik.io/traefik/middlewares/http/forwardauth/#insecureskipverify
     tls:
-      insecureSkipVerify: true
+      caSecret: {{ .Values.cert_manager.issuers.kubee.bundle_name }}
+      # insecureSkipVerify: true
     authResponseHeaders:
       - X-Forwarded-User

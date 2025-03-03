@@ -646,7 +646,7 @@ kubee::print_chart_values(){
                 )
                 if [ "$DEPENDENCY_CHART_REPOSITORY" == "" ]; then
                   echo::err "The dependency chart $DEPENDENCY_CHART_NAME has no repository"
-                  echo::err "A dependency that is not in the charts/ directory should have a repository or be pullet into charts/"
+                  echo::err "A dependency that is not in the charts/ directory should have a repository in Chart.yaml or be pulled into the charts/ directory."
                   return 1
                 fi
                 case "$DEPENDENCY_CHART_REPOSITORY" in

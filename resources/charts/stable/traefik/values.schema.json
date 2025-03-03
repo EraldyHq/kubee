@@ -1,9 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "additionalProperties": false,
   "properties": {
     "auth": {
-      "additionalProperties": false,
       "description": "Ingress Auth Configuration",
       "properties": {
         "middleware_name": {
@@ -26,7 +24,6 @@
       "type": "object"
     },
     "default_certificate": {
-      "additionalProperties": false,
       "description": " Set the default certificate as default traefik cert Mandatory for kubernetes-dashboard on a local development The rootCA should be added to the OS/Browser as trusted root CA https://doc.traefik.io/traefik/https/tls/#default-certificate",
       "properties": {
         "cert": {
@@ -47,16 +44,14 @@
     },
     "enabled": {
       "default": "false",
-      "description": " Enabled Not a string, no quote",
+      "description": " Not a string, no quote",
       "required": [],
       "title": "enabled"
     },
     "entrypoints": {
-      "additionalProperties": false,
       "description": " Used by template that creates IngressRoute (http and tcp)",
       "properties": {
         "smtps": {
-          "additionalProperties": false,
           "properties": {
             "name": {
               "default": "smtps",
@@ -90,7 +85,6 @@
       "title": "hostname"
     },
     "kubee_internal": {
-      "additionalProperties": false,
       "description": "Don't change",
       "properties": {
         "install_cross_dependency": {
@@ -107,11 +101,9 @@
       "type": "object"
     },
     "middlewares": {
-      "additionalProperties": false,
       "description": " https://doc.traefik.io/traefik/middlewares",
       "properties": {
         "auth_headers": {
-          "additionalProperties": false,
           "description": "Middleware to apply auth headers on website with an authentication form",
           "properties": {
             "name": {
@@ -128,7 +120,6 @@
           "type": "object"
         },
         "basic_auth": {
-          "additionalProperties": false,
           "description": " With the email as main identifier https://doc.traefik.io/traefik/middlewares/http/basicauth/ The admin user is added",
           "properties": {
             "name": {
@@ -138,11 +129,10 @@
               "type": "string"
             },
             "users": {
-              "default": "",
               "description": "List of extra users alongside the admin user",
               "required": [],
               "title": "users",
-              "type": "null"
+              "type": "object"
             }
           },
           "required": [
@@ -152,7 +142,6 @@
           "title": "basic_auth"
         },
         "forward_auth": {
-          "additionalProperties": false,
           "description": " https://doc.traefik.io/traefik/middlewares/http/forwardauth/",
           "properties": {
             "name": {
@@ -168,7 +157,6 @@
           "title": "forward_auth"
         },
         "forward_auth_bearer": {
-          "additionalProperties": false,
           "description": " It can be applied on Kube API client such as Kubernetes Dashboard'",
           "properties": {
             "name": {
@@ -184,7 +172,6 @@
           "title": "forward_auth_bearer"
         },
         "git_hooks": {
-          "additionalProperties": false,
           "description": " Used in Gitops app such as Argocd https://doc.traefik.io/traefik/middlewares/http/ipallowlist/",
           "properties": {
             "name": {
@@ -207,7 +194,6 @@
           "title": "git_hooks"
         },
         "private_network": {
-          "additionalProperties": false,
           "description": " Ip are given via the auth.private_networks",
           "properties": {
             "name": {
@@ -235,7 +221,6 @@
       "title": "namespace"
     },
     "traefik": {
-      "additionalProperties": false,
       "description": " https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml",
       "properties": {
         "additionalArguments": {
@@ -257,11 +242,9 @@
           "type": "array"
         },
         "ingressRoute": {
-          "additionalProperties": false,
           "description": " https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#access-traefik-dashboard-without-exposing-it",
           "properties": {
             "dashboard": {
-              "additionalProperties": false,
               "properties": {
                 "enabled": {
                   "default": false,
@@ -283,14 +266,11 @@
           "title": "ingressRoute"
         },
         "metrics": {
-          "additionalProperties": false,
           "properties": {
             "prometheus": {
-              "additionalProperties": false,
               "description": "Prometheus is enabled by default",
               "properties": {
                 "service": {
-                  "additionalProperties": false,
                   "description": " This value creates a dedicated metrics service to use with ServiceMonitor Enable Prometheus Metrics https://doc.traefik.io/traefik/observability/metrics/prometheus/ Metrics Info: https://doc.traefik.io/traefik/observability/metrics/overview/#global-metrics",
                   "properties": {
                     "enabled": {
@@ -318,20 +298,16 @@
           "type": "object"
         },
         "nodeSelector": {
-          "additionalProperties": false,
           "description": "nodeSelector is the simplest recommended form of node selection constraint.",
           "required": [],
           "title": "nodeSelector"
         },
         "ports": {
-          "additionalProperties": false,
           "properties": {
             "smtp": {
-              "additionalProperties": false,
               "description": " It creates the smtp [entrypoint](https://doc.traefik.io/traefik/routing/entrypoints/) - \"--entryPoints.smtp.address=:8025/tcp\"",
               "properties": {
                 "expose": {
-                  "additionalProperties": false,
                   "description": "Defines whether the port is listed in the service if service.type is LoadBalancer or NodePort.",
                   "properties": {
                     "default": {
@@ -378,11 +354,9 @@
               "title": "smtp"
             },
             "smtps": {
-              "additionalProperties": false,
               "description": "SMTP submission over TLS",
               "properties": {
                 "expose": {
-                  "additionalProperties": false,
                   "description": "Defines whether the port is listed in the service if service.type is LoadBalancer or NodePort.",
                   "properties": {
                     "default": {
@@ -430,15 +404,12 @@
               "type": "object"
             },
             "web": {
-              "additionalProperties": false,
               "description": "Redirections",
               "properties": {
                 "redirections": {
-                  "additionalProperties": false,
                   "description": "https://doc.traefik.io/traefik/routing/entrypoints/#redirection",
                   "properties": {
                     "entryPoint": {
-                      "additionalProperties": false,
                       "properties": {
                         "scheme": {
                           "default": "https",
@@ -483,10 +454,8 @@
           "type": "object"
         },
         "providers": {
-          "additionalProperties": false,
           "properties": {
             "kubernetesCRD": {
-              "additionalProperties": false,
               "properties": {
                 "allowEmptyServices": {
                   "default": "true",
@@ -500,7 +469,6 @@
               "type": "object"
             },
             "kubernetesIngress": {
-              "additionalProperties": false,
               "properties": {
                 "allowEmptyServices": {
                   "default": true,
@@ -525,7 +493,6 @@
           "type": "object"
         },
         "service": {
-          "additionalProperties": false,
           "properties": {
             "ipFamilies": {
               "items": {
@@ -548,7 +515,6 @@
               "title": "ipFamilyPolicy"
             },
             "spec": {
-              "additionalProperties": false,
               "properties": {
                 "externalTrafficPolicy": {
                   "default": "Local",

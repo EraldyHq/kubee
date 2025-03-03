@@ -10,7 +10,7 @@
 apiVersion: trust.cert-manager.io/v1alpha1
 kind: Bundle
 metadata:
-  name: kubee-cert-bundle
+  name: {{.Values.issuers.kubee.bundle_name}}
   {{- /* cluster scoped, no namespacce */}}
   labels:
     {{- include "kubee-manifest-labels" . | indent 4}}
@@ -41,14 +41,15 @@ spec:
       bundles in JKS and PKCS#12 formats named "bundle.jks" and "bundle.p12".
     */}}
     secret:
-      key: "kubee-bundle.pem"
+      {{/* Traefik search only for ca.crt or tls.ca, ca.crt is the default for Kubernetes */}}
+      key: "ca.crt"
 {{/*    configMap:*/}}
 {{/*      key: "kubee-bundle.pem"*/}}
     additionalFormats:
       jks:
-        key: "kubee-bundle.jks"
+        key: "ca.jks"
       pkcs12:
-        key: "kubee-bundle.p12"
-    namespaceSelector: {}
+        key: "ca.p12"
+    namespaceSelector: { }
 {{/*      matchLabels:*/}}
 {{/*        kubee/bundle: "enabled"*/}}

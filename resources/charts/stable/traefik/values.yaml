@@ -52,7 +52,7 @@ middlewares:
   basic_auth:
     name: 'basic-auth'
     # List of extra users alongside the admin user
-    users:
+    users: {}
     # Example:
     # users:
     #   emailUser1: password1

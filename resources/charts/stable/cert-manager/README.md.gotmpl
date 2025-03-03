@@ -29,32 +29,6 @@ cert_manager:
   enabled: true
 ```
 
-### Optional: Config Cloudflare
-
-By default, the `http01` challenge is executed meaning  
-but if you want a `dns01` on Cloudflare, you can configure it this way: 
-
-* Get the API key [Ref](https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/)
-  * Go to `Cloudflare > User Profile > API Tokens > API Tokens`.
-  * Create a token with
-  * Permissions:
-     * `Zone - DNS - Edit`
-     * `Zone - Zone - Read`
-    * Zone Resources :
-       * `Include - All Zones`
-* Set the cloudflare properties in your cluster values file.
-```yaml
-cert_manager:
-    dns01:
-        cloudflare:
-          # See cert-manager/README.md on how to get cloudflare api key
-          cloudflareApiToken: 'token'
-          # The dns Zone that are managed by cloudflare
-          dnsZones:
-            - my-apex-domain.tld
-            - another-apex-domain.tld
-```
-
 ### Deploy
 
 ```bash
@@ -67,17 +41,15 @@ kubee --cluster clusterName helmet play cert-manager
 By default, the certificate are issued with `letsencrypt-staging` and are [not valid](#why-my-certificates-are-not-valid).
 
 When you have controlled that you receive certificate 
-* from Letsencrypt 
+* from Letsencrypt
 * and not the default Traefik certificate
-you should change the default issuer to `letsencrypt-prod` 
+you should change the default issuer value to `letsencrypt-prod` 
 
 Example: In your cluster values file.
 ```yaml
 cert_manager:
   issuer_name: 'letsencrypt-prod'
 ```
-
-
 
 ## Features
 
@@ -99,10 +71,9 @@ The issuers solve the challenge:
 
 The
 * `letsencrypt-staging`. This is the Default used to:
-    * ensure that the verification process is working properly before moving to production.
-    * without hitting the [prod rate limits](https://letsencrypt.org/docs/rate-limits/)
+  * ensure that the verification process is working properly before moving to production.
+  * without hitting the [prod rate limits](https://letsencrypt.org/docs/rate-limits/)
 * `letsencrypt-prod` issues valid signed certificate
-
 
 
 You can check them in the CRD of the dashboard:
@@ -111,7 +82,7 @@ https://dashbord.example.com/#/customresourcedefinition/clusterissuers.cert-mana
 
 ### Kubee Internal CA
 
-We use an internal CA to issue internal certificate 
+We use an internal CA to issue internal certificate
 to:
 * enable SSL communication internally
 * issue certificate for auth service (database, oidc, ...)
@@ -122,6 +93,43 @@ The [cert-manager mixin](https://monitoring.mixins.dev/cert-manager/) is install
 to create:
 * [grafana dashboard](https://monitoring.mixins.dev/cert-manager/#dashboards) if the [grafana chart ](../grafana/README.md) is enabled
 * [alerts](https://monitoring.mixins.dev/cert-manager/#alerts) if the [prometheus chart](../prometheus/README.md) is enabled
+
+
+
+## Config
+### Cloudflare
+
+By default, the `http01` challenge is executed meaning  
+but if you want a `dns01` on Cloudflare, you can configure it this way:
+
+* Get the API key [Ref](https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/)
+  * Go to `Cloudflare > User Profile > API Tokens > API Tokens`.
+  * Create a token with
+  * Permissions:
+    * `Zone - DNS - Edit`
+    * `Zone - Zone - Read`
+    * Zone Resources :
+      * `Include - All Zones`
+* Set the cloudflare properties in your cluster values file.
+```yaml
+cert_manager:
+    dns01:
+        cloudflare:
+          # See cert-manager/README.md on how to get cloudflare api key
+          cloudflareApiToken: 'token'
+          # The dns Zone that are managed by cloudflare
+          dnsZones:
+            - my-apex-domain.tld
+            - another-apex-domain.tld
+```
+
+### Check the Root CA Bundle regularly
+
+The root CA Bundle does not change regularly, but it changes.
+You should check the actual version regularly.
+
+See How at [Securely Maintaining a trust-manager Installation](https://cert-manager.io/docs/trust/trust-manager/#securely-maintaining-a-trust-manager-installation)
+
 
 
 

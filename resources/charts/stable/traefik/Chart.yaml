@@ -18,7 +18,7 @@ version: 0.0.1
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "34.3.0" # Traefik Version
+appVersion: "34.4.0" # Traefik Version
 # https://github.com/cert-manager/cert-manager/releases
 # https://cert-manager.io/docs/installation/helm/#example-usage
 dependencies:
@@ -26,28 +26,33 @@ dependencies:
     # https://helm.sh/docs/chart_best_practices/dependencies/#versions
     # ~33.1.0, equivalent to >= 33.1.0, < 33.2.0
     # https://github.com/traefik/traefik-helm-chart/releases
-    version: 34.3.0
+    version: 34.4.0
     repository: https://traefik.github.io/charts
     alias: traefik
     #condition: certManager.enabled
   - name: kubee-cluster
     version: 0.0.1
-    #repository: file://../cluster
+    repository: file://../cluster
     alias: cluster
+  # For the name of the ca bundle
+  - name: kubee-cert-manager
+    version: 0.0.1
+    repository: file://../cert-manager
+    alias: cert_manager
   # For the dashboard
   - name: kubee-grafana
     version: 0.0.1
-    #repository: file://../grafana
+    repository: file://../grafana
     alias: grafana
     condition: kubee_internal.install_cross_dependency
   - name: kubee-oauth2-proxy
     version: 0.0.1
-    repository: file://../kubee-oauth2-proxy
+    repository: file://../oauth2-proxy
     alias: oauth2_proxy
     condition: kubee_internal.install_cross_dependency
   # For the scrape
   - name: kubee-prometheus
     version: 0.0.1
-    #repository: file://../prometheus
+    repository: file://../prometheus
     alias: prometheus
     condition: kubee_internal.install_cross_dependency
