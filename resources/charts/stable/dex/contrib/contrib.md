@@ -9,22 +9,7 @@ https://github.com/dexidp/helm-charts
 ## Bootstrap Helm Charts 
 
 ```bash
-mkdir "charts"
-ln -s $(realpath ../cluster) charts/kubee-cluster
-mkdir "charts/kubee-traefik"
-ln -s $(realpath ../traefik/Chart.yaml) charts/kubee-traefik/Chart.yaml
-ln -s $(realpath ../traefik/values.yaml) charts/kubee-traefik/values.yaml
-mkdir "charts/kubee-cert-manager"
-ln -s $(realpath ../cert-manager/Chart.yaml) charts/kubee-cert-manager/Chart.yaml
-ln -s $(realpath ../cert-manager/values.yaml) charts/kubee-cert-manager/values.yaml
-mkdir "charts/kubee-traefik-forward-auth"
-ln -s $(realpath ../traefik-forward-auth/Chart.yaml) charts/kubee-traefik-forward-auth/Chart.yaml
-ln -s $(realpath ../traefik-forward-auth/values.yaml) charts/kubee-traefik-forward-auth/values.yaml
-mkdir "charts/kubee-oauth2-proxy"
-ln -s $(realpath ../oauth2-proxy/Chart.yaml) charts/kubee-oauth2-proxy/Chart.yaml
-ln -s $(realpath ../oauth2-proxy/values.yaml) charts/kubee-oauth2-proxy/values.yaml
-# Pull
-helm pull https://github.com/dexidp/helm-charts/releases/download/dex-0.20.0/dex-0.20.0.tgz -d charts --untar
+ kubee helmet update-dependencies dex
 ```
 
 ## FAQ

@@ -1,0 +1,328 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "clients": {
+      "description": " https://dexidp.io/docs/guides/using-dex/#configuring-your-app",
+      "properties": {
+        "kubectl": {
+          "description": " Added if the secret is not empty",
+          "properties": {
+            "client_id": {
+              "const": "kubectl",
+              "default": "kubectl",
+              "description": "The kubectl client id",
+              "required": [],
+              "title": "client_id"
+            },
+            "secret": {
+              "default": "",
+              "description": "The oidc client secret (used to exchange the code between kubectl and dex) Example: `openssl rand -base64 32`",
+              "required": [],
+              "title": "secret"
+            }
+          },
+          "required": [],
+          "title": "kubectl"
+        },
+        "kubernetes": {
+          "properties": {
+            "client_id": {
+              "const": "kubernetes",
+              "default": "kubernetes",
+              "description": "The Kubernetes client id (ie token audience, fix value)",
+              "required": [],
+              "title": "client_id"
+            },
+            "trusted_peers": {
+              "description": "List of trusted client id All clients that needs kubernetes access should be in that list.",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "trusted_peers"
+            }
+          },
+          "required": [],
+          "title": "kubernetes",
+          "type": "object"
+        },
+        "oauth2_proxy": {
+          "properties": {
+            "client_id": {
+              "const": "oauth2-proxy",
+              "default": "oauth2-proxy",
+              "description": "The oauth2-proxy client id. If changed, all kubee charts that depends on it should be deployed again (traefik,...)",
+              "required": [],
+              "title": "client_id"
+            },
+            "secret": {
+              "default": "",
+              "description": "The oidc client secret (It is used to exchange the code between oauth2-proxy and dex). Example: `openssl rand -base64 32`",
+              "required": [],
+              "title": "The oauth2-proxy client id secret"
+            }
+          },
+          "required": [],
+          "title": "oauth2_proxy",
+          "type": "object"
+        },
+        "others": {
+          "description": "Other oidc clients definition to add your own clients. See the [doc](https://dexidp.io/docs/guides/using-dex/#configuring-your-app)",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "others"
+        }
+      },
+      "required": [
+        "kubernetes",
+        "oauth2_proxy"
+      ],
+      "title": "clients"
+    },
+    "connectors": {
+      "description": "Additional [auth connectors](https://dexidp.io/docs/connectors)",
+      "items": {
+        "required": []
+      },
+      "required": [],
+      "title": "connectors"
+    },
+    "dex": {
+      "description": " Dex Chart Values https://github.com/dexidp/helm-charts/blob/master/charts/dex/values.yaml",
+      "properties": {
+        "configSecret": {
+          "properties": {
+            "create": {
+              "default": false,
+              "required": [],
+              "title": "create",
+              "type": "boolean"
+            },
+            "name": {
+              "default": "dex-kubee-config",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "create",
+            "name"
+          ],
+          "title": "configSecret",
+          "type": "object"
+        },
+        "https": {
+          "properties": {
+            "enabled": {
+              "default": true,
+              "description": "False because it enable it with only one flag via command line and it conflicts with the configuration",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ],
+          "title": "https",
+          "type": "object"
+        },
+        "image": {
+          "properties": {
+            "tag": {
+              "default": "v2.41.1",
+              "description": "https://github.com/dexidp/dex/releases",
+              "required": [],
+              "title": "tag",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tag"
+          ],
+          "title": "image",
+          "type": "object"
+        },
+        "networkPolicy": {
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ],
+          "title": "networkPolicy",
+          "type": "object"
+        },
+        "serviceMonitor": {
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ],
+          "title": "serviceMonitor",
+          "type": "object"
+        },
+        "volumeMounts": {
+          "description": " as seen here: https://github.com/dexidp/dex/blob/a6dfa5ca9f9e1c819a846bd667c3c357da5252ac/examples/k8s/dex.yaml#L34",
+          "items": {
+            "anyOf": [
+              {
+                "properties": {
+                  "mountPath": {
+                    "default": "/etc/dex/tls",
+                    "required": [],
+                    "title": "mountPath",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "tls",
+                    "required": [],
+                    "title": "name",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "mountPath"
+                ],
+                "type": "object"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "volumeMounts"
+        },
+        "volumes": {
+          "items": {
+            "anyOf": [
+              {
+                "properties": {
+                  "name": {
+                    "default": "tls",
+                    "required": [],
+                    "title": "name",
+                    "type": "string"
+                  },
+                  "secret": {
+                    "properties": {
+                      "secretName": {
+                        "default": "dex-kubee-tls",
+                        "required": [],
+                        "title": "secretName",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "secretName"
+                    ],
+                    "title": "secret",
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "name",
+                  "secret"
+                ],
+                "type": "object"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "volumes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "configSecret",
+        "image",
+        "https",
+        "volumes",
+        "serviceMonitor",
+        "networkPolicy"
+      ],
+      "title": "dex"
+    },
+    "enabled": {
+      "default": false,
+      "description": "Boolean to indicate that this chart is or will be installed in the cluster",
+      "required": [],
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "expiration": {
+      "description": " It's possible to specify units using only s, m and h suffixes. This configuration are used by Oauth proxy to set cookie expiration settings",
+      "properties": {
+        "access_token_lifetime": {
+          "default": "10m",
+          "description": "The access token lifetime 24h is the [default](https://github.com/dexidp/dex/blob/65814bbd7746611a359408bb355fb4e12d6e2c14/config.yaml.dist#L89), 10m is the [recommended doc setting](https://dexidp.io/docs/configuration/tokens/#expiration-and-rotation-settings), 1m is the [recommended setting of Oauth proxy](https://oauth2-proxy.github.io/oauth2-proxy/configuration/session_storage). You can see the real value with the exp field of the JWS token",
+          "required": [],
+          "title": "access_token_lifetime"
+        },
+        "refresh_token_lifetime": {
+          "default": "168h",
+          "description": "The refresh token lifetime, it forces users to reauthenticate 3960h (165 days) is the [dex default](https://github.com/dexidp/dex/blob/65814bbd7746611a359408bb355fb4e12d6e2c14/config.yaml.dist#L89), 168h (7 days) is the [default cookie_expire value](https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview?_highlight=cookie_expire#cookie-options) You can see the real value in the cookie lifetime of oauth",
+          "required": [],
+          "title": "refresh_token_lifetime"
+        }
+      },
+      "required": [],
+      "title": "expiration"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "hostname": {
+      "default": "",
+      "description": "The public hostname (Required as you need a callback)",
+      "minLength": 1,
+      "required": [],
+      "title": "Hostname"
+    },
+    "kubee_internal": {
+      "description": "@ignored Internal Kubee constant",
+      "properties": {
+        "install_cross_dependency": {
+          "const": false,
+          "default": "false",
+          "description": " const: false @schema Constant used to not output template from kubee cross dependency in Chart.yaml Don't change, don't touch",
+          "required": [],
+          "title": "install_cross_dependency"
+        }
+      },
+      "required": [],
+      "title": "kubee_internal"
+    },
+    "namespace": {
+      "default": "auth",
+      "description": "The installation namespace",
+      "minLength": 1,
+      "required": [],
+      "title": "Namespace"
+    }
+  },
+  "required": [
+    "enabled",
+    "namespace",
+    "hostname"
+  ],
+  "type": "object"
+}

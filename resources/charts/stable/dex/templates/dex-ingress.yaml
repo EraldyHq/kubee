@@ -1,15 +1,15 @@
----
+{{ $ := mergeOverwrite $ (dict "component" "dex") }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "kubee-name-prefix" . }}
   namespace: {{.Values.namespace}}
   labels:
-    app.kubernetes.io/name: dex
-    app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "kubee-manifest-labels" . | indent 4}}
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.traefik.namespace }}-{{.Values.traefik.middlewares.auth_headers.name}}@kubernetescrd'
     {{- if not .Values.cert_manager.enabled }}
     {{- fail "cert_manager should be enabled" }}
     {{- end }}

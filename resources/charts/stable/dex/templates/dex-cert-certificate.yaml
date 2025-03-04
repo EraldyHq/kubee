@@ -1,14 +1,17 @@
-# TLS certificate for the Dex service, from local certificate authority.
+{{/*# TLS certificate for the Dex service, from local certificate authority.*/}}
+{{ $ := mergeOverwrite $ (dict "component" "dex") }}
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ include "kubee-name-prefix" . }}-tls
   namespace: {{ .Values.namespace }}
+  labels:
+      {{- include "kubee-manifest-labels" . | indent 4}}
 spec:
   secretName: {{ include "kubee-name-prefix" . }}-tls
   issuerRef:
-    kind: Issuer
-    name: {{ include "kubee-name-prefix" . }}-ca
+    kind: ClusterIssuer
+    name: {{ .Values.cert_manager.issuers.kubee.name }}
   dnsNames:
     - dex
     - dex.{{ .Values.namespace }}

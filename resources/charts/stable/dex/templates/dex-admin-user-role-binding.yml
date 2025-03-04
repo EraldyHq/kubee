@@ -1,10 +1,13 @@
-# Create the Role for the logged in admin user
+{{/*# Create the Role for the logged in admin user*/}}
+{{ $ := mergeOverwrite $ (dict "component" "dex") }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: '{{ .Values.cluster.auth.admin_user.username }}-email-binding-dex'
   # not namespaced
   # namespace: '.Release.Namespace'
+  labels:
+      {{- include "kubee-manifest-labels" . | indent 4}}
 roleRef:
   name: '{{ .Values.cluster.auth.admin_user.cluster_role }}'
   kind: ClusterRole

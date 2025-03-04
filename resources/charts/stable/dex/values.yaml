@@ -1,69 +1,93 @@
-# Enabled or not
-# not a string, don't quote
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
 enabled: false
-# The namespace
-# Used also for all auth clients such as auth proxy
+
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace
 namespace: 'auth'
 
-# The public hostname
+# @schema
+# title: Hostname
+# description: The public hostname
+# required: true
+# minLength: 1
+# @schema
+# -- The public hostname
 # (Required as you need a callback)
 hostname: ''
 
-# connectors
-# https://dexidp.io/docs/connectors
+# -- Additional [auth connectors](https://dexidp.io/docs/connectors)
 connectors: []
 
 # Clients
 # https://dexidp.io/docs/guides/using-dex/#configuring-your-app
 clients:
-  # Kubernetes
-  # The client id (ie token audience) accepted by Kubernetes Oidc for login
   kubernetes:
-    # The client id
-    # If changed, all kubee charts that depends on should be deployed again
+    # @schema
+    # const: 'kubernetes'
+    # @schema
+    # -- The Kubernetes client id (ie token audience, fix value)
     client_id: 'kubernetes'
-  # Oauth2_proxy
-  # For Traefik Forward Auth Middleware
+    # -- List of trusted client id
+    # All clients that needs kubernetes access should be in that list.
+    trusted_peers: []
   oauth2_proxy:
-    # The oidc client id
-    # If changed, all kubee charts that depends on should be deployed again
+    # @schema
+    # const: 'oauth2-proxy'
+    # @schema
+    # -- The oauth2-proxy client id.
+    # If changed, all kubee charts that depends on it should be deployed again (traefik,...)
     client_id: 'oauth2-proxy'
-    # The oidc client secret (used to exchange the code between oauth2-proxy and dex)
-    # openssl rand -base64 32
+    # @schema
+    # title: 'The oauth2-proxy client id secret'
+    # @schema
+    # -- The oidc client secret (It is used to exchange the code between oauth2-proxy and dex).
+    # Example: `openssl rand -base64 32`
     secret: ''
   # Kubectl (ie kubectl oidc-login)
   # Added if the secret is not empty
   kubectl:
-    # The client id
-    # If changed, all kubectl config should be modified
-    # and all kubee charts that depends on should be deployed again
-    client_id: 'kubectl'
-    # The oidc client secret (used to exchange the code between kubectl and dex)
-    # paopenssl rand -base64 32
+    # @schema
+    # const: 'kubectl'
+    # @schema
+    # -- The kubectl client id
+    client_id: 'kubectl' # If changed, all kubectl config should be modified
+    # -- The oidc client secret (used to exchange the code between kubectl and dex)
+    # Example: `openssl rand -base64 32`
     secret: ''
 
-  # Other client
-  # https://dexidp.io/docs/guides/using-dex/#configuring-your-app
+  # -- Other oidc clients definition to add your own clients. See the [doc](https://dexidp.io/docs/guides/using-dex/#configuring-your-app)
   others: []
 
-# Expiration settings
-# https://dexidp.io/docs/configuration/tokens/#expiration-and-rotation-settings
+# [Expiration settings](https://dexidp.io/docs/configuration/tokens/#expiration-and-rotation-settings)
 # It's possible to specify units using only s, m and h suffixes.
 # This configuration are used by Oauth proxy to set cookie expiration settings
 expiration:
-  # The access token lifetime
+  # -- The access token lifetime
   # 24h is the [default](https://github.com/dexidp/dex/blob/65814bbd7746611a359408bb355fb4e12d6e2c14/config.yaml.dist#L89),
-  # 10m is the [recommended doc setting](https://dexidp.io/docs/configuration/tokens/#expiration-and-rotation-settings)
-  # 1m is the [recommended setting of Oauth proxy](https://oauth2-proxy.github.io/oauth2-proxy/configuration/session_storage)
-  # You can set the real value with the exp field of the JWS token
+  # 10m is the [recommended doc setting](https://dexidp.io/docs/configuration/tokens/#expiration-and-rotation-settings),
+  # 1m is the [recommended setting of Oauth proxy](https://oauth2-proxy.github.io/oauth2-proxy/configuration/session_storage).
+  # You can see the real value with the exp field of the JWS token
   access_token_lifetime: "10m"
-  # The refresh token lifetime, it forces users to reauthenticate
+  # -- The refresh token lifetime, it forces users to reauthenticate
   # 3960h (165 days) is the [dex default](https://github.com/dexidp/dex/blob/65814bbd7746611a359408bb355fb4e12d6e2c14/config.yaml.dist#L89),
   # 168h (7 days) is the [default cookie_expire value](https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview?_highlight=cookie_expire#cookie-options)
   # You can see the real value in the cookie lifetime of oauth
   refresh_token_lifetime: "168h"
 
 
+
+# @ignored
 # Dex Chart Values
 # https://github.com/dexidp/helm-charts/blob/master/charts/dex/values.yaml
 dex:
@@ -91,6 +115,11 @@ dex:
     enabled: true
 
 
-# Internal don't change
+# -- @ignored Internal Kubee constant
 kubee_internal:
+  # @schema
+  # const: false
+  # @schema
+  # Constant used to not output template from kubee cross dependency in Chart.yaml
+  # Don't change, don't touch
   install_cross_dependency: false

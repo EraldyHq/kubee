@@ -53,7 +53,7 @@ include "kubee-name-prefix" (dict "Release" $.Release )
     {{- include "kubee-manifest-labels" $ | indent 4}}
 */}}
 {{- define "kubee-manifest-labels" }}
-{{ printf "app.kubernetes.io/name: %s" (required "app.kubernetes.io/name chart annotation is required " (index .Chart.Annotations "app.kubernetes.io/name")) }}
+{{ printf "app.kubernetes.io/name: %s" (required "app.kubernetes.io/name annotation is required in Chart.yaml" (index .Chart.Annotations "app.kubernetes.io/name")) }}
 {{ printf "app.kubernetes.io/component: %s" (required "component property is required " .component)}}
 {{ printf "app.kubernetes.io/instance: %s" .Release.Name }}
 {{ printf "app.kubernetes.io/version: %s" .Chart.AppVersion }}
