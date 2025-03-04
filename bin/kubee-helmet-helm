@@ -493,10 +493,17 @@ update-dependencies(){
               echo::err "No Url could be found to download $DEPENDENCY_CHART_NAME / $DEPENDENCY_CHART_VERSION in the index.yaml file ($REGISTRY_INDEX_YAML)"
               return 1
             fi
-            DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_YAML_URL";
-            if [[ "$DEPENDENCY_YAML_URL" =~ https.* ]]; then
-              DEPENDENCY_FULL_URL="$DEPENDENCY_YAML_URL";
-            fi
+            local DEPENDENCY_YAML_URL_SCHEME="${DEPENDENCY_YAML_URL%%:*}"
+            case "$DEPENDENCY_YAML_URL_SCHEME" in
+              "https"|"http"|"oci")
+                DEPENDENCY_FULL_URL="$DEPENDENCY_YAML_URL";
+                ;;
+              *)
+                # No scheme, relative url
+                DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_YAML_URL";
+                ;;
+            esac
+
           fi
 
           # Pull

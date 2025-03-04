@@ -13,4 +13,7 @@ tasks:
   tpl:
     cmds:
       - kubee helmet template --out kubernetes-dashboard
-
+  # Update the charts/ directory
+  dep:
+    cmds:
+      - kubee helmet update-dependencies kubernetes-dashboard

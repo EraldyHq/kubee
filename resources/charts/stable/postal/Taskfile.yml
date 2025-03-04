@@ -5,4 +5,16 @@ tasks:
   schema:
     cmds:
       # - pre-commit run helm-schema
-      - helm schema --helm-docs-compatibility-mode -k additionalProperties
+      - helm schema --helm-docs-compatibility-mode -k additionalProperties --dependencies-filter kubee-postal
+  # Generate the docs
+  docs:
+    cmds:
+      - helm-docs
+  # Output the template in the out directory
+  tpl:
+    cmds:
+      - kubee helmet template --out postal
+  # Update the charts/ directory
+  dep:
+    cmds:
+      - kubee helmet update-dependencies postal

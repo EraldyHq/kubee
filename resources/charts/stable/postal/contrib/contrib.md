@@ -11,27 +11,29 @@ Artifact:
 ## Bootstrap
 
 ```bash
-mkdir charts/
-ln -s $(realpath ../cluster) charts/kubee-cluster
-mkdir charts/kubee-cluster-0.0.1.tgz
-mkdir "charts/kubee-traefik"
-mkdir charts/kubee-traefik-0.0.1.tgz
-ln -s $(realpath ../traefik/Chart.yaml) charts/kubee-traefik/Chart.yaml
-ln -s $(realpath ../traefik/values.yaml) charts/kubee-traefik/values.yaml
-mkdir "charts/kubee-cert-manager"
-mkdir charts/kubee-cert-manager-0.0.1.tgz
-ln -s $(realpath ../cert-manager/Chart.yaml) charts/kubee-cert-manager/Chart.yaml
-ln -s $(realpath ../cert-manager/values.yaml) charts/kubee-cert-manager/values.yaml
+task dep
+```
+
+## Note
+### Postal Helm Chart
+We found [this postal chart](https://github.com/hoverkraft-tech/helm-chart-postal), but it's not yet released
+in a correct format.
 
 
-helm pull  oci://registry-1.docker.io/bitnamicharts/mariadb --version 20.4.1 -d charts --untar
-
+Does not work:
+```bash
 # Pull of https://github.com/hoverkraft-tech/helm-chart-postal
-# Does not work (Chart is not at the root)
 helm pull https://github.com/hoverkraft-tech/helm-chart-postal/archive/refs/tags/0.3.1.tar.gz -d charts --untar
 # Does not work (expect only one chart, chart is not at the root)
 helm pull oci://github.com/hoverkraft-tech/helm-chart-postal -d charts --untar
 ```
+
+## Config
+
+https://docs.postalserver.io/getting-started/configuration
+
+* [File](https://github.com/postalserver/postal/blob/main/doc/config/yaml.yml)
+* [Env](https://github.com/postalserver/postal/blob/main/doc/config/environment-variables.md)
 
 ## Maria Db
 
@@ -52,3 +54,43 @@ git remote add -f postal-chart https://github.com/dmitryzykov/postal-install.git
 git subtree add --prefix=resources/charts/stable/postal/charts/postal postal-chart main --squash -- helm/postal
 mkdir charts/postal-1.0.0.tgz
 ```
+
+## Installation
+
+### Postal Install
+
+Install the [postal bash cli](https://github.com/postalserver/install/blob/main/bin/postal)
+and resources
+```bash
+sudo git clone https://github.com/postalserver/install /opt/postal/install
+sudo ln -s /opt/postal/install/bin/postal /usr/bin/postal
+```
+
+
+### Boostrap
+To generate three files in `/opt/postal/config`
+```bash
+sudo postal bootstrap postal.yourdomain.com
+```
+```
+Latest version is: 3.3.4
+=> Creating /opt/postal/config/postal.yml
+=> Creating /opt/postal/config/Caddyfile
+=> Creating signing private key
+```
+See:
+* [postal](https://github.com/postalserver/postal/blob/main/doc/config/yaml.yml)
+* [Caddyfile](https://github.com/postalserver/install/blob/main/examples/Caddyfile)
+
+### Initialize/mk user
+
+It will run the [docker-compose.v$MAJOR_VERSION.yml](https://github.com/postalserver/install/blob/main/templates/docker-compose.v3.yml)
+to the `/opt/postal/install` dir
+
+
+## Note
+
+* Postal is a docker based installation. For instance, an upgrade is performed [postal upgrade command line](https://docs.postalserver.io/getting-started/upgrading)
+* `postal make-user` pull a big image (491MB around 4 minutes)
+* `postal` uses the `/config/postal.yml` conf
+* ruby app

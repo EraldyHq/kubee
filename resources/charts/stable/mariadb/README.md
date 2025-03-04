@@ -19,9 +19,24 @@ mariadb:
 kubee -c clusterName helmet play mariadb
 ```
 
+## Features
+
+### Automatic Cert Integration
+
+When `cert-manager` is enabled, the certificate are:
+* issued by the internal `kubee-ca` issuer.
+* and automatically rotated
+
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
 | namespace | string | `"mariadb"` | The installation Namespace |
+| mariadb-operator | object | | [The mariadb operator Helm Values](https://github.com/mariadb-operator/mariadb-operator/blob/0.37.1/deploy/charts/mariadb-operator/values.yaml) |
+
+## Note on memory
+
+This operator is pretty heavy in memory.
+In comparison to others operator that claims around `30Mi`, mariadb will claim `100Mi` of memory.
+

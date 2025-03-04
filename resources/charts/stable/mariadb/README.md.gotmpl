@@ -33,3 +33,9 @@ When `cert-manager` is enabled, the certificate are:
 {{ template "chart.valuesSection" . }}
 | mariadb-operator | object | | [The mariadb operator Helm Values](https://github.com/mariadb-operator/mariadb-operator/blob/{{ template "chart.appVersion" . }}/deploy/charts/mariadb-operator/values.yaml) |
 
+## Note on memory
+
+This operator is pretty heavy in memory. 
+In comparison to others operator that claims around `30Mi`, mariadb will claim `100Mi` of memory.
+
+
