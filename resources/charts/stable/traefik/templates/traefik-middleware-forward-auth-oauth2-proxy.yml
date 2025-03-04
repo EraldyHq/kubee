@@ -1,6 +1,6 @@
-# Forward authentication Middleware that passes te user
-# Oauth Proxy Doc: https://oauth2-proxy.github.io/oauth2-proxy/configuration/integration#configuring-for-use-with-the-traefik-v2-forwardauth-middleware
-# Traefik Doc: https://doc.traefik.io/traefik/middlewares/http/forwardauth/#configuration-examples
+{{/*# Forward authentication Middleware that passes the user*/}}
+{{/*# Oauth Proxy Doc: https://oauth2-proxy.github.io/oauth2-proxy/configuration/integration#configuring-for-use-with-the-traefik-v2-forwardauth-middleware*/}}
+{{/*# Traefik Doc: https://doc.traefik.io/traefik/middlewares/http/forwardauth/#configuration-examples*/}}
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
@@ -12,6 +12,6 @@ spec:
     # https://doc.traefik.io/traefik/middlewares/http/forwardauth/#insecureskipverify
     tls:
       caSecret: {{ .Values.cert_manager.issuers.kubee.bundle_name }}
-      # insecureSkipVerify: true
+      {{/* insecureSkipVerify: true - Only if you get an http error 500 */}}
     authResponseHeaders:
       - X-Forwarded-User

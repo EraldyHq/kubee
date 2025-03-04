@@ -4,54 +4,8 @@
     "cert_manager": {
       "description": "The cert manager kubee chart",
       "properties": {
-        "acme_issuers": {
-          "description": "Issuers endpoint",
-          "properties": {
-            "prod": {
-              "properties": {
-                "name": {
-                  "default": "letsencrypt-prod",
-                  "required": [],
-                  "title": "name",
-                  "type": "string"
-                },
-                "url": {
-                  "default": "https://acme-v02.api.letsencrypt.org/directory",
-                  "required": [],
-                  "title": "url",
-                  "type": "string"
-                }
-              },
-              "required": [],
-              "title": "prod",
-              "type": "object"
-            },
-            "staging": {
-              "properties": {
-                "name": {
-                  "default": "letsencrypt-staging",
-                  "required": [],
-                  "title": "name",
-                  "type": "string"
-                },
-                "url": {
-                  "default": "https://acme-staging-v02.api.letsencrypt.org/directory",
-                  "required": [],
-                  "title": "url",
-                  "type": "string"
-                }
-              },
-              "required": [],
-              "title": "staging",
-              "type": "object"
-            }
-          },
-          "required": [],
-          "title": "acme_issuers",
-          "type": "object"
-        },
         "cert-manager": {
-          "description": " defined by either the name or alias of your dependency in Chart.yaml",
+          "description": " defined by either the name or alias of your dependency in Chart.yaml @ignored",
           "properties": {
             "clusterResourceNamespace": {
               "default": "",
@@ -62,7 +16,7 @@
             "crds": {
               "properties": {
                 "enabled": {
-                  "default": true,
+                  "default": false,
                   "required": [],
                   "title": "enabled",
                   "type": "boolean"
@@ -73,10 +27,11 @@
               "type": "object"
             },
             "namespace": {
-              "default": "cert-manager",
-              "description": " fixed so that we don't make any mistake",
+              "default": "{{ .Values.namespace }}",
+              "description": "Installation namespace",
               "required": [],
-              "title": "namespace"
+              "title": "namespace",
+              "type": "string"
             },
             "prometheus": {
               "description": " https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/README.template.md#prometheus",
@@ -128,47 +83,45 @@
             "cloudflare": {
               "description": " Spec: https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderCloudflare Notes: in the doc, they use an email because they show an apiKey Auth, not an apiToken `ApiToken` is now the preferred method",
               "properties": {
+                "api_token": {
+                  "description": " A secret or external secret can be created",
+                  "properties": {
+                    "external_secret_remote_ref": {
+                      "properties": {
+                        "key": {
+                          "default": "",
+                          "description": "The external secret ref. If the remote ref key is not empty, an external secret is created (used for GitOps)",
+                          "required": [],
+                          "title": "key"
+                        },
+                        "property": {
+                          "default": "",
+                          "description": "The external secret property.",
+                          "required": [],
+                          "title": "property"
+                        }
+                      },
+                      "required": [],
+                      "title": "external_secret_remote_ref",
+                      "type": "object"
+                    },
+                    "k8s_secret_value": {
+                      "default": "",
+                      "description": "The api token value. If not empty, a Kubernetes secret is created.",
+                      "required": [],
+                      "title": "k8s_secret_value"
+                    }
+                  },
+                  "required": [],
+                  "title": "api_token"
+                },
                 "dns_zones": {
-                  "description": "The dns Zones that are managed by cloudflare, mandatory",
+                  "description": "the dns Zones that are managed by cloudflare, mandatory (ie a list of apex domains)",
                   "items": {
                     "required": []
                   },
                   "required": [],
-                  "title": "dns_zones",
-                  "type": "array"
-                },
-                "secret": {
-                  "description": " A secret or external secret can be created",
-                  "properties": {
-                    "cloudflare_api_token": {
-                      "default": "",
-                      "description": "A Kubernetes secret will be created if not empty",
-                      "required": [],
-                      "title": "cloudflare_api_token",
-                      "type": "string"
-                    },
-                    "external_secret_remote_ref": {
-                      "description": " if remote ref key is not empty",
-                      "properties": {
-                        "key": {
-                          "default": "",
-                          "required": [],
-                          "title": "key",
-                          "type": "string"
-                        },
-                        "property": {
-                          "default": "",
-                          "required": [],
-                          "title": "property",
-                          "type": "string"
-                        }
-                      },
-                      "required": [],
-                      "title": "external_secret_remote_ref"
-                    }
-                  },
-                  "required": [],
-                  "title": "secret"
+                  "title": "dns_zones"
                 }
               },
               "required": [],
@@ -180,7 +133,7 @@
         },
         "enabled": {
           "default": "false",
-          "description": " When disabled, the default certificate specified on Traefik is used Not a string, a boolean so no quote",
+          "description": "If true, cert-manager is or will be installed on the cluster When disabled, the default ingress certificate specified on Traefik is used Not a string, a boolean so no quote",
           "required": [],
           "title": "enabled"
         },
@@ -190,27 +143,60 @@
           "title": "global",
           "type": "object"
         },
-        "http01": {
-          "description": " https://cert-manager.io/docs/tutorials/acme/http-validation/ This is the default configuration if there is no DNS challenge configured for the domain, You need then to update your DNS to add an A or CNAME record to point the domain name at the correct IP address Wildcard certificates are not supported with HTTP01 validation and require DNS01. This challenge is disabled if ingressClassName is empty",
+        "issuer_name": {
+          "default": "letsencrypt-staging",
+          "required": [],
+          "title": "issuer_name",
+          "type": "string"
+        },
+        "issuers": {
+          "description": "The issuers",
           "properties": {
-            "ingress_class_name": {
-              "default": "traefik",
-              "description": " Used by cert manager to create ingress resource to resolve the http01 challenge A new ingress resource with a randomly generated name is created in order to solve the challenge.",
+            "kubee": {
+              "properties": {
+                "bundle_name": {
+                  "const": "kubee-ca-bundle",
+                  "default": "kubee-ca-bundle",
+                  "description": "The kubee cert bundle with the root CA and the kubee ca cert It's distributed to clients to create secure TLS connection",
+                  "required": [],
+                  "title": "bundle_name"
+                },
+                "name": {
+                  "const": "kubee-ca",
+                  "default": "kubee-ca",
+                  "description": "The kubee issuer name. The kubee issuer is used to create certificates for the local private domain cluster.local",
+                  "required": [],
+                  "title": "name"
+                }
+              },
               "required": [],
-              "title": "ingress_class_name"
+              "title": "kubee",
+              "type": "object"
+            },
+            "public": {
+              "properties": {
+                "name": {
+                  "default": "letsencrypt-staging",
+                  "description": "The public issuer name. The public issuer is used to create certificate for public access (ie public network / public domain name) It should be changed to `letsencrypt-prod` when the `letsencrypt-staging` is working and validated",
+                  "enum": [
+                    "letsencrypt-staging",
+                    "letsencrypt-prod"
+                  ],
+                  "required": [],
+                  "title": "name"
+                }
+              },
+              "required": [],
+              "title": "public",
+              "type": "object"
             }
           },
           "required": [],
-          "title": "http01"
-        },
-        "issuer_name": {
-          "default": "letsencrypt-staging",
-          "description": " of kubee by default Should be changed to 'letsencrypt-prod' when validated",
-          "required": [],
-          "title": "issuer_name"
+          "title": "issuers",
+          "type": "object"
         },
         "kubee_internal": {
-          "description": "Don't touch, used to block template output of cross dependency",
+          "description": " Don't touch, used to block template output of cross dependency",
           "properties": {
             "install_cross_dependency": {
               "default": false,
@@ -220,15 +206,96 @@
             }
           },
           "required": [],
-          "title": "kubee_internal",
-          "type": "object"
+          "title": "kubee_internal"
         },
         "namespace": {
           "default": "cert-manager",
-          "description": "Namespace",
+          "description": "The installation namespace",
           "required": [],
-          "title": "namespace",
-          "type": "string"
+          "title": "namespace"
+        },
+        "trust-manager": {
+          "description": " @ignored",
+          "properties": {
+            "app": {
+              "properties": {
+                "metrics": {
+                  "properties": {
+                    "service": {
+                      "properties": {
+                        "servicemonitor": {
+                          "properties": {
+                            "enabled": {
+                              "default": false,
+                              "description": "We do it ourselves so that there is some logic",
+                              "required": [],
+                              "title": "enabled",
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [],
+                          "title": "servicemonitor",
+                          "type": "object"
+                        }
+                      },
+                      "required": [],
+                      "title": "service",
+                      "type": "object"
+                    }
+                  },
+                  "required": [],
+                  "title": "metrics",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "app",
+              "type": "object"
+            },
+            "crds": {
+              "properties": {
+                "enabled": {
+                  "default": "false",
+                  "description": " no matches for kind \"Bundle\" in version \"trust.cert-manager.io/v1alpha1\"",
+                  "required": [],
+                  "title": "enabled"
+                }
+              },
+              "required": [],
+              "title": "crds",
+              "type": "object"
+            },
+            "secretTargets": {
+              "description": "Traefik require the TLS data to be secret",
+              "properties": {
+                "authorizedSecrets": {
+                  "description": " not be good executing from another context when creating our values file",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "required": [],
+                        "type": "string"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "authorizedSecrets"
+                },
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                }
+              },
+              "required": [],
+              "title": "secretTargets",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "trust-manager"
         }
       },
       "required": [],
@@ -237,7 +304,7 @@
     },
     "enable_private_network_middleware": {
       "default": true,
-      "description": " title: Private Network Restriction description: Applied the private network middleware required: true type: boolean @schema Enable private network If true and a private network has been defined in Traefik, only the IP from the private network will be able to connect to the SMTP server",
+      "description": "Enable private network. If true and a private network has been defined in Traefik, only the IP from the private network will be able to connect to the SMTP server",
       "required": [],
       "title": "Private Network Restriction",
       "type": "boolean"
@@ -263,7 +330,7 @@
       "title": "Hostname"
     },
     "kubee_internal": {
-      "description": "Internal Kubee constant",
+      "description": "@ignored Internal Kubee constant",
       "properties": {
         "install_cross_dependency": {
           "const": false,
@@ -274,8 +341,7 @@
         }
       },
       "required": [],
-      "title": "kubee_internal",
-      "type": "object"
+      "title": "kubee_internal"
     },
     "mailpit": {
       "description": "An email and SMTP testing tool with API for developers",
@@ -1029,7 +1095,7 @@
     },
     "namespace": {
       "default": "mail",
-      "description": "The installation Namespace",
+      "description": "The installation namespace",
       "minLength": 1,
       "required": [],
       "title": "Namespace"
@@ -1057,6 +1123,307 @@
           },
           "required": [],
           "title": "auth",
+          "type": "object"
+        },
+        "cert_manager": {
+          "description": "The cert manager kubee chart",
+          "properties": {
+            "cert-manager": {
+              "description": " defined by either the name or alias of your dependency in Chart.yaml @ignored",
+              "properties": {
+                "clusterResourceNamespace": {
+                  "default": "",
+                  "description": "cluster-resource-namespace=my-namespace https://cert-manager.io/docs/configuration/#cluster-resource-namespace The Cluster Resource Namespace is defaulted as being the `cert-manager` namespace, A ClusterIssuer CA will create the certificate in this namespace https://cert-manager.io/docs/configuration/ca/#deployment",
+                  "required": [],
+                  "title": "clusterResourceNamespace"
+                },
+                "crds": {
+                  "properties": {
+                    "enabled": {
+                      "default": false,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [],
+                  "title": "crds",
+                  "type": "object"
+                },
+                "namespace": {
+                  "default": "{{ .Values.namespace }}",
+                  "description": "Installation namespace",
+                  "required": [],
+                  "title": "namespace",
+                  "type": "string"
+                },
+                "prometheus": {
+                  "description": " https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/README.template.md#prometheus",
+                  "properties": {
+                    "enabled": {
+                      "default": false,
+                      "description": "We don't create it ourselves because it's pretty hard.",
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    },
+                    "servicemonitor": {
+                      "properties": {
+                        "enabled": {
+                          "default": false,
+                          "required": [],
+                          "title": "enabled",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [],
+                      "title": "servicemonitor",
+                      "type": "object"
+                    }
+                  },
+                  "required": [],
+                  "title": "prometheus"
+                },
+                "webhook": {
+                  "properties": {
+                    "timeoutSeconds": {
+                      "default": 4,
+                      "required": [],
+                      "title": "timeoutSeconds",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [],
+                  "title": "webhook",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "cert-manager"
+            },
+            "dns01": {
+              "description": " You don't need to publish a DNS A record",
+              "properties": {
+                "cloudflare": {
+                  "description": " Spec: https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderCloudflare Notes: in the doc, they use an email because they show an apiKey Auth, not an apiToken `ApiToken` is now the preferred method",
+                  "properties": {
+                    "api_token": {
+                      "description": " A secret or external secret can be created",
+                      "properties": {
+                        "external_secret_remote_ref": {
+                          "properties": {
+                            "key": {
+                              "default": "",
+                              "description": "The external secret ref. If the remote ref key is not empty, an external secret is created (used for GitOps)",
+                              "required": [],
+                              "title": "key"
+                            },
+                            "property": {
+                              "default": "",
+                              "description": "The external secret property.",
+                              "required": [],
+                              "title": "property"
+                            }
+                          },
+                          "required": [],
+                          "title": "external_secret_remote_ref",
+                          "type": "object"
+                        },
+                        "k8s_secret_value": {
+                          "default": "",
+                          "description": "The api token value. If not empty, a Kubernetes secret is created.",
+                          "required": [],
+                          "title": "k8s_secret_value"
+                        }
+                      },
+                      "required": [],
+                      "title": "api_token"
+                    },
+                    "dns_zones": {
+                      "description": "the dns Zones that are managed by cloudflare, mandatory (ie a list of apex domains)",
+                      "items": {
+                        "required": []
+                      },
+                      "required": [],
+                      "title": "dns_zones"
+                    }
+                  },
+                  "required": [],
+                  "title": "cloudflare"
+                }
+              },
+              "required": [],
+              "title": "dns01"
+            },
+            "enabled": {
+              "default": "false",
+              "description": "If true, cert-manager is or will be installed on the cluster When disabled, the default ingress certificate specified on Traefik is used Not a string, a boolean so no quote",
+              "required": [],
+              "title": "enabled"
+            },
+            "global": {
+              "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+              "required": [],
+              "title": "global",
+              "type": "object"
+            },
+            "issuer_name": {
+              "default": "letsencrypt-staging",
+              "required": [],
+              "title": "issuer_name",
+              "type": "string"
+            },
+            "issuers": {
+              "description": "The issuers",
+              "properties": {
+                "kubee": {
+                  "properties": {
+                    "bundle_name": {
+                      "const": "kubee-ca-bundle",
+                      "default": "kubee-ca-bundle",
+                      "description": "The kubee cert bundle with the root CA and the kubee ca cert It's distributed to clients to create secure TLS connection",
+                      "required": [],
+                      "title": "bundle_name"
+                    },
+                    "name": {
+                      "const": "kubee-ca",
+                      "default": "kubee-ca",
+                      "description": "The kubee issuer name. The kubee issuer is used to create certificates for the local private domain cluster.local",
+                      "required": [],
+                      "title": "name"
+                    }
+                  },
+                  "required": [],
+                  "title": "kubee",
+                  "type": "object"
+                },
+                "public": {
+                  "properties": {
+                    "name": {
+                      "default": "letsencrypt-staging",
+                      "description": "The public issuer name. The public issuer is used to create certificate for public access (ie public network / public domain name) It should be changed to `letsencrypt-prod` when the `letsencrypt-staging` is working and validated",
+                      "enum": [
+                        "letsencrypt-staging",
+                        "letsencrypt-prod"
+                      ],
+                      "required": [],
+                      "title": "name"
+                    }
+                  },
+                  "required": [],
+                  "title": "public",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "issuers",
+              "type": "object"
+            },
+            "kubee_internal": {
+              "description": " Don't touch, used to block template output of cross dependency",
+              "properties": {
+                "install_cross_dependency": {
+                  "default": false,
+                  "required": [],
+                  "title": "install_cross_dependency",
+                  "type": "boolean"
+                }
+              },
+              "required": [],
+              "title": "kubee_internal"
+            },
+            "namespace": {
+              "default": "cert-manager",
+              "description": "The installation namespace",
+              "required": [],
+              "title": "namespace"
+            },
+            "trust-manager": {
+              "description": " @ignored",
+              "properties": {
+                "app": {
+                  "properties": {
+                    "metrics": {
+                      "properties": {
+                        "service": {
+                          "properties": {
+                            "servicemonitor": {
+                              "properties": {
+                                "enabled": {
+                                  "default": false,
+                                  "description": "We do it ourselves so that there is some logic",
+                                  "required": [],
+                                  "title": "enabled",
+                                  "type": "boolean"
+                                }
+                              },
+                              "required": [],
+                              "title": "servicemonitor",
+                              "type": "object"
+                            }
+                          },
+                          "required": [],
+                          "title": "service",
+                          "type": "object"
+                        }
+                      },
+                      "required": [],
+                      "title": "metrics",
+                      "type": "object"
+                    }
+                  },
+                  "required": [],
+                  "title": "app",
+                  "type": "object"
+                },
+                "crds": {
+                  "properties": {
+                    "enabled": {
+                      "default": "false",
+                      "description": " no matches for kind \"Bundle\" in version \"trust.cert-manager.io/v1alpha1\"",
+                      "required": [],
+                      "title": "enabled"
+                    }
+                  },
+                  "required": [],
+                  "title": "crds",
+                  "type": "object"
+                },
+                "secretTargets": {
+                  "description": "Traefik require the TLS data to be secret",
+                  "properties": {
+                    "authorizedSecrets": {
+                      "description": " not be good executing from another context when creating our values file",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "required": [],
+                            "type": "string"
+                          }
+                        ],
+                        "required": []
+                      },
+                      "required": [],
+                      "title": "authorizedSecrets"
+                    },
+                    "enabled": {
+                      "default": true,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [],
+                  "title": "secretTargets",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "trust-manager"
+            }
+          },
+          "required": [],
+          "title": "kubee-cert-manager",
           "type": "object"
         },
         "default_certificate": {
@@ -1157,11 +1524,10 @@
                   "type": "string"
                 },
                 "users": {
-                  "default": "",
                   "description": "List of extra users alongside the admin user",
                   "required": [],
                   "title": "users",
-                  "type": "null"
+                  "type": "object"
                 }
               },
               "required": [],
@@ -1525,9 +1891,7 @@
     "enabled",
     "namespace",
     "hostname",
-    "enable_private_network_middleware",
-    "mailpit",
-    "kubee_internal"
+    "enable_private_network_middleware"
   ],
   "type": "object"
 }

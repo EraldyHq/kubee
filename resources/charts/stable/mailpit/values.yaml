@@ -14,7 +14,7 @@ enabled: false
 # required: true
 # minLength: 1
 # @schema
-# -- The installation Namespace
+# -- The installation namespace
 namespace: 'mail'
 
 # @schema
@@ -32,19 +32,28 @@ hostname: ''
 # required: true
 # type: boolean
 # @schema
-# Enable private network
+# -- Enable private network.
 # If true and a private network has been defined in Traefik,
 # only the IP from the private network will be able to
 # connect to the SMTP server
 enable_private_network_middleware: true
 
 # Mail Pit Values
-mailpit: # @schema hidden: true; $ref: https://raw.githubusercontent.com/jouve/charts/refs/heads/main/charts/mailpit/values.schema.json
+# -- @ignored
+mailpit: #
   image:
     # https://github.com/axllent/mailpit/releases
     tag: "v1.22.3"
   service:
     smtp:
+      # @schema
+      # title: The smtp port
+      # description: The smtp port
+      # required: true
+      # const: 465
+      # @schema
+      # -- The smtp port.
+      # The smtp port should be 465 to enable TLS to be able to route the mail via SNI on Traefik
       port: 465
       #externalTrafficPolicy: Local
   args:
@@ -57,7 +66,7 @@ mailpit: # @schema hidden: true; $ref: https://raw.githubusercontent.com/jouve/c
         secretName: "mailpit-cert"
 
 
-# Internal Kubee constant
+# -- @ignored Internal Kubee constant
 kubee_internal:
   # @schema
   # const: false

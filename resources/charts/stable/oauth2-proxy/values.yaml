@@ -8,6 +8,7 @@ version: "v7.8.1"
 hostname: ''
 # Auth
 auth:
+  # @schema
   # Secret Mandatory: A random value used to sign cookies
   # cookie_secret must be 16, 24, or 32 bytes to create an AES cipher
   # Example command: dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_' ; echo
