@@ -9,3 +9,8 @@ tasks:
   docs:
     cmds:
       - helm-docs
+  # Output the template in the out directory
+  tpl:
+    cmds:
+      - kubee helmet template --out cert-manager
+

@@ -38,9 +38,12 @@ kubee --cluster clusterName helmet play cert-manager
 
 ### Change the default issuer
 
-By default, the certificate are issued with `letsencrypt-staging` and are [not valid](#why-my-certificates-are-not-valid).
+By default, the certificate are issued with `letsencrypt-staging` to not hit the
+letsencrypt rate limit in case of misconfiguration.
 
-When you have controlled that you receive certificate 
+The issued staging certificate are therefore [not valid](#why-my-certificates-are-not-valid).
+
+Once you have controlled that you receive certificate 
 * from Letsencrypt
 * and not the default Traefik certificate
 you should change the default issuer value to `letsencrypt-prod` 
@@ -48,7 +51,9 @@ you should change the default issuer value to `letsencrypt-prod`
 Example: In your cluster values file.
 ```yaml
 cert_manager:
-  issuer_name: 'letsencrypt-prod'
+  issuers: 
+    public:
+      name: 'letsencrypt-prod'
 ```
 
 ## Features
@@ -76,9 +81,6 @@ The
 * `letsencrypt-prod` issues valid signed certificate
 
 
-You can check them in the CRD of the dashboard:
-https://dashbord.example.com/#/customresourcedefinition/clusterissuers.cert-manager.io?namespace=cert-manager
-
 
 ### Kubee Internal CA
 
@@ -91,15 +93,15 @@ to:
 
 The [cert-manager mixin](https://monitoring.mixins.dev/cert-manager/) is installed
 to create:
-* [grafana dashboard](https://monitoring.mixins.dev/cert-manager/#dashboards) if the [grafana chart ](../grafana/README.md) is enabled
-* [alerts](https://monitoring.mixins.dev/cert-manager/#alerts) if the [prometheus chart](../prometheus/README.md) is enabled
+* the [grafana dashboard](https://monitoring.mixins.dev/cert-manager/#dashboards) if the [grafana chart ](../grafana/README.md) is enabled
+* the [alerts](https://monitoring.mixins.dev/cert-manager/#alerts) if the [prometheus chart](../prometheus/README.md) is enabled
 
 
 
 ## Config
 ### Cloudflare
 
-By default, the `http01` challenge is executed meaning  
+By default, the `http01` challenge is executed 
 but if you want a `dns01` on Cloudflare, you can configure it this way:
 
 * Get the API key [Ref](https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/)
@@ -128,7 +130,7 @@ cert_manager:
 The root CA Bundle does not change regularly, but it changes.
 You should check the actual version regularly.
 
-See How at [Securely Maintaining a trust-manager Installation](https://cert-manager.io/docs/trust/trust-manager/#securely-maintaining-a-trust-manager-installation)
+See `How-to` at [Securely Maintaining a trust-manager Installation](https://cert-manager.io/docs/trust/trust-manager/#securely-maintaining-a-trust-manager-installation)
 
 
 
@@ -139,7 +141,8 @@ See How at [Securely Maintaining a trust-manager Installation](https://cert-mana
 
 ### Why my certificates are not valid
 
-By default, this chart is set to work with the [Let's encrypt Staging environment](https://letsencrypt.org/docs/staging-environment/).
+By default, this chart is set to work with the [Let's encrypt Staging environment](https://letsencrypt.org/docs/staging-environment/)
+to not hit the rate limit.
 
 The certificates are:
 * not valid (not trusted)

@@ -23,5 +23,5 @@ spec:
     - '{{ .Values.hostname }}'
   issuerRef:
     kind: ClusterIssuer
-    name: '{{ .Values.cert_manager.issuer_name }}'
+    name: '{{ .Values.cert_manager.issuers.public.name }}'
 {{- end -}}

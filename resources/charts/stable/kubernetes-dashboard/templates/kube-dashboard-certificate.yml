@@ -15,5 +15,5 @@ spec:
     - '{{ required "hostname should not be null" .Values.hostname }}'
   issuerRef:
     kind: ClusterIssuer
-    name: '{{ required "cert_manager.issuer_name should not be null" .Values.cert_manager.issuer_name }}'
+    name: '{{ required "cert_manager.issuers.public.name should not be null" .Values.cert_manager.issuers.public.name }}'
 {{- end}}

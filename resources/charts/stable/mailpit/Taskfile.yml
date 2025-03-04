@@ -4,7 +4,7 @@ tasks:
   # Generate the values.schema.json
   schema:
     cmds:
-      - helm schema --helm-docs-compatibility-mode -k additionalProperties
+      - helm schema --helm-docs-compatibility-mode -k additionalProperties --dependencies-filter kubee-mailpit
   # Generate the docs
   docs:
     cmds:

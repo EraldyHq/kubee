@@ -7,9 +7,8 @@ enabled: false
 # -- The installation namespace
 namespace: 'cert-manager'
 
-issuer_name: 'letsencrypt-staging'
 
-# The issuers
+# The ca issuers
 issuers:
   public:
     # @schema

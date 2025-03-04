@@ -72,7 +72,7 @@ Test:
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.tls: "true"
         {{- if ne .Values.cert_manager.enabled false }}
-        cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuer_name }}'
+        cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuers.public.name }}'
         {{- end }}
     spec:
       ingressClassName: traefik

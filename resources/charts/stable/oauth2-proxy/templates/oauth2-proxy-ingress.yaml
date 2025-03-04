@@ -14,7 +14,7 @@ metadata:
     {{- if not .Values.cert_manager.enabled }}
     {{- fail "cert_manager should be enabled" }}
     {{- end }}
-    cert-manager.io/cluster-issuer: {{.Values.cert_manager.issuer_name}}
+    cert-manager.io/cluster-issuer: {{.Values.cert_manager.issuers.public.name}}
 spec:
   rules:
     - host: {{ .Values.hostname}}

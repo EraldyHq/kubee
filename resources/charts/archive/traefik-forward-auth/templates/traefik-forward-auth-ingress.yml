@@ -16,7 +16,7 @@ metadata:
     {{- /* Otherwise it will request auth for itself   */}}
     {{- /* Credit https://github.com/coderanger/traefik-forward-auth-dex/blob/da8fd51cd49c3c22b4746c9918bb06c9bf7def8b/forward-auth.yml#L61C5-L63C93  */}}
     traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.namespace}}-{{ .Values.traefik.middlewares.forward_auth.name }}@kubernetescrd'
-    cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuer_name }}'
+    cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuers.public.name }}'
 spec:
   ingressClassName: traefik
   rules:

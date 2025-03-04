@@ -14,7 +14,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.traefik.namespace }}-{{ .Values.auth_middleware }}@kubernetescrd'
     {{- end }}
     {{- if ne .Values.cert_manager.enabled false }}
-    cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuer_name }}'
+    cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuers.public.name }}'
     {{- end }}
 spec:
   rules:

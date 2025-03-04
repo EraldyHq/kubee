@@ -25,7 +25,7 @@ local kxValues = {
 
   // Cert Manager
   cert_manager_enabled: validation.getNestedPropertyOrThrow(kxExtValues, 'cert_manager.enabled'),
-  cert_manager_issuer_name: validation.getNestedPropertyOrThrow(kxExtValues, 'cert_manager.issuer_name'),
+  cert_manager_issuer_name: validation.getNestedPropertyOrThrow(kxExtValues, 'cert_manager.issuers.public.name'),
 
   // Alert Manager
   alert_manager_name: validation.getNestedPropertyOrThrow(kxExtValues, 'alert_manager.name'),

@@ -53,8 +53,6 @@ This is the default configuration if there is no DNS challenge configured for th
 You need then to update your DNS to add an A or CNAME record to point the domain name at the correct IP address
 
 
-
-
 ### Why not ingress traefik cert?
 
 
