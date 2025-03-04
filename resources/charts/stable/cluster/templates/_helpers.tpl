@@ -51,8 +51,11 @@ include "kubee-name-prefix" (dict "Release" $.Release )
     or
     {{ $ := mergeOverwrite $ (dict "component" "cloudflare") }}
     {{- include "kubee-manifest-labels" $ | indent 4}}
+    
+    app/name is used by old cli as default such as kubenav for pod selection of Prometheus
 */}}
 {{- define "kubee-manifest-labels" }}
+{{ printf "app/name: %s" (required "app.kubernetes.io/name annotation is required in Chart.yaml" (index .Chart.Annotations "app.kubernetes.io/name")) }}
 {{ printf "app.kubernetes.io/name: %s" (required "app.kubernetes.io/name annotation is required in Chart.yaml" (index .Chart.Annotations "app.kubernetes.io/name")) }}
 {{ printf "app.kubernetes.io/component: %s" (required "component property is required " .component)}}
 {{ printf "app.kubernetes.io/instance: %s" .Release.Name }}
