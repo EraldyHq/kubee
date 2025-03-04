@@ -1,7 +1,7 @@
 {{- if and (ne .Values.cert_manager.enabled false ) (ne .Values.hostname "") }}
 {{- /*
   # The certificate
-  # Because we use IngressRoute, it needs to be created manually)
+  # Because we use a IngressRoute CRD and not Ingress, it needs to be created explictly)
 */}}
 apiVersion: cert-manager.io/v1
 kind: Certificate

@@ -1,17 +1,40 @@
-# Enabled or not
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
 enabled: false
-# The namespace
+
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace
 namespace: 'kubernetes-dashboard'
-# The external DNS
-# Example: hostname: 'dash.kubee.dev'
-# If set, an ingress will be created
+
+# @schema
+# title: Hostname
+# description: The public hostname
+# required: true
+# @schema
+# -- The public hostname
+# If not empty, an ingress is created
 hostname: ''
-# Auth
-# By default, you need to enter a service account token
-# But if the oauth2-proxy, dex and cluster oidc connect are installed and configured
-# you can use a middleware to authenticate the users
+
+# @schema
+# title: Use Auth Middleware
+# type: boolean
+# required: true
+# @schema
+# -- Use the auth proxy middleware to login.
+# If false, you need to enter a service account token to login.
+# If true, you are redirected to the authentication app (ie dex) via the proxy middleware chain (ie oauth2-proxy, dex and kubernetes oidc connect)
 use_auth_middleware: false
 
+# @ignored
 # Default of
 # https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml
 kubernetes-dashboard:
@@ -93,9 +116,9 @@ kubernetes-dashboard:
     resources:
        limits:
         # start at 75
-        memory: 100Mi
+        memory: 120Mi
        requests:
-        memory: 100Mi
+        memory: 120Mi
     image:
       # 3.9 and not 3.8 to solve this issue https://github.com/Kong/kong/issues/13730
       # pfff start with 75, but go into crashLoop after a couple of minute and does not reload as it should weird
@@ -105,13 +128,11 @@ kubernetes-dashboard:
       # https://github.com/Kong/kong/releases/
       tag: "3.9"
 
-# Internal, don't change
+# -- @ignored Internal Kubee constant
 kubee_internal:
+  # @schema
+  # const: false
+  # @schema
+  # Constant used to not output template from kubee cross dependency in Chart.yaml
+  # Don't change, don't touch
   install_cross_dependency: false
-
-# Move these values to helpers
-# Name used for consistency
-# Suffix Name of the cert for the ingress
-ingressDashboardCertSuffix: 'cert'
-# The name of the secret that holds the certificate
-ingressDashboardCertSecretNameSuffix: 'cert-secret'

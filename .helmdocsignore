@@ -2,6 +2,7 @@
 # see issue: https://github.com/norwoodj/helm-docs/issues/206
 resources/charts/stable/cert-manager/charts
 resources/charts/stable/dex/charts
+resources/charts/stable/kubernetes-dashboard/charts
 resources/charts/stable/mailpit/charts
 resources/charts/stable/oauth2-proxy/charts
 resources/charts/stable/traefik/charts

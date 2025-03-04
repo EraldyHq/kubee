@@ -1,0 +1,475 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "enabled": {
+      "default": false,
+      "description": "Boolean to indicate that this chart is or will be installed in the cluster",
+      "required": [],
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "hostname": {
+      "default": "",
+      "description": "The public hostname If not empty, an ingress is created",
+      "required": [],
+      "title": "Hostname"
+    },
+    "kubee_internal": {
+      "description": "@ignored Internal Kubee constant",
+      "properties": {
+        "install_cross_dependency": {
+          "const": false,
+          "default": "false",
+          "description": " const: false @schema Constant used to not output template from kubee cross dependency in Chart.yaml Don't change, don't touch",
+          "required": [],
+          "title": "install_cross_dependency"
+        }
+      },
+      "required": [],
+      "title": "kubee_internal"
+    },
+    "kubernetes-dashboard": {
+      "description": " Default of https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml",
+      "properties": {
+        "api": {
+          "properties": {
+            "containers": {
+              "properties": {
+                "resources": {
+                  "properties": {
+                    "limits": {
+                      "properties": {
+                        "memory": {
+                          "default": "50Mi",
+                          "required": [],
+                          "title": "memory",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "memory"
+                      ],
+                      "title": "limits",
+                      "type": "object"
+                    },
+                    "requests": {
+                      "properties": {
+                        "cpu": {
+                          "default": "100m",
+                          "required": [],
+                          "title": "cpu",
+                          "type": "string"
+                        },
+                        "memory": {
+                          "default": "50Mi",
+                          "description": " https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L218C8-L218C22 works with 50 only, takes 23Mi at start",
+                          "required": [],
+                          "title": "memory"
+                        }
+                      },
+                      "required": [
+                        "cpu"
+                      ],
+                      "title": "requests",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "requests",
+                    "limits"
+                  ],
+                  "title": "resources",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "resources"
+              ],
+              "title": "containers",
+              "type": "object"
+            }
+          },
+          "required": [
+            "containers"
+          ],
+          "title": "api",
+          "type": "object"
+        },
+        "app": {
+          "description": "General configuration shared across resources",
+          "properties": {
+            "settings": {
+              "properties": {
+                "global": {
+                  "description": "# Global dashboard settings",
+                  "properties": {
+                    "clusterName": {
+                      "default": "Kubee",
+                      "description": "Cluster name that appears in the browser window title if it is set",
+                      "required": [],
+                      "title": "clusterName",
+                      "type": "string"
+                    },
+                    "itemsPerPage": {
+                      "default": 50,
+                      "description": "Max number of items that can be displayed on each list page",
+                      "required": [],
+                      "title": "itemsPerPage",
+                      "type": "integer"
+                    },
+                    "labelsLimit": {
+                      "default": 3,
+                      "description": "Max number of labels that are displayed by default on most views.",
+                      "required": [],
+                      "title": "labelsLimit",
+                      "type": "integer"
+                    },
+                    "logsAutoRefreshTimeInterval": {
+                      "default": 5,
+                      "description": "Number of seconds between every auto-refresh of logs",
+                      "required": [],
+                      "title": "logsAutoRefreshTimeInterval",
+                      "type": "integer"
+                    },
+                    "resourceAutoRefreshTimeInterval": {
+                      "default": 10,
+                      "description": "Number of seconds between every auto-refresh of every resource. Set 0 to disable",
+                      "required": [],
+                      "title": "resourceAutoRefreshTimeInterval",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "clusterName",
+                    "itemsPerPage",
+                    "labelsLimit",
+                    "logsAutoRefreshTimeInterval",
+                    "resourceAutoRefreshTimeInterval"
+                  ],
+                  "title": "global",
+                  "type": "object"
+                },
+                "pinnedResources": {
+                  "description": "  disableAccessDeniedNotifications: false  # Hide all namespaces option in namespace selection dropdown to avoid accidental selection in large clusters thus preventing OOM errors  hideAllNamespaces: false  # Namespace that should be selected by default after logging in.  defaultNamespace: default  # List of namespaces that should be presented to user without namespace list privileges.  namespaceFallbackList:  - default # Pinned resources that will be displayed in the dashboard's menu below the CRD node",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "displayName": {
+                            "default": "Prometheus Rules",
+                            "description": " Display name",
+                            "required": [],
+                            "title": "displayName",
+                            "type": "string"
+                          },
+                          "kind": {
+                            "default": "customresourcedefinition",
+                            "required": [],
+                            "title": "kind",
+                            "type": "string"
+                          },
+                          "name": {
+                            "default": "prometheusrules.monitoring.coreos.com",
+                            "description": " Fully qualified name of a CRD",
+                            "required": [],
+                            "title": "name",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "name",
+                          "displayName"
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "properties": {
+                          "displayName": {
+                            "default": "Service Monitors",
+                            "description": " Display name",
+                            "required": [],
+                            "title": "displayName",
+                            "type": "string"
+                          },
+                          "kind": {
+                            "default": "customresourcedefinition",
+                            "required": [],
+                            "title": "kind",
+                            "type": "string"
+                          },
+                          "name": {
+                            "default": "servicemonitors.monitoring.coreos.com",
+                            "description": " Fully qualified name of a CRD",
+                            "required": [],
+                            "title": "name",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "name",
+                          "displayName"
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "properties": {
+                          "displayName": {
+                            "default": "Pod Monitors",
+                            "description": " Display name",
+                            "required": [],
+                            "title": "displayName",
+                            "type": "string"
+                          },
+                          "kind": {
+                            "default": "customresourcedefinition",
+                            "required": [],
+                            "title": "kind",
+                            "type": "string"
+                          },
+                          "name": {
+                            "default": "podmonitors.monitoring.coreos.com",
+                            "description": " Fully qualified name of a CRD",
+                            "required": [],
+                            "title": "name",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "name",
+                          "displayName"
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "pinnedResources"
+                }
+              },
+              "required": [
+                "global"
+              ],
+              "title": "settings",
+              "type": "object"
+            }
+          },
+          "required": [
+            "settings"
+          ],
+          "title": "app",
+          "type": "object"
+        },
+        "auth": {
+          "properties": {
+            "containers": {
+              "properties": {
+                "resources": {
+                  "properties": {
+                    "limits": {
+                      "properties": {
+                        "memory": {
+                          "default": "30Mi",
+                          "required": [],
+                          "title": "memory",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "memory"
+                      ],
+                      "title": "limits",
+                      "type": "object"
+                    },
+                    "requests": {
+                      "properties": {
+                        "memory": {
+                          "default": "30Mi",
+                          "required": [],
+                          "title": "memory",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "memory"
+                      ],
+                      "title": "requests",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "requests",
+                    "limits"
+                  ],
+                  "title": "resources",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "resources"
+              ],
+              "title": "containers",
+              "type": "object"
+            }
+          },
+          "required": [
+            "containers"
+          ],
+          "title": "auth",
+          "type": "object"
+        },
+        "kong": {
+          "description": " See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/Chart.yaml#L46 A DBless configuration to act as a gateway https://github.com/Kong/charts/blob/main/charts/kong/README.md#db-less-deployment",
+          "properties": {
+            "resources": {
+              "description": " See the values set by kubernetes-dashboard at: https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L371",
+              "properties": {
+                "limits": {
+                  "properties": {
+                    "memory": {
+                      "default": "100Mi",
+                      "description": "start at 75",
+                      "required": [],
+                      "title": "memory",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "memory"
+                  ],
+                  "title": "limits",
+                  "type": "object"
+                },
+                "requests": {
+                  "properties": {
+                    "memory": {
+                      "default": "100Mi",
+                      "required": [],
+                      "title": "memory",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "memory"
+                  ],
+                  "title": "requests",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "limits",
+                "requests"
+              ],
+              "title": "resources"
+            }
+          },
+          "required": [],
+          "title": "kong"
+        },
+        "web": {
+          "properties": {
+            "containers": {
+              "properties": {
+                "resources": {
+                  "properties": {
+                    "limits": {
+                      "properties": {
+                        "memory": {
+                          "default": "20Mi",
+                          "required": [],
+                          "title": "memory",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "memory"
+                      ],
+                      "title": "limits",
+                      "type": "object"
+                    },
+                    "requests": {
+                      "properties": {
+                        "cpu": {
+                          "default": "100m",
+                          "required": [],
+                          "title": "cpu",
+                          "type": "string"
+                        },
+                        "memory": {
+                          "default": "20Mi",
+                          "description": "was set to 200Mi, consume no more than 10Mi",
+                          "required": [],
+                          "title": "memory",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "cpu",
+                        "memory"
+                      ],
+                      "title": "requests",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "requests",
+                    "limits"
+                  ],
+                  "title": "resources",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "resources"
+              ],
+              "title": "containers",
+              "type": "object"
+            }
+          },
+          "required": [
+            "containers"
+          ],
+          "title": "web",
+          "type": "object"
+        }
+      },
+      "required": [
+        "app",
+        "auth",
+        "api",
+        "web"
+      ],
+      "title": "kubernetes-dashboard"
+    },
+    "namespace": {
+      "default": "kubernetes-dashboard",
+      "description": "The installation namespace",
+      "minLength": 1,
+      "required": [],
+      "title": "Namespace"
+    },
+    "use_auth_middleware": {
+      "default": false,
+      "description": "Use the auth proxy middleware to login. If false, you need to enter a service account token to login. If true, you are redirected to the authentication app (ie dex) via the proxy middleware chain (ie oauth2-proxy, dex and kubernetes oidc connect)",
+      "required": [],
+      "title": "Use Auth Middleware",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "enabled",
+    "namespace",
+    "hostname",
+    "use_auth_middleware"
+  ],
+  "type": "object"
+}

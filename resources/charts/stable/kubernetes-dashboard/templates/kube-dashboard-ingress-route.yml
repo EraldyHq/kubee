@@ -6,17 +6,19 @@ We therefore needed to use a traefik IngressRoute
 
 Note that we set this traefik server value to true
 with the argument --serverstransport.insecureskipverify=true
-We don't need it anymore but if the value change, it will not break.
+This argument is now the default on Traefik.
+and we have a local issuer so we
+should load the kube dashboard pod with a cert issued by kubee-ca
 */}}
 {{- if ne .Values.hostname "" }}
+{{ $ := mergeOverwrite $ (dict "component" "kube-dash") }}
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: '{{ include "kubernetes-dashboard-name" . }}'
   namespace: '{{.Release.Namespace}}'
-  #annotations:
   labels:
-    app.kubernetes.io/name: '{{ .Release.Name }}'
+      {{- include "kubee-manifest-labels" . | indent 4}}
 spec:
   entryPoints:
     - websecure
