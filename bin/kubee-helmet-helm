@@ -266,7 +266,7 @@ ping(){
 # If this is not a CRD chart that we install and that the CRD charts exists
 install_crd_first(){
 
-  PACKAGE_CRDS_NAME="$CHART_NAME$CRD_SUFFIX"
+
 
   if [ "$IS_CRD_CHART" == 1 ]; then
     echo::debug "Package is a package Crds. No extra Crd installation needed"
@@ -278,23 +278,73 @@ install_crd_first(){
     return
   fi
 
-  if ! PACKAGE_CRDS_DIRECTORY=$(kubee::get_chart_directory "$PACKAGE_CRDS_NAME"); then
-    echo::debug "No CRD Chart directory for package $CHART_NAME found with the name $PACKAGE_CRDS_NAME"
-    return
+  local KUBEE_PACKAGE_CRDS_NAME;
+  local TYPE_CRD_CHART;
+  local KUBEE_CRD_RELEASE_NAME="$CHART_NAME$CRD_SUFFIX";
+  local CHART_FILE_PATH="$CHART_DIRECTORY/Chart.yaml"
+
+  # Crd defined in Chart.yaml ?
+  local CHART_CRDS_CHART_NAME;
+  CHART_CRDS_CHART_NAME=$(echo::eval "yq '.annotations.kubee/crds-chart-name' $CHART_FILE_PATH")
+  if [ "$CHART_CRDS_CHART_NAME" != "null" ] && [ "$CHART_CRDS_CHART_NAME" != "" ]; then
+
+    echo::debug "Crds chart name $CHART_CRDS_CHART_NAME found in Chart.yaml"
+    TYPE_CRD_CHART="external"
+    KUBEE_PACKAGE_CRDS_NAME="$CHART_CRDS_CHART_NAME"
+    local CHART_CRDS_REPO_URI
+    CHART_CRDS_REPO_URI=$(echo::eval "yq '.annotations.kubee/crds-chart-repo' $CHART_FILE_PATH")
+    if [ "$CHART_CRDS_REPO_URI" == "null" ] && [ "$CHART_CRDS_REPO_URI" == "" ]; then
+      echo:err "The Chart.yaml annotations kubee/crds-chart-repo was not found."
+      echo:err "It's mandatory when using an external crds chart such as $CHART_CRDS_CHART_NAME"
+      return
+    fi
+
+  else
+
+    echo::debug "No Crds chart annotation name found in Chart.yaml"
+
+    # Kubee Crd Chart?
+    KUBEE_PACKAGE_CRDS_NAME="$CHART_NAME$CRD_SUFFIX"
+    if ! PACKAGE_CRDS_DIRECTORY=$(kubee::get_chart_directory "$KUBEE_PACKAGE_CRDS_NAME"); then
+      echo::debug "No CRD Chart directory for package $CHART_NAME found with the name $KUBEE_PACKAGE_CRDS_NAME"
+      return
+    fi
+    echo::debug "Chart Crds $KUBEE_PACKAGE_CRDS_NAME found (Directory : $PACKAGE_CRDS_DIRECTORY)"
+    TYPE_CRD_CHART="kubee"
+
   fi
 
-  echo::debug "Chart Crds $PACKAGE_CRDS_NAME found (Directory : $PACKAGE_CRDS_DIRECTORY)"
+  # CRD/Dependency version
+  local CHART_APP_VERSION
   CHART_APP_VERSION=$(yq '.appVersion' "$CHART_DIRECTORY/Chart.yaml")
-  if is_helm_chart_installed "$PACKAGE_CRDS_NAME" "$CHART_NAMESPACE" "$CHART_APP_VERSION"; then
-    echo::debug "CRD Chart $PACKAGE_CRDS_NAME already installed in the namespace $CHART_NAMESPACE with the appVersion $CHART_APP_VERSION"
+
+  if is_helm_chart_installed "$KUBEE_CRD_RELEASE_NAME" "$CHART_NAMESPACE" "$CHART_APP_VERSION"; then
+    echo::debug "CRD Chart Release $KUBEE_CRD_RELEASE_NAME is already installed in the namespace $CHART_NAMESPACE with the appVersion $CHART_APP_VERSION"
     return
   fi
 
-  # recursion
-  # We don't use helm directly as we have now CRD charts that are only with Jsonnet
-  echo::info "Installing CRD Chart $PACKAGE_CRDS_NAME in namespace $CHART_NAMESPACE"
-  # Garbage collection is disable because we install just after the chart
-  if ! echo::eval "kubee -n $CHART_NAMESPACE --no-garbage-collection helmet play $PACKAGE_CRDS_NAME"; then
+  local KUBE_CRDS_COMMAND;
+  # Garbage collection is disable on all command
+  # because we install just after the chart
+  local KUBEE_BASE_COMMAND="kubee -n $CHART_NAMESPACE --no-garbage-collection"
+  case "$TYPE_CRD_CHART" in
+      "kubee")
+        # We don't use helm directly as we have now CRD charts that are only with Jsonnet
+        KUBE_CRDS_COMMAND="$KUBEE_BASE_COMMAND helmet play $KUBEE_PACKAGE_CRDS_NAME"
+        ;;
+      "external")
+        # The repo should be present
+        local KUBEE_CRD_REPO_NAME="${KUBEE_PACKAGE_CRDS_NAME%%/*}"
+        echo::eval "helm repo add $KUBEE_CRD_REPO_NAME $CHART_CRDS_REPO_URI"
+        KUBE_CRDS_COMMAND="$KUBEE_BASE_COMMAND helm upgrade $KUBEE_CRD_RELEASE_NAME $KUBEE_PACKAGE_CRDS_NAME --version $CHART_APP_VERSION --install -n $CHART_NAMESPACE"
+        ;;
+      *)
+        echo::err "Internal error, crd chart type $TYPE_CRD_CHART is unknown"
+        ;;
+  esac
+
+  echo::info "Installing $TYPE_CRD_CHART CRD Chart $KUBEE_PACKAGE_CRDS_NAME in namespace $CHART_NAMESPACE"
+  if ! echo::eval "$KUBE_CRDS_COMMAND"; then
     return 1
   fi
 
@@ -435,7 +485,7 @@ update-dependencies(){
             echo::info "$DEPENDENCY_CHART_NAME: Fetching $DEPENDENCY_CHART_SCHEME dependency $DEPENDENCY_CHART_NAME"
             local REGISTRY_INDEX_YAML="$DEPENDENCY_CHART_REPOSITORY/index.yaml"
             local DEPENDENCY_YAML_URL
-            if ! DEPENDENCY_YAML_URL=$(echo::eval "curl -s $REGISTRY_INDEX_YAML | yq '.entries[\"$DEPENDENCY_CHART_NAME\"][] | select(.version == \"$DEPENDENCY_CHART_VERSION\") | .urls[0]'"); then
+            if ! DEPENDENCY_YAML_URL=$(echo::eval "curl --location -s $REGISTRY_INDEX_YAML | yq '.entries[\"$DEPENDENCY_CHART_NAME\"][] | select(.version == \"$DEPENDENCY_CHART_VERSION\") | .urls[0]'"); then
               echo::err "Error while retrieving the download url of the dependency char $DEPENDENCY_CHART_NAME"
               return 1
             fi

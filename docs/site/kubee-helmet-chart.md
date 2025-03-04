@@ -33,7 +33,7 @@ A `Kubee Helmet Chart`:
     * Only one chart is going to supports this 2 methods.
 
     
-# Values file
+## Values file
 
 Each `values.yaml` file should contain at least the following properties:
 * `namespace = name`: the namespace where to install the chart
@@ -47,6 +47,19 @@ Each `values.yaml` file should contain at least the following properties:
 The values file should contain different nodes for:
 * the chart itself
 * the external services (opsgenie, new relic, grafana cloud, ...) - making clear what the parameters are for.
+
+## CRD Chart
+
+By default, `kubee helmet` will look for a Chart called `kubee-(chartName)-crds`.
+
+You can define an external CRD chart with the `kubee/crds-chart-name` and `kubee/crds-chart-repo` annotations in the `Chart.yaml`.
+
+Example:
+```yaml
+annotations:
+  kubee/crds-chart-name: mariadb-operator/mariadb-operator-crds
+  kubee/crds-chart-repo: https://helm.mariadb.com/mariadb-operator
+```
 
 
 ## FAQ: Why not multiple sub-chart by umbrella chart?

@@ -21,5 +21,15 @@ mariadb:
 kubee -c clusterName helmet play mariadb
 ```
 
+## Features
+
+### Automatic Cert Integration 
+
+When `cert-manager` is enabled, the certificate are:
+* issued by the internal `kubee-ca` issuer.
+* and automatically rotated
+
 
 {{ template "chart.valuesSection" . }}
+| mariadb-operator | object | | [The mariadb operator Helm Values](https://github.com/mariadb-operator/mariadb-operator/blob/{{ template "chart.appVersion" . }}/deploy/charts/mariadb-operator/values.yaml) |
+

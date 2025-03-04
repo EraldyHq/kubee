@@ -21,11 +21,17 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # https://mariadb-operator.github.io/mariadb-operator/index.yaml
 appVersion: "0.37.1" # The mail pit version
 
+annotations:
+  app.kubernetes.io/name: mariadb
+  kubee/crds-chart-name: mariadb-operator/mariadb-operator-crds
+  kubee/crds-chart-repo: https://helm.mariadb.com/mariadb-operator
 
 dependencies:
   # https://mariadb-operator.github.io/mariadb-operator/index.yaml
   - name: mariadb-operator
+    # https://github.com/mariadb-operator/mariadb-operator/releases
     version: 0.37.1
+    #  https://helm.mariadb.com/mariadb-operator/
     repository: https://helm.mariadb.com/mariadb-operator
     alias: mariadb-operator
   - name: kubee-cluster

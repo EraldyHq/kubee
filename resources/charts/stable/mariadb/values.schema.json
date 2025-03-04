@@ -1,0 +1,232 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "enabled": {
+      "default": false,
+      "description": "Boolean to indicate that this chart is or will be installed in the cluster",
+      "required": [],
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "kubee_internal": {
+      "description": " @ignored",
+      "properties": {
+        "install_cross_dependency": {
+          "const": false,
+          "default": "false",
+          "description": " const: false @schema Constant used to not output template from kubee cross dependency in Chart.yaml Don't change, don't touch",
+          "required": [],
+          "title": "install_cross_dependency"
+        }
+      },
+      "required": [],
+      "title": "kubee_internal"
+    },
+    "mariadb-operator": {
+      "description": "Mariadb Operator values https://github.com/mariadb-operator/mariadb-operator/blob/main/deploy/charts/mariadb-operator/values.yaml @ignored",
+      "properties": {
+        "certController": {
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Specifies whether the cert-controller should be created.",
+              "required": [],
+              "title": "enabled"
+            }
+          },
+          "required": [],
+          "title": "certController",
+          "type": "object"
+        },
+        "currentNamespaceOnly": {
+          "default": "false",
+          "description": "Whether the operator should watch CRDs only in its own namespace or not.",
+          "required": [],
+          "title": "currentNamespaceOnly"
+        },
+        "metrics": {
+          "description": " https://github.com/mariadb-operator/mariadb-operator/blob/main/docs/HELM.md#installing-the-operator",
+          "properties": {
+            "enabled": {
+              "default": "{{if eq .Values.prometheus.enabled true}}true{{else}}false{{end}}",
+              "required": [],
+              "title": "enabled",
+              "type": "string"
+            },
+            "serviceMonitor": {
+              "properties": {
+                "enabled": {
+                  "default": "{{if eq .Values.prometheus.enabled true}}true{{else}}false{{end}}",
+                  "description": "Enable controller ServiceMonitor",
+                  "required": [],
+                  "title": "enabled"
+                },
+                "interval": {
+                  "default": "{{ .Values.prometheus.scrape_interval }}",
+                  "description": "Interval to scrape metrics",
+                  "required": [],
+                  "title": "interval"
+                }
+              },
+              "required": [],
+              "title": "serviceMonitor",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "serviceMonitor"
+          ],
+          "title": "metrics"
+        },
+        "resources": {
+          "properties": {
+            "limits": {
+              "properties": {
+                "memory": {
+                  "default": "32Mi",
+                  "required": [],
+                  "title": "memory",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "memory"
+              ],
+              "title": "limits",
+              "type": "object"
+            },
+            "requests": {
+              "properties": {
+                "cpu": {
+                  "default": "10m",
+                  "required": [],
+                  "title": "cpu",
+                  "type": "string"
+                },
+                "memory": {
+                  "default": "32Mi",
+                  "required": [],
+                  "title": "memory",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "title": "requests",
+              "type": "object"
+            }
+          },
+          "required": [
+            "requests",
+            "limits"
+          ],
+          "title": "resources",
+          "type": "object"
+        },
+        "webhook": {
+          "properties": {
+            "cert": {
+              "properties": {
+                "certManager": {
+                  "properties": {
+                    "enabled": {
+                      "default": "{{if eq .Values.cert_manager.enabled true}}true{{else}}false{{end}}",
+                      "required": [],
+                      "title": "enabled",
+                      "type": "string"
+                    },
+                    "issuerRef": {
+                      "properties": {
+                        "kind": {
+                          "default": "ClusterIssuer",
+                          "required": [],
+                          "title": "kind",
+                          "type": "string"
+                        },
+                        "name": {
+                          "default": "{{ .Values.cert_manager.issuers.kubee.name }}",
+                          "required": [],
+                          "title": "name",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "name"
+                      ],
+                      "title": "issuerRef",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "enabled",
+                    "issuerRef"
+                  ],
+                  "title": "certManager",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "certManager"
+              ],
+              "title": "cert",
+              "type": "object"
+            },
+            "serviceMonitor": {
+              "properties": {
+                "enabled": {
+                  "default": "{{if eq .Values.prometheus.enabled true}}true{{else}}false{{end}}",
+                  "description": "Enable webhook ServiceMonitor. Metrics must be enabled",
+                  "required": [],
+                  "title": "enabled"
+                },
+                "interval": {
+                  "default": "{{ .Values.prometheus.scrape_interval }}",
+                  "description": "Interval to scrape metrics",
+                  "required": [],
+                  "title": "interval"
+                }
+              },
+              "required": [],
+              "title": "serviceMonitor",
+              "type": "object"
+            }
+          },
+          "required": [
+            "cert",
+            "serviceMonitor"
+          ],
+          "title": "webhook",
+          "type": "object"
+        }
+      },
+      "required": [
+        "webhook",
+        "resources",
+        "certController"
+      ],
+      "title": "mariadb-operator"
+    },
+    "namespace": {
+      "default": "mariadb",
+      "description": "The installation Namespace",
+      "minLength": 1,
+      "required": [],
+      "title": "Namespace"
+    }
+  },
+  "required": [
+    "enabled",
+    "namespace"
+  ],
+  "type": "object"
+}
