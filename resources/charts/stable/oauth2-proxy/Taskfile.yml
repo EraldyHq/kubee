@@ -10,3 +10,7 @@ tasks:
   docs:
     cmds:
       - helm-docs
+  # Update the charts/ directory
+  dep:
+    cmds:
+      - kubee helmet update-dependencies oauth2-proxy

@@ -1,23 +1,13 @@
 # Dev Contrib
 
+## Session storage (cookie vs Redis)
+
+https://oauth2-proxy.github.io/oauth2-proxy/configuration/session_storage#cookie-storage
 
 ## Charts dir bootstrap
 
 ```bash
-mkdir "charts"
-ln -s $(realpath ../cluster) charts/kubee-cluster
-mkdir "charts/kubee-dex"
-ln -s $(realpath ../dex/Chart.yaml) charts/kubee-dex/Chart.yaml
-ln -s $(realpath ../dex/values.yaml) charts/kubee-dex/values.yaml
-mkdir "charts/kubee-prometheus"
-ln -s $(realpath ../prometheus/Chart.yaml) charts/kubee-prometheus/Chart.yaml
-ln -s $(realpath ../prometheus/values.yaml) charts/kubee-prometheus/values.yaml
-mkdir "charts/kubee-cert-manager"
-ln -s $(realpath ../cert-manager/Chart.yaml) charts/kubee-cert-manager/Chart.yaml
-ln -s $(realpath ../cert-manager/values.yaml) charts/kubee-cert-manager/values.yaml
-mkdir "charts/kubee-traefik"
-ln -s $(realpath ../traefik/Chart.yaml) charts/kubee-traefik/Chart.yaml
-ln -s $(realpath ../traefik/values.yaml) charts/kubee-traefik/values.yaml
+task dep
 ```
 
 Pull the original helm chart to get the original Helm template and get the logic
@@ -102,3 +92,6 @@ You get a 403 because you don't have the session cookie
 ```bash
 curl -I  -k https://oauth2-bcf52bfa.nip.io/ 
 ```
+
+## No refresh token used, scope offline_access
+

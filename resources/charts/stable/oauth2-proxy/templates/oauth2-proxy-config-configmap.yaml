@@ -110,9 +110,10 @@ data:
     #   View basic profile information
     #   View your email address
     #   View your groups
+    #   Have offline access (to get refresh token)
     # openid scope is mandatory
     # audience:server:client_id is a scope to get kubernetes as an extra audience to be able to login to kubernetes api (See https://dexidp.io/docs/configuration/custom-scopes-claims-clients/#cross-client-trust-and-authorized-party)
     # For all scopes, see https://dexidp.io/docs/configuration/custom-scopes-claims-clients/
-    scope = "openid email profile groups audience:server:client_id:{{ .Values.dex.clients.kubernetes.client_id }}"
+    scope = "openid offline_access email profile groups audience:server:client_id:{{ .Values.dex.clients.kubernetes.client_id }}"
 
 
