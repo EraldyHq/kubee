@@ -15,7 +15,7 @@ enabled: false
 # minLength: 1
 # @schema
 # -- The installation Namespace
-namespace: 'mail'
+namespace: 'postal'
 
 # @schema
 # title: Hostname
@@ -32,8 +32,31 @@ hostname: ''
 # description: The postal version
 # required: true
 # @schema
-# -- The postal version, https://github.com/postalserver/postal/releases
-version: 'v3.3.4'
+# -- The postal [docker version](https://github.com/postalserver/postal/pkgs/container/postal)
+# (The release version Without the v)
+version: '3.3.4'
+
+# @schema
+# title: Dkim Signing Private Key
+# description: The Dkim Private signing key
+# required: true
+# minLength: 5
+# @schema
+# -- Private key
+# It should be in pem format (BEGIN/END PRIVATE KEY)
+# The signing.key can be generated using the following command:
+# `openssl genrsa -out path/to/signing.key 2048`
+dkim_signing_key: ''
+
+# @schema
+# title: Rail Secret Key
+# description: Rail signing key
+# required: true
+# minLength: 5
+# @schema
+# -- Rail Secret key (for signing payload)
+rail_secret_key: ''
+
 
 # @schema
 # title: Signing Private Key
@@ -43,7 +66,7 @@ version: 'v3.3.4'
 # @schema
 # -- Private key (for signing payload)
 # It should be in pem format (BEGIN/END PRIVATE KEY)
-signing_key: ''
+postal_yaml:
 
 # @schema
 # title: Components

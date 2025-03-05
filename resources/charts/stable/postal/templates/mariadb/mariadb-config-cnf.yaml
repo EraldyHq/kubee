@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mariadb-cnf
+  namespace: '{{.Values.namespace}}'
+  labels:
+    {{- include "kubee-manifest-labels" . | indent 4}}
+data:
+  my.cnf: |-
+    # Method 1: Using my.cnf configuration file
+    [mysqld]
+
+    # Maximum memory allocation
+    #innodb_buffer_pool_size = 1G       # Sets the memory allocated to InnoDB buffer pool
+    #max_heap_table_size = 64M           # Maximum size for in-memory tables
+    #tmp_table_size = 64M                # Maximum size for temporary tables
+
+    # Memory-related settings
+    #key_buffer_size = 256M              # Buffer size for index blocks
+    #query_cache_size = 64M              # Query cache memory (if using older MariaDB versions)
+    #max_connections = 100                # Limit number of connections to control memory usage
+

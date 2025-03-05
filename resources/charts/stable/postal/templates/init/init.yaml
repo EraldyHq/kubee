@@ -1,4 +1,5 @@
 {{/*https://docs.postalserver.io/getting-started/installation#initializing-the-database*/}}
+{{ if eq 1 0}}
 {{ $ := mergeOverwrite $ (dict "component" "init") }}
 apiVersion: batch/v1
 kind: Job
@@ -42,5 +43,6 @@ spec:
                   key: rails-secret-key
           envFrom:
             - configMapRef:
-                name: {{ include "postal-name-postal-yml" . }}
+                name: {{ include "postal-name-config-map" . }}
       restartPolicy: Never
+{{- end }}

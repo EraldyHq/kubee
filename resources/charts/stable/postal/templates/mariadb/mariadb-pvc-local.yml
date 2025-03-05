@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mariadb-pvc-local
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # https://docs.k3s.io/storage#setting-up-the-local-storage-provider
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 500Mi # minimum 2 times the repo of 300Mb

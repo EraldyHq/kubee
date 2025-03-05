@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: Secret
-metadata:
-  name: {{ include "postal-name-postal-yml" . }}
-  namespace: '{{.Values.namespace}}'
-  labels:
-    {{- include "kubee-manifest-labels" . | indent 4}}
-data:
-  postal.yml: {{ toYaml .Values.config | b64enc | quote }}

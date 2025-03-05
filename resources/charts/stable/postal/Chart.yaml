@@ -30,10 +30,10 @@ dependencies:
   - name: postal
     version: 0.3.0
     condition: kubee_internal.install_cross_dependency
-  - name: mariadb
-    repository: https://charts.bitnami.com/bitnami
-    version: 20.4.1
-    condition: mariadb.enabled
+  #- name: mariadb
+  #  repository: https://charts.bitnami.com/bitnami
+  #  version: 20.4.1
+  #  condition: mariadb.enabled
   - name: kubee-cluster
     version: 0.0.1
     repository: file://../cluster

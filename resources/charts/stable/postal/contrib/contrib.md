@@ -35,7 +35,14 @@ https://docs.postalserver.io/getting-started/configuration
 * [File](https://github.com/postalserver/postal/blob/main/doc/config/yaml.yml)
 * [Env](https://github.com/postalserver/postal/blob/main/doc/config/environment-variables.md)
 
+In the [docker image](https://docs.postalserver.io/other/containers#configuration), the `$config-file-root` is `/config`
 ## Maria Db
+
+https://github.com/MariaDB/mariadb-docker
+Backup:
+```bash
+docker run --volume /backup-volume:/backup --rm mariadb:10.6.15 mariadb-backup --help
+```
 
 https://mariadb.com/kb/en/kubernetes-and-mariadb/
 https://mariadb.com/kb/en/kubernetes-operators-for-mariadb/
@@ -79,7 +86,8 @@ Latest version is: 3.3.4
 => Creating signing private key
 ```
 See:
-* [postal](https://github.com/postalserver/postal/blob/main/doc/config/yaml.yml)
+* [postal installation](https://github.com/postalserver/install/blob/main/examples/postal.v3.yml)
+* [posta fulll](https://github.com/postalserver/postal/blob/main/doc/config/yaml.yml)
 * [Caddyfile](https://github.com/postalserver/install/blob/main/examples/Caddyfile)
 
 ### Initialize/mk user

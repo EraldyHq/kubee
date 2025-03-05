@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb-deployment
+  labels:
+    app: mariadb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+        - name: mariadb
+          image: mariadb:11.7.2
+          # starting with a db
+          env:
+            #- name: MARIADB_USER
+            #  value: postal
+{{/*            - name: MARIADB_PASSWORD*/}}
+{{/*              valueFrom:*/}}
+{{/*                secretKeyRef:*/}}
+{{/*                  name: {{ include "postal-name-config-secret" . }}*/}}
+{{/*                  key: mariadb-password*/}}
+{{/*            - name: MARIADB_DATABASE*/}}
+{{/*              value: postal*/}}
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postal-name-config-secret" . }}
+                  key: mariadb-password
+            #- name: MARIADB_INITDB_SKIP_TZINFO
+            #  value: "1"
+          ports:
+            - containerPort: 3306
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+            exec:
+              command:
+                - /bin/bash
+                - -ec
+                - |
+                  password_aux="${MARIADB_ROOT_PASSWORD:-}"
+                  if [[ -f "${MARIADB_ROOT_PASSWORD_FILE:-}" ]]; then
+                      password_aux=$(cat "$MARIADB_ROOT_PASSWORD_FILE")
+                  fi
+                  mariadb-admin status -uroot -p"${password_aux}"
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+            exec:
+              command:
+                - /bin/bash
+                - -ec
+                - |
+                  password_aux="${MARIADB_ROOT_PASSWORD:-}"
+                  if [[ -f "${MARIADB_ROOT_PASSWORD_FILE:-}" ]]; then
+                      password_aux=$(cat "$MARIADB_ROOT_PASSWORD_FILE")
+                  fi
+                  mariadb-admin ping -uroot -p"${password_aux}"
+          resources:
+            limits:
+              # 200 was too low
+              memory: 250Mi
+            requests:
+              cpu: 200m
+              memory: 250Mi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            {{/*            - name: custom-init-scripts*/}}
+            {{/*              mountPath: /docker-entrypoint-initdb.d*/}}
+            #- name: config
+            #  mountPath: /etc/mysql/conf.d
+            #  subPath: my.cnf
+      volumes:
+        - name: custom-init-scripts
+          secret:
+            secretName: mariadb-init
+            items:
+              - key: init-sql
+                path: 01-init.sql
+        - name: config
+          configMap:
+            name: mariadb-cnf
+        - name: data
+          persistentVolumeClaim:
+            claimName: mariadb-pvc-local
+

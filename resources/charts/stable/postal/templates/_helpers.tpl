@@ -1,6 +1,6 @@
 
 {{/*
-Helper to print the basic name for consitency
+Helper to print the basic name for consistency
 */}}
 {{- define "postal-name" }}
 {{- printf "%s"
@@ -8,27 +8,22 @@ Helper to print the basic name for consitency
     }}
 {{- end }}
 
-{{/* Config name*/}}
-{{- define "postal-name-postal-yml" }}
-{{- printf "%s" (include "kubee-name" (merge . (dict "component" "config")))}}
+{{/* Config Map name*/}}
+{{- define "postal-name-config-map" }}
+{{- printf "%s" (include "kubee-name" (mergeOverwrite . (dict "component" "config")))}}
 {{- end }}
 
-{{/* Config name*/}}
+{{/* Config Secret name*/}}
 {{- define "postal-name-config-secret" }}
-{{- printf "%s" (include "kubee-name" (merge . (dict "component" "config-secret")))}}
+{{- printf "%s" (include "kubee-name" (mergeOverwrite . (dict "component" "config") .))}}
 {{- end }}
 
-{{/* Signing Key name*/}}
-{{- define "postal-name-signing-key" }}
-{{- printf "%s" (include "kubee-name" (merge . (dict "component" "signing-key")))}}
-{{- end }}
-
-{{/* Config name*/}}
+{{/* Config Tls secret name*/}}
 {{- define "postal-name-tls" }}
-{{- printf "%s" (include "kubee-name" (merge . (dict "component" "tls")))}}
+{{- printf "%s" (include "kubee-name" (mergeOverwrite . (dict "component" "tls") ))}}
 {{- end }}
 
 {{/* Config checksum*/}}
 {{- define "postal-config-checksum-annotation" }}
-{{ printf "postal-config/checksum: %s" (include (print .Template.BasePath "/config/postal-postal.yaml") . | sha256sum )}}
+{{ printf "postal-config/checksum: %s" (include (print .Template.BasePath "/config/postal-config-map.yaml") . | sha256sum )}}
 {{- end }}

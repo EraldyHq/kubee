@@ -6,6 +6,7 @@ metadata:
   labels:
     {{- include "kubee-manifest-labels" . | indent 4}}
 spec:
+  replicas: 1
   selector:
     matchLabels:
       {{- include "kubee-pod-labels" . | indent 6}}
@@ -17,18 +18,65 @@ spec:
         {{- include "postal-config-checksum-annotation" . | indent 8}}
     spec:
       containers:
-      - name: web
-        image: "ghcr.io/postalserver/postal:{{ .Values.version }}"
-        command: ["postal", "web-server"]
-        {{- /* resources: {{ toYaml .Values.resources | nindent 10 }} */}}
-        ports:
         - name: web
-          containerPort: 5000
-        volumeMounts:
-        - name: config
-          mountPath: /config/
-          readOnly: true
+          image: "ghcr.io/postalserver/postal:{{ .Values.version }}"
+          command: [ "postal", "web-server" ]
+        {{- /* resources: {{ toYaml .Values.resources | nindent 10 }} */}}
+          env:
+            - name: MAIN_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postal-name-config-secret" . }}
+                  key: mariadb-password
+            - name: MESSAGE_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postal-name-config-secret" . }}
+                  key: mariadb-password
+            - name: RAILS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postal-name-config-secret" . }}
+                  key: rails-secret-key
+            - name: WEB_SERVER_DEFAULT_PORT
+              value: '5000'
+            - name: WORKER_DEFAULT_HEALTH_SERVER_PORT
+              value: '9090'
+
+          ports:
+            - name: web
+              containerPort: 5000
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: metrics
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: metrics
+          volumeMounts:
+            - name: config-map
+              mountPath: /config/postal.yml
+              subPath: postal.yml
+              readOnly: true
+            - name: config-secret
+              # This is the default $config-file-root/signing.key
+              mountPath: /config/signing.key
+              subPath: dkim-signing-key
+              readOnly: true
+            - name: smtp-tls
+              mountPath: /config/certs
+              readOnly: true
       volumes:
-      - name: config
-        secret:
-          secretName: {{ include "postal-name-postal-yml" . }}
+        - name: config-map
+          secret:
+            secretName: {{ include "postal-name-config-map" . }}
+        - name: config-secret
+          secret:
+            secretName: '{{ include "postal-name-config-secret" . }}'
+        - name: smtp-tls
+          secret:
+            secretName: '{{ include "postal-name-tls" . }}'
