@@ -39,16 +39,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "postal-name-config-secret" . }}
                   key: rails-secret-key
-            - name: SMTP_SERVER_DEFAULT_PORT
-              value: '25'
-            - name: WORKER_DEFAULT_HEALTH_SERVER_PORT
-              value: '9090'
           ports:
             - name: smtp
-              containerPort: 25
+              containerPort: {{.Values.conf_yaml.smtp_server.default_port }}
             - name: metrics
-              containerPort: 9090
-              protocol: TCP
+              containerPort: {{.Values.conf_yaml.smtp_server.default_health_server_port}}
           livenessProbe:
             httpGet:
               path: /health
@@ -68,11 +63,11 @@ spec:
               subPath: dkim-signing-key
               readOnly: true
             - name: smtp-tls
-              mountPath: /config/smtp.cert
+              mountPath: {{ .Values.conf_yaml.smtp_server.tls_certificate_path }}
               subPath: tls.crt
               readOnly: true
             - name: smtp-tls
-              mountPath: /config/smtp.key
+              mountPath: {{ .Values.conf_yaml.smtp_server.tls_private_key_path }}
               subPath: tls.key
               readOnly: true
       volumes:

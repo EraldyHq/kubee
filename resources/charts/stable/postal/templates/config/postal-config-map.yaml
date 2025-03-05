@@ -6,8 +6,5 @@ metadata:
   labels:
     {{- include "kubee-manifest-labels" . | indent 4}}
 data:
-  #postal.yml: toYaml .Values.config | b64enc | quote
   postal.yml: |-
-    {{- range .Files.Lines "conf/postal.yaml" }}
-{{ . | indent 4 }}
-    {{- end}}
+{{.Values.conf_yaml |toYaml| indent 4}}

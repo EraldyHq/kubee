@@ -1,43 +1,79 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "properties": {
-    "components": {
-      "description": " title: Components description: The components @schema",
+    "conf_kube": {
+      "description": " @ignored",
       "properties": {
-        "smtp": {
+        "main_db": {
           "properties": {
-            "resource": {
+            "resources": {
+              "description": "The resources",
               "properties": {
-                "cpu": {
-                  "default": "",
-                  "required": [],
-                  "title": "cpu",
-                  "type": "string"
+                "limits": {
+                  "properties": {
+                    "memory": {
+                      "default": "250Mi",
+                      "description": "200 was too low",
+                      "required": [],
+                      "title": "memory",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "memory"
+                  ],
+                  "title": "limits",
+                  "type": "object"
                 },
-                "memory": {
-                  "default": "",
-                  "required": [],
-                  "title": "memory",
-                  "type": "string"
+                "requests": {
+                  "properties": {
+                    "cpu": {
+                      "default": "200m",
+                      "required": [],
+                      "title": "cpu",
+                      "type": "string"
+                    },
+                    "memory": {
+                      "default": "250Mi",
+                      "required": [],
+                      "title": "memory",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "cpu",
+                    "memory"
+                  ],
+                  "title": "requests",
+                  "type": "object"
                 }
               },
               "required": [
-                "memory",
-                "cpu"
+                "limits",
+                "requests"
               ],
-              "title": "resource",
+              "title": "resources",
               "type": "object"
+            },
+            "service_name": {
+              "default": "mariadb",
+              "description": "The service name",
+              "required": [],
+              "title": "service_name",
+              "type": "string"
             }
           },
           "required": [
-            "resource"
+            "service_name",
+            "resources"
           ],
-          "title": "smtp",
+          "title": "main_db",
           "type": "object"
         },
-        "web": {
+        "smtp_server": {
           "properties": {
-            "resource": {
+            "resources": {
+              "description": "Resources",
               "properties": {
                 "cpu": {
                   "default": "",
@@ -56,14 +92,45 @@
                 "memory",
                 "cpu"
               ],
-              "title": "resource",
+              "title": "resources",
               "type": "object"
             }
           },
           "required": [
-            "resource"
+            "resources"
           ],
-          "title": "web",
+          "title": "smtp_server",
+          "type": "object"
+        },
+        "web_server": {
+          "properties": {
+            "resources": {
+              "properties": {
+                "cpu": {
+                  "default": "",
+                  "required": [],
+                  "title": "cpu",
+                  "type": "string"
+                },
+                "memory": {
+                  "default": "",
+                  "required": [],
+                  "title": "memory",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "memory",
+                "cpu"
+              ],
+              "title": "resources",
+              "type": "object"
+            }
+          },
+          "required": [
+            "resources"
+          ],
+          "title": "web_server",
           "type": "object"
         },
         "worker": {
@@ -99,11 +166,1035 @@
         }
       },
       "required": [
-        "smtp",
-        "web",
+        "main_db",
+        "smtp_server",
+        "web_server",
         "worker"
       ],
-      "title": "Components"
+      "title": "conf_kube"
+    },
+    "conf_secrets": {
+      "properties": {
+        "db_password": {
+          "default": "",
+          "description": "The database password",
+          "minLength": 5,
+          "required": [],
+          "title": "Maria Db password"
+        },
+        "dkim_signing_key": {
+          "default": "",
+          "description": "Private key It should be in pem format (BEGIN/END PRIVATE KEY) The signing.key can be generated using the following command: `openssl genrsa -out path/to/signing.key 2048`",
+          "minLength": 5,
+          "required": [],
+          "title": "Dkim Signing Private Key"
+        },
+        "rails_secret_key": {
+          "default": "",
+          "description": "Rail Secret key (for signing payload)",
+          "minLength": 5,
+          "required": [],
+          "title": "Rail Secret Key"
+        },
+        "smtp_password": {
+          "default": "",
+          "description": "The password to use when authentication to the SMTP server",
+          "minLength": 5,
+          "required": [],
+          "title": "Smtp Password"
+        }
+      },
+      "required": [
+        "rails_secret_key",
+        "dkim_signing_key",
+        "smtp_password",
+        "db_password"
+      ],
+      "title": "conf_secrets",
+      "type": "object"
+    },
+    "conf_yaml": {
+      "description": " from [here](https://github.com/postalserver/postal/blob/main/doc/config/yaml.yml) @ignore",
+      "properties": {
+        "clamav": {
+          "properties": {
+            "enabled": {
+              "default": false,
+              "description": "Enable ClamAV for message inspection",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "host": {
+              "default": "127.0.0.1",
+              "description": "The host of the ClamAV server",
+              "required": [],
+              "title": "host",
+              "type": "string"
+            },
+            "port": {
+              "default": 2000,
+              "description": "The port of the ClamAV server",
+              "required": [],
+              "title": "port",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "enabled",
+            "host",
+            "port"
+          ],
+          "title": "clamav",
+          "type": "object"
+        },
+        "dns": {
+          "properties": {
+            "custom_return_path_prefix": {
+              "default": "psrp",
+              "description": "The domain to use on external domains which points to the Postal return path domain",
+              "required": [],
+              "title": "custom_return_path_prefix",
+              "type": "string"
+            },
+            "dkim_identifier": {
+              "default": "postal",
+              "description": "The identifier to use for DKIM keys in DNS records",
+              "required": [],
+              "title": "dkim_identifier",
+              "type": "string"
+            },
+            "domain_verify_prefix": {
+              "default": "postal-verification",
+              "description": "The prefix to add before TXT record verification string",
+              "required": [],
+              "title": "domain_verify_prefix",
+              "type": "string"
+            },
+            "helo_hostname": {
+              "default": "{{ .Values.postal.hostname }}",
+              "description": " required: false @schema The hostname to use in HELO/EHLO when connecting to external SMTP servers",
+              "required": [],
+              "title": "helo_hostname"
+            },
+            "mx_records": {
+              "description": "The names of the default MX records",
+              "items": {
+                "anyOf": [
+                  {
+                    "required": [],
+                    "type": "string"
+                  },
+                  {
+                    "required": [],
+                    "type": "string"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "mx_records",
+              "type": "array"
+            },
+            "resolv_conf_path": {
+              "default": "/etc/resolv.conf",
+              "description": "The path to the resolv.conf file containing addresses for local nameservers",
+              "required": [],
+              "title": "resolv_conf_path",
+              "type": "string"
+            },
+            "return_path_domain": {
+              "default": "rp.{{ .Values.postal.hostname }}",
+              "description": "The return path hostname",
+              "required": [],
+              "title": "return_path_domain",
+              "type": "string"
+            },
+            "route_domain": {
+              "default": "routes.{{ .Values.postal.hostname }}",
+              "description": "The domain to use for hosting route-specific addresses",
+              "required": [],
+              "title": "route_domain",
+              "type": "string"
+            },
+            "spf_include": {
+              "default": "spf.{{ .Values.postal.hostname }}",
+              "description": "The location of the SPF record",
+              "required": [],
+              "title": "spf_include",
+              "type": "string"
+            },
+            "timeout": {
+              "default": 5,
+              "description": "The timeout to wait for DNS resolution",
+              "required": [],
+              "title": "timeout",
+              "type": "integer"
+            },
+            "track_domain": {
+              "default": "track.{{ .Values.postal.hostname }}",
+              "description": "The CNAME which tracking domains should be pointed to",
+              "required": [],
+              "title": "track_domain",
+              "type": "string"
+            }
+          },
+          "required": [
+            "mx_records",
+            "spf_include",
+            "return_path_domain",
+            "route_domain",
+            "track_domain",
+            "dkim_identifier",
+            "domain_verify_prefix",
+            "custom_return_path_prefix",
+            "timeout",
+            "resolv_conf_path"
+          ],
+          "title": "dns",
+          "type": "object"
+        },
+        "gelf": {
+          "properties": {
+            "facility": {
+              "default": "postal",
+              "description": "The facility name to add to all log entries sent to GELF",
+              "required": [],
+              "title": "facility",
+              "type": "string"
+            },
+            "host": {
+              "default": "",
+              "description": " required: false @schema GELF-capable host to send logs to",
+              "required": [],
+              "title": "host"
+            },
+            "port": {
+              "default": 12201,
+              "description": "GELF port to send logs to",
+              "required": [],
+              "title": "port",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "port",
+            "facility"
+          ],
+          "title": "gelf",
+          "type": "object"
+        },
+        "logging": {
+          "properties": {
+            "enabled": {
+              "default": true,
+              "description": "Enable the Postal logger to log to STDOUT",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "highlighting_enabled": {
+              "default": false,
+              "description": "Enable highlighting of log lines",
+              "required": [],
+              "title": "highlighting_enabled",
+              "type": "boolean"
+            },
+            "rails_log_enabled": {
+              "default": false,
+              "description": "Enable the default Rails logger",
+              "required": [],
+              "title": "rails_log_enabled",
+              "type": "boolean"
+            },
+            "sentry_dsn": {
+              "default": "",
+              "description": " required: false @schema A DSN which should be used to report exceptions to Sentry",
+              "required": [],
+              "title": "sentry_dsn"
+            }
+          },
+          "required": [
+            "rails_log_enabled",
+            "enabled",
+            "highlighting_enabled"
+          ],
+          "title": "logging",
+          "type": "object"
+        },
+        "main_db": {
+          "properties": {
+            "database": {
+              "default": "postal",
+              "description": "The MariaDB database name",
+              "required": [],
+              "title": "database",
+              "type": "string"
+            },
+            "encoding": {
+              "default": "utf8mb4",
+              "description": "The encoding to use when connecting to the MariaDB database",
+              "required": [],
+              "title": "encoding",
+              "type": "string"
+            },
+            "pool_size": {
+              "default": 5,
+              "description": "The maximum size of the MariaDB connection pool",
+              "required": [],
+              "title": "pool_size",
+              "type": "integer"
+            },
+            "port": {
+              "default": 3306,
+              "description": "The MariaDB port to connect to",
+              "required": [],
+              "title": "port",
+              "type": "integer"
+            },
+            "username": {
+              "default": "postal",
+              "description": "The MariaDB username",
+              "required": [],
+              "title": "username",
+              "type": "string"
+            }
+          },
+          "required": [
+            "port",
+            "username",
+            "database",
+            "pool_size",
+            "encoding"
+          ],
+          "title": "main_db",
+          "type": "object"
+        },
+        "message_db": {
+          "properties": {
+            "database_name_prefix": {
+              "default": "postal",
+              "description": "The MariaDB prefix to add to database names",
+              "required": [],
+              "title": "database_name_prefix",
+              "type": "string"
+            },
+            "encoding": {
+              "default": "utf8mb4",
+              "description": "The encoding to use when connecting to the MariaDB database",
+              "required": [],
+              "title": "encoding",
+              "type": "string"
+            },
+            "host": {
+              "default": "localhost",
+              "description": "Hostname for the MariaDB server which stores the mail server databases",
+              "required": [],
+              "title": "host",
+              "type": "string"
+            },
+            "port": {
+              "default": 3306,
+              "description": "The MariaDB port to connect to",
+              "required": [],
+              "title": "port",
+              "type": "integer"
+            },
+            "username": {
+              "default": "postal",
+              "description": "The MariaDB username",
+              "required": [],
+              "title": "username",
+              "type": "string"
+            }
+          },
+          "required": [
+            "host",
+            "port",
+            "username",
+            "encoding",
+            "database_name_prefix"
+          ],
+          "title": "message_db",
+          "type": "object"
+        },
+        "migration_waiter": {
+          "properties": {
+            "attempts": {
+              "default": 120,
+              "description": "The number of attempts to try waiting for migrations to complete before start",
+              "required": [],
+              "title": "attempts",
+              "type": "integer"
+            },
+            "enabled": {
+              "default": false,
+              "description": "Wait for all migrations to run before starting a process",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "sleep_time": {
+              "default": 2,
+              "description": "The number of seconds to wait between each migration check",
+              "required": [],
+              "title": "sleep_time",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "enabled",
+            "attempts",
+            "sleep_time"
+          ],
+          "title": "migration_waiter",
+          "type": "object"
+        },
+        "oidc": {
+          "properties": {
+            "authorization_endpoint": {
+              "default": "",
+              "description": " required: false @schema The authorize endpoint on the authorization server (only used when discovery is false)",
+              "required": [],
+              "title": "authorization_endpoint"
+            },
+            "discovery": {
+              "default": true,
+              "description": "Enable discovery to determine endpoints from .well-known/openid-configuration from the Issuer",
+              "required": [],
+              "title": "discovery",
+              "type": "boolean"
+            },
+            "email_address_field": {
+              "default": "email",
+              "description": "The field to use to determine the user's email address",
+              "required": [],
+              "title": "email_address_field",
+              "type": "string"
+            },
+            "enabled": {
+              "default": false,
+              "description": "Enable OIDC authentication",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "identifier": {
+              "default": "",
+              "description": " required: false @schema The client ID for OIDC",
+              "required": [],
+              "title": "identifier"
+            },
+            "issuer": {
+              "default": "https://{{ .Values.dex.hostname }}",
+              "description": "The OIDC issuer URL",
+              "required": [],
+              "title": "issuer",
+              "type": "string"
+            },
+            "jwks_uri": {
+              "default": "",
+              "description": " required: false @schema The JWKS endpoint on the authorization server (only used when discovery is false)",
+              "required": [],
+              "title": "jwks_uri"
+            },
+            "local_authentication_enabled": {
+              "default": true,
+              "description": "When enabled, users with passwords will still be able to login locally. If disable, only OpenID Connect will be available.",
+              "required": [],
+              "title": "local_authentication_enabled",
+              "type": "boolean"
+            },
+            "name": {
+              "default": "OIDC Provider",
+              "description": "The name of the OIDC provider as shown in the UI",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            },
+            "name_field": {
+              "default": "name",
+              "description": "The field to use to determine the user's name",
+              "required": [],
+              "title": "name_field",
+              "type": "string"
+            },
+            "scopes": {
+              "description": "Scopes to request from the OIDC server.",
+              "items": {
+                "anyOf": [
+                  {
+                    "required": [],
+                    "type": "string"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "scopes",
+              "type": "array"
+            },
+            "secret": {
+              "default": "",
+              "description": " required: false @schema The client secret for OIDC",
+              "required": [],
+              "title": "secret"
+            },
+            "token_endpoint": {
+              "default": "",
+              "description": " required: false @schema The token endpoint on the authorization server (only used when discovery is false)",
+              "required": [],
+              "title": "token_endpoint"
+            },
+            "uid_field": {
+              "default": "sub",
+              "description": "The field to use to determine the user's UID",
+              "required": [],
+              "title": "uid_field",
+              "type": "string"
+            },
+            "userinfo_endpoint": {
+              "default": "",
+              "description": " required: false @schema The user info endpoint on the authorization server (only used when discovery is false)",
+              "required": [],
+              "title": "userinfo_endpoint"
+            }
+          },
+          "required": [
+            "enabled",
+            "local_authentication_enabled",
+            "name",
+            "issuer",
+            "scopes",
+            "uid_field",
+            "email_address_field",
+            "name_field",
+            "discovery"
+          ],
+          "title": "oidc",
+          "type": "object"
+        },
+        "postal": {
+          "properties": {
+            "batch_queued_messages": {
+              "default": true,
+              "description": "When enabled queued messages will be de-queued in batches based on their destination",
+              "required": [],
+              "title": "batch_queued_messages",
+              "type": "boolean"
+            },
+            "default_maximum_delivery_attempts": {
+              "default": 18,
+              "description": "The maximum number of delivery attempts",
+              "required": [],
+              "title": "default_maximum_delivery_attempts",
+              "type": "integer"
+            },
+            "default_maximum_hold_expiry_days": {
+              "default": 7,
+              "description": "The number of days to hold a message before they will be expired",
+              "required": [],
+              "title": "default_maximum_hold_expiry_days",
+              "type": "integer"
+            },
+            "default_spam_failure_threshold": {
+              "default": 20,
+              "description": "The default threshold at which a message should be treated as spam failure",
+              "required": [],
+              "title": "default_spam_failure_threshold",
+              "type": "integer"
+            },
+            "default_spam_threshold": {
+              "default": 5,
+              "description": "The default threshold at which a message should be treated as spam",
+              "required": [],
+              "title": "default_spam_threshold",
+              "type": "integer"
+            },
+            "default_suppression_list_automatic_removal_days": {
+              "default": 30,
+              "description": "The number of days an address will remain in a suppression list before being removed",
+              "required": [],
+              "title": "default_suppression_list_automatic_removal_days",
+              "type": "integer"
+            },
+            "queued_message_lock_stale_days": {
+              "default": 1,
+              "description": "The number of days after which to consider a lock as stale. Messages with stale locks will be removed and not retried.",
+              "required": [],
+              "title": "queued_message_lock_stale_days",
+              "type": "integer"
+            },
+            "smtp_hostname": {
+              "default": "{{ .Values.postal.hostname }}",
+              "description": " title: Smtp Hostname description: The Smtp hostname required: true minLength: 1 format: hostname @schema The hostname that the Postal SMTP server runs on",
+              "format": "hostname",
+              "minLength": 1,
+              "required": [],
+              "title": "Smtp Hostname"
+            },
+            "smtp_relays": {
+              "description": "An array of SMTP relays in the format of smtp://host:port",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "smtp_relays",
+              "type": "array"
+            },
+            "trusted_proxies": {
+              "description": "An array of IP addresses to trust for proxying requests to Postal (in addition to localhost addresses)",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "trusted_proxies",
+              "type": "array"
+            },
+            "use_ip_pools": {
+              "default": false,
+              "description": "Should IP pools be enabled for this installation?",
+              "required": [],
+              "title": "use_ip_pools",
+              "type": "boolean"
+            },
+            "use_local_ns_for_domain_verification": {
+              "default": false,
+              "description": "Domain verification and checking usually checks with a domain's nameserver. Enable this to check with the server's local nameservers.",
+              "required": [],
+              "title": "use_local_ns_for_domain_verification",
+              "type": "boolean"
+            },
+            "use_resent_sender_header": {
+              "default": true,
+              "description": "Append a Resend-Sender header to all outgoing e-mails",
+              "required": [],
+              "title": "use_resent_sender_header",
+              "type": "boolean"
+            },
+            "web_hostname": {
+              "default": "{{ .Values.postal.hostname }}",
+              "description": "the hostname that the Postal web interface runs on",
+              "format": "hostname",
+              "minLength": 1,
+              "required": [],
+              "title": "Web Hostname"
+            }
+          },
+          "required": [
+            "web_hostname",
+            "smtp_hostname",
+            "use_ip_pools",
+            "default_maximum_delivery_attempts",
+            "default_maximum_hold_expiry_days",
+            "default_suppression_list_automatic_removal_days",
+            "default_spam_threshold",
+            "default_spam_failure_threshold",
+            "use_local_ns_for_domain_verification",
+            "use_resent_sender_header",
+            "smtp_relays",
+            "trusted_proxies",
+            "queued_message_lock_stale_days",
+            "batch_queued_messages"
+          ],
+          "title": "postal",
+          "type": "object"
+        },
+        "rails": {
+          "properties": {
+            "environment": {
+              "default": "production",
+              "description": "The Rails environment to run the application in",
+              "required": [],
+              "title": "environment",
+              "type": "string"
+            }
+          },
+          "required": [
+            "environment"
+          ],
+          "title": "rails",
+          "type": "object"
+        },
+        "rspamd": {
+          "properties": {
+            "enabled": {
+              "default": false,
+              "description": "Enable rspamd for message inspection",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "flags": {
+              "default": "",
+              "description": " required: false @schema Any flags for the rspamd server",
+              "required": [],
+              "title": "flags"
+            },
+            "host": {
+              "default": "127.0.0.1",
+              "description": "The hostname of the rspamd server",
+              "required": [],
+              "title": "host",
+              "type": "string"
+            },
+            "password": {
+              "default": "",
+              "description": " required: false @schema The password for the rspamd server",
+              "required": [],
+              "title": "password"
+            },
+            "port": {
+              "default": 11334,
+              "description": "The port of the rspamd server",
+              "required": [],
+              "title": "port",
+              "type": "integer"
+            },
+            "ssl": {
+              "default": false,
+              "description": "Enable SSL for the rspamd connection",
+              "required": [],
+              "title": "ssl",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled",
+            "host",
+            "port",
+            "ssl"
+          ],
+          "title": "rspamd",
+          "type": "object"
+        },
+        "smtp": {
+          "properties": {
+            "authentication_type": {
+              "default": "login",
+              "description": "The type of authentication to use",
+              "required": [],
+              "title": "authentication_type",
+              "type": "string"
+            },
+            "enable_starttls": {
+              "default": false,
+              "description": "Use STARTTLS when connecting to the SMTP server and fail if unsupported",
+              "required": [],
+              "title": "enable_starttls",
+              "type": "boolean"
+            },
+            "enable_starttls_auto": {
+              "default": true,
+              "description": "Detects if STARTTLS is enabled in the SMTP server and starts to use it",
+              "required": [],
+              "title": "enable_starttls_auto",
+              "type": "boolean"
+            },
+            "from_address": {
+              "default": "postal@{{ .Values.postal.hostname }}",
+              "description": "The e-mail to use as the from address outgoing emails from Postal",
+              "required": [],
+              "title": "from_address",
+              "type": "string"
+            },
+            "from_name": {
+              "default": "Postal",
+              "description": "The name to use as the from name outgoing emails from Postal",
+              "required": [],
+              "title": "from_name",
+              "type": "string"
+            },
+            "host": {
+              "default": "127.0.0.1",
+              "description": "The hostname to send application-level e-mails to",
+              "required": [],
+              "title": "host",
+              "type": "string"
+            },
+            "openssl_verify_mode": {
+              "default": "peer",
+              "description": "When using TLS, you can set how OpenSSL checks the certificate. Use 'none' for no certificate checking",
+              "required": [],
+              "title": "openssl_verify_mode",
+              "type": "string"
+            },
+            "port": {
+              "default": 25,
+              "description": "The port number to send application-level e-mails to",
+              "required": [],
+              "title": "port",
+              "type": "integer"
+            },
+            "username": {
+              "default": "postal",
+              "description": " title: Smtp Username description: Smtp Username required: true minLength: 3 @schema The username to use when authentication to the SMTP server",
+              "minLength": 3,
+              "required": [],
+              "title": "Smtp Username"
+            }
+          },
+          "required": [
+            "host",
+            "port",
+            "username",
+            "authentication_type",
+            "enable_starttls",
+            "enable_starttls_auto",
+            "openssl_verify_mode",
+            "from_name",
+            "from_address"
+          ],
+          "title": "smtp",
+          "type": "object"
+        },
+        "smtp_client": {
+          "properties": {
+            "open_timeout": {
+              "default": 30,
+              "description": "The open timeout for outgoing SMTP connections",
+              "required": [],
+              "title": "open_timeout",
+              "type": "integer"
+            },
+            "read_timeout": {
+              "default": 30,
+              "description": "The read timeout for outgoing SMTP connections",
+              "required": [],
+              "title": "read_timeout",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "open_timeout",
+            "read_timeout"
+          ],
+          "title": "smtp_client",
+          "type": "object"
+        },
+        "smtp_server": {
+          "properties": {
+            "default_bind_address": {
+              "default": "::",
+              "description": "The default bind address the SMTP server should listen on unless overriden by the BIND_ADDRESS environment variable",
+              "required": [],
+              "title": "default_bind_address",
+              "type": "string"
+            },
+            "default_health_server_bind_address": {
+              "default": "127.0.0.1",
+              "description": "The default bind address for the SMTP server health server to listen on",
+              "required": [],
+              "title": "default_health_server_bind_address",
+              "type": "string"
+            },
+            "default_health_server_port": {
+              "default": 9091,
+              "description": "The default port for the SMTP server health server to listen on",
+              "required": [],
+              "title": "default_health_server_port",
+              "type": "integer"
+            },
+            "default_port": {
+              "default": 25,
+              "description": "The default port the SMTP server should listen on unless overriden by the PORT environment variable",
+              "required": [],
+              "title": "default_port",
+              "type": "integer"
+            },
+            "log_connections": {
+              "default": false,
+              "description": "Enable connection logging",
+              "required": [],
+              "title": "log_connections",
+              "type": "boolean"
+            },
+            "log_ip_address_exclusion_matcher": {
+              "default": "",
+              "description": " required: false @schema A regular expression to use to exclude connections from logging",
+              "required": [],
+              "title": "log_ip_address_exclusion_matcher"
+            },
+            "max_message_size": {
+              "default": 14,
+              "description": "The maximum message size to accept from the SMTP server (in MB)",
+              "required": [],
+              "title": "max_message_size",
+              "type": "integer"
+            },
+            "proxy_protocol": {
+              "const": false,
+              "default": "false",
+              "description": "Enable proxy protocol for use behind some load balancers (supports proxy protocol v1 only)",
+              "required": [],
+              "title": "proxy_protocol"
+            },
+            "ssl_version": {
+              "default": "SSLv23",
+              "description": "The SSL versions which are supported",
+              "required": [],
+              "title": "ssl_version",
+              "type": "string"
+            },
+            "tls_certificate_path": {
+              "default": "/config/smtp.cert",
+              "description": "The path to the SMTP server's TLS certificate",
+              "required": [],
+              "title": "tls_certificate_path",
+              "type": "string"
+            },
+            "tls_ciphers": {
+              "default": "",
+              "description": " required: false @schema Override ciphers to use for SSL",
+              "required": [],
+              "title": "tls_ciphers"
+            },
+            "tls_enabled": {
+              "const": true,
+              "default": "true",
+              "description": "Enable TLS for the SMTP server (requires certificate)",
+              "required": [],
+              "title": "tls_enabled"
+            },
+            "tls_private_key_path": {
+              "default": "/config/smtp.key",
+              "description": "The path to the SMTP server's TLS private key",
+              "required": [],
+              "title": "tls_private_key_path",
+              "type": "string"
+            }
+          },
+          "required": [
+            "default_port",
+            "default_bind_address",
+            "default_health_server_port",
+            "default_health_server_bind_address",
+            "tls_certificate_path",
+            "tls_private_key_path",
+            "ssl_version",
+            "log_connections",
+            "max_message_size"
+          ],
+          "title": "smtp_server",
+          "type": "object"
+        },
+        "spamd": {
+          "properties": {
+            "enabled": {
+              "default": false,
+              "description": "Enable SpamAssassin for message inspection",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "host": {
+              "default": "127.0.0.1",
+              "description": "The hostname for the SpamAssassin server",
+              "required": [],
+              "title": "host",
+              "type": "string"
+            },
+            "port": {
+              "default": 783,
+              "description": "The port of the SpamAssassin server",
+              "required": [],
+              "title": "port",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "enabled",
+            "host",
+            "port"
+          ],
+          "title": "spamd",
+          "type": "object"
+        },
+        "web_server": {
+          "properties": {
+            "default_bind_address": {
+              "default": "127.0.0.1",
+              "description": "The default bind address the web server should listen on unless overriden by the BIND_ADDRESS environment variable",
+              "required": [],
+              "title": "default_bind_address",
+              "type": "string"
+            },
+            "default_port": {
+              "default": 5000,
+              "description": "The default port the web server should listen on unless overriden by the PORT environment variable",
+              "required": [],
+              "title": "default_port",
+              "type": "integer"
+            },
+            "max_threads": {
+              "default": 5,
+              "description": "The maximum number of threads which can be used by the web server",
+              "required": [],
+              "title": "max_threads",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "default_port",
+            "default_bind_address",
+            "max_threads"
+          ],
+          "title": "web_server",
+          "type": "object"
+        },
+        "worker": {
+          "properties": {
+            "default_health_server_bind_address": {
+              "default": "127.0.0.1",
+              "description": "The default bind address for the worker health server to listen on",
+              "required": [],
+              "title": "default_health_server_bind_address",
+              "type": "string"
+            },
+            "default_health_server_port": {
+              "default": 9090,
+              "description": "The default port for the worker health server to listen on",
+              "required": [],
+              "title": "default_health_server_port",
+              "type": "integer"
+            },
+            "threads": {
+              "default": 2,
+              "description": "The number of threads to execute within each worker",
+              "required": [],
+              "title": "threads",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "default_health_server_port",
+            "default_health_server_bind_address",
+            "threads"
+          ],
+          "title": "worker",
+          "type": "object"
+        }
+      },
+      "required": [
+        "postal",
+        "web_server",
+        "worker",
+        "main_db",
+        "message_db",
+        "logging",
+        "gelf",
+        "smtp_server",
+        "dns",
+        "smtp",
+        "rails",
+        "rspamd",
+        "spamd",
+        "clamav",
+        "smtp_client",
+        "migration_waiter",
+        "oidc"
+      ],
+      "title": "conf_yaml"
     },
     "enabled": {
       "default": false,
@@ -120,7 +1211,7 @@
     },
     "hostname": {
       "default": "",
-      "description": "The hostname",
+      "description": "The hostname You should own the apex domain as you need to [add DNS record](https://docs.postalserver.io/getting-started/dns-configuration)",
       "format": "hostname",
       "minLength": 1,
       "required": [],
@@ -140,93 +1231,16 @@
       "required": [],
       "title": "kubee_internal"
     },
-    "mariadb": {
-      "description": " check available values here: https://artifacthub.io/packages/helm/bitnami/mariadb?modal=values-schema @ignored",
-      "properties": {
-        "auth": {
-          "properties": {
-            "database": {
-              "default": "postal",
-              "required": [],
-              "title": "database",
-              "type": "string"
-            },
-            "password": {
-              "default": "",
-              "description": " title: Database Password description: The database password required: true minLength: 5 @schema",
-              "minLength": 5,
-              "required": [],
-              "title": "Database Password"
-            },
-            "username": {
-              "default": "postal",
-              "required": [],
-              "title": "username",
-              "type": "string"
-            }
-          },
-          "required": [
-            "database",
-            "username",
-            "password"
-          ],
-          "title": "auth",
-          "type": "object"
-        },
-        "enabled": {
-          "default": "true",
-          "description": "set it to false if you want to use [operator](https://github.com/mariadb-operator/mariadb-operator/)",
-          "required": [],
-          "title": "enabled"
-        },
-        "fullnameOverride": {
-          "default": "postal-mariadb",
-          "description": "TODO: we should switch to templating for the name to avoid using reference to fullname override everywhere",
-          "required": [],
-          "title": "fullnameOverride",
-          "type": "string"
-        },
-        "initdbScripts": {
-          "properties": {
-            "grant_privileges.sql": {
-              "default": "GRANT ALL PRIVILEGES ON `{{ .Values.mariadb.auth.database }}%`.* TO '{{ .Values.mariadb.auth.username }}'@'%' WITH GRANT OPTION;\n",
-              "description": "NOTE: postal is creating postal-server-* databases to handle postal mail servers configuration",
-              "required": [],
-              "title": "grant_privileges.sql",
-              "type": "string"
-            }
-          },
-          "required": [
-            "grant_privileges.sql"
-          ],
-          "title": "initdbScripts",
-          "type": "object"
-        }
-      },
-      "required": [
-        "fullnameOverride",
-        "auth",
-        "initdbScripts"
-      ],
-      "title": "mariadb"
-    },
     "namespace": {
-      "default": "mail",
+      "default": "postal",
       "description": "The installation Namespace",
       "minLength": 1,
       "required": [],
       "title": "Namespace"
     },
-    "signing_key": {
-      "default": "",
-      "description": "The signing key",
-      "minLength": 5,
-      "required": [],
-      "title": "Signing Key"
-    },
     "version": {
-      "default": "v3.3.4",
-      "description": "The postal version, https://github.com/postalserver/postal/releases",
+      "default": "3.3.4",
+      "description": "The postal [docker version](https://github.com/postalserver/postal/pkgs/container/postal) (The release version Without the v)",
       "required": [],
       "title": "Version"
     }
@@ -236,7 +1250,7 @@
     "namespace",
     "hostname",
     "version",
-    "signing_key"
+    "conf_secrets"
   ],
   "type": "object"
 }

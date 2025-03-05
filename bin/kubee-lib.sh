@@ -558,9 +558,18 @@ kubee::get_cluster_values_files_for_chart(){
     CLUSTER_FILES+=("$CLUSTER_CHART_VALUES_FILE")
     echo::debug "Returned the cluster chart values files $CLUSTER_CHART_VALUES_FILE"
 
-    # Delete the properties in the cluster values file
-    echo::debug "Delete the property $ACTUAL_CHART_ALIAS of the cluster values files for cleanness"
-    yq -i "del(.$ACTUAL_CHART_ALIAS)" "$CLUSTER_VALUES_FILE"
+    # Deletion of the actual chart property in the cluster values file does not occur anymore
+    #
+    # Why? So that the helm chart developer can reference the value with a full qualified name
+    #
+    # For example, in cert manager values.yaml, the reference {{ .Values.cert_manager.hostname }}
+    # will be always available,
+    # * when installing cert_manager
+    # * but also when installing any another dependent chart.
+    #
+    # Deprecated: Delete the properties in the cluster values file
+    # echo::debug "Delete the property $ACTUAL_CHART_ALIAS of the cluster values files for cleanness"
+    # yq -i "del(.$ACTUAL_CHART_ALIAS)" "$CLUSTER_VALUES_FILE"
 
     # return
     echo "${CLUSTER_FILES[@]}"

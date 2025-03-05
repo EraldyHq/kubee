@@ -15,7 +15,14 @@ The `{{ template "chart.description" . }}` is a `Kubee Chart` that installs [Pos
 
 Set this values in your cluster values file.
 ```yaml
-
+postal:
+  enabled: true
+  hostname: 'postal.example.com' 
+  conf_secrets:
+    dkim_signing_key: '${KUBEE_POSTAL_SIGNING_KEY}'
+    db_password: '${KUBEE_POSTAL_MARIADB_PASSWORD}'
+    rails_secret_key: '${KUBEE_POSTAL_RAILS_SECRET}'
+    smtp_password: '${KUBEE_POSTAL_SMTP_PASSWORD}'
 ```
 
 ### Install
@@ -25,10 +32,10 @@ kubee -c clusterName helmet play postal
 ```
 
 
-
 {{ template "chart.valuesSection" . }}
-| mariadb | object | | [The Bitnami MariaDb chart values](https://github.com/bitnami/charts/blob/main/bitnami/mariadb/values.yaml) |
+| conf_yaml | object | | [The Postal Configuration](https://github.com/postalserver/postal/blob/main/doc/config/yaml.yml) |
 
+By default, all username are named `postal`. You can change them in the `postal configuration` section. 
 
 ## Contrib / Dev
 

@@ -19,24 +19,22 @@ spec:
           image: mariadb:11.7.2
           # starting with a db
           env:
-            #- name: MARIADB_USER
-            #  value: postal
-{{/*            - name: MARIADB_PASSWORD*/}}
-{{/*              valueFrom:*/}}
-{{/*                secretKeyRef:*/}}
-{{/*                  name: {{ include "postal-name-config-secret" . }}*/}}
-{{/*                  key: mariadb-password*/}}
-{{/*            - name: MARIADB_DATABASE*/}}
-{{/*              value: postal*/}}
+            - name: MARIADB_USER
+              value: {{.Values.conf_yaml.main_db.username}}
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postal-name-config-secret" . }}
+                  key: mariadb-password
+            - name: MARIADB_DATABASE
+              value: {{.Values.conf_yaml.main_db.database }}
             - name: MARIADB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postal-name-config-secret" . }}
                   key: mariadb-password
-            #- name: MARIADB_INITDB_SKIP_TZINFO
-            #  value: "1"
           ports:
-            - containerPort: 3306
+            - containerPort: {{ .Values.conf_yaml.main_db.port }}
           livenessProbe:
             failureThreshold: 3
             initialDelaySeconds: 120
@@ -69,21 +67,15 @@ spec:
                       password_aux=$(cat "$MARIADB_ROOT_PASSWORD_FILE")
                   fi
                   mariadb-admin ping -uroot -p"${password_aux}"
-          resources:
-            limits:
-              # 200 was too low
-              memory: 250Mi
-            requests:
-              cpu: 200m
-              memory: 250Mi
+          resources: {{ .Values.conf_yaml.main_db.resources | toYaml | nindent 12 }}
           volumeMounts:
             - name: data
               mountPath: /var/lib/mysql
-            {{/*            - name: custom-init-scripts*/}}
-            {{/*              mountPath: /docker-entrypoint-initdb.d*/}}
-            #- name: config
-            #  mountPath: /etc/mysql/conf.d
-            #  subPath: my.cnf
+            {{- /*            - name: custom-init-scripts*/}}
+            {{- /*              mountPath: /docker-entrypoint-initdb.d*/}}
+            - name: config
+              mountPath: /etc/mysql/conf.d
+              subPath: my.cnf
       volumes:
         - name: custom-init-scripts
           secret:

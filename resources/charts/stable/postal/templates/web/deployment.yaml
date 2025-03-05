@@ -38,17 +38,9 @@ spec:
                 secretKeyRef:
                   name: {{ include "postal-name-config-secret" . }}
                   key: rails-secret-key
-            - name: WEB_SERVER_DEFAULT_PORT
-              value: '5000'
-            - name: WORKER_DEFAULT_HEALTH_SERVER_PORT
-              value: '9090'
-
           ports:
             - name: web
-              containerPort: 5000
-            - name: metrics
-              containerPort: 9090
-              protocol: TCP
+              containerPort: {{ .Values.conf_yaml.web_server.default_port }}
           livenessProbe:
             httpGet:
               path: /health

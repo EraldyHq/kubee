@@ -15,7 +15,14 @@ The `Kubee Postal Chart` is a `Kubee Chart` that installs [Postal](https://docs.
 
 Set this values in your cluster values file.
 ```yaml
-
+postal:
+  enabled: true
+  hostname: 'postal.example.com'
+  conf_secrets:
+    dkim_signing_key: '${KUBEE_POSTAL_SIGNING_KEY}'
+    db_password: '${KUBEE_POSTAL_MARIADB_PASSWORD}'
+    rails_secret_key: '${KUBEE_POSTAL_RAILS_SECRET}'
+    smtp_password: '${KUBEE_POSTAL_SMTP_PASSWORD}'
 ```
 
 ### Install
@@ -28,18 +35,15 @@ kubee -c clusterName helmet play postal
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| components.smtp.resource.cpu | string | `""` |  |
-| components.smtp.resource.memory | string | `""` |  |
-| components.web.resource.cpu | string | `""` |  |
-| components.web.resource.memory | string | `""` |  |
-| components.worker.resource.cpu | string | `""` |  |
-| components.worker.resource.memory | string | `""` |  |
+| conf_secrets.db_password | string | `""` | The database password |
+| conf_secrets.dkim_signing_key | string | `""` | Private key It should be in pem format (BEGIN/END PRIVATE KEY) The signing.key can be generated using the following command: `openssl genrsa -out path/to/signing.key 2048` |
+| conf_secrets.rails_secret_key | string | `""` | Rail Secret key (for signing payload) |
+| conf_secrets.smtp_password | string | `""` | The password to use when authentication to the SMTP server |
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
-| hostname | string | `""` | The hostname |
-| namespace | string | `"mail"` | The installation Namespace |
-| signing_key | string | `""` | Private key (for signing payload) It should be in pem format (BEGIN/END PRIVATE KEY) |
-| version | string | `"v3.3.4"` | The postal version, https://github.com/postalserver/postal/releases |
-| mariadb | object | | [The Bitnami MariaDb chart values](https://github.com/bitnami/charts/blob/main/bitnami/mariadb/values.yaml) |
+| hostname | string | `""` | The hostname You should own the apex domain as you need to [add DNS record](https://docs.postalserver.io/getting-started/dns-configuration) |
+| namespace | string | `"postal"` | The installation Namespace |
+| version | string | `"3.3.4"` | The postal [docker version](https://github.com/postalserver/postal/pkgs/container/postal) (The release version Without the v) |
+| conf_yaml | object | | [The Postal Configuration](https://github.com/postalserver/postal/blob/main/doc/config/yaml.yml) |
 
 ## Contrib / Dev
 

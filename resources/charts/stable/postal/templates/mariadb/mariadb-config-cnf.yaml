@@ -7,8 +7,12 @@ metadata:
     {{- include "kubee-manifest-labels" . | indent 4}}
 data:
   my.cnf: |-
-    # Method 1: Using my.cnf configuration file
     [mysqld]
+
+    # Allow remote access
+    # https://mariadb.com/kb/en/configuring-mariadb-for-remote-client-access/
+    skip-networking=0
+    skip-bind-address
 
     # Maximum memory allocation
     #innodb_buffer_pool_size = 1G       # Sets the memory allocated to InnoDB buffer pool

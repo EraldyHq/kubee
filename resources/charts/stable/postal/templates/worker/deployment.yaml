@@ -22,6 +22,12 @@ spec:
         image: "ghcr.io/postalserver/postal:{{ .Values.version }}"
         command: ["postal", "worker"]
         {{- /* resources: {{ toYaml .Values.resources | nindent 10 }} */}}
+        env:
+          - name: MAIN_DB_HOST
+            value: '{{.Values.conf_kube.main_db.service_name}}.{{.Values.namespace}}.svc.cluster.local'
+        ports:
+          - name: metrics
+            containerPort: {{ .Values.conf_yaml.worker.default_health_server_port }}
         volumeMounts:
         - name: config
           mountPath: /config/
