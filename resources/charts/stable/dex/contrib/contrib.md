@@ -39,3 +39,9 @@ The [Helm Chart Roll Deployment](https://helm.sh/docs/howto/charts_tips_and_tric
 is on the Dex Helm deployment chart.
 
 We can't trick it to apply the checksum on our configuration.
+
+
+### How to see the token lifetime
+
+* `access token lifetime`: You can see the real value with the exp field of the JWS token.
+* `refresh_token_lifetime`: You can see the real value in the cookie lifetime of oauth

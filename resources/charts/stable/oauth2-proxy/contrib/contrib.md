@@ -93,5 +93,18 @@ You get a 403 because you don't have the session cookie
 curl -I  -k https://oauth2-bcf52bfa.nip.io/ 
 ```
 
-## No refresh token used, scope offline_access
 
+
+### Why I need to reauthenticate ?
+
+* No scope `offline_access`
+* Bad `cookie_refresh` values
+ 
+When the access token is stored in a cookie, the user needs to access the website in the access token lifespan to trigger a refresh before expiration otherwise it would need to re-authenticate.
+
+If we want to have a lower access token lifespan of `10m` and `cookie_refresh_interval: 1m`, we need to use Redis as storage.
+
+Issues:
+* https://github.com/oauth2-proxy/oauth2-proxy/issues/1942
+* https://github.com/oauth2-proxy/oauth2-proxy/issues/1285
+* https://github.com/oauth2-proxy/oauth2-proxy/issues/1836

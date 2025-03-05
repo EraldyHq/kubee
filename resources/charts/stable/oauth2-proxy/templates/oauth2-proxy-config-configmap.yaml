@@ -57,7 +57,8 @@ data:
     # upstreams = [ "file:///dev/null" ]
 
     # Headers options
-    # To be able to log to Kubernetes dashboard
+    # Set the http authorization header with the access token
+    # To be able to log to Kubernetes Cli such as Kubernetes dashboard
     set_authorization_header = true
 
     # Tls
@@ -80,17 +81,21 @@ data:
     cookie_name = "_oauth2_proxy"
     cookie_httponly = true
     # cookie_refresh to prevent that Oauth serve expired token
-    #  Issue: https://github.com/oauth2-proxy/oauth2-proxy/issues/1285
-    #  Issue: https://github.com/oauth2-proxy/oauth2-proxy/issues/1836
     # The "cookie-refresh" value controls when OAuth2 Proxy tries to refresh an Access-Token.
-    # Recommended setting: cookie_refresh := Access-Token lifespan - 1m
-    cookie_refresh = "{{.Values.dex.expiration.access_token_lifetime }}"
+    # Recommended setting for Redis (ie background refresh): cookie_refresh := Access-Token lifespan - 1m
+    # .Values.auth.cookie_refresh_interval was added because of this
+    # Issue: https://github.com/oauth2-proxy/oauth2-proxy/issues/1942#issuecomment-2700271002
+    {{- $cookie_refresh := (sub .Values.dex.expiration.access_token_lifetime .Values.auth.token_refresh_interval) }}
+    {{- if le $cookie_refresh 0 }}
+    {{- fail (printf "The cookie refresh interval (%s) is greater than the access token lifetime (%s)"  .Values.auth.token_refresh_interval .Values.dex.expiration.access_token_lifetime) }}
+    {{- end }}
+    cookie_refresh = "{{ $cookie_refresh }}m"
     # The "cookie-expire" value should be equal to the lifetime of the Refresh-Token
     # that is issued by the OAuth2 authorization server.
     # Default is 168h (ie 7 days)
     # Recommended setting: cookie_expire := Refresh-Token lifespan (i.e. Keycloak client_session_idle)
     # It forces users to reauthenticate and obtain a new refresh token.
-    cookie_expire = "{{.Values.dex.expiration.refresh_token_lifetime }}"
+    cookie_expire = "{{.Values.dex.expiration.refresh_token_lifetime }}m"
 
     # Csrf Cookie
     # https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/#cookie-options

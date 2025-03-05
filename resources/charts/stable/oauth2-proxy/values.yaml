@@ -1,32 +1,77 @@
-# Enabled or not
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
 enabled: false
-# The auth namespace
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace
 namespace: 'auth'
-# The version
+# -- The oauth-proxy [release version](https://github.com/oauth2-proxy/oauth2-proxy/releases)
 version: "v7.8.1"
-# the hostname mandatory
+# @schema
+# title: Hostname
+# description: The public hostname
+# required: true
+# format: hostname
+# minLength: 1
+# @schema
+# -- The public hostname
 hostname: ''
 # Auth
 auth:
   # @schema
-  # Secret Mandatory: A random value used to sign cookies
-  # cookie_secret must be 16, 24, or 32 bytes to create an AES cipher
-  # Example command: dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_' ; echo
-  # https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview#generating-a-cookie-secret
+  # required: true
+  # minLength: 16
+  # @schema
+  # -- Secret Mandatory: A random value used to sign cookies
+  # It must be 16, 24, or 32 bytes to create an AES cipher
+  # Example command: `dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_' ; echo`
+  # [Doc Reference](https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview#generating-a-cookie-secret)
   cookie_secret: ''
-  # Cookie Expiration is controlled by Oidc Token expiration
-  # Add the domain of the hostname as cookie and while list domain
+  # @schema
+  # type: boolean
+  # @schema
+  # -- Add the domain of the hostname as cookie domain and while list domain
   use_domain_hostname: true
-  # Optional domain of the cookie: the longest domain matching the request's host will be used (or the shortest cookie domain if there is no match).
+  # @schema
+  # format: hostname
+  # @schema
+  # -- Possible domains of the cookie.
+  # The longest domain matching the request's host is used (or the shortest cookie domain if there is no match).
   cookie_domains: []
-  # Whitelist domains
-  # Required to allow redirection back to original requested target
+  # @schema
+  # title: Refresh interval before access token expiration
+  # type: integer
+  # required: true
+  # @schema
+  # -- The interval in minutes in which the refresh of the access token will happen before expiration (in minutes)
+  # `120` is the default and not `1` because of this [issue](https://github.com/oauth2-proxy/oauth2-proxy/issues/1942#issuecomment-2700271002)
+  token_refresh_interval: 120
+  # @schema
+  # format: hostname
+  # @schema
+  # -- Whitelist domains.
+  # The allowed domains for redirection back to the original requested target
   whitelist_domains: []
-  # Email Domains
-  # Only users with this domain will be let in
-  # Accepted value: `*` for all emails or `your.company.com`
+  # @schema
+  # format: hostname
+  # @schema
+  # -- Email Domains.
+  # Only users with this domain will be let in.
+  # Accepted value: `*` for all emails or a hostname `your.company.com`
   email_domains: [ '*' ]
-  # Authenticated email address
+  # @schema
+  # format: email
+  # @schema
+  # -- Authenticated email address.
   # Only users with this email addresses will be let in
   # The admin email is already taken into account
   email_addresses: []
@@ -34,6 +79,7 @@ auth:
 
 # Oauth proxy helm values
 # https://github.com/oauth2-proxy/manifests/blob/main/helm/oauth2-proxy/values.yaml
+# @ignored
 oauth2-proxy:
   config:
     # We use our own secret
@@ -83,9 +129,11 @@ oauth2-proxy:
       secret:
         secretName: oauth2-proxy-kubee-tls-ca
 
-# Tweak to not output the template of the kubee cross-dependency chart
-# in the prometheus release
-# It's used in the chart dependencies condition
+# -- @ignored Internal Kubee constant
 kubee_internal:
-  # Don't modify the value, don't change
+  # @schema
+  # const: false
+  # @schema
+  # Constant used to not output template from kubee cross dependency in Chart.yaml
+  # Don't change, don't touch
   install_cross_dependency: false

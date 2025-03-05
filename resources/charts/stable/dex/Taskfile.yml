@@ -13,4 +13,12 @@ tasks:
   tpl:
     cmds:
       - kubee helmet template --out dex
+  # Install
+  play:
+    cmds:
+      - kubee helmet play dex
+  # Restart
+  restart:
+    cmds:
+      - kubee app restart dex
 

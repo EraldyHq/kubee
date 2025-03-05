@@ -73,17 +73,25 @@ clients:
 # It's possible to specify units using only s, m and h suffixes.
 # This configuration are used by Oauth proxy to set cookie expiration settings
 expiration:
-  # -- The access token lifetime
-  # 24h is the [default](https://github.com/dexidp/dex/blob/65814bbd7746611a359408bb355fb4e12d6e2c14/config.yaml.dist#L89),
+  # @schema
+  # title: The access token lifetime
+  # type: integer
+  # required: true
+  # @schema
+  # -- The access token lifetime (in minutes)
+  # 24h (1440m) is the [default](https://github.com/dexidp/dex/blob/65814bbd7746611a359408bb355fb4e12d6e2c14/config.yaml.dist#L89),
   # 10m is the [recommended doc setting](https://dexidp.io/docs/configuration/tokens/#expiration-and-rotation-settings),
   # 1m is the [recommended setting of Oauth proxy](https://oauth2-proxy.github.io/oauth2-proxy/configuration/session_storage).
-  # You can see the real value with the exp field of the JWS token
-  access_token_lifetime: "10m"
-  # -- The refresh token lifetime, it forces users to reauthenticate
+  access_token_lifetime: 1440  # It must be an integer because the refresh process needs to be executed before and oauth-proxy needs a value so we need to apply some math.
+  # @schema
+  # title: The refresh token lifetime
+  # type: integer
+  # required: true
+  # @schema
+  # -- The refresh token lifetime (in minutes), it forces users to reauthenticate
   # 3960h (165 days) is the [dex default](https://github.com/dexidp/dex/blob/65814bbd7746611a359408bb355fb4e12d6e2c14/config.yaml.dist#L89),
-  # 168h (7 days) is the [default cookie_expire value](https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview?_highlight=cookie_expire#cookie-options)
-  # You can see the real value in the cookie lifetime of oauth
-  refresh_token_lifetime: "168h"
+  # 168h (7 days, 10080m) is the [default cookie_expire value](https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview?_highlight=cookie_expire#cookie-options)
+  refresh_token_lifetime: 10080
 
 
 

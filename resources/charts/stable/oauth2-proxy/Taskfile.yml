@@ -14,3 +14,11 @@ tasks:
   dep:
     cmds:
       - kubee helmet update-dependencies oauth2-proxy
+  # Template out
+  tpl:
+    cmds:
+      - kubee helmet template --out oauth2-proxy
+  # Install
+  play:
+    cmds:
+      - kubee helmet play oauth2-proxy
