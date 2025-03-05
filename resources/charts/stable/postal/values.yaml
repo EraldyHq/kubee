@@ -87,6 +87,15 @@ mariadb:
     # NOTE: postal is creating postal-server-* databases to handle postal mail servers configuration
     grant_privileges.sql: |
       GRANT ALL PRIVILEGES ON `{{ .Values.mariadb.auth.database }}%`.* TO '{{ .Values.mariadb.auth.username }}'@'%' WITH GRANT OPTION;
+  primary:
+    resources:
+      limits:
+        ephemeral-storage: 2Gi
+        memory: 128Mi
+      requests:
+        cpu: 500m
+        ephemeral-storage: 50Mi
+        memory: 128Mi
 
 # Internal Kubee constant
 # @ignored
