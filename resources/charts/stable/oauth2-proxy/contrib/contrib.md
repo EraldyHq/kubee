@@ -108,3 +108,10 @@ Issues:
 * https://github.com/oauth2-proxy/oauth2-proxy/issues/1942
 * https://github.com/oauth2-proxy/oauth2-proxy/issues/1285
 * https://github.com/oauth2-proxy/oauth2-proxy/issues/1836
+
+### Scopes?
+
+* `openid` is mandatory.  Returns the `sub` claim, which uniquely identifies the user. In an ID Token, iss, aud, exp, iat, and at_hash claims will also be present.
+* `profile`: returns claims that represent basic profile information, including name, family_name, given_name, middle_name, nickname, picture, and updated_at
+* `offline_access` to get a refresh token
+* `email`: email
