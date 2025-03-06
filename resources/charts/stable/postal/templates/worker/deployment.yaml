@@ -22,6 +22,7 @@ spec:
           command: [ "postal", "worker" ]
         {{- /* resources: {{ toYaml .Values.resources | nindent 10 }} */}}
           ports:
-            - name: metrics
+            - name: health
               containerPort: {{ .Values.conf_yaml.worker.default_health_server_port }}
-      {{- include "postal-deploy-containers-common" . | indent 6}}
+          {{- include "postal-health-probes" . | nindent 10}}
+      {{- include "postal-deploy-containers-common" . | nindent 6}}

@@ -21,13 +21,14 @@ spec:
       containers:
         - name: smtp
           command: [ "postal", "smtp-server" ]
-        {{- /* resources: {{ toYaml .Values.resources | nindent 10 }} */}}
+          {{- /* resources: {{ toYaml .Values.resources | nindent 10 }} */}}
           securityContext:
             capabilities:
               add: [ "NET_BIND_SERVICE" ] # to connect to port 25
           ports:
             - name: smtp
               containerPort: {{.Values.conf_yaml.smtp_server.default_port }}
-            - name: metrics
+            - name: health
               containerPort: {{.Values.conf_yaml.smtp_server.default_health_server_port}}
-      {{- include "postal-deploy-containers-common" . | indent 6}}
+          {{- include "postal-health-probes" . | nindent 10}}
+      {{- include "postal-deploy-containers-common" . | nindent 6}}

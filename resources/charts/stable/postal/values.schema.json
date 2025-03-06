@@ -131,7 +131,7 @@
             },
             "service_name": {
               "default": "smtp",
-              "description": " as it's shown to the end user",
+              "description": " as it's shown as instructions",
               "required": [],
               "title": "service_name"
             }
@@ -863,17 +863,20 @@
           "properties": {
             "default_bind_address": {
               "default": "::",
-              "description": "The default bind address the SMTP server should listen on unless overriden by the BIND_ADDRESS environment variable",
+              "description": " enum: [ '0.0.0.0', '::' ] @schema The default bind address the SMTP server should listen on unless overriden by the BIND_ADDRESS environment variable It should be all otherwise the connection is refused for kubelet",
+              "enum": [
+                "0.0.0.0",
+                "::"
+              ],
               "required": [],
-              "title": "default_bind_address",
-              "type": "string"
+              "title": "default_bind_address"
             },
             "default_health_server_bind_address": {
+              "const": "0.0.0.0",
               "default": "0.0.0.0",
-              "description": "The default bind address for the SMTP server health server to listen on",
+              "description": " const: 0.0.0.0 @schema The default bind address for the SMTP server health server to listen on It should be 0.0.0.0 otherwise the connection is refused for kubelet",
               "required": [],
-              "title": "default_health_server_bind_address",
-              "type": "string"
+              "title": "default_health_server_bind_address"
             },
             "default_health_server_port": {
               "default": 9091,
@@ -884,7 +887,7 @@
             },
             "default_port": {
               "default": 25,
-              "description": " @schema required: false type: integer @schema",
+              "description": " This port is shown in the UI as configuration instruction It should be therefore the same as in the public one (ie proxy entry point or Loadbalancer service) @schema required: true type: integer @schema",
               "required": [],
               "title": "default_port",
               "type": "integer"
@@ -952,9 +955,8 @@
             }
           },
           "required": [
-            "default_bind_address",
+            "default_port",
             "default_health_server_port",
-            "default_health_server_bind_address",
             "tls_certificate_path",
             "tls_private_key_path",
             "ssl_version",
@@ -999,11 +1001,11 @@
         "web_server": {
           "properties": {
             "default_bind_address": {
+              "const": "0.0.0.0",
               "default": "0.0.0.0",
-              "description": "The default bind address the web server should listen on unless overriden by the BIND_ADDRESS environment variable",
+              "description": " const: 0.0.0.0 @schema The default bind address the web server should listen on unless overriden by the BIND_ADDRESS environment variable It should be 0.0.0.0 otherwise the connection is refused",
               "required": [],
-              "title": "default_bind_address",
-              "type": "string"
+              "title": "default_bind_address"
             },
             "default_port": {
               "default": 5000,
@@ -1022,7 +1024,6 @@
           },
           "required": [
             "default_port",
-            "default_bind_address",
             "max_threads"
           ],
           "title": "web_server",
@@ -1031,11 +1032,11 @@
         "worker": {
           "properties": {
             "default_health_server_bind_address": {
-              "default": "localhost",
-              "description": "The default bind address for the worker health server to listen on",
+              "const": "0.0.0.0",
+              "default": "0.0.0.0",
+              "description": " const: 0.0.0.0 @schema The default bind address for the worker health server to listen on It should be 0.0.0.0 otherwise the connection is refused for kubelet",
               "required": [],
-              "title": "default_health_server_bind_address",
-              "type": "string"
+              "title": "default_health_server_bind_address"
             },
             "default_health_server_port": {
               "default": 9090,
@@ -1054,7 +1055,6 @@
           },
           "required": [
             "default_health_server_port",
-            "default_health_server_bind_address",
             "threads"
           ],
           "title": "worker",

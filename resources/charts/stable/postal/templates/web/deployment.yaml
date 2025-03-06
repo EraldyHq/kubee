@@ -22,6 +22,6 @@ spec:
           command: [ "postal", "web-server" ]
         {{- /* resources: {{ toYaml .Values.resources | nindent 10 }} */}}
           ports:
-            - name: web
+            - name: 'web'
               containerPort: {{ .Values.conf_yaml.web_server.default_port }}
       {{- include "postal-deploy-containers-common" . | indent 6}}

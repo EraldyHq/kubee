@@ -29,6 +29,30 @@ Helper to print the basic name for consistency
 {{ printf "postal-config/secret-checksum: %s" (include (print .Template.BasePath "/config/postal-config-secret.yaml") . | sha256sum )}}
 {{- end }}
 
+{{- define "postal-health-probes"}}
+{{- /*  https://docs.postalserver.io/features/health-metrics#health-checks */}}
+{{- /*  The /health endpoint will return "OK" when the process is running. */}}
+{{/* There is no health check for the web component ???? We get a 403 at /health */}}
+livenessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+    httpGet:
+        path: "/health"
+        port: "health"
+readinessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+    httpGet:
+        path: "/health"
+        port: "health"
+{{- end }}
+
 {{/*# https://helm.sh/docs/chart_template_guide/named_templates/#declaring-and-using-templates-with-define-and-template*/}}
 {{- define "postal-deploy-containers-common" }}
     image: "ghcr.io/postalserver/postal:{{ .Values.version }}"

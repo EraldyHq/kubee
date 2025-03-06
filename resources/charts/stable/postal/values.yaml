@@ -128,7 +128,11 @@ conf_yaml:
   web_server:
     # The default port the web server should listen on unless overriden by the PORT environment variable
     default_port: 5000
+    # @schema
+    # const: 0.0.0.0
+    # @schema
     # The default bind address the web server should listen on unless overriden by the BIND_ADDRESS environment variable
+    # It should be 0.0.0.0 otherwise the connection is refused
     default_bind_address: 0.0.0.0
     # The maximum number of threads which can be used by the web server
     max_threads: 5
@@ -136,8 +140,12 @@ conf_yaml:
   worker:
     # The default port for the worker health server to listen on
     default_health_server_port: 9090
+    # @schema
+    # const: 0.0.0.0
+    # @schema
     # The default bind address for the worker health server to listen on
-    default_health_server_bind_address: localhost
+    # It should be 0.0.0.0 otherwise the connection is refused for kubelet
+    default_health_server_bind_address: 0.0.0.0
     # The number of threads to execute within each worker
     threads: 2
 
@@ -194,11 +202,20 @@ conf_yaml:
     # type: integer
     # @schema
     default_port: 25
-    # The default bind address the SMTP server should listen on unless overriden by the BIND_ADDRESS environment variable
+    # @schema
+    # enum: [ '0.0.0.0', '::' ]
+    # @schema
+    # The default bind address the SMTP server should listen on unless
+    # overriden by the BIND_ADDRESS environment variable
+    # It should be all otherwise the connection is refused for kubelet
     default_bind_address: '::'
     # The default port for the SMTP server health server to listen on
     default_health_server_port: 9091
+    # @schema
+    # const: 0.0.0.0
+    # @schema
     # The default bind address for the SMTP server health server to listen on
+    # It should be 0.0.0.0 otherwise the connection is refused for kubelet
     default_health_server_bind_address: 0.0.0.0
     # @schema
     # const: true
