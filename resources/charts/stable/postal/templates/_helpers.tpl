@@ -25,7 +25,8 @@ Helper to print the basic name for consistency
 
 {{/* Config checksum*/}}
 {{- define "postal-config-checksum-annotation" }}
-{{ printf "postal-config/checksum: %s" (include (print .Template.BasePath "/config/postal-config-map.yaml") . | sha256sum )}}
+{{ printf "postal-config/map-checksum: %s" (include (print .Template.BasePath "/config/postal-config-map.yaml") . | sha256sum )}}
+{{ printf "postal-config/secret-checksum: %s" (include (print .Template.BasePath "/config/postal-config-secret.yaml") . | sha256sum )}}
 {{- end }}
 
 {{- /*

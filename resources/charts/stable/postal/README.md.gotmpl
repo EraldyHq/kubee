@@ -15,14 +15,21 @@ The `{{ template "chart.description" . }}` is a `Kubee Chart` that installs [Pos
 
 Set this values in your cluster values file.
 ```yaml
+# mandatory
 postal:
   enabled: true
-  hostname: 'postal.example.com' 
+  hostname: 'postal.example.com' # You should own this domain 
   conf_secrets:
-    dkim_signing_key: '${KUBEE_POSTAL_SIGNING_KEY}'
+    dkim_signing_key: '${KUBEE_POSTAL_SIGNING_KEY}' # Generate the private key via `openssl genrsa -out path/to/signing.key 2048`
     db_password: '${KUBEE_POSTAL_MARIADB_PASSWORD}'
     rails_secret_key: '${KUBEE_POSTAL_RAILS_SECRET}'
     smtp_password: '${KUBEE_POSTAL_SMTP_PASSWORD}'
+# Only if you want to log in via dex
+dex:
+  enabled: true
+  clients:
+    postal:
+      secret: '${KUBEE_DEX_POSTAL_SECRET}'
 ```
 
 ### Install
@@ -43,7 +50,7 @@ If dex is enabled and the dex postal secret is not empty `.Values.dex.clients.po
 {{ template "chart.valuesSection" . }}
 | conf_yaml | object | | [The Postal Configuration without secrets](https://github.com/postalserver/postal/blob/{{ template "chart.appVersion" . }}/doc/config/yaml.yml) |
 
-By default, all username are named `postal`. You can change them in the `postal configuration` section. 
+By default, all username are named `postal`. You can change them in the `conf_yaml` postal configuration section. 
 
 ## Contrib / Dev
 

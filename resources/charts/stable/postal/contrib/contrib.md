@@ -36,16 +36,6 @@ https://docs.postalserver.io/getting-started/configuration
 * [Env](https://github.com/postalserver/postal/blob/main/doc/config/environment-variables.md)
 
 In the [docker image](https://docs.postalserver.io/other/containers#configuration), the `$config-file-root` is `/config`
-## Maria Db
-
-https://github.com/MariaDB/mariadb-docker
-Backup:
-```bash
-docker run --volume /backup-volume:/backup --rm mariadb:10.6.15 mariadb-backup --help
-```
-
-https://mariadb.com/kb/en/kubernetes-and-mariadb/
-https://mariadb.com/kb/en/kubernetes-operators-for-mariadb/
 
 
 

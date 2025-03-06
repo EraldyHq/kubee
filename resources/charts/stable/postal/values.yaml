@@ -191,7 +191,12 @@ conf_yaml:
 
   smtp_server:
     # The default port the SMTP server should listen on unless overriden by the PORT environment variable
-    default_port: 25
+    # @schema
+    # required: false
+    # type: integer
+    # minimum: 1000
+    # @schema
+    default_port: 1025
     # The default bind address the SMTP server should listen on unless overriden by the BIND_ADDRESS environment variable
     default_bind_address: '::'
     # The default port for the SMTP server health server to listen on
@@ -261,8 +266,13 @@ conf_yaml:
   smtp:
     # The hostname to send application-level e-mails to
     host: 127.0.0.1
-    # The port number to send application-level e-mails to
-    port: 25
+    # @schema
+    # required: false
+    # type: integer
+    # minimum: 1000
+    # @schema
+    # -- the port number to send application-level e-mails to
+    port: 1025
     # @schema
     # title: Smtp Username
     # description: Smtp Username

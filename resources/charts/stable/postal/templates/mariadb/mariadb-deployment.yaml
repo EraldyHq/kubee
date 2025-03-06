@@ -6,6 +6,10 @@ metadata:
     app: mariadb
 spec:
   replicas: 1
+  strategy:
+    # On restart only one instance can be up
+    # 2025-03-06T09:46:43.286216299Z 2025-03-06  9:46:43 0 [Note] InnoDB: Check that you do not already have another mariadbd process using the same InnoDB data or log files.
+    type: Recreate
   selector:
     matchLabels:
       app: mariadb
@@ -13,6 +17,8 @@ spec:
     metadata:
       labels:
         app: mariadb
+      annotations:
+        {{- include "postal-config-checksum-annotation" . | indent 8}}
     spec:
       containers:
         - name: mariadb
@@ -76,8 +82,10 @@ spec:
               mountPath: /var/lib/mysql
             {{- /*            - name: custom-init-scripts*/}}
             {{- /*              mountPath: /docker-entrypoint-initdb.d*/}}
+            # See Using a custom MariaDB configuration file
+            # https://hub.docker.com/_/mariadb
             - name: config
-              mountPath: /etc/mysql/conf.d
+              mountPath: /etc/mysql/conf.d/my.cnf
               subPath: my.cnf
       volumes:
         - name: custom-init-scripts

@@ -18,8 +18,8 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-# https://github.com/postalserver/postal/releases
-appVersion: "v3.3.4" # The postal version
+# https://github.com/postalserver/postal/releases without the v
+appVersion: "3.3.4" # The postal version
 
 
 annotations:

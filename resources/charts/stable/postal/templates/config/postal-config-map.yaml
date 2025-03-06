@@ -7,6 +7,10 @@ metadata:
     {{- include "kubee-manifest-labels" . | indent 4}}
 data:
   postal.yml: |-
+    # Version to avoid the error message
+    # See https://docs.postalserver.io/getting-started/configuration#legacy-configuration
+    version: 2
+
 {{.Values.conf_yaml |toYaml| indent 4}}
 {{- if and (eq .Values.dex.enabled true) (ne .Values.dex.clients.postal.secret "")}}
     oidc:
@@ -41,4 +45,4 @@ data:
       userinfo_endpoint: 'https://{{ .Values.dex.hostname }}/userinfo'
       # The JWKS endpoint on the authorization server (only used when discovery is false)
       jwks_uri: 'https://{{ .Values.dex.hostname }}/keys'
-{{- end }}
+      {{- end }}

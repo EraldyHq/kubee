@@ -23,6 +23,8 @@ spec:
           command: [ "postal", "web-server" ]
         {{- /* resources: {{ toYaml .Values.resources | nindent 10 }} */}}
           env:
+            - name: MAIN_DB_HOST
+              value: '{{.Values.conf_kube.main_db.service_name}}.{{.Values.namespace}}.svc.cluster.local'
             - name: MAIN_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -41,14 +43,14 @@ spec:
           ports:
             - name: web
               containerPort: {{ .Values.conf_yaml.web_server.default_port }}
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: metrics
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: metrics
+{{/*          livenessProbe:*/}}
+{{/*            httpGet:*/}}
+{{/*              path: /health*/}}
+{{/*              port: metrics*/}}
+{{/*          readinessProbe:*/}}
+{{/*            httpGet:*/}}
+{{/*              path: /health*/}}
+{{/*              port: metrics*/}}
           volumeMounts:
             - name: config-map
               mountPath: /config/postal.yml
@@ -64,8 +66,8 @@ spec:
               readOnly: true
       volumes:
         - name: config-map
-          secret:
-            secretName: {{ include "postal-name-config-map" . }}
+          configMap:
+            name: {{ include "postal-name-config-map" . }}
         - name: config-secret
           secret:
             secretName: '{{ include "postal-name-config-secret" . }}'
