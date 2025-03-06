@@ -22,6 +22,9 @@ spec:
         - name: smtp
           command: [ "postal", "smtp-server" ]
         {{- /* resources: {{ toYaml .Values.resources | nindent 10 }} */}}
+          securityContext:
+            capabilities:
+              add: [ "NET_BIND_SERVICE" ] # to connect to port 25
           ports:
             - name: smtp
               containerPort: {{.Values.conf_yaml.smtp_server.default_port }}

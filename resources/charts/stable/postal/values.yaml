@@ -186,13 +186,14 @@ conf_yaml:
     facility: postal
 
   smtp_server:
-    # The default port the SMTP server should listen on unless overriden by the PORT environment variable
+    # The default port the SMTP server should listen on unless overridden by the PORT environment variable
+    # This port is shown in the UI as configuration instruction
+    # It should be therefore the same as in the public one (ie proxy entry point or Loadbalancer service)
     # @schema
-    # required: false
+    # required: true
     # type: integer
-    # minimum: 1000
     # @schema
-    default_port: 1025
+    default_port: 25
     # The default bind address the SMTP server should listen on unless overriden by the BIND_ADDRESS environment variable
     default_bind_address: '::'
     # The default port for the SMTP server health server to listen on
@@ -232,6 +233,8 @@ conf_yaml:
 
   dns:
     # The names of the default MX records
+    # There are given as instruction to add them as MX records in a third party domain
+    # (ie Postal Server)
     mx_records:
       - 'mx1.{{ .Values.postal.hostname }}'
       - 'mx2.{{ .Values.postal.hostname }}'
@@ -372,8 +375,9 @@ conf_kube:
         cpu: 200m
         memory: 250Mi
   smtp_server:
+    # No port because it should be the same port as the server
+    # as it's shown as instructions
     service_name: smtp
-    service_port: 25
     # Resources
     resources:
       memory: ''

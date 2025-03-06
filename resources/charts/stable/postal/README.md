@@ -48,7 +48,7 @@ kubee -cluster clusterName app shell postal/web
 ```bash
 postal make-user
 ```
-* Enter the information
+* Enter the admin user information
 ```bash
 Loading config from /config/postal.yml
 Postal User Creator
@@ -58,13 +58,13 @@ This tool is usually only used to create your initial admin user.
 E-Mail Address      : admin@example.com
 First Name          : Admin
 Last Name           : Admin
-Initial Password    : *********
+Initial Password    : ********* # Initial password is just the password. It's not asked for a password change
 
 User has been created with e-mail address admin@example.com
 ```
 * Go to https://postal.example.com and login
 
-<img src="contrib/postal-login.jpg"  alt="Postal Login" width="200px"/>
+<img src="contrib/postal-login.jpg"  alt="Postal Login" width="300"/>
 
 ## Features
 

@@ -10,6 +10,8 @@ spec:
     {{- include "kubee-pod-labels" . | indent 4}}
   ports:
     - name: smtp
-      port: {{.Values.conf_kube.smtp_server.service_port}}
+      # This port is shown in the UI as configuration instruction
+      # That's why we use the same
+      port: {{.Values.conf_yaml.smtp_server.default_port}}
       targetPort: smtp
 

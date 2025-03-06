@@ -9,7 +9,7 @@ metadata:
   labels:
     {{- include "kubee-manifest-labels" . | indent 4}}
   annotations:
-    helm.sh/hook: "post-install,post-upgrade"
+    helm.sh/hook: "post-install" # No post-upgrade as it will errored
     helm.sh/hook-delete-policy: "before-hook-creation"
     helm.sh/hook-weight: "1"
 spec:
