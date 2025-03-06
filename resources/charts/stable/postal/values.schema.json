@@ -6,6 +6,12 @@
       "properties": {
         "main_db": {
           "properties": {
+            "hashtag": {
+              "default": "sha256:310d29fbb58169dcddb384b0ff138edb081e2773d6e2eceb976b3668089f2f84",
+              "description": " We use [11.7.2](https://github.com/docker-library/repo-info/blob/master/repos/mariadb/remote/11.7.2.md)",
+              "required": [],
+              "title": "hashtag"
+            },
             "resources": {
               "description": "The resources",
               "properties": {
@@ -57,10 +63,17 @@
             },
             "service_name": {
               "default": "mariadb",
-              "description": "The service name",
+              "description": " title: MariaDB service name required: true minLength: 1 format: hostname @schema The service name",
+              "format": "hostname",
+              "minLength": 1,
               "required": [],
-              "title": "service_name",
-              "type": "string"
+              "title": "MariaDB service name"
+            },
+            "version": {
+              "default": "11.7.2",
+              "description": "the hashtag of mariadb container See the full list [here](https://github.com/docker-library/repo-info/blob/master/repos/mariadb/remote/)",
+              "required": [],
+              "title": "version"
             }
           },
           "required": [
@@ -548,130 +561,6 @@
             "sleep_time"
           ],
           "title": "migration_waiter",
-          "type": "object"
-        },
-        "oidc": {
-          "properties": {
-            "authorization_endpoint": {
-              "default": "",
-              "description": " required: false @schema The authorize endpoint on the authorization server (only used when discovery is false)",
-              "required": [],
-              "title": "authorization_endpoint"
-            },
-            "discovery": {
-              "default": true,
-              "description": "Enable discovery to determine endpoints from .well-known/openid-configuration from the Issuer",
-              "required": [],
-              "title": "discovery",
-              "type": "boolean"
-            },
-            "email_address_field": {
-              "default": "email",
-              "description": "The field to use to determine the user's email address",
-              "required": [],
-              "title": "email_address_field",
-              "type": "string"
-            },
-            "enabled": {
-              "default": false,
-              "description": "Enable OIDC authentication",
-              "required": [],
-              "title": "enabled",
-              "type": "boolean"
-            },
-            "identifier": {
-              "default": "",
-              "description": " required: false @schema The client ID for OIDC",
-              "required": [],
-              "title": "identifier"
-            },
-            "issuer": {
-              "default": "https://{{ .Values.dex.hostname }}",
-              "description": "The OIDC issuer URL",
-              "required": [],
-              "title": "issuer",
-              "type": "string"
-            },
-            "jwks_uri": {
-              "default": "",
-              "description": " required: false @schema The JWKS endpoint on the authorization server (only used when discovery is false)",
-              "required": [],
-              "title": "jwks_uri"
-            },
-            "local_authentication_enabled": {
-              "default": true,
-              "description": "When enabled, users with passwords will still be able to login locally. If disable, only OpenID Connect will be available.",
-              "required": [],
-              "title": "local_authentication_enabled",
-              "type": "boolean"
-            },
-            "name": {
-              "default": "OIDC Provider",
-              "description": "The name of the OIDC provider as shown in the UI",
-              "required": [],
-              "title": "name",
-              "type": "string"
-            },
-            "name_field": {
-              "default": "name",
-              "description": "The field to use to determine the user's name",
-              "required": [],
-              "title": "name_field",
-              "type": "string"
-            },
-            "scopes": {
-              "description": "Scopes to request from the OIDC server.",
-              "items": {
-                "anyOf": [
-                  {
-                    "required": [],
-                    "type": "string"
-                  }
-                ],
-                "required": []
-              },
-              "required": [],
-              "title": "scopes",
-              "type": "array"
-            },
-            "secret": {
-              "default": "",
-              "description": " required: false @schema The client secret for OIDC",
-              "required": [],
-              "title": "secret"
-            },
-            "token_endpoint": {
-              "default": "",
-              "description": " required: false @schema The token endpoint on the authorization server (only used when discovery is false)",
-              "required": [],
-              "title": "token_endpoint"
-            },
-            "uid_field": {
-              "default": "sub",
-              "description": "The field to use to determine the user's UID",
-              "required": [],
-              "title": "uid_field",
-              "type": "string"
-            },
-            "userinfo_endpoint": {
-              "default": "",
-              "description": " required: false @schema The user info endpoint on the authorization server (only used when discovery is false)",
-              "required": [],
-              "title": "userinfo_endpoint"
-            }
-          },
-          "required": [
-            "enabled",
-            "local_authentication_enabled",
-            "name",
-            "issuer",
-            "scopes",
-            "uid_field",
-            "email_address_field",
-            "name_field",
-            "discovery"
-          ],
-          "title": "oidc",
           "type": "object"
         },
         "postal": {
@@ -1191,8 +1080,7 @@
         "spamd",
         "clamav",
         "smtp_client",
-        "migration_waiter",
-        "oidc"
+        "migration_waiter"
       ],
       "title": "conf_yaml"
     },

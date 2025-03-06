@@ -7,6 +7,9 @@ metadata:
     {{- include "kubee-manifest-labels" . | indent 4}}
 data:
   my.cnf: |-
+    [mariadb]
+    port = 3307
+
     [mysqld]
 
     # Allow remote access

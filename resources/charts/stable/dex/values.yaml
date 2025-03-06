@@ -65,6 +65,20 @@ clients:
     # -- The oidc client secret (used to exchange the code between kubectl and dex)
     # Example: `openssl rand -base64 32`
     secret: ''
+  # Postal
+  postal:
+    # @schema
+    # title: Postal Client Id
+    # required: true
+    # minLength: 1
+    # @schema
+    # -- The postal client id.
+    # If changed, postal should be redeployed
+    client_id: 'oauth2-proxy'
+    # -- The oidc client secret (used to exchange the code between postal and dex)
+    # Example: `openssl rand -base64 32`
+    secret: ''
+
 
   # -- Other oidc clients definition to add your own clients. See the [doc](https://dexidp.io/docs/guides/using-dex/#configuring-your-app)
   others: []

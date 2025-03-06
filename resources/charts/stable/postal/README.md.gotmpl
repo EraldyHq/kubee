@@ -31,9 +31,17 @@ postal:
 kubee -c clusterName helmet play postal
 ```
 
+## Features
+
+### Automatic Auth Oidc configuration
+
+If dex is enabled and the dex postal secret is not empty `.Values.dex.clients.postal.secret`,
+`postal` is configured to log in via dex.
+
+
 
 {{ template "chart.valuesSection" . }}
-| conf_yaml | object | | [The Postal Configuration](https://github.com/postalserver/postal/blob/main/doc/config/yaml.yml) |
+| conf_yaml | object | | [The Postal Configuration without secrets](https://github.com/postalserver/postal/blob/{{ template "chart.appVersion" . }}/doc/config/yaml.yml) |
 
 By default, all username are named `postal`. You can change them in the `postal configuration` section. 
 

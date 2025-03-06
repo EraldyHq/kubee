@@ -8,3 +8,37 @@ metadata:
 data:
   postal.yml: |-
 {{.Values.conf_yaml |toYaml| indent 4}}
+{{- if and (eq .Values.dex.enabled true) (ne .Values.dex.clients.postal.secret "")}}
+    oidc:
+      # Enable OIDC authentication
+      enabled: true
+      # When enabled, users with passwords will still be able to login locally. If disable, only OpenID Connect will be available.
+      local_authentication_enabled: true
+      # The name of the OIDC provider as shown in the UI
+      name: OIDC Provider
+      # The OIDC issuer URL
+      issuer: 'https://{{ .Values.dex.hostname }}'
+      # The client ID for OIDC
+      identifier: {{.Values.dex.clients.postal.client_id }}
+      # The client secret for OIDC
+      secret: {{ .Values.dex.clients.postal.secret }}
+      # Scopes to request from the OIDC server.
+      scopes:
+        - openid,email
+      # The field to use to determine the user's UID
+      uid_field: sub
+      # The field to use to determine the user's email address
+      email_address_field: email
+      # The field to use to determine the user's name
+      name_field: name
+      # Enable discovery to determine endpoints from .well-known/openid-configuration from the Issuer
+      discovery: false # If dex is down, postal may not start
+      # The authorize endpoint on the authorization server (only used when discovery is false)
+      authorization_endpoint: 'https://{{ .Values.dex.hostname }}/auth'
+      # The token endpoint on the authorization server (only used when discovery is false)
+      token_endpoint: 'https://{{ .Values.dex.hostname }}/token'
+      # The user info endpoint on the authorization server (only used when discovery is false)
+      userinfo_endpoint: 'https://{{ .Values.dex.hostname }}/userinfo'
+      # The JWKS endpoint on the authorization server (only used when discovery is false)
+      jwks_uri: 'https://{{ .Values.dex.hostname }}/keys'
+{{- end }}

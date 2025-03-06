@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: mariadb
-          image: mariadb:11.7.2
+          image: 'mariadb{{if .Values.conf_kube.main_db.hashtag  }}@{{ .Values.conf_kube.main_db.hashtag}}{{else}}:{{.Values.conf_kube.main_db.version}}{{end}}'
           # starting with a db
           env:
             - name: MARIADB_USER
@@ -33,6 +33,9 @@ spec:
                 secretKeyRef:
                   name: {{ include "postal-name-config-secret" . }}
                   key: mariadb-password
+          #command:
+          #  ???
+          #  - --port {{ .Values.conf_yaml.main_db.port }}
           ports:
             - containerPort: {{ .Values.conf_yaml.main_db.port }}
           livenessProbe:
