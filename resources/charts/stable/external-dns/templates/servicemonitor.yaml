@@ -1,0 +1,23 @@
+{{- if eq .Values.prometheus.enabled true }}
+{{ $ := mergeOverwrite $ (dict "component" "external-dns") }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "kubee-name" .}}
+  namespace: {{.Values.namespace}}
+  labels:
+    {{- include "kubee-manifest-labels" . | indent 4}}
+spec:
+  jobLabel: {{ index .Chart.Annotations "app.kubernetes.io/name" }}
+  namespaceSelector:
+    matchNames:
+      - {{.Values.namespace}}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ index .Chart.Annotations "app.kubernetes.io/name"}}
+      app.kubernetes.io/instance: {{.Release.Name}}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{.Values.prometheus.scrape_interval}}
+{{- end }}

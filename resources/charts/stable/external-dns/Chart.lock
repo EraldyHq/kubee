@@ -1,0 +1,9 @@
+dependencies:
+- name: kubee-cluster
+  repository: file://../cluster
+  version: 0.0.1
+- name: external-dns
+  repository: https://kubernetes-sigs.github.io/external-dns/
+  version: 1.15.2
+digest: sha256:49a2bf2fb37796a3ea6e22e4c396f005afd513a736ff59f38441596ca830ac16
+generated: "2025-03-06T18:48:28.801670251+01:00"

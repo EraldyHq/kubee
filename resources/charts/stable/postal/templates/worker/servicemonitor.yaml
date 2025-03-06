@@ -1,0 +1,21 @@
+{{- if eq .Values.prometheus.enabled true}}
+{{ $ := mergeOverwrite $ (dict "component" "worker") }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "kubee-name" .}}
+  namespace: {{.Values.namespace}}
+  labels:
+    {{- include "kubee-manifest-labels" . | indent 4}}
+spec:
+  jobLabel: "{{ .Release.Name }}-{{ .component }}"
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.namespace }}
+  selector:
+    matchLabels:
+      {{- include "kubee-pod-labels" . | indent 6}}
+  endpoints:
+    - port: web
+      path: /metrics
+{{- end }}

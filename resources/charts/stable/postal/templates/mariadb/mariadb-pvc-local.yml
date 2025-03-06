@@ -1,3 +1,6 @@
+{{- if ne .Values.cluster.distriution "k3s"}}
+{{ fail "Cluster is not k3s, sotrage class is unknown/unimplemented" }}
+{{- end}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

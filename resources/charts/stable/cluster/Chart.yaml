@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-cluster
-description: A library chart of common values and helpers for a kubee cluster
+description: The kubee cluster chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #

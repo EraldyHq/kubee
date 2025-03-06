@@ -1,0 +1,49 @@
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
+enabled: false
+
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace
+namespace: 'external-dns'
+
+
+# @ignored
+external-dns:
+  serviceMonitor:
+    # @schema
+    # const: false
+    # @schema
+    # -- We generate ourselves the monitor
+    enabled: false
+  provider:
+    name: cloudflare
+  env:
+    - name: CF_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: cloudflare-api-key
+          key: apiKey
+    - name: CF_API_EMAIL
+      valueFrom:
+        secretKeyRef:
+          name: cloudflare-api-key
+          key: email
+
+# -- @ignored Internal Kubee constant
+kubee_internal:
+  # @schema
+  # const: false
+  # @schema
+  # Constant used to not output template from kubee cross dependency in Chart.yaml
+  # Don't change, don't touch
+  install_cross_dependency: false

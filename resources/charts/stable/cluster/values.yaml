@@ -1,37 +1,51 @@
 # Cluster app values (ie global/shared)
 
-# The cluster name
+# -- The cluster name
 # used:
 # * to identify the cluster (for instance, on prometheus remote-write metrics, the name is added as label)
 # * as default first instance name for operator (for instance, prometheus operator allows to install multiple prometheus that needs to be unique. Kube-prometheus asks for a unique name)
 name: 'kubee'
 
-# The cluster chart
+# -- The kubernetes distribution
+# k3s is the distribution that has a cluster chart implemented.
+distribution: 'k3s'
+
+# -- The cluster chart.
+# The cluster chart is responsible for the installation/management of Kubernetes on the nodes
 chart: 'k3s-ansible'
 
 # Cluster Auth
 auth:
-  # The admin user
-  #  * created as admin user in Kubernetes and other app
-  #  * added in basicAuth
   admin_user:
+    # -- The admin user
+    #  * created as admin user in Kubernetes and other app
+    #  * added in basicAuth
     username: 'admin'
-    # The password
+    # @schema
+    # required: true
+    # minLength: 1
+    # @schema
+    # -- the admin password
     password: ''
-    # Kubernetes clusterRole
+    # @schema
+    # required: true
+    # enum: [ 'cluster-admin', 'admin' ]
+    # @schema
+    # -- Kubernetes clusterRole
     # * `cluster-admin` has full access
     # * `admin` does not have access to node and cluster scope related object such as ClusterRoleBinding
     cluster_role: 'cluster-admin'
     # @schema
     # format: email
+    # minLength: 1
     # @schema
-    # -- The email
+    # -- The admin email
     # It's used by default in apps. For instance:
     # * letsencrypt registration email
     # * alert notifications: prometheus, argocd
     email: ''
 
-  # Trusted Proxy
+  # -- Trusted Proxies
   # If trusted, reverse_proxy handler will proxy and augment the sensitive X-Forwarded-* request headers.
   # You should set the CIDR value of:
   # * internal proxy such as traefik
@@ -50,7 +64,7 @@ email:
     # required: true
     # format: hostname
     # @schema
-    # The smtp host
+    # -- The smtp host
     # if the host is not empty, smtp configuration are added
     # for example for argocd email notifications
     host: ''
@@ -58,7 +72,7 @@ email:
     # title: Smtp Port
     # description: The Smtp port
     # type: integer
-    # required: true
+    # required: false
     # @schema
     # -- the smtp port
     port: ''
