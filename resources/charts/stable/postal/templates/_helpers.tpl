@@ -36,7 +36,7 @@ Helper to print the basic name for consistency
       - name: SMTP_HOST
         value: '{{.Values.conf_kube.smtp_server.service_name}}.{{.Values.namespace}}.svc.cluster.local'
       - name: SMTP_PORT
-        value: '{{.Values.conf_kube.smtp_server.port}}'
+        value: '{{.Values.conf_kube.smtp_server.service_port}}'
       - name: MAIN_DB_HOST
         value: '{{.Values.conf_kube.main_db.service_name}}.{{.Values.namespace}}.svc.cluster.local'
       - name: MAIN_DB_PORT

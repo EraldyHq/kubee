@@ -25,12 +25,12 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
 #
 # @arg $1 string The app name
 # @example
-#    read APP_NAMESPACE APP_NAME <<< "$(kube::get_qualified_app_name "$APP_NAME")"
+#    read APP_NAMESPACE KUBEE_APP_NAME <<< "$(kube::get_qualified_app_name "$KUBEE_APP_NAME")"
 #
 # @stdout The app label ie `app.kubernetes.io/name=<app name>`
 kube::get_qualified_app_name(){
-  APP_NAME=$1
-  IFS="/" read -ra NAMES <<< "$APP_NAME"
+  KUBEE_APP_NAME=$1
+  IFS="/" read -ra NAMES <<< "$KUBEE_APP_NAME"
   case "${#NAMES[@]}" in
     '1')
       echo "${NAMES[0]} ${NAMES[0]}"
@@ -39,7 +39,7 @@ kube::get_qualified_app_name(){
       echo "${NAMES[@]}"
       ;;
     *)
-      echo::err "This app name ($APP_NAME) has more than 2 parts (ie ${#NAMES[@]})."
+      echo::err "This app name ($KUBEE_APP_NAME) has more than 2 parts (ie ${#NAMES[@]})."
       echo::err "A qualified app name is made of one optional namespace and a name separated by a slash"
       echo::err "Example:"
       echo::err "  * traefik/traefik"
@@ -56,12 +56,19 @@ kube::get_qualified_app_name(){
 #
 # @arg $1 string The app name
 # @example
-#    APP_LABEL="$(kube::get_app_label "$APP_NAME")"
+#    APP_LABEL="$(kubee::get_app_label "$KUBEE_APP_NAME")"
 #
 # @stdout The app label ie `app.kubernetes.io/name=<app name>`
-kube::get_app_label(){
-  APP_NAME=$1
-  echo "app.kubernetes.io/name=$APP_NAME"
+kubee::get_app_label(){
+  echo "app.kubernetes.io/name=$1"
+}
+
+kubee::get_instance_label(){
+  echo "app.kubernetes.io/instance=$1"
+}
+
+kubee::get_component_label(){
+  echo "app.kubernetes.io/component=$1"
 }
 
 
@@ -69,19 +76,19 @@ kube::get_app_label(){
 #     Function to search for resources across all namespaces by app name
 #     and returns data about them
 #
-# @arg $1 string `x`                  - the app name (mandatory) used in the label "app.kubernetes.io/name=$APP_NAME"
+# @arg $1 string `x`                  - the kubee app name (mandatory)
 # @arg $2 string `--type x`           - the resource type: pod, ... (mandatory)
 # @arg $3 string `--custom-columns x` - the custom columns (Default to `NAME:.metadata.name,NAMESPACE:.metadata.namespace`)
 # @arg $4 string `--headers`          - the headers (Default to `no headers`)
 # @example
-#    PODS="$(kube::get_resources_by_app_name --type pod "$APP_NAME")"
+#    PODS="$(kube::get_resources_by_app_name --type pod "$KUBEE_APP_NAME")"
 #
-#    PODS_WITH_NODE_NAME="$(kube::get_resources_by_app_name --type pod --custom-columns "NAME:.metadata.name,NAMESPACE:.metadata.namespace,NODE_NAME:.spec.nodeName" "$APP_NAME")"
+#    PODS_WITH_NODE_NAME="$(kube::get_resources_by_app_name --type pod --custom-columns "NAME:.metadata.name,NAMESPACE:.metadata.namespace,NODE_NAME:.spec.nodeName" "$KUBEE_APP_NAME")"
 #
 # @stdout The resources data (one resource by line) or an empty string
 kube::get_resources_by_app_name() {
 
-  local APP_NAME=''
+  local KUBEE_APP_NAME=''
   local RESOURCE_TYPE=''
   local CUSTOM_COLUMNS='NAME:.metadata.name,NAMESPACE:.metadata.namespace'
   local NO_HEADERS="--no-headers"
@@ -105,8 +112,8 @@ kube::get_resources_by_app_name() {
         shift
       ;;
       *)
-        if [ "$APP_NAME" == "" ]; then
-          APP_NAME=$1
+        if [ "$KUBEE_APP_NAME" == "" ]; then
+          KUBEE_APP_NAME=$1
           shift
           continue
         fi
@@ -120,7 +127,7 @@ kube::get_resources_by_app_name() {
     esac
   done
 
-  if [ "$APP_NAME" == "" ]; then
+  if [ "$KUBEE_APP_NAME" == "" ]; then
     echo::err "At least, the app name as argument should be given"
     return 1
   fi
@@ -129,15 +136,29 @@ kube::get_resources_by_app_name() {
     return 1
   fi
 
-  # App Label
-  APP_LABEL=$(kube::get_app_label "$APP_NAME")
+  IFS="/" read -ra KUBEE_APP_NAMES <<< "$KUBEE_APP_NAME"
+  local APP_LABELS=()
+  case "${#KUBEE_APP_NAMES[@]}" in
+      "1")
+        # App Label
+        APP_LABELS+=("$(kubee::get_instance_label "$KUBEE_APP_NAME")")
+      ;;
+      "2")
+        APP_LABELS+=("$(kubee::get_instance_label "${KUBEE_APP_NAMES[0]}")")
+        APP_LABELS+=("$(kubee::get_component_label "${KUBEE_APP_NAMES[1]}")")
+        ;;
+      *)
+        echo::err "A kubee app name has one or 2 parts ($KUBEE_APP_NAME)"
+        return 1
+  esac
+
 
   #
   # Customs columns is a Json path wrapper.
   # Example:
   #     COMMAND="kubectl get $RESOURCE_TYPE --all-namespaces -l $APP_LABEL -o jsonpath='{range .items[*]}{.metadata.name}{\" \"}{.metadata.namespace}{\"\n\"}{end}' 2>/dev/null"
   #
-  COMMAND="kubectl get $RESOURCE_TYPE --all-namespaces -l $APP_LABEL -o custom-columns='$CUSTOM_COLUMNS' $NO_HEADERS 2> ${COMMAND_STDOUT_FD:-"/dev/null"}"
+  COMMAND="kubectl get $RESOURCE_TYPE --all-namespaces -l $(IFS=","; echo "${APP_LABELS[*]}") -o custom-columns='$CUSTOM_COLUMNS' $NO_HEADERS 2> ${COMMAND_STDOUT_FD:-"/dev/null"}"
   echo::eval "$COMMAND"
 
 }
@@ -151,19 +172,19 @@ kube::get_resources_by_app_name() {
 # @arg $3 string `--custom-columns x` - the custom columns (Default to `NAME:.metadata.name,NAMESPACE:.metadata.namespace`)
 # @arg $4 string `--headers`          - the headers (Default to `no headers`)
 # @example
-#    read -r POD_NAME POD_NAMESPACE <<< "$(kube::get_resource_by_app_name --type pod "$APP_NAME" )"
+#    read -r POD_NAME POD_NAMESPACE <<< "$(kubee::get_resource_by_app_name --type pod "$KUBEE_APP_NAME" )"
 #    if [ -z "$POD_NAME" ]; then
-#        echo "Error: Pod not found with label $(kube::get_app_label $APP_NAME)"
+#        echo "Error: Pod not found with label $(kubee::get_app_label $KUBEE_APP_NAME)"
 #        exit 1
 #    fi
 #
 # @stdout The resource name and namespace separated by a space or an empty string
 # @exitcode 1 - if too many resource was found
-kube::get_resource_by_app_name(){
+kubee::get_resource_by_app_name(){
   RESOURCES=$(kube::get_resources_by_app_name "$@")
   RESOURCE_COUNT=$(echo "$RESOURCES" | sed '/^\s*$/d' | wc -l )
   if [ "$RESOURCE_COUNT" -gt 1 ]; then
-      echo "Error: Multiple resource found with the label app.kubernetes.io/name=$APP_NAME:"
+      echo "Error: Multiple resource found with the label app.kubernetes.io/name=$KUBEE_APP_NAME:"
       echo "$RESOURCES"
       exit 1
   fi;

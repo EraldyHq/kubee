@@ -64,10 +64,10 @@ if [ $SCOPE == "app" ]; then
 
   APP_NAME=$1
   echo "Getting pod name"
-  read -r POD_NAME NS_NAME <<< "$(kube::get_resource_by_app_name "$APP_NAME" pod)"
+  read -r POD_NAME NS_NAME <<< "$(kubee::get_resource_by_app_name "$APP_NAME" pod)"
 
   if [ "$POD_NAME" == "" ]; then
-      echo::err "No pod found with the label $(kube::get_app_label "$APP_NAME")"
+      echo::err "No pod found with the label $(kubee::get_app_label "$APP_NAME")"
       exit 1
   fi
 

@@ -79,7 +79,7 @@ fi
 PUBLIC_KEY_CONTENT=$(cat "$PUBLIC_KEY")
 
 echo::info "Getting the pod data for the App $APP_NAME"
-read -r POD_NAME POD_NAMESPACE POD_NODE_NAME POD_UID <<< "$(kube::get_resource_by_app_name --type pod --custom-columns "NAME:.metadata.name,NAMESPACE:.metadata.namespace,NODE_NAME:.spec.nodeName,NODE_UID:.metadata.uid" "$APP_NAME")"
+read -r POD_NAME POD_NAMESPACE POD_NODE_NAME POD_UID <<< "$(kubee::get_resource_by_app_name --type pod --custom-columns "NAME:.metadata.name,NAMESPACE:.metadata.namespace,NODE_NAME:.spec.nodeName,NODE_UID:.metadata.uid" "$APP_NAME")"
 
 MANIFEST_YAML=/tmp/sshd-pod.yaml
 SSHD_POD_NAME="sshd-$APP_NAME"

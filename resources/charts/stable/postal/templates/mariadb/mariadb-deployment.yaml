@@ -82,8 +82,8 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/mysql
-            {{- /*            - name: custom-init-scripts*/}}
-            {{- /*              mountPath: /docker-entrypoint-initdb.d*/}}
+            - name: custom-init-scripts
+              mountPath: /docker-entrypoint-initdb.d
             # See Using a custom MariaDB configuration file
             # https://hub.docker.com/_/mariadb
             - name: config
@@ -93,9 +93,6 @@ spec:
         - name: custom-init-scripts
           secret:
             secretName: mariadb-init
-            items:
-              - key: init-sql
-                path: 01-init.sql
         - name: config
           configMap:
             name: mariadb-cnf

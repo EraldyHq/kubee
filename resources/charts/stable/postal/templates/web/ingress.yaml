@@ -14,10 +14,6 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.traefik.namespace }}-{{.Values.traefik.middlewares.auth_headers.name}}@kubernetescrd'
-    {{- if not .Values.cert_manager.enabled }}
-    {{- fail "cert_manager should be enabled to apply a secure ingress" }}
-    {{- end }}
-    cert-manager.io/cluster-issuer: {{.Values.cert_manager.issuers.public.name}}
 spec:
   rules:
     - host: {{ .Values.hostname }}
@@ -27,10 +23,10 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "kubee-name" . }}
+                name: {{.Values.conf_kube.web_server.service_name}}
                 port:
-                  number: 5000
+                  number: {{.Values.conf_kube.web_server.service_port}}
   tls:
     - hosts:
         - {{ .Values.hostname }}
-      secretName: {{ include "kubee-name" (merge . (dict "component" $tlsComponent)) }}
+      secretName: {{ include "postal-name-tls" . }}

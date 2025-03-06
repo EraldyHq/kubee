@@ -60,9 +60,9 @@ source kubee-env || error::exit $?
 # Check if the Service Monitor selects a service
 ################################################################################
 echo::info "Getting Service Monitor Namespace for the App $APP_NAME"
-read -r SERVICE_MONITOR_NAME SERVICE_MONITOR_NAMESPACE <<< "$(kube::get_resource_by_app_name "$APP_NAME" servicemonitor)"
+read -r SERVICE_MONITOR_NAME SERVICE_MONITOR_NAMESPACE <<< "$(kubee::get_resource_by_app_name "$APP_NAME" servicemonitor)"
 if [ "$SERVICE_MONITOR_NAME" == "" ]; then
-    echo::err "Error: No service monitor found for app label: $(kube::get_app_label "$APP_NAME")"
+    echo::err "Error: No service monitor found for app label: $(kubee::get_app_label "$APP_NAME")"
     echo::err "  Is the app name correct?: $APP_NAME"
     exit 1
 fi

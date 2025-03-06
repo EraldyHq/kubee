@@ -50,7 +50,7 @@ fi
 
 APP_NAME=$1
 
-APP_LABEL=$(kube::get_app_label "$APP_NAME")
+APP_LABEL=$(kubee::get_app_label "$APP_NAME")
 
 kubectl get pod --watch -l "$APP_LABEL"
 

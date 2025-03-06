@@ -4,10 +4,11 @@ metadata:
   name: mariadb-init
 type: Opaque
 stringData:
-  init-sql: |
-    CREATE DATABASE IF NOT EXISTS mydb;
-    CREATE USER 'myuser'@'%' IDENTIFIED BY 'myuser-password';
-    GRANT ALL PRIVILEGES ON mydb.* TO 'myuser'@'%';
-    FLUSH PRIVILEGES;
+  # Maria db User prerequisites
+  # If you are unable or unwilling to grant root access, the database user you create separately needs all permissions on databases called postal and postal-*
+  # (this prefix can be configured in the message_db part of your configuration).
+  # https://docs.postalserver.io/getting-started/prerequisites#mariadb-106-or-higher
+  01-init.sql: |
+    GRANT ALL PRIVILEGES ON `{{.Values.conf_yaml.message_db.database_name_prefix}}%`.* TO '{{.Values.conf_yaml.main_db.username}}'@'%' WITH GRANT OPTION;
 
 

@@ -10,9 +10,9 @@ A library of kubernetes functions
 ## Index
 
 * [kube::get_qualified_app_name](#kubeget_qualified_app_name)
-* [kube::get_app_label](#kubeget_app_label)
+* [kubee::get_app_label](#kubeget_app_label)
 * [kube::get_resources_by_app_name](#kubeget_resources_by_app_name)
-* [kube::get_resource_by_app_name](#kubeget_resource_by_app_name)
+* [kubee::get_resource_by_app_name](#kubeget_resource_by_app_name)
 * [kube::get_json_path](#kubeget_json_path)
 * [kube::test_connection](#kubetest_connection)
 * [kubee::get_cluster_directory](#kubeeget_cluster_directory)
@@ -36,7 +36,7 @@ read APP_NAMESPACE APP_NAME <<< "$(kube::get_qualified_app_name "$APP_NAME")"
 
 * The app label ie `app.kubernetes.io/name=<app name>`
 
-### kube::get_app_label
+### kubee::get_app_label
 
 Return the app label used to locate resources
 It will return the label `app.kubernetes.io/name=<app name>`
@@ -45,7 +45,7 @@ This is the common app label as seen on the [common label page](https://kubernet
 #### Example
 
 ```bash
-APP_LABEL="$(kube::get_app_label "$APP_NAME")"
+APP_LABEL="$(kubee::get_app_label "$APP_NAME")"
 ```
 
 #### Arguments
@@ -78,7 +78,7 @@ PODS="$(kube::get_resources_by_app_name --type pod "$APP_NAME")"
 
 * The resources data (one resource by line) or an empty string
 
-### kube::get_resource_by_app_name
+### kubee::get_resource_by_app_name
 
 Function to search for 1 resource across all namespaces by app name
 and returns data
@@ -86,9 +86,9 @@ and returns data
 #### Example
 
 ```bash
-read -r POD_NAME POD_NAMESPACE <<< "$(kube::get_resource_by_app_name --type pod "$APP_NAME" )"
+read -r POD_NAME POD_NAMESPACE <<< "$(kubee::get_resource_by_app_name --type pod "$APP_NAME" )"
 if [ -z "$POD_NAME" ]; then
-    echo "Error: Pod not found with label $(kube::get_app_label $APP_NAME)"
+    echo "Error: Pod not found with label $(kubee::get_app_label $APP_NAME)"
     exit 1
 fi
 ```

@@ -7,9 +7,9 @@ metadata:
     {{- include "kubee-manifest-labels" . | indent 4}}
 spec:
   selector:
-    {{- include "kubee-pod-labels" . | indent 6}}
+    {{- include "kubee-pod-labels" . | indent 4}}
   ports:
-  - name: smtp
-    port: {{.Values.conf_kube.smtp_server.port}}
-    targetPort: smtp
+    - name: smtp
+      port: {{.Values.conf_kube.smtp_server.service_port}}
+      targetPort: smtp
 

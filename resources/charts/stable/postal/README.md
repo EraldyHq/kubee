@@ -38,6 +38,34 @@ dex:
 kubee -c clusterName helmet play postal
 ```
 
+### Create your first user
+
+* Connect to the web pods.
+```bash
+kubee -cluster clusterName app shell postal/web
+```
+* Enter the [make-user](https://docs.postalserver.io/getting-started/installation#initializing-the-database) command
+```bash
+postal make-user
+```
+* Enter the information
+```bash
+Loading config from /config/postal.yml
+Postal User Creator
+Enter the information required to create a new Postal user.
+This tool is usually only used to create your initial admin user.
+
+E-Mail Address      : admin@example.com
+First Name          : Admin
+Last Name           : Admin
+Initial Password    : *********
+
+User has been created with e-mail address admin@example.com
+```
+* Go to https://postal.example.com and login
+
+<img src="contrib/postal-login.jpg"  alt="Postal Login" width="200px"/>
+
 ## Features
 
 ### Automatic Auth Oidc configuration
@@ -57,7 +85,7 @@ If dex is enabled and the dex postal secret is not empty `.Values.dex.clients.po
 | hostname | string | `""` | The hostname You should own the apex domain as you need to [add DNS record](https://docs.postalserver.io/getting-started/dns-configuration) |
 | namespace | string | `"postal"` | The installation Namespace |
 | version | string | `"3.3.4"` | The postal [docker version](https://github.com/postalserver/postal/pkgs/container/postal) (The release version Without the v) |
-| conf_yaml | object | | [The Postal Configuration without secrets](https://github.com/postalserver/postal/blob/3.3.4/doc/config/yaml.yml) |
+| conf_yaml | object | | [The Postal Configuration without secrets and host](https://github.com/postalserver/postal/blob/3.3.4/doc/config/yaml.yml) |
 
 By default, all username are named `postal`. You can change them in the `conf_yaml` postal configuration section.
 

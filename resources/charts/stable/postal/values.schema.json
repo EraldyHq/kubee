@@ -106,12 +106,6 @@
         },
         "smtp_server": {
           "properties": {
-            "port": {
-              "default": 25,
-              "required": [],
-              "title": "port",
-              "type": "integer"
-            },
             "resources": {
               "description": "Resources",
               "properties": {
@@ -140,11 +134,17 @@
               "required": [],
               "title": "service_name",
               "type": "string"
+            },
+            "service_port": {
+              "default": 25,
+              "required": [],
+              "title": "service_port",
+              "type": "integer"
             }
           },
           "required": [
             "service_name",
-            "port",
+            "service_port",
             "resources"
           ],
           "title": "smtp_server",
@@ -173,9 +173,23 @@
               ],
               "title": "resources",
               "type": "object"
+            },
+            "service_name": {
+              "default": "web",
+              "required": [],
+              "title": "service_name",
+              "type": "string"
+            },
+            "service_port": {
+              "default": 80,
+              "required": [],
+              "title": "service_port",
+              "type": "integer"
             }
           },
           "required": [
+            "service_name",
+            "service_port",
             "resources"
           ],
           "title": "web_server",

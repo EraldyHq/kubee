@@ -53,7 +53,7 @@ fi
 kubee::set_kubeconfig_env
 
 echo::info "Searching a deployment"
-read -r DEPLOYMENT_NAME NAMESPACE  <<< "$(kube::get_resource_by_app_name "$KUBEE_APP_NAME" deployment)"
+read -r DEPLOYMENT_NAME NAMESPACE  <<< "$(kubee::get_resource_by_app_name "$KUBEE_APP_NAME" deployment)"
 if [ "$DEPLOYMENT_NAME" != "" ]; then
     echo::info "Deployment found: $DEPLOYMENT_NAME in namespace: $NAMESPACE"
     echo::info "Restarting"
@@ -64,7 +64,7 @@ if [ "$DEPLOYMENT_NAME" != "" ]; then
 fi
 
 echo::info "No Deployment found. Searching a Statefulset"
-read -r STATEFULSET_NAME NAMESPACE <<< "$(kube::get_resource_by_app_name "$KUBEE_APP_NAME" statefulset)"
+read -r STATEFULSET_NAME NAMESPACE <<< "$(kubee::get_resource_by_app_name "$KUBEE_APP_NAME" statefulset)"
 if [ "$STATEFULSET_NAME" != "" ]; then
     echo::info "StatefulSet found: $STATEFULSET_NAME in namespace: $NAMESPACE"
     echo::info "Restarting"
@@ -74,5 +74,5 @@ if [ "$STATEFULSET_NAME" != "" ]; then
     exit 0
 fi
 
-echo::err "No deployment or statefulset found for the app $KUBEE_APP_NAME (with the label $(kube::get_app_label "$KUBEE_APP_NAME")"
+echo::err "No deployment or statefulset found for the app $KUBEE_APP_NAME (with the label $(kubee::get_app_label "$KUBEE_APP_NAME")"
 exit 1

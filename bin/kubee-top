@@ -53,10 +53,10 @@ SLEEPING=1
 
 echo Getting Pod Name and Namespace for app "$APP_NAME"
 
-read -r POD_NAME POD_NAMESPACE <<< "$(kube::get_resource_by_app_name "$APP_NAME" "pod")"
+read -r POD_NAME POD_NAMESPACE <<< "$(kubee::get_resource_by_app_name "$APP_NAME" "pod")"
 
 if [ "$POD_NAME" == "" ]; then
-    echo::err "Error: Pod not found with label $(kube::get_app_label "$APP_NAME")"
+    echo::err "Error: Pod not found with label $(kubee::get_app_label "$APP_NAME")"
     exit 1
 fi
 echo Pod Name: "$POD_NAME"

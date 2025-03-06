@@ -86,7 +86,14 @@ It will run the [docker-compose.v$MAJOR_VERSION.yml](https://github.com/postalse
 to the `/opt/postal/install` dir
 
 
-## Debug
+## Support
+
+### Bad password
+
+```bash
+kubee -c beau kubectl -n postal port-forward svc/mariadb 3306
+```
+Delete the rows from the users table
 
 
 

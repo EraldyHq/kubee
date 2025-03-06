@@ -157,6 +157,8 @@ conf_yaml:
     # The encoding to use when connecting to the MariaDB database
     encoding: utf8mb4
     # The MariaDB prefix to add to database names
+    # All database schema that represent a server  are created with this prefix
+    # With postal, databases will be called postal-*
     database_name_prefix: postal
 
   logging:
@@ -371,12 +373,14 @@ conf_kube:
         memory: 250Mi
   smtp_server:
     service_name: smtp
-    port: 25
+    service_port: 25
     # Resources
     resources:
       memory: ''
       cpu: ''
   web_server:
+    service_name: web
+    service_port: 80
     resources:
       memory: ''
       cpu: ''
