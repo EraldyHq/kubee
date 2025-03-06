@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mariadb-cnf
+  name: postal-mariadb-cnf-kubee
   namespace: '{{.Values.namespace}}'
   labels:
     {{- include "kubee-manifest-labels" . | indent 4}}

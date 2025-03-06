@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mariadb-deployment
+  name: {{ include "kubee-name" . }}
   labels:
     {{- include "kubee-manifest-labels" . | indent 4}}
 spec:
@@ -92,11 +92,11 @@ spec:
       volumes:
         - name: custom-init-scripts
           secret:
-            secretName: mariadb-init
+            secretName: postal-mariadb-init-kubee
         - name: config
           configMap:
-            name: mariadb-cnf
+            name: postal-mariadb-cnf-kubee
         - name: data
           persistentVolumeClaim:
-            claimName: mariadb-pvc-local
+            claimName: postal-mariadb-pvc-local-kubee
 

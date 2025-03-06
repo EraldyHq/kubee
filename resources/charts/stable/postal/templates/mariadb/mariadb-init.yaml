@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: mariadb-init
+  name: postal-mariadb-init-kubee
 type: Opaque
 stringData:
   # Maria db User prerequisites
