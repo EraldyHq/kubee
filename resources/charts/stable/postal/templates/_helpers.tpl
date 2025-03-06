@@ -29,62 +29,57 @@ Helper to print the basic name for consistency
 {{ printf "postal-config/secret-checksum: %s" (include (print .Template.BasePath "/config/postal-config-secret.yaml") . | sha256sum )}}
 {{- end }}
 
-{{- /*
-Merge a YAML file with a Helm values map
-Params:
-- $values: The Helm values map
-- $filename: Path to the YAML file to merge
-- $context: The context to use for rendering (usually $ or .)
-
-Example Usage in values.yaml or templates:
-my-config:
-    {{ include "utils.mergeYaml" (list .Values.myBaseConfig "configs/default-config.yaml" $) | indent 2 }}
-*/ -}}
-{{- define "utils.mergeYaml" -}}
-    {{- $values := index . 0 -}}
-    {{- $filename := index . 1 -}}
-    {{- $context := index . 2 -}}
-
-    {{- $fileContent := "" -}}
-    {{- if $context.Files.Get $filename -}}
-        {{- $fileContent = $context.Files.Get $filename | fromYaml -}}
-    {{- else -}}
-        {{- fail (printf "File not found: %s" $filename) -}}
-    {{- end -}}
-
-    {{- $merged := mustMergeOverwrite $values -}}
-    {{- $merged | toYaml -}}
-{{- end -}}
-
-{{- /*
-Deep merge function for nested tree structures
-Params:
-- $base: Base tree/dictionary to merge into
-- $overlay: Overlay tree/dictionary to merge from
- Example Usage in templates or values files
-{{ include "utils.deepMerge" (list .Values.baseConfig .Values.overlayConfig) | indent 2 }}
-*/ -}}
-{{- define "utils.deepMerge" -}}
-    {{- $base := index . 0 -}}
-    {{- $overlay := index . 1 -}}
-
-    {{- if kindIs "map" $base -}}
-        {{- range $key, $overlayValue := $overlay -}}
-            {{- $baseValue := get $base $key -}}
-
-            {{- if eq $baseValue nil -}}
-                {{/* If key doesn't exist in base, set directly */}}
-                {{- $_ := set $base $key $overlayValue -}}
-            {{- else if and (kindIs "map" $baseValue) (kindIs "map" $overlayValue) -}}
-                {{/* Recursively merge nested maps */}}
-                {{- $mergedValue := include "utils.deepMerge" (list $baseValue $overlayValue) | fromYaml -}}
-                {{- $_ := set $base $key $mergedValue -}}
-            {{- else -}}
-                {{/* For non-map values, overlay replaces base */}}
-                {{- $_ := set $base $key $overlayValue -}}
-            {{- end -}}
-        {{- end -}}
-    {{- end -}}
-
-    {{- $base | toYaml -}}
-{{- end -}}
+{{/*# https://helm.sh/docs/chart_template_guide/named_templates/#declaring-and-using-templates-with-define-and-template*/}}
+{{- define "postal-deploy-containers-common" }}
+    image: "ghcr.io/postalserver/postal:{{ .Values.version }}"
+    env:
+      - name: SMTP_HOST
+        value: '{{.Values.conf_kube.smtp_server.service_name}}.{{.Values.namespace}}.svc.cluster.local'
+      - name: SMTP_PORT
+        value: '{{.Values.conf_kube.smtp_server.port}}'
+      - name: MAIN_DB_HOST
+        value: '{{.Values.conf_kube.main_db.service_name}}.{{.Values.namespace}}.svc.cluster.local'
+      - name: MAIN_DB_PORT
+        value: '{{.Values.conf_yaml.main_db.port}}'
+      - name: MAIN_DB_USERNAME
+        value: '{{.Values.conf_yaml.main_db.username}}'
+      - name: MAIN_DB_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: {{ include "postal-name-config-secret" . }}
+            key: mariadb-password
+      - name: MESSAGE_DB_HOST
+        value: '{{.Values.conf_kube.main_db.service_name}}.{{.Values.namespace}}.svc.cluster.local'
+      - name: MESSAGE_DB_PORT
+        value: '{{.Values.conf_yaml.main_db.port}}'
+      - name: MESSAGE_DB_USERNAME
+        value: {{.Values.conf_yaml.main_db.username}}
+      - name: MESSAGE_DB_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: {{ include "postal-name-config-secret" . }}
+            key: mariadb-password
+      - name: RAILS_SECRET_KEY
+        valueFrom:
+          secretKeyRef:
+            name: {{ include "postal-name-config-secret" . }}
+            key: rails-secret-key
+    volumeMounts:
+      - name: config-map
+        mountPath: /config/postal.yml
+        subPath: postal.yml
+        readOnly: true
+      - name: smtp-tls
+        mountPath: /config/certs
+        readOnly: true
+volumes:
+  - name: config-map
+    configMap:
+      name: {{ include "postal-name-config-map" . }}
+  - name: smtp-tls
+    secret:
+      secretName: '{{ include "postal-name-tls" . }}'
+  - name: config-secret
+    secret:
+      secretName: '{{ include "postal-name-config-secret" . }}'
+{{- end }}

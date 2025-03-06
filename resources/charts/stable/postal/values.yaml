@@ -67,7 +67,7 @@ conf_secrets:
   # -- The password to use when authentication to the SMTP server
   smtp_password: ''
   # @schema
-  # title: Maria Db password
+  # title: Maria Db root and postal user password
   # description: The database Password
   # required: true
   # minLength: 5
@@ -129,7 +129,7 @@ conf_yaml:
     # The default port the web server should listen on unless overriden by the PORT environment variable
     default_port: 5000
     # The default bind address the web server should listen on unless overriden by the BIND_ADDRESS environment variable
-    default_bind_address: 127.0.0.1
+    default_bind_address: 0.0.0.0
     # The maximum number of threads which can be used by the web server
     max_threads: 5
 
@@ -137,7 +137,7 @@ conf_yaml:
     # The default port for the worker health server to listen on
     default_health_server_port: 9090
     # The default bind address for the worker health server to listen on
-    default_health_server_bind_address: 127.0.0.1
+    default_health_server_bind_address: localhost
     # The number of threads to execute within each worker
     threads: 2
 
@@ -154,12 +154,6 @@ conf_yaml:
     encoding: utf8mb4
 
   message_db:
-    # Hostname for the MariaDB server which stores the mail server databases
-    host: localhost
-    # The MariaDB port to connect to
-    port: 3306
-    # The MariaDB username
-    username: postal
     # The encoding to use when connecting to the MariaDB database
     encoding: utf8mb4
     # The MariaDB prefix to add to database names
@@ -202,7 +196,7 @@ conf_yaml:
     # The default port for the SMTP server health server to listen on
     default_health_server_port: 9091
     # The default bind address for the SMTP server health server to listen on
-    default_health_server_bind_address: 127.0.0.1
+    default_health_server_bind_address: 0.0.0.0
     # @schema
     # const: true
     # @schema
@@ -263,16 +257,8 @@ conf_yaml:
     # The path to the resolv.conf file containing addresses for local nameservers
     resolv_conf_path: /etc/resolv.conf
 
+  # App
   smtp:
-    # The hostname to send application-level e-mails to
-    host: 127.0.0.1
-    # @schema
-    # required: false
-    # type: integer
-    # minimum: 1000
-    # @schema
-    # -- the port number to send application-level e-mails to
-    port: 1025
     # @schema
     # title: Smtp Username
     # description: Smtp Username
@@ -352,6 +338,10 @@ conf_yaml:
 # Configuration on Kubernetes manifest
 # @ignored
 conf_kube:
+  # Initialize container
+  # to [initialize the database](https://docs.postalserver.io/getting-started/installation#initializing-the-database)
+  init:
+    enabled: true
   main_db:
     # @schema
     # title: MariaDB service name
@@ -367,6 +357,10 @@ conf_kube:
     # The docker hashtag to get a stable image
     # We use [11.7.2](https://github.com/docker-library/repo-info/blob/master/repos/mariadb/remote/11.7.2.md)
     hashtag: sha256:310d29fbb58169dcddb384b0ff138edb081e2773d6e2eceb976b3668089f2f84
+    # -- A restriction on the hosts from where root can connect
+    # [MARIADB_ROOT_HOST](https://mariadb.com/kb/en/mariadb-server-docker-official-image-environment-variables/#mariadb_master_host)
+    # ie GRANT ALL PRIVILEGES ON *.* TO 'root'@'root_host'
+    root_host: '%'
     # The resources
     resources:
       limits:
@@ -376,6 +370,8 @@ conf_kube:
         cpu: 200m
         memory: 250Mi
   smtp_server:
+    service_name: smtp
+    port: 25
     # Resources
     resources:
       memory: ''

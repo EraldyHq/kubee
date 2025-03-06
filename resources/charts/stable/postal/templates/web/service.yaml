@@ -10,5 +10,5 @@ spec:
     {{- include "kubee-pod-labels" . | indent 4}}
   ports:
   - name: web
-    port: 5000
+    port: 80
     targetPort: web

@@ -1,9 +1,10 @@
+{{ $ := mergeOverwrite $ (dict "component" "mariadb") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mariadb-deployment
   labels:
-    app: mariadb
+    {{- include "kubee-manifest-labels" . | indent 4}}
 spec:
   replicas: 1
   strategy:
@@ -12,36 +13,37 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: mariadb
+      {{- include "kubee-pod-labels" . | indent 6}}
   template:
     metadata:
       labels:
-        app: mariadb
+        {{- include "kubee-pod-labels" . | indent 8}}
       annotations:
-        {{- include "postal-config-checksum-annotation" . | indent 8}}
+        {{ printf "mariadb-config/checksum: %s" (include (print .Template.BasePath "/mariadb/mariadb-config-cnf.yaml") . | sha256sum )}}
     spec:
       containers:
         - name: mariadb
           image: 'mariadb{{if .Values.conf_kube.main_db.hashtag  }}@{{ .Values.conf_kube.main_db.hashtag}}{{else}}:{{.Values.conf_kube.main_db.version}}{{end}}'
-          # starting with a db
+          {{- /* https://mariadb.com/kb/en/mariadb-server-docker-official-image-environment-variables*/}}
           env:
+            {{- /* starting with a user */}}
             - name: MARIADB_USER
-              value: {{.Values.conf_yaml.main_db.username}}
+              value: '{{.Values.conf_yaml.main_db.username}}'
+            {{- /* root can connect only from localhost */}}
+            - name: MARIADB_ROOT_HOST
+              value: '{{ .Values.conf_kube.main_db.root_host }}'
             - name: MARIADB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postal-name-config-secret" . }}
                   key: mariadb-password
             - name: MARIADB_DATABASE
-              value: {{.Values.conf_yaml.main_db.database }}
+              value: '{{.Values.conf_yaml.main_db.database }}'
             - name: MARIADB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postal-name-config-secret" . }}
                   key: mariadb-password
-          #command:
-          #  ???
-          #  - --port {{ .Values.conf_yaml.main_db.port }}
           ports:
             - containerPort: {{ .Values.conf_yaml.main_db.port }}
           livenessProbe:

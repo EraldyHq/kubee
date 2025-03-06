@@ -48,7 +48,7 @@ If dex is enabled and the dex postal secret is not empty `.Values.dex.clients.po
 
 
 {{ template "chart.valuesSection" . }}
-| conf_yaml | object | | [The Postal Configuration without secrets](https://github.com/postalserver/postal/blob/{{ template "chart.appVersion" . }}/doc/config/yaml.yml) |
+| conf_yaml | object | | [The Postal Configuration without secrets and host](https://github.com/postalserver/postal/blob/{{ template "chart.appVersion" . }}/doc/config/yaml.yml) |
 
 By default, all username are named `postal`. You can change them in the `conf_yaml` postal configuration section. 
 

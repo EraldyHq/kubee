@@ -9,13 +9,13 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 
 
 synopsis(){
-  CLI_COMMANDS=$(doc::get_cli_command_words)
+
 cat <<EOF
 
 Get a shell into your application pod or your cluster with busybox
 
 \`\`\`bash
-$CLI_COMMANDS [--shell|-s shellName] <app name>
+kubee app shell [--shell|-s shellName] <app name>
 \`\`\`
 
 where:
@@ -99,7 +99,8 @@ fi
 if [ "$KUBEE_APP_NAME" == "busybox" ] || [ "$KUBEE_APP_NAME" == "kubernetes" ]; then
 
     echo::info "Starting busybox ${KUBEE_BUSYBOX_IMAGE} in the namespace ${KUBEE_CONNECTION_NAMESPACE}"
-    # --image-pull-policy Always will check the latest sha
+    # --image-pull-policy Always will download it every time
+    # Making it work with latest
     kubectl run -it busybox-pod --image="$KUBEE_BUSYBOX_IMAGE" --restart=Never --rm --image-pull-policy Always
     exit 0
 
@@ -119,8 +120,10 @@ echo::info "Pod Name: $POD_NAME"
 echo::info "Pod Namespace: $POD_NAMESPACE"
 
 if [ "$SHELL_NAME" == "ephemeral" ]; then
+  # https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container-example
   echo::info "Starting a ephemeral busybox shell on the pod $POD_NAMESPACE/$POD_NAME"
-  kubectl debug -it --image="$BUSY_BOX_IMAGE" -n "$POD_NAMESPACE" --target="$POD_NAME" ephemeral-shell
+  TARGET_CONTAINER_NAME="todo"
+  kubectl debug -it  --image="$BUSY_BOX_IMAGE" -n "$POD_NAMESPACE" --target="$TARGET_CONTAINER_NAME" "$POD_NAME"
   exit 0
 fi
 

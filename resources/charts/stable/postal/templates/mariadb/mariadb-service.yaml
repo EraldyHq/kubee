@@ -1,11 +1,14 @@
+{{ $ := mergeOverwrite $ (dict "component" "mariadb") }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{.Values.conf_kube.main_db.service_name}}
   namespace: {{.Values.namespace}}
+  labels:
+    {{- include "kubee-manifest-labels" . | indent 4}}
 spec:
   selector:
-    app: mariadb
+    {{- include "kubee-pod-labels" . | indent 6}}
   ports:
     - protocol: TCP
       port: {{.Values.conf_yaml.main_db.port}}

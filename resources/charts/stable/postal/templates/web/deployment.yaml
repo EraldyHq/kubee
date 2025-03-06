@@ -19,58 +19,9 @@ spec:
     spec:
       containers:
         - name: web
-          image: "ghcr.io/postalserver/postal:{{ .Values.version }}"
           command: [ "postal", "web-server" ]
         {{- /* resources: {{ toYaml .Values.resources | nindent 10 }} */}}
-          env:
-            - name: MAIN_DB_HOST
-              value: '{{.Values.conf_kube.main_db.service_name}}.{{.Values.namespace}}.svc.cluster.local'
-            - name: MAIN_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "postal-name-config-secret" . }}
-                  key: mariadb-password
-            - name: MESSAGE_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "postal-name-config-secret" . }}
-                  key: mariadb-password
-            - name: RAILS_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "postal-name-config-secret" . }}
-                  key: rails-secret-key
           ports:
             - name: web
               containerPort: {{ .Values.conf_yaml.web_server.default_port }}
-{{/*          livenessProbe:*/}}
-{{/*            httpGet:*/}}
-{{/*              path: /health*/}}
-{{/*              port: metrics*/}}
-{{/*          readinessProbe:*/}}
-{{/*            httpGet:*/}}
-{{/*              path: /health*/}}
-{{/*              port: metrics*/}}
-          volumeMounts:
-            - name: config-map
-              mountPath: /config/postal.yml
-              subPath: postal.yml
-              readOnly: true
-            - name: config-secret
-              # This is the default $config-file-root/signing.key
-              mountPath: /config/signing.key
-              subPath: dkim-signing-key
-              readOnly: true
-            - name: smtp-tls
-              mountPath: /config/certs
-              readOnly: true
-      volumes:
-        - name: config-map
-          configMap:
-            name: {{ include "postal-name-config-map" . }}
-        - name: config-secret
-          secret:
-            secretName: '{{ include "postal-name-config-secret" . }}'
-        - name: smtp-tls
-          secret:
-            secretName: '{{ include "postal-name-tls" . }}'
+      {{- include "postal-deploy-containers-common" . | indent 6}}

@@ -4,6 +4,21 @@
     "conf_kube": {
       "description": " @ignored",
       "properties": {
+        "init": {
+          "description": " to [initialize the database](https://docs.postalserver.io/getting-started/installation#initializing-the-database)",
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ],
+          "title": "init"
+        },
         "main_db": {
           "properties": {
             "hashtag": {
@@ -61,6 +76,12 @@
               "title": "resources",
               "type": "object"
             },
+            "root_host": {
+              "default": "%",
+              "description": "A restriction on the hosts from where root can connect [MARIADB_ROOT_HOST](https://mariadb.com/kb/en/mariadb-server-docker-official-image-environment-variables/#mariadb_master_host) ie GRANT ALL PRIVILEGES ON *.* TO 'root'@'root_host'",
+              "required": [],
+              "title": "root_host"
+            },
             "service_name": {
               "default": "mariadb",
               "description": " title: MariaDB service name required: true minLength: 1 format: hostname @schema The service name",
@@ -85,6 +106,12 @@
         },
         "smtp_server": {
           "properties": {
+            "port": {
+              "default": 25,
+              "required": [],
+              "title": "port",
+              "type": "integer"
+            },
             "resources": {
               "description": "Resources",
               "properties": {
@@ -107,9 +134,17 @@
               ],
               "title": "resources",
               "type": "object"
+            },
+            "service_name": {
+              "default": "smtp",
+              "required": [],
+              "title": "service_name",
+              "type": "string"
             }
           },
           "required": [
+            "service_name",
+            "port",
             "resources"
           ],
           "title": "smtp_server",
@@ -193,7 +228,7 @@
           "description": "The database password",
           "minLength": 5,
           "required": [],
-          "title": "Maria Db password"
+          "title": "Maria Db root and postal user password"
         },
         "dkim_signing_key": {
           "default": "",
@@ -498,33 +533,9 @@
               "required": [],
               "title": "encoding",
               "type": "string"
-            },
-            "host": {
-              "default": "localhost",
-              "description": "Hostname for the MariaDB server which stores the mail server databases",
-              "required": [],
-              "title": "host",
-              "type": "string"
-            },
-            "port": {
-              "default": 3306,
-              "description": "The MariaDB port to connect to",
-              "required": [],
-              "title": "port",
-              "type": "integer"
-            },
-            "username": {
-              "default": "postal",
-              "description": "The MariaDB username",
-              "required": [],
-              "title": "username",
-              "type": "string"
             }
           },
           "required": [
-            "host",
-            "port",
-            "username",
             "encoding",
             "database_name_prefix"
           ],
@@ -758,6 +769,7 @@
           "type": "object"
         },
         "smtp": {
+          "description": "App",
           "properties": {
             "authentication_type": {
               "default": "login",
@@ -794,26 +806,12 @@
               "title": "from_name",
               "type": "string"
             },
-            "host": {
-              "default": "127.0.0.1",
-              "description": "The hostname to send application-level e-mails to",
-              "required": [],
-              "title": "host",
-              "type": "string"
-            },
             "openssl_verify_mode": {
               "default": "peer",
               "description": "When using TLS, you can set how OpenSSL checks the certificate. Use 'none' for no certificate checking",
               "required": [],
               "title": "openssl_verify_mode",
               "type": "string"
-            },
-            "port": {
-              "default": 25,
-              "description": "The port number to send application-level e-mails to",
-              "required": [],
-              "title": "port",
-              "type": "integer"
             },
             "username": {
               "default": "postal",
@@ -824,8 +822,6 @@
             }
           },
           "required": [
-            "host",
-            "port",
             "username",
             "authentication_type",
             "enable_starttls",
@@ -871,7 +867,7 @@
               "type": "string"
             },
             "default_health_server_bind_address": {
-              "default": "127.0.0.1",
+              "default": "0.0.0.0",
               "description": "The default bind address for the SMTP server health server to listen on",
               "required": [],
               "title": "default_health_server_bind_address",
@@ -885,8 +881,9 @@
               "type": "integer"
             },
             "default_port": {
-              "default": 25,
-              "description": "The default port the SMTP server should listen on unless overriden by the PORT environment variable",
+              "default": 1025,
+              "description": " @schema required: false type: integer minimum: 1000 @schema",
+              "minimum": 1000,
               "required": [],
               "title": "default_port",
               "type": "integer"
@@ -954,7 +951,6 @@
             }
           },
           "required": [
-            "default_port",
             "default_bind_address",
             "default_health_server_port",
             "default_health_server_bind_address",
@@ -1002,7 +998,7 @@
         "web_server": {
           "properties": {
             "default_bind_address": {
-              "default": "127.0.0.1",
+              "default": "0.0.0.0",
               "description": "The default bind address the web server should listen on unless overriden by the BIND_ADDRESS environment variable",
               "required": [],
               "title": "default_bind_address",
@@ -1034,7 +1030,7 @@
         "worker": {
           "properties": {
             "default_health_server_bind_address": {
-              "default": "127.0.0.1",
+              "default": "localhost",
               "description": "The default bind address for the worker health server to listen on",
               "required": [],
               "title": "default_health_server_bind_address",

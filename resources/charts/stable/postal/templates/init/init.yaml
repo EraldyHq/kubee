@@ -1,5 +1,5 @@
 {{/*https://docs.postalserver.io/getting-started/installation#initializing-the-database*/}}
-{{ if eq 1 0}}
+{{ if eq .Values.conf_kube.init.enabled true}}
 {{ $ := mergeOverwrite $ (dict "component" "init") }}
 apiVersion: batch/v1
 kind: Job
@@ -26,6 +26,8 @@ spec:
             - postal
             - initialize
           env:
+            - name: MAIN_DB_HOST
+              value: '{{.Values.conf_kube.main_db.service_name}}.{{.Values.namespace}}.svc.cluster.local'
             - name: MAIN_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -44,5 +46,33 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "postal-name-config-map" . }}
+          volumeMounts:
+            - name: config-map
+              mountPath: /config/postal.yml
+              subPath: postal.yml
+              readOnly: true
+            - name: config-secret
+              # This is the default $config-file-root/signing.key
+              mountPath: /config/signing.key
+              subPath: dkim-signing-key
+              readOnly: true
+            - name: smtp-tls
+              mountPath: {{ .Values.conf_yaml.smtp_server.tls_certificate_path }}
+              subPath: tls.crt
+              readOnly: true
+            - name: smtp-tls
+              mountPath: {{ .Values.conf_yaml.smtp_server.tls_private_key_path }}
+              subPath: tls.key
+              readOnly: true
+      volumes:
+        - name: config-map
+          configMap:
+            name: {{ include "postal-name-config-map" . }}
+        - name: config-secret
+          secret:
+            secretName: '{{ include "postal-name-config-secret" . }}'
+        - name: smtp-tls
+          secret:
+            secretName: '{{ include "postal-name-tls" . }}'
       restartPolicy: Never
 {{- end }}

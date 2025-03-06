@@ -1,3 +1,5 @@
+{{/* https://mariadb.com/kb/en/configuring-mariadb-with-option-files/ */}}
+{{/* https://mariadb.com/kb/en/mariadbd-options/  */}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,16 +8,18 @@ metadata:
   labels:
     {{- include "kubee-manifest-labels" . | indent 4}}
 data:
+  {{/* Full list of mariadb configuration  https://mariadb.com/kb/en/server-system-variables/*/}}
   my.cnf: |-
     [mariadb]
-    port = 3307
-
-    [mysqld]
+    port = {{ .Values.conf_yaml.main_db.port }}
 
     # Allow remote access
-    # https://mariadb.com/kb/en/configuring-mariadb-for-remote-client-access/
+    # Listen to TCP/IP connection
+    # https://mariadb.com/kb/en/server-system-variables/#skip_networking
     skip-networking=0
-    skip-bind-address
+    # All address
+    # https://mariadb.com/kb/en/server-system-variables/#bind_address
+    # bind-address = ::
 
     # Maximum memory allocation
     #innodb_buffer_pool_size = 1G       # Sets the memory allocated to InnoDB buffer pool

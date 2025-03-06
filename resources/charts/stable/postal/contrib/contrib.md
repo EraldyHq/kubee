@@ -86,6 +86,11 @@ It will run the [docker-compose.v$MAJOR_VERSION.yml](https://github.com/postalse
 to the `/opt/postal/install` dir
 
 
+## Debug
+
+
+
+
 ## Note
 
 * Postal is a docker based installation. For instance, an upgrade is performed [postal upgrade command line](https://docs.postalserver.io/getting-started/upgrading)
