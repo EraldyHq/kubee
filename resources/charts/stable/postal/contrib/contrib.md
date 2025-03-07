@@ -3,19 +3,58 @@
 
 This helm is based on the [container](https://docs.postalserver.io/other/containers)
 
-Artifact:
+
+
+## Config
+
+We have split the [config](https://docs.postalserver.io/getting-started/configuration) in 2:
+* [File](https://github.com/postalserver/postal/blob/main/doc/config/yaml.yml) stored as `conf_yaml`
+* [Env](https://github.com/postalserver/postal/blob/main/doc/config/environment-variables.md) for secret and host
+
+The default config is for docker as:
+* it listens to `localhost` and not `0.0.0.0`
+* and the service name is not in Kubernetes format.
+
+
+`$config-file-root`, in the [docker image](https://docs.postalserver.io/other/containers#configuration), the `$config-file-root` is `/config`
+
+## TODO
+### Automatic Admin User ?
+
+* The password hash is a [bcrypt](https://github.com/postalserver/postal/blob/fd3c7ccdf6dc4ee0a76c9523cbd735159e4b8000/app/models/concerns/has_authentication.rb#L31)
+* uuid is number 4 `554423b5-15bd-4d37-87eb-fbb3487db815`
+* `timezone` UTC
+
+```sql
+insert into users (id, uuid, first_name, last_name, email_address, password_digest, time_zone, email_verification_token,
+                   email_verified_at, created_at, updated_at, password_reset_token, password_reset_token_valid_until,
+                   admin, oidc_uid, oidc_issuer)
+values ();
+```
+
+## Search Note
+
+### Docker Artifacts
+
 * [Compose](https://github.com/postalserver/install/blob/main/templates/docker-compose.v3.yml)
 * [Dockerfile](https://github.com/postalserver/postal/blob/main/Dockerfile)
 
 
-## Bootstrap
+### Helm
 
+#### Postal Helm Server Install Pull
+The helm is not yet finished: https://github.com/postalserver/install/pull/20
+and pretty poor
+
+We didn't go with it.
 ```bash
-task dep
+mkdir charts
+git remote add -f postal-chart https://github.com/dmitryzykov/postal-install.git
+git subtree add --prefix=resources/charts/stable/postal/charts/postal postal-chart main --squash -- helm/postal
+mkdir charts/postal-1.0.0.tgz
 ```
 
-## Note
-### Postal Helm Chart
+#### Postal Helm Chart
 We found [this postal chart](https://github.com/hoverkraft-tech/helm-chart-postal), but it's not yet released
 in a correct format.
 
@@ -28,33 +67,13 @@ helm pull https://github.com/hoverkraft-tech/helm-chart-postal/archive/refs/tags
 helm pull oci://github.com/hoverkraft-tech/helm-chart-postal -d charts --untar
 ```
 
-## Config
+### Database Model
 
-https://docs.postalserver.io/getting-started/configuration
+See: https://github.com/postalserver/postal/tree/3.3.4/app/models
 
-* [File](https://github.com/postalserver/postal/blob/main/doc/config/yaml.yml)
-* [Env](https://github.com/postalserver/postal/blob/main/doc/config/environment-variables.md)
+###  Standard Installation
 
-In the [docker image](https://docs.postalserver.io/other/containers#configuration), the `$config-file-root` is `/config`
-
-
-
-## Helm
-
-The helm is not yet finished: https://github.com/postalserver/install/pull/20
-and pretty poor
-
-We didn't go with it.
-```bash
-mkdir charts
-git remote add -f postal-chart https://github.com/dmitryzykov/postal-install.git
-git subtree add --prefix=resources/charts/stable/postal/charts/postal postal-chart main --squash -- helm/postal
-mkdir charts/postal-1.0.0.tgz
-```
-
-## Installation
-
-### Postal Install
+#### Postal Cli Install
 
 Install the [postal bash cli](https://github.com/postalserver/install/blob/main/bin/postal)
 and resources
@@ -64,8 +83,10 @@ sudo ln -s /opt/postal/install/bin/postal /usr/bin/postal
 ```
 
 
-### Boostrap
-To generate three files in `/opt/postal/config`
+#### Boostrap
+
+Bootstrap is a docker compose file generation.
+that generate three files in `/opt/postal/config`
 ```bash
 sudo postal bootstrap postal.yourdomain.com
 ```
@@ -80,20 +101,25 @@ See:
 * [posta fulll](https://github.com/postalserver/postal/blob/main/doc/config/yaml.yml)
 * [Caddyfile](https://github.com/postalserver/install/blob/main/examples/Caddyfile)
 
-### Initialize/mk user
+#### Initialize/mk user
 
 It will run the [docker-compose.v$MAJOR_VERSION.yml](https://github.com/postalserver/install/blob/main/templates/docker-compose.v3.yml)
 to the `/opt/postal/install` dir
 
 
+## Howto
+
+### Connect to the database
+
+```bash
+kubee kubectl -n postal port-forward svc/mariadb 3306
+```
+
 ## Support
 
 ### Bad password
 
-```bash
-kubee -c beau kubectl -n postal port-forward svc/mariadb 3306
-```
-Delete the rows from the users table
+[Connect to the database](#connect-to-the-database) and delete the rows from the users table
 
 
 
