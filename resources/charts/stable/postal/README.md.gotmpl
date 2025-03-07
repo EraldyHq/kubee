@@ -84,6 +84,7 @@ If dex is enabled and the dex postal secret (`.Values.dex.clients.postal.secret`
 
 {{ template "chart.valuesSection" . }}
 | conf_yaml | object | | [The Postal Configuration without secrets and host](https://github.com/postalserver/postal/blob/{{ template "chart.appVersion" . }}/doc/config/yaml.yml) |
+| conf_kube | object | | The configuration values for the kubernetes resources |
 
 By default, all username are named `postal`. You can change them in the `conf_yaml` postal configuration section. 
 

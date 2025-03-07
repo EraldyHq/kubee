@@ -102,6 +102,7 @@ These `kubee charts` add their features when `enabled`.
 | namespace | string | `"postal"` | The installation Namespace |
 | version | string | `"3.3.4"` | The postal [docker version](https://github.com/postalserver/postal/pkgs/container/postal) (The release version Without the v) |
 | conf_yaml | object | | [The Postal Configuration without secrets and host](https://github.com/postalserver/postal/blob/3.3.4/doc/config/yaml.yml) |
+| conf_kube | object | | The configuration values for the kubernetes resources |
 
 By default, all username are named `postal`. You can change them in the `conf_yaml` postal configuration section.
 
