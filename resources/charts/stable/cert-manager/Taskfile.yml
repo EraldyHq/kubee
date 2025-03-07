@@ -13,4 +13,7 @@ tasks:
   tpl:
     cmds:
       - kubee helmet template --out cert-manager
+  play:
+    cmds:
+      - kubee helmet play cert-manager
 

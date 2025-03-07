@@ -5,11 +5,17 @@
 
 # {{ template "chart.description" . }}
 
-This chart represents a `kubee cluster`.
+This `kubee chart` represents a `kubee cluster`.
 
 It adds support for:
 * cluster values
-* common app values
+  * name 
+  * nodes 
+* common app values such as:
+  * users (admin) 
+  * email
+  * [cloudflare dns](../../../../docs/site/cloudflare.md)
+  * trusted proxies
 * and a [common library of functions](templates/_helpers.tpl)
 
 

@@ -3,10 +3,10 @@
 
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![AppVersion: v1.17.1-v0.16.0](https://img.shields.io/badge/AppVersion-v1.17.1--v0.16.0-informational?style=flat-square)
 
-# The cert manager kubee chart
+# The Cert Manager Kubee Chart
 
 ## About
-This `kubee chart` will install [cert-manager](https://cert-manager.io/) to manage certificate.
+This `kubee chart` will install [cert-manager](https://cert-manager.io/) to manage certificates.
 
 ## Installation
 
@@ -34,9 +34,12 @@ kubee --cluster clusterName helmet play cert-manager
 
 ### Change the default issuer
 
-By default, the certificate are issued with `letsencrypt-staging` and are [not valid](#why-my-certificates-are-not-valid).
+By default, the certificate are issued with `letsencrypt-staging` to not hit the
+letsencrypt rate limit in case of misconfiguration.
 
-When you have controlled that you receive certificate
+The issued staging certificate are therefore [not valid](#why-my-certificates-are-not-valid).
+
+Once you have controlled that you receive certificate
 * from Letsencrypt
 * and not the default Traefik certificate
 you should change the default issuer value to `letsencrypt-prod`
@@ -44,7 +47,9 @@ you should change the default issuer value to `letsencrypt-prod`
 Example: In your cluster values file.
 ```yaml
 cert_manager:
-  issuer_name: 'letsencrypt-prod'
+  issuers:
+    public:
+      name: 'letsencrypt-prod'
 ```
 
 ## Features
@@ -63,7 +68,7 @@ It will create:
 The issuers solve the challenge:
 
 * `http01` (default, ie an A or CNAME record should be present in the DNS Zone)
-* and optional `DNS01` from cloudflare (if the api token and the domains are given).
+* and optional [DNS01 from cloudflare](#automatic-dns01-cloudflare-challenge-configuration)
 
 The
 * `letsencrypt-staging`. This is the Default used to:
@@ -82,62 +87,45 @@ to:
 
 The [cert-manager mixin](https://monitoring.mixins.dev/cert-manager/) is installed
 to create:
-* [grafana dashboard](https://monitoring.mixins.dev/cert-manager/#dashboards) if the [grafana chart ](../grafana/README.md) is enabled
-* [alerts](https://monitoring.mixins.dev/cert-manager/#alerts) if the [prometheus chart](../prometheus/README.md) is enabled
+* the [grafana dashboard](https://monitoring.mixins.dev/cert-manager/#dashboards) if the [grafana chart ](../grafana/README.md) is enabled
+* the [alerts](https://monitoring.mixins.dev/cert-manager/#alerts) if the [prometheus chart](../prometheus/README.md) is enabled
+
+### Automatic DNS01 Cloudflare challenge configuration
+
+By default, the `http01` challenge is executed.
+
+If [Cloudflare is set as a DNS provider in your cluster values file](../../../../docs/site/cloudflare.md),
+a `dns01` is executed.
+
+You can then:
+* issue wildcard certificate
+* use dns name without creating A records.
 
 ## Config
-### Cloudflare
-
-By default, the `http01` challenge is executed
-but if you want a `dns01` on Cloudflare, you can configure it this way:
-
-* Get the API key [Ref](https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/)
-  * Go to `Cloudflare > User Profile > API Tokens > API Tokens`.
-  * Create a token with
-  * Permissions:
-    * `Zone - DNS - Edit`
-    * `Zone - Zone - Read`
-    * Zone Resources :
-      * `Include - All Zones`
-* Set the cloudflare properties in your cluster values file.
-```yaml
-cert_manager:
-    dns01:
-        cloudflare:
-          # See cert-manager/README.md on how to get cloudflare api key
-          cloudflareApiToken: 'token'
-          # The dns Zone that are managed by cloudflare
-          dnsZones:
-            - my-apex-domain.tld
-            - another-apex-domain.tld
-```
 
 ### Check the Root CA Bundle regularly
 
 The root CA Bundle does not change regularly, but it changes.
 You should check the actual version regularly.
 
-See How at [Securely Maintaining a trust-manager Installation](https://cert-manager.io/docs/trust/trust-manager/#securely-maintaining-a-trust-manager-installation)
+See `How-to` at [Securely Maintaining a trust-manager Installation](https://cert-manager.io/docs/trust/trust-manager/#securely-maintaining-a-trust-manager-installation)
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| dns01.cloudflare.api_token.external_secret_remote_ref.key | string | `""` | The external secret ref. If the remote ref key is not empty, an external secret is created (used for GitOps) |
-| dns01.cloudflare.api_token.external_secret_remote_ref.property | string | `""` | The external secret property. |
-| dns01.cloudflare.api_token.k8s_secret_value | string | `""` | The api token value. If not empty, a Kubernetes secret is created. |
-| dns01.cloudflare.dns_zones | list | `[]` | the dns Zones that are managed by cloudflare, mandatory (ie a list of apex domains) |
 | enabled | bool | `false` | If true, cert-manager is or will be installed on the cluster When disabled, the default ingress certificate specified on Traefik is used Not a string, a boolean so no quote |
-| issuers.kubee.bundle_name | string | `"kubee-ca-bundle"` | The kubee cert bundle with the root CA and the kubee ca cert It's distributed to clients to create secure TLS connection |
-| issuers.kubee.name | string | `"kubee-ca"` | The kubee issuer name. The kubee issuer is used to create certificates for the local private domain cluster.local |
-| issuers.public.name | string | `"letsencrypt-staging"` | The public issuer name. The public issuer is used to create certificate for public access (ie public network / public domain name) It should be changed to `letsencrypt-prod` when the `letsencrypt-staging` is working and validated |
+| issuers.kubee | object | `{"bundle_name":"kubee-ca-bundle","name":"kubee-ca"}` | The kubee issuer is used to create certificates for the internal service and pods (ie the local private domain cluster.local) |
+| issuers.public | object | `{"name":"letsencrypt-staging"}` | The public issuer name. The public issuer is used to create certificate for public access (ie public network / public domain name) Its name should be changed to `letsencrypt-prod` when the `letsencrypt-staging` is working and validated |
 | namespace | string | `"cert-manager"` | The installation namespace |
 
+For the whole set of values, see the [values file](values.yaml)
 ## Support
 
 ### Why my certificates are not valid
 
-By default, this chart is set to work with the [Let's encrypt Staging environment](https://letsencrypt.org/docs/staging-environment/).
+By default, this chart is set to work with the [Let's encrypt Staging environment](https://letsencrypt.org/docs/staging-environment/)
+to not hit the rate limit.
 
 The certificates are:
 * not valid (not trusted)

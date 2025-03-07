@@ -5,11 +5,17 @@
 
 # The kubee cluster chart
 
-This chart represents a `kubee cluster`.
+This `kubee chart` represents a `kubee cluster`.
 
 It adds support for:
-* [cluster values](#values)
-* common app values
+* cluster values
+  * name
+  * nodes
+* common app values such as:
+  * users (admin)
+  * email
+  * [cloudflare dns](../../../../docs/site/cloudflare.md)
+  * trusted proxies
 * and a [common library of functions](templates/_helpers.tpl)
 
 This chart is a dependency of all `Kubee charts`
@@ -18,19 +24,12 @@ This chart is a dependency of all `Kubee charts`
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| auth.admin_user.cluster_role | string | `"cluster-admin"` | Kubernetes clusterRole * `cluster-admin` has full access * `admin` does not have access to node and cluster scope related object such as ClusterRoleBinding |
-| auth.admin_user.email | string | `""` | The admin email It's used by default in apps. For instance: * letsencrypt registration email * alert notifications: prometheus, argocd |
-| auth.admin_user.password | string | `""` | the admin password |
-| auth.admin_user.username | string | `"admin"` | The admin user  * created as admin user in Kubernetes and other app  * added in basicAuth |
-| auth.trusted_proxies | list | `[]` | Trusted Proxies If trusted, reverse_proxy handler will proxy and augment the sensitive X-Forwarded-* request headers. You should set the CIDR value of: * internal proxy such as traefik * and external proxy such as cloudflare It's used by Traefik and all auth application that needs the real ip and trust the X-forward headers |
+| auth.admin_user | object | `{"cluster_role":"cluster-admin","email":"","password":"","username":"admin"}` | The admin user  * created as admin user in Kubernetes and other app  * added in basicAuth |
+| auth.trusted_proxies | list | `[]` | Trusted Proxies If trusted, reverse proxies handler will proxy and augment the sensitive X-Forwarded-* request headers.  You should set the CIDR value of: * internal proxy such as traefik * and external proxy such as cloudflare It's used by Traefik and all auth application that needs the real ip and trust the X-forward headers |
 | chart | string | `"k3s-ansible"` | The cluster chart. The cluster chart is responsible for the installation/management of Kubernetes on the nodes |
 | distribution | string | `"k3s"` | The kubernetes distribution k3s is the distribution that has a cluster chart implemented. |
-| email.smtp.from | string | `""` |  |
-| email.smtp.hello | string | `""` |  |
-| email.smtp.host | string | `""` | The smtp host if the host is not empty, smtp configuration are added for example for argocd email notifications |
-| email.smtp.password | string | `""` |  |
-| email.smtp.port | string | `""` | the smtp port |
-| email.smtp.username | string | `""` |  |
+| dns.cloudflare | object | `{"api_token":{"key":"cloudflare-api-token","property":"","type":"secret","value":""},"dns_zones":[]}` | Cloudflare It's enabled if the list is not empty |
+| email.smtp | object | `{"from":"","hello":"","host":"","password":"","port":465,"username":""}` | Smtp Configuration |
 | name | string | `"kubee"` | The cluster name used: * to identify the cluster (for instance, on prometheus remote-write metrics, the name is added as label) * as default first instance name for operator (for instance, prometheus operator allows to install multiple prometheus that needs to be unique. Kube-prometheus asks for a unique name) |
 
  

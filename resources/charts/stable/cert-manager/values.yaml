@@ -10,50 +10,30 @@ namespace: 'cert-manager'
 
 # The ca issuers
 issuers:
+  # -- The public issuer name.
+  # The public issuer is used to create certificate for public access (ie public network / public domain name)
+  # Its name should be changed to `letsencrypt-prod` when the `letsencrypt-staging` is working and validated
   public:
     # @schema
     # enum: [ 'letsencrypt-staging', 'letsencrypt-prod' ]
     # required: true
     # @schema
-    # -- The public issuer name.
-    # The public issuer is used to create certificate for public access (ie public network / public domain name)
-    # It should be changed to `letsencrypt-prod` when the `letsencrypt-staging` is working and validated
+    # The public issuer name.
     name: 'letsencrypt-staging'
+  # -- The kubee issuer is used to create certificates for the internal service and pods (ie the local private domain cluster.local)
   kubee:
     # @schema
     # const: 'kubee-ca'
     # @schema
-    # -- The kubee issuer name.
-    # The kubee issuer is used to create certificates for the local private domain cluster.local
+    # The kubee issuer name.
     name: 'kubee-ca' # The name pattern follows istio with istio-ca.
     # @schema
     # const: 'kubee-ca-bundle'
     # @schema
-    # -- The kubee cert bundle with the root CA and the kubee ca cert
+    # The kubee cert bundle with the root CA and the kubee ca cert
     # It's distributed to clients to create secure TLS connection
     bundle_name: 'kubee-ca-bundle' # if you change this value, you need to change the authorizedSecrets value below
 
-
-# Dns01 challenge
-# You don't need to publish a DNS A record
-dns01:
-  # Doc: https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/
-  # Spec: https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderCloudflare
-  # Notes: in the doc, they use an email because they show an apiKey Auth, not an apiToken
-  # `ApiToken` is now the preferred method
-  cloudflare:
-    # See cert-manager/README.md on how to get cloudflare api key
-    # A secret or external secret can be created
-    api_token:
-      # -- The api token value. If not empty, a Kubernetes secret is created.
-      k8s_secret_value: ''
-      external_secret_remote_ref:
-        # -- The external secret ref. If the remote ref key is not empty, an external secret is created (used for GitOps)
-        key: ''
-        # -- The external secret property.
-        property: ''
-    # -- the dns Zones that are managed by cloudflare, mandatory (ie a list of apex domains)
-    dns_zones: []
 
 # https://github.com/cert-manager/cert-manager/blob/release-1.16/deploy/charts/cert-manager/values.yaml
 # defined by either the name or alias of your dependency in Chart.yaml

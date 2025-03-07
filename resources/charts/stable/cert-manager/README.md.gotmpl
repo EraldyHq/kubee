@@ -7,7 +7,7 @@
 
 
 ## About
-This `kubee chart` will install [cert-manager](https://cert-manager.io/) to manage certificate.
+This `kubee chart` will install [cert-manager](https://cert-manager.io/) to manage certificates.
 
 
 
@@ -72,7 +72,7 @@ It will create:
 The issuers solve the challenge:
 
 * `http01` (default, ie an A or CNAME record should be present in the DNS Zone)
-* and optional `DNS01` from cloudflare (if the api token and the domains are given).
+* and optional [DNS01 from cloudflare](#automatic-dns01-cloudflare-challenge-configuration)
 
 The
 * `letsencrypt-staging`. This is the Default used to:
@@ -97,33 +97,21 @@ to create:
 * the [alerts](https://monitoring.mixins.dev/cert-manager/#alerts) if the [prometheus chart](../prometheus/README.md) is enabled
 
 
+### Automatic DNS01 Cloudflare challenge configuration
+
+By default, the `http01` challenge is executed.
+
+If [Cloudflare is set as a DNS provider in your cluster values file](../../../../docs/site/cloudflare.md),
+a `dns01` is executed.
+
+You can then:
+* issue wildcard certificate
+* use dns name without creating A records.
+
 
 ## Config
-### Cloudflare
 
-By default, the `http01` challenge is executed 
-but if you want a `dns01` on Cloudflare, you can configure it this way:
 
-* Get the API key [Ref](https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/)
-  * Go to `Cloudflare > User Profile > API Tokens > API Tokens`.
-  * Create a token with
-  * Permissions:
-    * `Zone - DNS - Edit`
-    * `Zone - Zone - Read`
-    * Zone Resources :
-      * `Include - All Zones`
-* Set the cloudflare properties in your cluster values file.
-```yaml
-cert_manager:
-    dns01:
-        cloudflare:
-          # See cert-manager/README.md on how to get cloudflare api key
-          cloudflareApiToken: 'token'
-          # The dns Zone that are managed by cloudflare
-          dnsZones:
-            - my-apex-domain.tld
-            - another-apex-domain.tld
-```
 
 ### Check the Root CA Bundle regularly
 
@@ -137,6 +125,7 @@ See `How-to` at [Securely Maintaining a trust-manager Installation](https://cert
 
 {{ template "chart.valuesSection" . }}
 
+For the whole set of values, see the [values file](values.yaml)
 ## Support
 
 ### Why my certificates are not valid

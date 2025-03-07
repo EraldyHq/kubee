@@ -213,10 +213,15 @@ jsonnet_processing(){
           # Closing
           POST_PROCESSING="$POST_PROCESSING'"
 
+          # Ext-code args is due Bug
+          # If a values has 3 ---,
+          # such as in -----BEGIN PRIVATE KEY-----,
+          # std.parseYaml will create an array
+          # https://github.com/google/go-jsonnet/issues/793
           if ! JSONNET_MANIFEST=$(
             echo::eval "jsonnet -J $JPATH \
             --multi $JSONNET_OUTPUT_DIR \
-            --ext-code 'values=std.parseYaml(importstr \"$KUBEE_VALUES_FILE\")' \
+            --ext-code 'values=(local valuesFile=std.parseYaml(importstr \"$KUBEE_VALUES_FILE\"); if std.isArray(valuesFile) && std.length(valuesFile) > 0 then valuesFile[0] else valuesFile)' \
             $JSONNET_FILE \
             | $POST_PROCESSING"
           ); then

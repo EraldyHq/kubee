@@ -5,12 +5,6 @@ Return the name of the cloudflare secret
 {{- printf "%s-cloudflare-dns-api-token" (include "kubee-name-prefix" (dict "Release" $.Release "Values" $.Values.kubee ))}}
 {{- end }}
 
-{{/*
-Return the key of the cloudflare api token in the secret
-*/}}
-{{- define "cert-manager-cloudflare-secret-key" }}
-{{- printf "api-token" -}}
-{{- end }}
 
 {{/*
 Return the key of the cloudflare api token in the secret

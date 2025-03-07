@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-cert-manager
-description: The cert manager kubee chart
+description: The Cert Manager Kubee Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #

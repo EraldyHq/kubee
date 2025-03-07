@@ -14,24 +14,69 @@ distribution: 'k3s'
 # The cluster chart is responsible for the installation/management of Kubernetes on the nodes
 chart: 'k3s-ansible'
 
+
+# Dns is common data because
+# it's used by cert-manager for the DNS01 proof
+# and by external dns
+dns:
+  # -- Cloudflare
+  # Enabled if the domain list is not empty
+  cloudflare:
+    # The api token.
+    # `ApiToken` is now the preferred method (ApiKey is deprecated)
+    api_token:
+      # @schema
+      # required: true
+      # enum: [ 'secret', 'external-secret' ]
+      # @schema
+      # The type of secret
+      # A secret or external secret
+      # The chart is responsible for supporting them
+      type: 'secret'
+      # The api token value.
+      # (Used with the k8s secret type to create a Kubernetes secret)
+      value: ''
+      # @schema
+      # required: true
+      # minLength: 1
+      # @schema
+      # The key property (in the secret of k8s or any other provider)
+      key: 'cloudflare-api-token'
+      # Inside a key, you may have a property name (Example: vault)
+      # Used with the External Secret type
+      property: ''
+    # @schema
+    # format: hostname
+    # required: true
+    # minLength: 0
+    # @schema
+    # The dns Zones that are managed by cloudflare,
+    # Cloudflare is enabled if the list is not empty
+    dns_zones: [ ]
+
 # Cluster Auth
 auth:
+  # -- The admin user
+  #  * created as admin user in Kubernetes and other app
+  #  * added in basicAuth
   admin_user:
-    # -- The admin user
-    #  * created as admin user in Kubernetes and other app
-    #  * added in basicAuth
+    # @schema
+    # required: true
+    # minLength: 3
+    # @schema
+    # The username
     username: 'admin'
     # @schema
     # required: true
     # minLength: 1
     # @schema
-    # -- the admin password
+    # The admin password
     password: ''
     # @schema
     # required: true
     # enum: [ 'cluster-admin', 'admin' ]
     # @schema
-    # -- Kubernetes clusterRole
+    # Kubernetes clusterRole
     # * `cluster-admin` has full access
     # * `admin` does not have access to node and cluster scope related object such as ClusterRoleBinding
     cluster_role: 'cluster-admin'
@@ -39,14 +84,15 @@ auth:
     # format: email
     # minLength: 1
     # @schema
-    # -- The admin email
+    # The admin email
     # It's used by default in apps. For instance:
     # * letsencrypt registration email
     # * alert notifications: prometheus, argocd
     email: ''
 
   # -- Trusted Proxies
-  # If trusted, reverse_proxy handler will proxy and augment the sensitive X-Forwarded-* request headers.
+  # If trusted, reverse proxies handler will proxy and augment the sensitive X-Forwarded-* request headers.
+  #
   # You should set the CIDR value of:
   # * internal proxy such as traefik
   # * and external proxy such as cloudflare
@@ -57,6 +103,7 @@ auth:
 
 # Default smtp server parameters
 email:
+  # -- Smtp Configuration
   smtp:
     # @schema
     # title: Smtp host
@@ -64,7 +111,7 @@ email:
     # required: true
     # format: hostname
     # @schema
-    # -- The smtp host
+    # The smtp host
     # if the host is not empty, smtp configuration are added
     # for example for argocd email notifications
     host: ''
@@ -74,8 +121,12 @@ email:
     # type: integer
     # required: false
     # @schema
-    # -- the smtp port
-    port: ''
+    # the smtp port
+    port: 465
+    # @schema
+    # format: email
+    # required: false
+    # @schema
     # the default from
     from: ''
     # the auth connection username

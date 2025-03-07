@@ -1,5 +1,5 @@
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// Don't modify this script if you are not in the Kubee Utilities Promtheus Chart directory
+// Don't modify this script if you are not in the Kubee `prometheus/utilities` chart
 // Otherwise this file will be overwritten
 // as this is not the source
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -33,6 +33,10 @@ function(params)
   // we used folderUid
   local folderUid = std.md5('folder' + folderName);
 
+  // Resync: Reload if the dashboard or folder was deleted from grafana
+  // https://grafana.github.io/grafana-operator/docs/overview/#resyncperiod
+  // 10m by default
+  // 0m: never poll for changes in the dashboards
   local syncPeriod = '10m';
 
   // Dashboard Folder
@@ -48,10 +52,6 @@ function(params)
       // https://github.com/grafana/grafana-operator/tree/master/examples/crossnamespace
       // https://grafana.github.io/grafana-operator/docs/examples/crossnamespace/readme/
       allowCrossNamespaceImport: true,
-      // Resync: Reload if the dashboard or folder was deleted from grafana
-      // https://grafana.github.io/grafana-operator/docs/overview/#resyncperiod
-      // 10m by default
-      // 0m: never poll for changes in the dashboards
       resyncPeriod: syncPeriod,
       instanceSelector: {
         matchLabels: {
