@@ -726,17 +726,6 @@ kubee::print_chart_values(){
   # Chart Own values files
   # Should be after the dependency so that in the merge they have priorities
   local CHART_VALUES_FILE="$CHART_DIRECTORY/values.yaml"
-  if [[ "$CHART_NAME" == *"$CRD_SUFFIX" ]]; then
-      local PARENT_CHART_NAME;
-      PARENT_CHART_NAME=${CHART_NAME%"$CRD_SUFFIX"};
-      if ! PARENT_CHART_DIRECTORY=$(kubee::get_chart_directory "$PARENT_CHART_NAME"); then
-        echo::err "The parent chart ($PARENT_CHART_NAME) of the CRD chart ($PARENT_CHART_NAME) was not found"
-        echo::err "  * the cluster resources directory (${KUBEE_RESOURCE_STABLE_CHARTS_DIR}) " # the /resources/charts dir
-        echo::err "  * or the paths of the KUBEE_CHARTS_PATH variable (${KUBEE_CHARTS_PATH:-'not set'})"
-        exit 1
-      fi
-      CHART_VALUES_FILE="$PARENT_CHART_DIRECTORY/values.yaml"
-  fi
   if [ ! -f "$CHART_VALUES_FILE" ]; then
     echo::err "Values files ($CHART_VALUES_FILE) should exist"
     echo::err "Every kubee chart should have a values file to set the enabled and namespace properties"

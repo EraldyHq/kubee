@@ -7,7 +7,7 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-array.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-array.sh"
 
-
+ACTUAL_CHART_DRIVER="kubee-helmet-helm";
 
 # Package Name
 # Come first because we use it in the log, we use it in all command
@@ -16,6 +16,12 @@ if [ "$CHART_NAME" == "" ]; then
   echo::err "A chart name is mandatory"
   exit 1
 fi
+
+if [[ $CHART_NAME =~ -h|--help ]]; then
+  echo::eval "source $ACTUAL_CHART_DRIVER $*"
+  exit
+fi
+
 echo::debug "Chart Name: $CHART_NAME"
 # Remove the chart argument
 # Come after the check because it can be not given
@@ -38,7 +44,7 @@ if [ "$KUBEE_CLUSTER_NAME" != "" ]; then
   fi
 fi
 
-ACTUAL_CHART_DRIVER="kubee-helmet-helm";
+
 export CHART_TYPE="helm"
 
 export CHART_DIRECTORY

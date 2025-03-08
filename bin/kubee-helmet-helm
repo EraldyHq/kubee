@@ -14,6 +14,7 @@ $CLI_NAME command options chartName
 
 where:
 * \`command\` can be:
+  * \`crds\`                - Lists the CRD dependencies
   * \`install\`             - Install a Kubee Chart
   * \`ping\`                - Verify the connection to the cluster api
   * \`play\`                - Upgrade or install a Kubee Chart
@@ -61,32 +62,43 @@ is_helm_chart_installed() {
 
   # Check if the release exists
   # The revision may be installed in another namespace
-  if ACTUAL_NAMESPACE=$(helm list --all-namespaces --no-headers --filter "$CHART_RELEASE_NAME" | awk '{print $2}'); then
-    echo::info "Release found: $ACTUAL_NAMESPACE/$CHART_RELEASE_NAME"
-    if [ "$ACTUAL_NAMESPACE" != "" ] && [ "$ACTUAL_NAMESPACE" != "$CHART_RELEASE_NAMESPACE" ]; then
-      echo::err "The name $CHART_RELEASE_NAME was already found in the namespace ($ACTUAL_NAMESPACE) instead of the namespace $CHART_NAMESPACE"
-      exit 1
-    fi
+  if ! ACTUAL_NAMESPACE=$(helm list --all-namespaces --no-headers --filter "$CHART_RELEASE_NAME" | awk '{print $2}'); then
+    # should return empty string at least
+    echo::err "An error occurred while retrieving the namespace for the release $CHART_RELEASE_NAME"
+    exit 1
   fi
 
-  # Get the installed chart version
-  local HELM_GET_CHART_VERSION_COMMAND="helm list -n $CHART_RELEASE_NAMESPACE --filter \"^$CHART_RELEASE_NAME\$\" --output json | jq -r '.[0] | \"\(.version) \(.chart)\"'"
-  read -r CHART_RELEASE_APP_VERSION CHART_RELEASE_CHART <<< "$(echo::eval "$HELM_GET_CHART_VERSION_COMMAND")"
-  # We don't check on chart version
-  IFS="-" read -ra CHART_RELEASE_PARTS <<< "$CHART_RELEASE_CHART"
-  CHART_RELEASE_CHART_VERSION="${CHART_RELEASE_PARTS[-1]}"
-  CHART_RELEASE_CHART_NAME=$({
-   CHART_RELEASE_CHART_NAMES=("${CHART_RELEASE_PARTS[@]:0:${#CHART_RELEASE_PARTS[@]}-1}");
-   IFS='-';
-   echo "${CHART_RELEASE_CHART_NAMES[*]}"
-  })
-
-  if [[ "$CHART_RELEASE_APP_VERSION" != "$CHART_RELEASE_VERSION" ]]; then
-    echo::info "Chart app version mismatch for chart $CHART_RELEASE_CHART (Release App Version: $CHART_RELEASE_APP_VERSION. Chart App Version: $CHART_RELEASE_VERSION)"
+  if [ "$ACTUAL_NAMESPACE" == "" ]; then
+    echo::info "Release $CHART_RELEASE_NAME not found"
     return 1
   fi
 
-  echo::info "Chart $CHART_RELEASE_CHART_NAME with version $CHART_RELEASE_CHART_VERSION and app version $CHART_RELEASE_VERSION is already installed."
+  echo::info "Release found: $ACTUAL_NAMESPACE/$CHART_RELEASE_NAME"
+  if [ "$ACTUAL_NAMESPACE" != "" ] && [ "$ACTUAL_NAMESPACE" != "$CHART_RELEASE_NAMESPACE" ]; then
+    echo::err "The name $CHART_RELEASE_NAME was already found in the namespace ($ACTUAL_NAMESPACE) instead of the namespace $CHART_NAMESPACE"
+    exit 1
+  fi
+
+  # Get the installed chart version
+  # data example: [{"name":"cert-manager-crds","namespace":"cert-manager","revision":"4","updated":"2025-03-08 17:05:23.773039442 +0100 CET","status":"deployed","chart":"kubee-cert-manager-crds-1.17.1","app_version":"0.0.0"}]
+  local ACTUAL_CHART_VERSION_COMMAND="helm list -n $CHART_RELEASE_NAMESPACE --filter \"^$CHART_RELEASE_NAME\$\" --output json | jq -r '.[0] | \"\(.chart)\"'"
+  local ACTUAL_CHART_NAME
+
+  ACTUAL_CHART_NAME="$(echo::eval "$ACTUAL_CHART_VERSION_COMMAND")"
+  if [ "$ACTUAL_CHART_NAME" == "null" ]; then
+    echo::err "Internal bug: actual chart name should not be null"
+    exit 1
+  fi
+
+  # example value for ACTUAL_CHART_NAME: kubee-cert-manager-crds-1.17.1
+  # we take the last part
+  local ACTUAL_CHART_RELEASE_VERSION=${ACTUAL_CHART_NAME##*-}
+  if [[ "$ACTUAL_CHART_RELEASE_VERSION" != "$CHART_RELEASE_VERSION" ]]; then
+    echo::info "Chart app version mismatch for release $CHART_RELEASE_NAME (Actual Version: $ACTUAL_CHART_RELEASE_VERSION. Asked Version: $CHART_RELEASE_VERSION)"
+    return 1
+  fi
+
+  echo::info "Chart release $CHART_RELEASE_NAME with version $CHART_RELEASE_VERSION is already installed."
 
 
 }
@@ -108,7 +120,7 @@ apply(){
   case "$COMMAND" in
       "play")
         HELM_COMMAND+=( "upgrade" "--install" )
-        echo::info "Playing package $CHART_NAME  (ie upgrade or install if not present)"
+        echo::info "Playing chart $CHART_NAME  (ie upgrade or install if not present)"
         kubee::set_kubeconfig_env_and_check
         ;;
       "upgrade")
@@ -139,39 +151,59 @@ apply(){
         ;;
   esac
 
+  # values and namespace
+  # For all chart expected for crd chart, the values and namespace
+  # should be given
+  # Why? CRD install is driven by the parent or manually
+  # ie the namespace is at the connection level
+  # Values are not created for CRD charts
+  if [ "$IS_CRD_CHART" != "1" ]; then
+    # App executions
+    HELM_COMMAND+=("-f" "${CHART_VALUES_PATH}")
+    HELM_COMMAND+=("--namespace" "$CHART_NAMESPACE")
 
-  HELM_COMMAND+=("-f" "${CHART_VALUES_PATH}")
+    # Post renderer
+    HELM_COMMAND+=(
+      "--post-renderer" "kubee-helm-post-renderer"
+      "--post-renderer-args" "$CHART_DIRECTORY"
+      "--post-renderer-args" "$CHART_VALUES_PATH"
+      "--post-renderer-args" "$CHART_NAMESPACE"
+      "--post-renderer-args" "$CHART_OUTPUT_DIR"
+      )
 
+    # Update dependencies if they are missing in the charts dir
+    # It will create the Chart.lock
+    # HELM_COMMAND+=("--dependency-update")
 
-  HELM_COMMAND+=("--namespace" "$CHART_NAMESPACE")
+  else
+
+    # Crd executions
+    if [ "${KUBEE_CONNECTION_NAMESPACE:-}" == "" ]; then
+      echo::err "For a CRD chart the connection namespace should given"
+      return 1
+    fi
+    HELM_COMMAND+=("--namespace" "$KUBEE_CONNECTION_NAMESPACE")
+
+  fi
+
   if [[ "$COMMAND" =~ 'play'|'install' ]]; then
     # Create namespace only on install
     HELM_COMMAND+=("--create-namespace");
   fi
 
-  # Install CRD first
-  if ! install_crd_first; then
-    echo::err "An error has occurred while installing the CRD chart"
-    return 1
+
+  if [[ "$COMMAND" =~ "play"|"upgrade"|"install" ]]; then
+    # Install CRD first
+    if ! kubee_crds_function "play"; then
+        echo::err "An error has occurred while installing the CRD charts"
+        return 1
+    fi
   fi
 
   # Options ???
   if [ "${KUBEE_HELM_INSTALL_OPTIONS:-}" != "" ]; then
     HELM_COMMAND+=("${KUBEE_HELM_INSTALL_OPTIONS[@]}")
   fi
-
-  # Post renderer
-  HELM_COMMAND+=(
-    "--post-renderer" "kubee-helm-post-renderer"
-    "--post-renderer-args" "$CHART_DIRECTORY"
-    "--post-renderer-args" "$CHART_VALUES_PATH"
-    "--post-renderer-args" "$CHART_NAMESPACE"
-    "--post-renderer-args" "$CHART_OUTPUT_DIR"
-    )
-
-  # Update dependencies if they are missing in the charts dir
-  # It will create the Chart.lock
-  HELM_COMMAND+=("--dependency-update")
 
   # Debug
   if [ "${#HELM_EXTRA_FLAGS[*]}" != "0" ]; then
@@ -182,8 +214,8 @@ apply(){
   # `Error: no repository definition for https://traefik.github.io/charts. Please add the missing repos via 'helm repo add'`
   # See https://github.com/helm/helm/issues/7214
   # values.yaml file is taken by default
-  PACKAGE_RELEASE_NAME="$CHART_NAME"
-  HELM_COMMAND+=("$PACKAGE_RELEASE_NAME" "$CHART_DIRECTORY")
+  local CHART_RELEASE_NAME="$CHART_NAME"
+  HELM_COMMAND+=("$CHART_RELEASE_NAME" "$CHART_DIRECTORY")
 
 
   # Working directory is the cluster directory
@@ -273,26 +305,18 @@ ping(){
 # kubectl apply --server-side --force-conflicts -f https://github.com/grafana/grafana-operator/releases/download/v5.15.1/crds.yaml
 #```
 # If this is not a CRD chart that we install and that the CRD charts exists
-install_crd_first(){
+kubee_crds_function(){
 
+  local CRD_COMMAND=${1}
 
 
   if [ "$IS_CRD_CHART" == 1 ]; then
-    echo::debug "Package is a package Crds. No extra Crd installation needed"
+    echo::debug "Chart is a Crds chart. No Crd dependencies"
     return
   fi
 
-  if [[ ! "$COMMAND" =~ "play"|"upgrade"|"install" ]]; then
-    echo::debug "Command ($COMMAND) is not an installation command, no crds installation"
-    return
-  fi
 
   local CHART_FILE_PATH="$CHART_DIRECTORY/Chart.yaml"
-
-  local KUBE_CRDS_COMMAND;
-  # Garbage collection is disable on all command
-  # because we install just after the chart
-  local KUBEE_BASE_COMMAND="kubee -n $CHART_NAMESPACE --no-garbage-collection"
 
 
   # Crd defined in Chart.yaml ?
@@ -306,9 +330,16 @@ install_crd_first(){
 
   echo::debug "Crds chart found in Chart.yaml"
   local CHART_CRDS_CSV
-  local CHART_CRDS_COMMAND="echo \"$CHART_CRDS_YAML\" | yq -r '.[0] | [ (.name // \"\") + \",\" + (.repository // \"\") + \",\" + ( .version // \"\")] | join(\"\n\")'"
+  local CHART_CRDS_COMMAND="echo \"$CHART_CRDS_YAML\" | yq -r '.[] | [ (.name // \"\") + \",\" + (.repository // \"\") + \",\" + ( .version // \"\")] | join(\"\n\")'"
   CHART_CRDS_CSV="$(echo::eval "$CHART_CRDS_COMMAND")"
   while IFS=, read -r HELM_CHART_CRDS_NAME HELM_CHART_CRDS_REPO_URI HELM_CHART_CRDS_VERSION; do
+
+    if [ "$CRD_COMMAND" == "list" ]; then
+      echo "- name       : $HELM_CHART_CRDS_NAME"
+      echo "  repository : $HELM_CHART_CRDS_REPO_URI"
+      echo "  version    : $HELM_CHART_CRDS_VERSION"
+      continue
+    fi
 
     if [ "$HELM_CHART_CRDS_NAME" == "" ] || [ "$HELM_CHART_CRDS_NAME" == "null" ]; then
       echo::err "A name was not found in the chart $HELM_CRDS_ANNOTATIONS_ADDRESS annotations."
@@ -320,15 +351,26 @@ install_crd_first(){
       HELM_CHART_CRDS_VERSION="$CHART_APP_VERSION"
     fi
 
-    # Example name: mariadb-operator/mariadb-operator-crds
+    # Example name: mariadb-operator-crds
     # release name is then mariadb-operator-crds
+    # Example name: kubee-cert-manager-crds
+    # release name is then cert-manager-crds
     local HELM_CHART_CRDS_RELEASE_NAME=$HELM_CHART_CRDS_NAME
+    if [[ $HELM_CHART_CRDS_RELEASE_NAME == kubee-* ]]; then
+      # kubee is not part of the release name
+      HELM_CHART_CRDS_RELEASE_NAME="${HELM_CHART_CRDS_RELEASE_NAME#kubee-}"
+    fi
 
     if is_helm_chart_installed "$HELM_CHART_CRDS_RELEASE_NAME" "$CHART_NAMESPACE" "$HELM_CHART_CRDS_VERSION"; then
       echo::debug "CRD Chart Release $HELM_CHART_CRDS_RELEASE_NAME is already installed in the namespace $CHART_NAMESPACE with the appVersion $HELM_CHART_CRDS_VERSION"
       continue
     fi
 
+    ## Command executions
+    local KUBE_CRDS_COMMAND;
+    # Garbage collection is disable on all command
+    # because we install just after the chart
+    local KUBEE_BASE_COMMAND="kubee -n $CHART_NAMESPACE --no-garbage-collection"
     if [[ "$HELM_CHART_CRDS_NAME" == kubee-* ]]; then
 
       local KUBEE_NAME="${HELM_CHART_CRDS_NAME#kubee-}"
@@ -700,7 +742,9 @@ main(){
   mkdir -p "$CHART_OUTPUT_VALUES_DIR"
 
   # Values and namespace
-  if [[ ! "$COMMAND" =~ ^("update-dependencies"|"ping")$ ]]; then
+  # Not for command
+  # Not for CRD chart (namespace is given by the parent or manually)
+  if [[ ! "$COMMAND" =~ ^("update-dependencies"|"ping"|"crds")$ ]] && [ "$IS_CRD_CHART" != "1" ]; then
       # The kubee values
       # We need them to determine the namespace
       CHART_VALUES_PATH="$CHART_OUTPUT_VALUES_DIR/values.yml"
@@ -740,6 +784,9 @@ main(){
       ;;
     "update-dependencies")
       update-dependencies || error::exit $?
+      ;;
+    "crds")
+      kubee_crds_function "list" || error::exit $?
       ;;
     "values")
       # The -t test checks if the file descriptor is connected to a terminal.

@@ -31,7 +31,7 @@ annotations:
     - name: kubee-cert-manager-crds
       version: 1.17.1
       repository: file://../cert-manager-crds
-    - name: kubee/kubee-trust-manager-crds
+    - name: kubee-trust-manager-crds
       version: 0.16.0
       repository: file://../trust-manager-crds
 
