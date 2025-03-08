@@ -22,7 +22,7 @@ local values = {
   alert_manager_opsgenie_apikey: validation.getNestedPropertyOrThrow(extValues, 'opsgenie.api_key'),
   alert_manager_memory: validation.getNestedPropertyOrThrow(extValues, 'resources.memory'),
   cert_manager_enabled: validation.getNestedPropertyOrThrow(extValues, 'cert_manager.enabled'),
-  cert_manager_issuer_name: validation.getNestedPropertyOrThrow(extValues, 'cert_manager.issuer_name'),
+  cert_manager_issuer_name: validation.getNestedPropertyOrThrow(extValues, 'cert_manager.issuers.public.name'),
   prometheus_interval: validation.getNestedPropertyOrThrow(extValues, 'prometheus.scrape_interval'),
   secret_kind: validation.getNestedPropertyOrThrow(extValues, 'secret.kind'),
   external_secrets_store_name: validation.getNestedPropertyOrThrow(extValues, 'external_secrets.store.name'),

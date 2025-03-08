@@ -135,6 +135,7 @@ jsonnet_processing(){
   JSONNET_DIR="jsonnet"
   if [ ! -d "$JSONNET_DIR" ]; then
     echo::info "Jsonnet: No directory found"
+    return
   fi
   echo::info "Jsonnet: project processing"
 
@@ -155,6 +156,9 @@ jsonnet_processing(){
     fi
     if ! echo::eval "$JB_COMMAND"; then
       echo::err "Error while executing the jb command (jsonnet bundler)"
+      # We delete it otherwise we may ends up with a empty vendor
+      # directory and the jb command is never run again
+      rm -rf "$JPATH"
       exit 1
     fi
   fi
