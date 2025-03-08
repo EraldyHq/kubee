@@ -1,0 +1,3 @@
+enabled: false
+namespace: keycloak
+version: 26.1.2

@@ -1,0 +1,29 @@
+{{- if ne .Values.hostname "" -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gogs
+  namespace: {{ .Values.namespace }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    {{- if ne .Valuescert_manager.enabled false }}
+    cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuers.public.name }}'
+    {{- end }}
+spec:
+  rules:
+    - host: {{ .Values.hostname }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: gogs
+                port:
+                  number: 3000
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - {{ .Values.hostname }}
+      secretName: gogs-cert
+{{- end -}}

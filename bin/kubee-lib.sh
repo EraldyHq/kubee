@@ -450,7 +450,7 @@ kubee::set_env(){
   # This is a global constant because it's used by the kubee-cluster and kubee-helmet command as a cluster is also a chart
   SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
   export KUBEE_RESOURCE_STABLE_CHARTS_DIR
-  KUBEE_RESOURCE_STABLE_CHARTS_DIR=$(realpath "$SCRIPT_DIR/../resources/charts/stable")
+  KUBEE_RESOURCE_STABLE_CHARTS_DIR=$(realpath "$SCRIPT_DIR/../charts")
 
   # The cluster
   KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}

@@ -42,14 +42,22 @@ fi
 #     Return if the chart is already installed
 # @args $1 - the release name
 # @args $2 - the release namespace
-# @args $3 - the chart app version that should be installed
-# @exitcode 1 - if the chart is not installed or with another app version
+# @args $3 - the release version that should be installed
+# @exitcode 1 - if the chart is not installed or with another app version or any fatal error
 is_helm_chart_installed() {
 
   local CHART_RELEASE_NAME="$1"
   local CHART_RELEASE_NAMESPACE="$2"
-  local CHART_APP_VERSION="$3"
+  # not the app version
+  # Why? On external helm chart, it may be null
+  # NAME                    NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                           APP VERSION
+  # mariadb-operator-crds   mariadb         1               2025-03-08 12:34:19.800138202 +0100 CET deployed        mariadb-operator-crds-0.37.1    0.0.0
+  local CHART_RELEASE_VERSION="$3"
 
+  if [ "$CHART_RELEASE_NAME" == "" ]; then
+    echo::err "Internal: the release name should not be empty"
+    exit 1
+  fi
 
   # Check if the release exists
   # The revision may be installed in another namespace
@@ -62,7 +70,8 @@ is_helm_chart_installed() {
   fi
 
   # Get the installed chart version
-  read -r CHART_RELEASE_APP_VERSION CHART_RELEASE_CHART <<< "$(helm list -n "$CHART_RELEASE_NAMESPACE" --filter "^$CHART_RELEASE_NAME\$" --output json | jq -r '.[0] | "\(.app_version) \(.chart)"')"
+  local HELM_GET_CHART_VERSION_COMMAND="helm list -n $CHART_RELEASE_NAMESPACE --filter \"^$CHART_RELEASE_NAME\$\" --output json | jq -r '.[0] | \"\(.version) \(.chart)\"'"
+  read -r CHART_RELEASE_APP_VERSION CHART_RELEASE_CHART <<< "$(echo::eval "$HELM_GET_CHART_VERSION_COMMAND")"
   # We don't check on chart version
   IFS="-" read -ra CHART_RELEASE_PARTS <<< "$CHART_RELEASE_CHART"
   CHART_RELEASE_CHART_VERSION="${CHART_RELEASE_PARTS[-1]}"
@@ -72,12 +81,12 @@ is_helm_chart_installed() {
    echo "${CHART_RELEASE_CHART_NAMES[*]}"
   })
 
-  if [[ "$CHART_RELEASE_APP_VERSION" != "$CHART_APP_VERSION" ]]; then
-    echo::info "Chart app version mismatch for chart $CHART_RELEASE_CHART (Release App Version: $CHART_RELEASE_APP_VERSION. Chart App Version: $CHART_APP_VERSION)"
+  if [[ "$CHART_RELEASE_APP_VERSION" != "$CHART_RELEASE_VERSION" ]]; then
+    echo::info "Chart app version mismatch for chart $CHART_RELEASE_CHART (Release App Version: $CHART_RELEASE_APP_VERSION. Chart App Version: $CHART_RELEASE_VERSION)"
     return 1
   fi
 
-  echo::info "Chart $CHART_RELEASE_CHART_NAME with version $CHART_RELEASE_CHART_VERSION and app version $CHART_APP_VERSION is already installed."
+  echo::info "Chart $CHART_RELEASE_CHART_NAME with version $CHART_RELEASE_CHART_VERSION and app version $CHART_RELEASE_VERSION is already installed."
 
 
 }
@@ -278,75 +287,78 @@ install_crd_first(){
     return
   fi
 
-  local KUBEE_PACKAGE_CRDS_NAME;
-  local TYPE_CRD_CHART;
-  local KUBEE_CRD_RELEASE_NAME="$CHART_NAME$CRD_SUFFIX";
   local CHART_FILE_PATH="$CHART_DIRECTORY/Chart.yaml"
-
-  # Crd defined in Chart.yaml ?
-  local CHART_CRDS_CHART_NAME;
-  CHART_CRDS_CHART_NAME=$(echo::eval "yq '.annotations.kubee/crds-chart-name' $CHART_FILE_PATH")
-  if [ "$CHART_CRDS_CHART_NAME" != "null" ] && [ "$CHART_CRDS_CHART_NAME" != "" ]; then
-
-    echo::debug "Crds chart name $CHART_CRDS_CHART_NAME found in Chart.yaml"
-    TYPE_CRD_CHART="external"
-    KUBEE_PACKAGE_CRDS_NAME="$CHART_CRDS_CHART_NAME"
-    local CHART_CRDS_REPO_URI
-    CHART_CRDS_REPO_URI=$(echo::eval "yq '.annotations.kubee/crds-chart-repo' $CHART_FILE_PATH")
-    if [ "$CHART_CRDS_REPO_URI" == "null" ] && [ "$CHART_CRDS_REPO_URI" == "" ]; then
-      echo:err "The Chart.yaml annotations kubee/crds-chart-repo was not found."
-      echo:err "It's mandatory when using an external crds chart such as $CHART_CRDS_CHART_NAME"
-      return
-    fi
-
-  else
-
-    echo::debug "No Crds chart annotation name found in Chart.yaml"
-
-    # Kubee Crd Chart?
-    KUBEE_PACKAGE_CRDS_NAME="$CHART_NAME$CRD_SUFFIX"
-    if ! PACKAGE_CRDS_DIRECTORY=$(kubee::get_chart_directory "$KUBEE_PACKAGE_CRDS_NAME"); then
-      echo::debug "No CRD Chart directory for package $CHART_NAME found with the name $KUBEE_PACKAGE_CRDS_NAME"
-      return
-    fi
-    echo::debug "Chart Crds $KUBEE_PACKAGE_CRDS_NAME found (Directory : $PACKAGE_CRDS_DIRECTORY)"
-    TYPE_CRD_CHART="kubee"
-
-  fi
-
-  # CRD/Dependency version
-  local CHART_APP_VERSION
-  CHART_APP_VERSION=$(yq '.appVersion' "$CHART_DIRECTORY/Chart.yaml")
-
-  if is_helm_chart_installed "$KUBEE_CRD_RELEASE_NAME" "$CHART_NAMESPACE" "$CHART_APP_VERSION"; then
-    echo::debug "CRD Chart Release $KUBEE_CRD_RELEASE_NAME is already installed in the namespace $CHART_NAMESPACE with the appVersion $CHART_APP_VERSION"
-    return
-  fi
 
   local KUBE_CRDS_COMMAND;
   # Garbage collection is disable on all command
   # because we install just after the chart
   local KUBEE_BASE_COMMAND="kubee -n $CHART_NAMESPACE --no-garbage-collection"
-  case "$TYPE_CRD_CHART" in
-      "kubee")
-        # We don't use helm directly as we have now CRD charts that are only with Jsonnet
-        KUBE_CRDS_COMMAND="$KUBEE_BASE_COMMAND helmet play $KUBEE_PACKAGE_CRDS_NAME"
-        ;;
-      "external")
-        # The repo should be present
-        local KUBEE_CRD_REPO_NAME="${KUBEE_PACKAGE_CRDS_NAME%%/*}"
-        echo::eval "helm repo add $KUBEE_CRD_REPO_NAME $CHART_CRDS_REPO_URI"
-        KUBE_CRDS_COMMAND="$KUBEE_BASE_COMMAND helm upgrade $KUBEE_CRD_RELEASE_NAME $KUBEE_PACKAGE_CRDS_NAME --version $CHART_APP_VERSION --install -n $CHART_NAMESPACE"
-        ;;
-      *)
-        echo::err "Internal error, crd chart type $TYPE_CRD_CHART is unknown"
-        ;;
-  esac
 
-  echo::info "Installing $TYPE_CRD_CHART CRD Chart $KUBEE_PACKAGE_CRDS_NAME in namespace $CHART_NAMESPACE"
-  if ! echo::eval "$KUBE_CRDS_COMMAND"; then
-    return 1
+
+  # Crd defined in Chart.yaml ?
+  local CHART_CRDS_YAML;
+  local HELM_CRDS_ANNOTATIONS_ADDRESS='.annotations.kubee/crds'
+  CHART_CRDS_YAML=$(echo::eval "yq '$HELM_CRDS_ANNOTATIONS_ADDRESS' $CHART_FILE_PATH")
+  if [ "$CHART_CRDS_YAML" == "null" ] || [ "$CHART_CRDS_YAML" == "" ]; then
+    echo::debug "No Crds dependency"
+    return
   fi
+
+  echo::debug "Crds chart found in Chart.yaml"
+  local CHART_CRDS_CSV
+  local CHART_CRDS_COMMAND="echo \"$CHART_CRDS_YAML\" | yq -r '.[0] | [ (.name // \"\") + \",\" + (.repository // \"\") + \",\" + ( .version // \"\")] | join(\"\n\")'"
+  CHART_CRDS_CSV="$(echo::eval "$CHART_CRDS_COMMAND")"
+  while IFS=, read -r HELM_CHART_CRDS_NAME HELM_CHART_CRDS_REPO_URI HELM_CHART_CRDS_VERSION; do
+
+    if [ "$HELM_CHART_CRDS_NAME" == "" ] || [ "$HELM_CHART_CRDS_NAME" == "null" ]; then
+      echo::err "A name was not found in the chart $HELM_CRDS_ANNOTATIONS_ADDRESS annotations."
+      echo::err "It's mandatory when using an helm crds chart"
+      return 1
+    fi
+
+    if [ "$HELM_CHART_CRDS_VERSION" == "" ] || [ "$HELM_CHART_CRDS_VERSION" == "null" ]; then
+      HELM_CHART_CRDS_VERSION="$CHART_APP_VERSION"
+    fi
+
+    # Example name: mariadb-operator/mariadb-operator-crds
+    # release name is then mariadb-operator-crds
+    local HELM_CHART_CRDS_RELEASE_NAME=$HELM_CHART_CRDS_NAME
+
+    if is_helm_chart_installed "$HELM_CHART_CRDS_RELEASE_NAME" "$CHART_NAMESPACE" "$HELM_CHART_CRDS_VERSION"; then
+      echo::debug "CRD Chart Release $HELM_CHART_CRDS_RELEASE_NAME is already installed in the namespace $CHART_NAMESPACE with the appVersion $HELM_CHART_CRDS_VERSION"
+      continue
+    fi
+
+    if [[ "$HELM_CHART_CRDS_NAME" == kubee-* ]]; then
+
+      local KUBEE_NAME="${HELM_CHART_CRDS_NAME#kubee-}"
+      # We don't use helm as command directly as we have now CRD charts that are only with Jsonnet
+      KUBE_CRDS_COMMAND="$KUBEE_BASE_COMMAND helmet play $KUBEE_NAME"
+      echo::info "Installing kubee CRD Chart $KUBEE_NAME in namespace $CHART_NAMESPACE"
+      if ! echo::eval "$KUBE_CRDS_COMMAND"; then
+        return 1
+      fi
+      continue
+
+    fi
+
+    # this is an external chart (not kubee)
+    if [ "$HELM_CHART_CRDS_REPO_URI" == "null" ] && [ "$HELM_CHART_CRDS_REPO_URI" == "" ]; then
+      echo::err "The crd repo annotations was not found in the chart $HELM_CRDS_ANNOTATIONS_ADDRESS annotations."
+      echo::err "It's mandatory when using an helm crds chart"
+      return 1
+    fi
+
+
+    # Upgrade / install
+    local KUBE_CRDS_COMMAND="$KUBEE_BASE_COMMAND helm upgrade $HELM_CHART_CRDS_RELEASE_NAME $HELM_CHART_CRDS_NAME --version $HELM_CHART_CRDS_VERSION --repo $HELM_CHART_CRDS_REPO_URI --install -n $CHART_NAMESPACE"
+    echo::info "Installing helm CRD Chart $HELM_CHART_CRDS_RELEASE_NAME in namespace $CHART_NAMESPACE"
+    if ! echo::eval "$KUBE_CRDS_COMMAND"; then
+      return 1
+    fi
+
+  done <<< "$CHART_CRDS_CSV"
+
 
 }
 

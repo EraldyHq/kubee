@@ -1,0 +1,23 @@
+version: '3'
+
+tasks:
+  # Generate the values.schema.json
+  schema:
+    cmds:
+      - helm schema --helm-docs-compatibility-mode -k additionalProperties
+  # Generate the docs
+  docs:
+    cmds:
+      - helm-docs
+  # Output the template in the out directory
+  tpl:
+    cmds:
+      - kubee helmet template --out cert-manager
+  play:
+    cmds:
+      - kubee helmet play cert-manager
+  # recreate the /charts directory
+  dep-force:
+    cmds:
+      - kubee helmet update-dependencies -f cert-manager
+

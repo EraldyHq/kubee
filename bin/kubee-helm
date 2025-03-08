@@ -35,4 +35,4 @@ done
 
 
 kubee::set_kubeconfig_env
-helm "${args[@]}"
+echo::eval "helm ${args[*]}"
