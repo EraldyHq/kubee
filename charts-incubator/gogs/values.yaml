@@ -1,6 +1,0 @@
-# Temporary
-kubee:
-  gogs:
-    enabled: false
-    namespace: gogs
-    hostname: ''
