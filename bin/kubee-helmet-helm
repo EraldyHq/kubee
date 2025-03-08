@@ -157,10 +157,10 @@ apply(){
   # Why? CRD install is driven by the parent or manually
   # ie the namespace is at the connection level
   # Values are not created for CRD charts
-  if [ "$IS_CRD_CHART" != "1" ]; then
+  if [ "$CHART_TYPE" != "crds" ]; then
+
     # App executions
     HELM_COMMAND+=("-f" "${CHART_VALUES_PATH}")
-    HELM_COMMAND+=("--namespace" "$CHART_NAMESPACE")
 
     # Post renderer
     HELM_COMMAND+=(
@@ -175,16 +175,11 @@ apply(){
     # It will create the Chart.lock
     # HELM_COMMAND+=("--dependency-update")
 
-  else
-
-    # Crd executions
-    if [ "${KUBEE_CONNECTION_NAMESPACE:-}" == "" ]; then
-      echo::err "For a CRD chart the connection namespace should given"
-      return 1
-    fi
-    HELM_COMMAND+=("--namespace" "$KUBEE_CONNECTION_NAMESPACE")
-
   fi
+
+
+  HELM_COMMAND+=("--namespace" "$CHART_NAMESPACE")
+
 
   if [[ "$COMMAND" =~ 'play'|'install' ]]; then
     # Create namespace only on install
@@ -272,7 +267,7 @@ apply(){
   # Can we Wait with that?
   # kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator
   #
-  if [ "$IS_CRD_CHART" == 1 ]; then
+  if [ "$CHART_TYPE" == "crds" ]; then
     echo::info "Waiting until all CRD are established in the namespace $CHART_NAMESPACE"
     kubectl wait \
       --for condition=Established \
@@ -310,8 +305,8 @@ kubee_crds_function(){
   local CRD_COMMAND=${1}
 
 
-  if [ "$IS_CRD_CHART" == 1 ]; then
-    echo::debug "Chart is a Crds chart. No Crd dependencies"
+  if [ "$CHART_TYPE" != "app" ]; then
+    echo::debug "Chart is not an app chart. No Crd dependencies"
     return
   fi
 
@@ -585,16 +580,6 @@ uninstall(){
 
 main(){
 
-  # CRD
-  IS_CRD_CHART=0
-  # glob match
-  if [[ $CHART_NAME == *"$CRD_SUFFIX" ]]; then
-    echo::debug "This is a CRD chart"
-    IS_CRD_CHART=1
-  else
-    echo::debug "This is not a CRD chart"
-  fi
-
 
   ##########################
   ## Collect the options
@@ -744,7 +729,7 @@ main(){
   # Values and namespace
   # Not for command
   # Not for CRD chart (namespace is given by the parent or manually)
-  if [[ ! "$COMMAND" =~ ^("update-dependencies"|"ping"|"crds")$ ]] && [ "$IS_CRD_CHART" != "1" ]; then
+  if [[ ! "$COMMAND" =~ ^("update-dependencies"|"ping"|"crds")$ ]] && [ "$CHART_TYPE" != "crds" ]; then
       # The kubee values
       # We need them to determine the namespace
       CHART_VALUES_PATH="$CHART_OUTPUT_VALUES_DIR/values.yml"
@@ -753,20 +738,31 @@ main(){
         exit 1
       fi
 
-      # Chart Namespace
-      if [ "$CHART_TYPE" == "driver" ]; then
-        CHART_NAMESPACE="default"
-        echo::info "Default Namespace ($CHART_NAMESPACE)"
-      else
-        VALUES_NAMESPACE_PATH=".namespace"
-        CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$CHART_VALUES_PATH")
-        if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
-          echo::err "No namespace found at path $VALUES_NAMESPACE_PATH on the file $CHART_VALUES_PATH"
-          exit 1
-        fi
-        echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
-      fi
   fi
+
+  # Chart Namespace
+  case "$CHART_TYPE" in
+    "driver")
+      CHART_NAMESPACE="default"
+      echo::info "Default Namespace ($CHART_NAMESPACE)"
+    ;;
+    "crds")
+      # Crd executions
+      if [ "${KUBEE_CONNECTION_NAMESPACE:-}" == "" ]; then
+        echo::err "For a CRD chart the connection namespace should given"
+        return 1
+      fi
+      CHART_NAMESPACE="$KUBEE_CONNECTION_NAMESPACE"
+    ;;
+    *)
+      VALUES_NAMESPACE_PATH=".namespace"
+      CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$CHART_VALUES_PATH")
+      if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
+        echo::err "No namespace found at path $VALUES_NAMESPACE_PATH on the file $CHART_VALUES_PATH"
+        exit 1
+      fi
+      echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
+  esac
 
 
   case "$COMMAND" in

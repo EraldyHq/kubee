@@ -24,8 +24,15 @@ Extracts the CRDS
 ## Script
 
 ```bash
-for object_name in $(kubee -c beau kubectl get crd -o name | grep cert-manager.io); do
+for object_name in $(kubee kubectl get crd -o name | grep cert-manager.io); do
   echo "Patching $object_name"
-  kubee -c beau kubectl patch "$object_name" --type=merge   -p '{"metadata": { "annotations": {"meta.helm.sh/release-name": "cert-manager-crds"}}}'
+  kubee kubectl patch "$object_name" --type=merge   -p '{"metadata": { "annotations": {"meta.helm.sh/release-name": "cert-manager-crds"}}}'
+done
+```
+
+```bash
+for object_name in $(kubee kubectl get crd -o name | grep trust.cert-manager.io); do
+  echo "Patching $object_name"
+  kubee kubectl patch "$object_name" --type=merge   -p '{"metadata": { "annotations": {"meta.helm.sh/release-name": "trust-manager-crds"}}}'
 done
 ```

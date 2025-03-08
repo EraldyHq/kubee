@@ -45,7 +45,11 @@ if [ "$KUBEE_CLUSTER_NAME" != "" ]; then
 fi
 
 
-export CHART_TYPE="helm"
+export CHART_TYPE="app"
+if [[ $CHART_NAME == *"$CRD_SUFFIX" ]]; then
+  echo::debug "This is a CRD chart"
+  CHART_TYPE="crds"
+fi
 
 export CHART_DIRECTORY
 if ! CHART_DIRECTORY=$(kubee::get_chart_directory "$CHART_NAME"); then
