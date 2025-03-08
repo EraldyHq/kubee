@@ -21,6 +21,15 @@ version: 0.0.1
 appVersion: "v5.16.0" # Grafana Operator version, should be the same in grafana-crds
 # Grafana Version, click on the icon help in the Grafana UI)
 
+annotations:
+  app.kubernetes.io/name: "grafana"
+  artifacthub.io/operator: "true"
+  kubee/crds: |
+    - name: kubee-grafana-crds
+      version: 5.16.0
+      repository: file://../grafana-crds
+
+
 dependencies:
   # ie https://github.com/grafana/grafana-operator/pkgs/container/helm-charts%2Fgrafana-operator
   # https://github.com/grafana/grafana-operator/releases

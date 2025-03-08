@@ -1,0 +1,21 @@
+{{- /*
+  Command line configuration
+  Command line argument
+  https://argo-cd.readthedocs.io/en/stable/operator-manual/argocd-cmd-params-cm-yaml/
+  You can also see them in the deployment manifest of each server
+  https://raw.githubusercontent.com/argoproj/argo-cd/v2.11.7/manifests/install.yaml
+*/}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cmd-params-cm
+  labels:
+    app.kubernetes.io/name: argocd-cmd-params-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  {{- /* Prometheus's metrics cache expiration (disabled  by default. e.g. 24h0m0s) */}}
+  controller.metrics.cache.expiration: '{{ .Values.conf.controller_metrics_cache_expiration }}'
+  {{- /* Argo Cd Controller CPU Parallelism */}}
+  controller.kubectl.parallelism.limit: '{{ .Values.conf.controller_kubectl_parallelism_limit }}'
+  {{- /*  ArgoCd Controller Parallelism */}}
+  reposerver.parallelism.limit: '{{ .Values.conf.reposerver_parallelism_limit }}'

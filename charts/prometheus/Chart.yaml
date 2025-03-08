@@ -24,6 +24,16 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # https://github.com/prometheus-operator/prometheus-operator/releases
 appVersion: "v0.79.2" # The version of prometheus operator (should be the same on crds)
 
+annotations:
+  # Used to download the library with kube-prometheus-downloader-helper
+  # https://github.com/prometheus-operator/kube-prometheus/releases
+  kube-prometheus/version: "0.14.0"
+  app.kubernetes.io/name: "prometheus"
+  kubee/crds: |
+    - name: kubee-prometheus-crds
+      version: 0.79.2
+      repository: file://../prometheus-crds
+
 # The dependencies
 dependencies:
   - name: kubee-cluster
@@ -60,7 +70,4 @@ dependencies:
     alias: traefik
     condition: kubee_internal.install_cross_dependency
 
-# Used to download the library with kube-prometheus-downloader-helper
-# https://github.com/prometheus-operator/kube-prometheus/releases
-annotations:
-  kube-prometheus/version: "0.14.0"
+

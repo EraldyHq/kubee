@@ -1,0 +1,8 @@
+# This transport is applied on the service via svc-no-tls-patch
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: noverifytls
+{{/*  namespace: {{ .Values.namespace }}*/}}
+spec:
+  insecureSkipVerify: true

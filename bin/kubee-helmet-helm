@@ -162,19 +162,24 @@ apply(){
     # App executions
     HELM_COMMAND+=("-f" "${CHART_VALUES_PATH}")
 
-    # Post renderer
-    HELM_COMMAND+=(
-      "--post-renderer" "kubee-helm-post-renderer"
-      "--post-renderer-args" "$CHART_DIRECTORY"
-      "--post-renderer-args" "$CHART_VALUES_PATH"
-      "--post-renderer-args" "$CHART_NAMESPACE"
-      "--post-renderer-args" "$CHART_OUTPUT_DIR"
-      )
-
     # Update dependencies if they are missing in the charts dir
     # It will create the Chart.lock
     # HELM_COMMAND+=("--dependency-update")
 
+  fi
+
+  # Post renderer
+
+  HELM_COMMAND+=(
+    "--post-renderer" "kubee-helm-post-renderer"
+    "--post-renderer-args" "--chart-dir=$CHART_DIRECTORY"
+    "--post-renderer-args" "--chart-namespace=$CHART_NAMESPACE"
+    "--post-renderer-args" "--chart-output-dir=$CHART_OUTPUT_DIR"
+    )
+  # We have jsonnet only CRD
+  # crd do not have any values file but we bash we can't pass empty
+  if [ "$CHART_TYPE" != "crds" ]; then
+      HELM_COMMAND+=("--post-renderer-args" "--chart-values-path=$CHART_VALUES_PATH")
   fi
 
 
@@ -224,13 +229,13 @@ apply(){
   # Redirect the error to capture it
   # We don't redirect to stdout because Helm put it also warning (ie without failing the command)
   # The output is then no more yaml compliant
-  # Example: walk.go:75: found symbolic link in path: /home/admin/code/kubee/resources/charts/mailu/charts/kubee-cluster resolves to /home/admin/code/kubee/resources/charts/cluster. Contents of linked file included and used
+  # Example: walk.go:75: found symbolic link in path: /home/admin/code/kubee/charts/mailu/charts/kubee-cluster resolves to /home/admin/code/kubee/resources/charts/cluster. Contents of linked file included and used
   local STDERR_FD="$KUBEE_RUNTIME_DIR"/helm_stderr.log
   rm -rf "$STDERR_FD"
   if ! HELM_OUTPUT=$(echo::eval "${HELM_COMMAND[*]}" "$STDERR_FD"); then
     echo::err "An error occurs during the command $COMMAND."
     echo::err "Output:"
-    echo::err "$(cat $STDERR_FD)"
+    echo::err "$(cat "$STDERR_FD")"
     return 1
   fi
 
@@ -267,7 +272,7 @@ apply(){
   # Can we Wait with that?
   # kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator
   #
-  if [ "$CHART_TYPE" == "crds" ]; then
+  if [ "$CHART_TYPE" == "crds" ] && [[ "$COMMAND" =~ "play"|"upgrade"|"install" ]]; then
     echo::info "Waiting until all CRD are established in the namespace $CHART_NAMESPACE"
     kubectl wait \
       --for condition=Established \
@@ -526,37 +531,46 @@ update-dependencies(){
             echo::eval "rm -rf $DEPENDENCY_DIR_PATH_IN_CHARTS"
           fi
 
-          # Get the url
-          # the url is the oci one
-          local DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_CHART_NAME";
-          # for https, there is a little bit more work
-          if [ "$DEPENDENCY_CHART_SCHEME" == "https" ]; then
-            echo::info "$DEPENDENCY_CHART_NAME: Fetching $DEPENDENCY_CHART_SCHEME dependency $DEPENDENCY_CHART_NAME"
-            local REGISTRY_INDEX_YAML="$DEPENDENCY_CHART_REPOSITORY/index.yaml"
-            local DEPENDENCY_YAML_URL
-            if ! DEPENDENCY_YAML_URL=$(echo::eval "curl --location -s $REGISTRY_INDEX_YAML | yq '.entries[\"$DEPENDENCY_CHART_NAME\"][] | select(.version == \"$DEPENDENCY_CHART_VERSION\") | .urls[0]'"); then
-              echo::err "Error while retrieving the download url of the dependency char $DEPENDENCY_CHART_NAME"
-              return 1
-            fi
-            if [ "$DEPENDENCY_YAML_URL" == "" ] || [ "$DEPENDENCY_YAML_URL" == "null" ]; then
-              echo::err "No Url could be found to download $DEPENDENCY_CHART_NAME / $DEPENDENCY_CHART_VERSION in the index.yaml file ($REGISTRY_INDEX_YAML)"
-              return 1
-            fi
-            local DEPENDENCY_YAML_URL_SCHEME="${DEPENDENCY_YAML_URL%%:*}"
-            case "$DEPENDENCY_YAML_URL_SCHEME" in
-              "https"|"http"|"oci")
-                DEPENDENCY_FULL_URL="$DEPENDENCY_YAML_URL";
-                ;;
-              *)
-                # No scheme, relative url
-                DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_YAML_URL";
-                ;;
-            esac
+          local HELM_PULL_COMMAND=("helm" "pull" "-d" "$CHART_CHARTS_DIRECTORY" "--untar")
 
-          fi
+          case "$DEPENDENCY_CHART_SCHEME" in
+            "https")
+              # for https, there is a little bit more work
+              echo::info "$DEPENDENCY_CHART_NAME: Fetching $DEPENDENCY_CHART_SCHEME dependency $DEPENDENCY_CHART_NAME"
+              local REGISTRY_INDEX_YAML="$DEPENDENCY_CHART_REPOSITORY/index.yaml"
+              local DEPENDENCY_YAML_URL
+              if ! DEPENDENCY_YAML_URL=$(echo::eval "curl --location -s $REGISTRY_INDEX_YAML | yq '.entries[\"$DEPENDENCY_CHART_NAME\"][] | select(.version == \"$DEPENDENCY_CHART_VERSION\") | .urls[0]'"); then
+                echo::err "Error while retrieving the download url of the dependency char $DEPENDENCY_CHART_NAME"
+                return 1
+              fi
+              if [ "$DEPENDENCY_YAML_URL" == "" ] || [ "$DEPENDENCY_YAML_URL" == "null" ]; then
+                echo::err "No Url could be found to download $DEPENDENCY_CHART_NAME / $DEPENDENCY_CHART_VERSION in the index.yaml file ($REGISTRY_INDEX_YAML)"
+                return 1
+              fi
+              local DEPENDENCY_YAML_URL_SCHEME="${DEPENDENCY_YAML_URL%%:*}"
+              case "$DEPENDENCY_YAML_URL_SCHEME" in
+                "https"|"http"|"oci")
+                  DEPENDENCY_FULL_URL="$DEPENDENCY_YAML_URL";
+                  ;;
+                *)
+                  # No scheme, relative url
+                  DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_YAML_URL";
+                  ;;
+              esac
+              HELM_PULL_COMMAND+=("$DEPENDENCY_FULL_URL")
+              ;;
+            "oci")
+              DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_CHART_NAME";
+              HELM_PULL_COMMAND+=("$DEPENDENCY_FULL_URL")
+              HELM_PULL_COMMAND+=("--version" "$DEPENDENCY_CHART_VERSION")
+              ;;
+            *)
+              echo::err "Dependency scheme unknown: $DEPENDENCY_CHART_SCHEME"
+              return 1
+          esac
 
           # Pull
-          if ! echo::eval "helm pull $DEPENDENCY_FULL_URL -d $CHART_CHARTS_DIRECTORY --untar"; then
+          if ! echo::eval "${HELM_PULL_COMMAND[*]}"; then
             echo::err "Error while pulling $DEPENDENCY_CHART_NAME"
             return 1
           fi
@@ -729,7 +743,11 @@ main(){
   # Values and namespace
   # Not for command
   # Not for CRD chart (namespace is given by the parent or manually)
-  if [[ ! "$COMMAND" =~ ^("update-dependencies"|"ping"|"crds")$ ]] && [ "$CHART_TYPE" != "crds" ]; then
+  local IS_VALUES_FILE_COMMAND=1
+  if [[ "$COMMAND" =~ ^("update-dependencies"|"ping"|"crds")$ ]]; then
+    IS_VALUES_FILE_COMMAND=0
+  fi
+  if [ "$IS_VALUES_FILE_COMMAND" == "1" ] && [ "$CHART_TYPE" != "crds" ]; then
       # The kubee values
       # We need them to determine the namespace
       CHART_VALUES_PATH="$CHART_OUTPUT_VALUES_DIR/values.yml"
@@ -755,13 +773,17 @@ main(){
       CHART_NAMESPACE="$KUBEE_CONNECTION_NAMESPACE"
     ;;
     *)
-      VALUES_NAMESPACE_PATH=".namespace"
-      CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$CHART_VALUES_PATH")
-      if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
-        echo::err "No namespace found at path $VALUES_NAMESPACE_PATH on the file $CHART_VALUES_PATH"
-        exit 1
+      if [ "$IS_VALUES_FILE_COMMAND" == "1" ]; then
+        VALUES_NAMESPACE_PATH=".namespace"
+        CHART_NAMESPACE=$(yq "$VALUES_NAMESPACE_PATH" "$CHART_VALUES_PATH")
+        if [ "$CHART_NAMESPACE" == "null" ] || [ "$CHART_NAMESPACE" == "" ]; then
+          echo::err "No namespace found at path $VALUES_NAMESPACE_PATH on the file $CHART_VALUES_PATH"
+          exit 1
+        fi
+        echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
+      else
+        CHART_NAMESPACE="$KUBEE_CONNECTION_NAMESPACE"
       fi
-      echo::info "Namespace ($CHART_NAMESPACE) found in the values file at $VALUES_NAMESPACE_PATH"
   esac
 
 

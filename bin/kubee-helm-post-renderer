@@ -213,17 +213,25 @@ jsonnet_processing(){
           # Closing
           POST_PROCESSING="$POST_PROCESSING'"
 
-          # Ext-code args is due Bug
-          # If a values has 3 ---,
-          # such as in -----BEGIN PRIVATE KEY-----,
-          # std.parseYaml will create an array
-          # https://github.com/google/go-jsonnet/issues/793
+          # The command
+          local JSONNET_COMMAND;
+          JSONNET_COMMAND=("jsonnet" "-J" "$JPATH" "--multi" "$JSONNET_OUTPUT_DIR" )
+
+          # Values files
+          # It may be empty for jsonnet crds
+          if [ "${KUBEE_VALUES_FILE:-}" != "" ]; then
+            # Ext-code args is due Bug
+            # If a values has 3 ---,
+            # such as in -----BEGIN PRIVATE KEY-----,
+            # std.parseYaml will create an array
+            # The ext-code check if it's an array, it takes the first element
+            # https://github.com/google/go-jsonnet/issues/793
+            JSONNET_COMMAND+=("--ext-code" "'values=(local valuesFile=std.parseYaml(importstr \"$KUBEE_VALUES_FILE\"); if std.isArray(valuesFile) && std.length(valuesFile) > 0 then valuesFile[0] else valuesFile)'")
+          fi
+
+          JSONNET_COMMAND+=("$JSONNET_FILE | $POST_PROCESSING")
           if ! JSONNET_MANIFEST=$(
-            echo::eval "jsonnet -J $JPATH \
-            --multi $JSONNET_OUTPUT_DIR \
-            --ext-code 'values=(local valuesFile=std.parseYaml(importstr \"$KUBEE_VALUES_FILE\"); if std.isArray(valuesFile) && std.length(valuesFile) > 0 then valuesFile[0] else valuesFile)' \
-            $JSONNET_FILE \
-            | $POST_PROCESSING"
+            echo::eval "${JSONNET_COMMAND[*]}"
           ); then
             echo::err "$JSONNET_MANIFEST"
             exit 1
@@ -252,15 +260,15 @@ synopsis(){
   cat <<EOF
 A post renderer to integrate \`kustomize\` and \`jsonnet\`
 \`\`\`bash
-$(basename "$0") appDirectory valuesPath namespace output_dir
+$(basename "$0") --chart-dir=chartDirectory --chart-values-path=valuesPath --chart-namespace=namespace --chart-output-dir=output_dir
 \`\`\`
 
 where:
 
-* \`KUBEE_CHART_DIRECTORY\` is the directory of the app to install
-* \`KUBEE_VALUES_FILE\` is the path to the values file
-* \`NAMESPACE\` is the installation namespace
-* \`OUTPUT_DIR\` is the output dir (Helm)
+* \`--chart-dir\`          : [Mandatory] the directory of the app to install
+* \`--chart-values-path\`  : [Optional]  the path to the values file (optional as its not mandatory for jsonnet crds chart)
+* \`--chart-namespace\`    : [Mandatory] the installation namespace
+* \`--chart-output-dir\`   : [Mandatory] the output dir (Helm)
 
 Note: Helm:
 * pass the templates output via stdin
@@ -268,43 +276,80 @@ Note: Helm:
 EOF
 }
 
-
-KUBEE_CHART_DIRECTORY="${1:-}"
-
-if [[ "$KUBEE_CHART_DIRECTORY" =~ "synopsis"|"help" ]]; then
+if [[ "$1" =~ "synopsis"|"help" ]]; then
   exec 1>&3 # Restore stdout because we want the synopsis output to stdout
   exec 3>&- # Close the saved descriptor
   synopsis > /dev/stdout
   exit 0
 fi
 
-if [ ! -d "$KUBEE_CHART_DIRECTORY" ]; then
-  echo::err "Internal Error: the first argument KUBEE_CHART_DIRECTORY ($KUBEE_CHART_DIRECTORY) is not a valid directory"
+# Parsing
+args=$(getopt -l "chart-output-dir:,chart-dir:,chart-namespace:,chart-values-path:,help" -o "h" -- "$@")
+# eval set to set the positional arguments back to $args
+eval set -- "$args"
+
+while [[ $# -gt 0 ]]; do
+   case $1 in
+    "--chart-output-dir")
+      shift
+      # Output
+      # The output dir is mandatory for Jsonnet or Kustomize processing
+      KUBEE_OUTPUT_DIR="$1"
+      ;;
+    "--chart-dir")
+      shift
+      KUBEE_CHART_DIRECTORY="${1}"
+      if [ ! -d "$KUBEE_CHART_DIRECTORY" ]; then
+        echo::err "Internal Error: the argument KUBEE_CHART_DIRECTORY ($KUBEE_CHART_DIRECTORY) is not a valid directory"
+        exit 1
+      fi
+    ;;
+    "--chart-values-path")
+      shift
+      # Values path is already generated at this point
+      # that's why we pass it and not regenerate it
+      KUBEE_VALUES_FILE="${1}"
+      # crds do not have any values file
+      if [ ! -f "$KUBEE_VALUES_FILE" ]; then
+        echo::err "Internal Error: the values path ($KUBEE_VALUES_FILE) is not a valid file"
+        exit 1
+      fi
+      ;;
+    "--chart-namespace")
+      shift
+      KUBEE_NAMESPACE="${1}"
+      ;;
+    "--help"|"-h")
+      synopsis
+      exit
+      ;;
+    "--")
+      break;
+      ;;
+    *)
+      echo "No optional argument is expected. The value ($1) is unexpected."
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+if [ "${KUBEE_OUTPUT_DIR:-}" == "" ]; then
+    echo::err "Internal Error: KUBEE_OUTPUT_DIR should not be empty"
+    synopsis
+    exit 1
+fi
+
+if [ "${KUBEE_NAMESPACE:-}" == "" ]; then
+  echo::err "Internal Error: KUBEE_NAMESPACE should not be empty"
   exit 1
 fi
 
-# Values path is already generated at this point
-# that's why we pass it and not regenerate it
-KUBEE_VALUES_FILE="${2:-}"
-if [ ! -f "$KUBEE_VALUES_FILE" ]; then
-  echo::err "Internal Error: the second argument values path ($KUBEE_VALUES_FILE) is not a valid file"
+if [ "${KUBEE_CHART_DIRECTORY:-}" == "" ]; then
+  echo::err "Internal Error: KUBEE_CHART_DIRECTORY should not be empty"
   exit 1
 fi
 
-KUBEE_NAMESPACE="${3:-}"
-if [ "$KUBEE_NAMESPACE" == "" ]; then
-  echo::err "Internal Error: the third argument namespace should not be empty"
-  exit 1
-fi
-
-# Output
-# The output dir is mandatory for Jsonnet or Kustomize processing
-KUBEE_OUTPUT_DIR="${4}"
-if [ "$KUBEE_OUTPUT_DIR" == "" ]; then
-  echo::err "Internal Error: the fourth argument namespace should not be empty"
-  synopsis
-  exit 1
-fi
 
 # COMMAND_STDOUT_FD is exported from helm_x
 # where the output of stdout and stderr from external command should go

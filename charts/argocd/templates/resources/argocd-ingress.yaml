@@ -1,0 +1,40 @@
+{{/*
+   Doc: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#traefik-v22
+  Chart: https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd#ingress-configuration
+*/}}
+{{- if ne .Values.hostname "" -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd
+{{/*  namespace: {{ .Values.namespace }}*/}}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    {{- if ne .Values.cert_manager.enabled false }}
+    cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuer_name }}'
+    {{- end }}
+    {{- /* Only from Github or our network */}}
+    {{- if and (not (empty (.Values.cluster.auth.private_networks))) ( eq .Values.git.webhook.service "github") }}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.traefik.namespace }}-{{ .Values.traefik.middlewares.git_hooks.name }}@kubernetescrd
+    {{- end}}
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: '{{ .Values.hostname }}'
+      http:
+        paths:
+          - backend:
+              service:
+                name: 'argocd-server'
+                port:
+                  number: 443
+            path: /
+            pathType: Prefix
+  {{- if ne .Values.cert_manager.enabled false }}
+  tls:
+    - hosts:
+        - '{{ .Values.hostname }}'
+      secretName: 'argocd-cert'
+  {{- end }}
+{{- end -}}

@@ -1,0 +1,95 @@
+{{/*
+ Notification Configuration
+ See dodc: With [Notification](https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/)
+ Config Notification service, trigger and template
+ Example config
+ https://github.com/argoproj/argoproj-deployments/blob/master/argocd/overlays/production/argocd-notifications-cm.yaml
+ Actual Config
+ https://kube.i.eraldy.com/#/configmap/argocd/argocd-notifications-cm?namespace=argocd
+
+Test:
+helm template -s templates/argocd-notifications-config-map-patch.yml \
+  --set 'cluster.email.smtp.host=smtp.gmail.com'  \
+  --set 'cluster.email.smtp.port=587'  \
+  --set 'cluster.email.smtp.username=nico'  \
+  --set 'cluster.email.smtp.password=welcome'  \
+  --set 'cluster.auth.admin_user.email=foo@gmail.com' \
+  . | yq
+
+*/}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+{{/*  namespace: {{ .Values.namespace }}*/}}
+  annotations:
+    {{/*
+      The behavior annotation will influence how conflicts are handled for resources emitted by the plugin.
+      Valid values include “create”, “merge”, and “replace” with “create” being the default.
+    */}}
+    kustomize.config.k8s.io/behavior: merge
+data:
+{{/*
+  ##############################
+  # Services section
+  ##############################
+  # Email
+  # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/email/
+*/}}
+  {{- if ne .Values.cluster.email.smtp.host ""}}
+  service.email: |
+    host: {{ .Values.cluster.email.smtp.host }}
+    port: {{ required ".Values.cluster.email.smtp.port is required" .Values.cluster.email.smtp.port }}
+    from: {{ required "cluster.auth.admin_user.email or cluster.email.smtp.from is requried" (default .Values.cluster.auth.admin_user.email .Values.cluster.email.smtp.from) }}
+    username: ${{ template "kubee-argocd-email-username-variable-name" }}
+    password: ${{ template "kubee-argocd-email-password-variable-name" }}
+    html: true
+  {{- end }}
+{{- /*
+  ##############################
+    # Trigger
+  ##############################
+  # Optional 'oncePer' property ensure that notification is sent only once per specified field value
+  # E.g. following is triggered once per sync revision
+  # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/triggers/#avoid-sending-same-notification-too-often
+  # See also this discussion
+  # https://github.com/argoproj/argo-cd/issues/12169
+
+*/}}
+  trigger.on-deployed: |
+    - when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy' and time.Now().Sub(time.Parse(app.status.operationState.startedAt)).Minutes() < 2
+      oncePer: app.status.operationState.syncResult.revision
+      send: [on-deployed-template]
+{{- /*
+  ##############################
+  # Template
+  ##############################
+*/}}
+  template.on-deployed-template: {{ .Files.Get "argocd-templates/on-deployed-template.yml" | quote }}
+  {{- /*
+   ##############################
+  # Context (ie Variables)
+  ##############################
+  # Context holds list of variables that can be referenced in templates
+  */}}
+  {{- if ne .Values.hostname "" }}
+  context: |
+    {{- if ne .Values.hostname "" }}
+    argocdUrl: https://{{ .Values.hostname }}
+    {{- end }}
+  {{- end }}
+  {{- /*
+    ##############################
+    # Global Subscriptions
+    ##############################
+  */}}
+  {{- if ne .Values.cluster.auth.admin_user.email "" }}
+  subscriptions: |
+    {{- if ne .Values.cluster.auth.admin_user.email "" }}
+    # Global Subscription for on-deployed trigger notifications
+    - recipients:
+        - "email:{{ .Values.cluster.auth.admin_user.email }}"
+      triggers:
+        - on-deployed
+    {{- end }}
+  {{- end }}

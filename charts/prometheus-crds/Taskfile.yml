@@ -1,0 +1,16 @@
+version: '3'
+
+tasks:
+  # Generate the docs
+  docs:
+    cmds:
+      - helm-docs
+  # Output the template in the out directory
+  tpl:
+    cmds:
+      - kubee helmet template --out prometheus-crds
+  play:
+    cmds:
+      - kubee -n monitoring helmet play prometheus-crds
+
+

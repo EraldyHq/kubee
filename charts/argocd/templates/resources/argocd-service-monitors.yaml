@@ -1,0 +1,122 @@
+{{- /*
+  The metrics point for
+  https://argo-cd.readthedocs.io/en/latest/operator-manual/metrics/#prometheus-operator
+  */}}
+{{- /*
+  The controller metrics to get health status
+  https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/#application-controller-metrics
+*/}}
+{{- if eq .Values.prometheus.enabled true }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd
+  {{- /*  namespace: {{ .Values.namespace }}*/}}
+  labels:
+    release: prometheus-operator
+    app.kubernetes.io/name: argocd
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-metrics
+  endpoints:
+    - port: metrics
+      interval: 5m # 5m to lower the memory consumption as this is not a critical component
+      relabelings:
+        # Drop the discovery service label
+        # We keep service to be able to get the kb by service
+        - action: labeldrop
+          regex: '(container|endpoint|job|namespace|pod)'
+      metricRelabelings:
+        # repo: We have only one repo
+        # `dest_server: https://kubernetes.default.svc` - we have only one cluster
+        # `dest_namespace` : the destination namespace of the app
+        # autosync_enabled="true" / not deleted because it's part of a alert
+        # instance="10.42.0.61:8082" of the service
+        # namespace="argocd" for all apps ???
+        # project="default" - we have only one project
+        - action: labeldrop
+          regex: '(repo|dest_server|dest_namespace|instance|project|namespace)'
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd-server
+  labels:
+    release: prometheus-operator
+    app.kubernetes.io/name: argocd-server
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-server-metrics
+  endpoints:
+    - port: metrics
+      interval: 5m
+      relabelings:
+        # Drop the discovery service label
+        # We keep service to be able to get the kb by service
+        - action: labeldrop
+          regex: '(container|endpoint|job|namespace|pod)'
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd-repo-server
+  labels:
+    release: prometheus-operator
+    app.kubernetes.io/name: argocd-repo-server
+spec:
+  selector:
+    matchLabels:
+      # No metrics service
+      app.kubernetes.io/name: argocd-repo-server
+  endpoints:
+    - port: metrics
+      interval: 5m
+      relabelings:
+        # Drop the discovery service label
+        # We keep service to be able to get the kb by service
+        - action: labeldrop
+          regex: '(container|endpoint|job|namespace|pod)'
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd-applicationset-controller
+  labels:
+    release: prometheus-operator
+    app.kubernetes.io/name: argocd-applicationset-controller
+spec:
+  selector:
+    matchLabels:
+      # No metrics suffix (normal)
+      app.kubernetes.io/name: argocd-applicationset-controller
+  endpoints:
+    - port: metrics
+      interval: 5m
+      relabelings:
+        # Drop the discovery service label
+        # We keep service to be able to get the kb by service
+        - action: labeldrop
+          regex: '(container|endpoint|job|namespace|pod)'
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd-notifications-controller
+  labels:
+    release: prometheus-operator
+    app.kubernetes.io/name: argocd-applicationset-controller
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-notifications-controller-metrics
+  endpoints:
+    - port: metrics
+      interval: 5m
+      relabelings:
+      # Drop the discovery service label
+      # We keep service to be able to get the kb by service
+        - action: labeldrop
+          regex: '(container|endpoint|job|namespace|pod)'
+{{- end -}}

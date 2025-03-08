@@ -25,7 +25,14 @@ local prometheusOperator = (import 'vendor/github.com/prometheus-operator/promet
 
 // Extract only the CRDS
 {
- ['prometheus-operator-'+name]: prometheusOperator[name]
+ ['prometheus-operator-'+name]: prometheusOperator[name]{
+    metadata+:{
+      annotations+: {
+        // Don't delete
+        "helm.sh/resource-policy": "keep"
+      }
+    }
+ }
  for name in std.filter((function(name) prometheusOperator[name].kind == 'CustomResourceDefinition'), std.objectFields(prometheusOperator))
 }
 

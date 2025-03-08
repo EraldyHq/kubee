@@ -23,6 +23,12 @@ version: 0.0.1
 # It is recommended to use it with quotes.
 appVersion: "0.10.7" # The version of the app packaged
 
+annotations:
+  app.kubernetes.io/name: "external-secrets"
+  kubee/crds: |
+    - name: kubee-external-secrets
+      version: 0.10.7
+      repository: file://../external-secrets-crds
 
 # https://github.com/external-secrets/external-secrets/releases
 dependencies:
