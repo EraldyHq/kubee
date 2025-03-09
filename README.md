@@ -31,7 +31,7 @@ The `E` stands for:
 On Mac / Linux / Windows WSL with HomeBrew
 
 ```bash
-brew install --HEAD eraldy/tap/kubee
+brew install --HEAD eraldyhq/tap/kubee
 ```
 
 ### Getting Started
