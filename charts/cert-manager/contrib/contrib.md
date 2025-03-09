@@ -65,6 +65,8 @@ You need then to update your DNS to add an A or CNAME record to point the domain
     * Traefik CE (community edition) is stateless, and it's not possible to run multiple instances of Traefik CE with LetsEncrypt enabled.
 * Local CA to provision self-signed certificate
 * Database Operator such as MariaDb integrate with a cluster issuer to get the certificate
+* Traefik store in the json file, cert-manager stores the certs in etcd.
+
 
 ### Default cert, what happens if the secret name is omitted in an ingress?
 
