@@ -126,6 +126,9 @@ kustomize_processing(){
       return 1
     fi
 
+    # out
+    echo "$KUSTOMIZE_MANIFEST" > "$KUBEE_OUTPUT_DIR/kustomized.yaml"
+
     echo "$KUSTOMIZE_MANIFEST"
 
 }

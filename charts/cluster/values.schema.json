@@ -88,21 +88,21 @@
                   "required": [],
                   "title": "key"
                 },
+                "kind": {
+                  "default": "Secret",
+                  "description": " required: true enum: [ 'Secret', 'ExternalSecret' ] @schema The type of secret A secret or external secret The chart is responsible for supporting them",
+                  "enum": [
+                    "Secret",
+                    "ExternalSecret"
+                  ],
+                  "required": [],
+                  "title": "kind"
+                },
                 "property": {
                   "default": "",
                   "description": " Used with the External Secret type",
                   "required": [],
                   "title": "property"
-                },
-                "type": {
-                  "default": "secret",
-                  "description": " required: true enum: [ 'secret', 'external-secret' ] @schema The type of secret A secret or external secret The chart is responsible for supporting them",
-                  "enum": [
-                    "secret",
-                    "external-secret"
-                  ],
-                  "required": [],
-                  "title": "type"
                 },
                 "value": {
                   "default": "",
@@ -112,7 +112,7 @@
                 }
               },
               "required": [
-                "type",
+                "kind",
                 "key"
               ],
               "title": "api_token"

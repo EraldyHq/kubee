@@ -13,15 +13,18 @@ Run [utilties/dl-dependency-scripts](utilties/dl-dependency-scripts) to update t
 
 ## How to
 
-### Test/Check template at dev
 
-* With helm
+### Test/Check values before installation
+
+With Helmet For instance, to check the [repo creation](templates/resources/argocd-secret-repo.yaml)
 ```bash
-helm template -s templates/patches/argocd-secret-patch.yaml \
-  --set 'cluster.auth.admin_user.password=welcome'  \
-  . | yq
+export BASHLIB_ECHO_LEVEL=4;
+kubee helmet -c clusterName template argocd | grep 'name: argocd-secret-repo' -A 2 -B 11
 ```
 
+## Namespace
+
+https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#installing-argo-cd-in-a-custom-namespace
 
 ### Debug Notifications
 

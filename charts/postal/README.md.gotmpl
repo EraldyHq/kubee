@@ -80,7 +80,7 @@ If dex is enabled and the dex postal secret (`.Values.dex.clients.postal.secret`
 `postal` is configured to log in via dex.
 
 
-{{ template "kubeeChartFeaturesSection" . }}
+{{ template "kubee-chart-features-section" . }}
 
 {{ template "chart.valuesSection" . }}
 | conf_yaml | object | | [The Postal Configuration without secrets and host](https://github.com/postalserver/postal/blob/{{ template "chart.appVersion" . }}/doc/config/yaml.yml) |

@@ -27,12 +27,12 @@ dns:
     api_token:
       # @schema
       # required: true
-      # enum: [ 'secret', 'external-secret' ]
+      # enum: [ 'Secret', 'ExternalSecret' ]
       # @schema
       # The type of secret
       # A secret or external secret
       # The chart is responsible for supporting them
-      type: 'secret'
+      kind: 'Secret'
       # The api token value.
       # (Used with the k8s secret type to create a Kubernetes secret)
       value: ''

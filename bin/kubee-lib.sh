@@ -253,7 +253,7 @@ kubee::get_cluster_directory(){
     local SCRIPT_DIR
     SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
     local KUBEE_RESOURCE_CLUSTERS_DIR
-    KUBEE_RESOURCE_CLUSTERS_DIR=$(realpath "$SCRIPT_DIR/../resources/clusters")
+    KUBEE_RESOURCE_CLUSTERS_DIR=$(realpath "$SCRIPT_DIR/../examples/clusters")
     local KUBEE_CLUSTER_DIRS+=("$KUBEE_RESOURCE_CLUSTERS_DIR")
     for KUBEE_CLUSTER_DIR in "${KUBEE_CLUSTER_DIRS[@]}"; do
         if [ ! -d "$KUBEE_CLUSTER_DIR" ]; then
