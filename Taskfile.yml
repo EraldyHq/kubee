@@ -1,0 +1,9 @@
+version: '3'
+
+tasks:
+  # Generate the values.schema.json
+  readme:
+    # yq '  {.name: { "description": .description, "appVersion": .appVersion, "status": .annotations."chart.kubee/status" // "na", "kind": (.annotations."chart.kubee/kinds" | from_yaml) }} | . as $item ireduce ({}; . * $item )' Chart.yaml ../cluster/Chart.yaml ../grafana/Chart.yaml
+    cmds:
+      - |
+        yq '{.name: { "description": .description, "appVersion": .appVersion, "status": .annotations."chart.kubee/status" // "na", "kind": (.annotations."chart.kubee/kinds" | from_yaml) }} | . as $item ireduce ({}; . * $item )' $(find "./charts" -type f -name "Chart.yml") > README.model.yaml

@@ -24,7 +24,10 @@ appVersion: "v5.16.0" # Grafana Operator version, should be the same in grafana-
 annotations:
   app.kubernetes.io/name: "grafana"
   artifacthub.io/operator: "true"
-  kubee/crds: |
+  chart.kubee/status: "stable"
+  chart.kubee/kinds: |
+    - helm
+  chart.kubee/crds: |
     - name: kubee-grafana-crds
       version: 5.16.0
       repository: file://../grafana-crds
