@@ -29,7 +29,7 @@ annotations:
   # https://github.com/prometheus-operator/kube-prometheus/releases
   kube-prometheus/version: "0.14.0"
   app.kubernetes.io/name: "prometheus"
-  kubee/crds: |
+  chart.kubee/crds: |
     - name: kubee-prometheus-crds
       version: 0.79.2
       repository: file://../prometheus-crds

@@ -23,7 +23,7 @@ appVersion: "0.37.1"
 
 annotations:
   app.kubernetes.io/name: mariadb
-  kubee/crds: |
+  chart.kubee/crds: |
     - name: mariadb-operator-crds
       repository: https://helm.mariadb.com/mariadb-operator
       version: 0.37.1

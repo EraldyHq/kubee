@@ -25,7 +25,7 @@ appVersion: "0.10.7" # The version of the app packaged
 
 annotations:
   app.kubernetes.io/name: "external-secrets"
-  kubee/crds: |
+  chart.kubee/crds: |
     - name: kubee-external-secrets
       version: 0.10.7
       repository: file://../external-secrets-crds

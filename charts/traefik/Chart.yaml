@@ -23,7 +23,7 @@ appVersion: "34.4.0" # Traefik Version
 
 annotations:
   app.kubernetes.io/name: "traefik"
-  kubee/crds: |
+  chart.kubee/crds: |
     - name: kubee-traefik-crds
       version: 34.4.0
       repository: file://../traefik-crds

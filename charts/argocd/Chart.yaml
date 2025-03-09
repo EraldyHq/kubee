@@ -23,6 +23,11 @@ version: 0.0.1
 # It is recommended to use it with quotes.
 appVersion: "v2.14.4" # The version of argocd (in kustomization.yml url)
 
+annotations:
+  chart.kubee/status: "stable"
+  chart.kubee/kind: |
+    - helm
+    - kustomize
 
 # https://github.com/external-secrets/external-secrets/releases
 dependencies:

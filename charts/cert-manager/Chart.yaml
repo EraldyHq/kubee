@@ -27,7 +27,7 @@ appVersion: "v1.17.1-v0.16.0"
 
 annotations:
   app.kubernetes.io/name: "cert-manager"
-  kubee/crds: |
+  chart.kubee/crds: |
     - name: kubee-cert-manager-crds
       version: 1.17.1
       repository: file://../cert-manager-crds

@@ -20,6 +20,13 @@ version: 0.0.1
 # It is recommended to use it with quotes.
 appVersion: "v0.0.1"
 
+
+annotations:
+  chart.kubee/status: "stable"
+  chart.kubee/type: "app"
+  chart.kubee/kinds: |
+    - helm
+
 dependencies:
   - name: kubee-cluster
     version: 0.0.1

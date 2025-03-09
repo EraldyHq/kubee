@@ -12,3 +12,13 @@ version: 5.16.0
 # This is the version number of the application being deployed.
 # Grafana Operator Version
 appVersion: "v5.16.0"
+
+keywords:
+  - crds
+  - grafana
+
+annotations:
+  chart.kubee/status: "stable"
+  chart.kubee/type: "crds"
+  chart.kubee/kinds: |
+    - helm

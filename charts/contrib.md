@@ -28,16 +28,38 @@ metadata:
     {{- include "kubee-manifest-labels" . | indent 4}}
 ```
 
-### CRD Dependency Charts
-
-By default, `kubee helmet` will look for a Chart called `kubee-(chartName)-crds`.
-
-You can define an external CRD chart with the `kubee/crds-chart-name` and `kubee/crds-chart-repo` annotations in the `Chart.yaml`.
+### Chart Kind and Status
 
 Example:
 ```yaml
 annotations:
-  kubee/crds: |
+  chart.kubee/status: "stable"
+      #  "stable" - can be installed
+      #  "incubator" - been developed
+      #  "deprecated" - no more maintained
+  chart.kubee/type: "crds"
+    #  "app"  - apps
+    #  "crds" - can be installed
+    #  "cluster" - been developed
+    #  "internal" - internal
+  chart.kubee/kind: |
+    - helm # helm only
+    - jsonnet # needs jsonnet
+    - kustomize # neets kustomize
+```
+
+
+
+### CRD Dependency Charts
+
+By default, `kubee helmet` will look for a Chart called `kubee-(chartName)-crds`.
+
+You can define an external CRD chart with the `chart.kubee/crds` annotations in the `Chart.yaml`.
+
+Example:
+```yaml
+annotations:
+  chart.kubee/crds: |
     - name: mariadb-operator/mariadb-operator-crds
       repository: https://helm.mariadb.com/mariadb-operator
       version: 0.37.1
