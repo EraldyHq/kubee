@@ -162,5 +162,4 @@ kubee --cluster "$KUBEE_CLUSTER_NAME" helmet play traefik
 ```bash
 kubee --cluster "$KUBEE_CLUSTER_NAME" helmet play cert-manager
 ```
-
-The whole list of available `kubee charts` can be seen in the [Kubee Charts directory](../../resources/charts/stable/README.md).
+or install any [other Kubee Charts ](../../README.md#list-of-charts)
