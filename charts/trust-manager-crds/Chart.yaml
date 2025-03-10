@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-trust-manager-crds
-description: The trust manager crds kubee chart
+description: Kubee Trust manager crds chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -23,4 +23,8 @@ version: "0.16.0"
 # It is recommended to use it with quotes.
 appVersion: "0.0.0"
 
-
+annotations:
+  chart.kubee/type: "crds"
+  chart.kubee/status: "stable"
+  chart.kubee/kind: |
+    - helm

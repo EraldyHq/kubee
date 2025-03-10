@@ -1,18 +1,24 @@
 # Kubee Helmet Chart
 
 
-A Kubee Chart may be:
-* a Helm Chart
-* a [Jsonnet Chart](jsonnet-chart.md)
-* a [Kustomize Chart](kustomize-project.md)
-* a [Cluster Chart](cluster-chart.md)
+A `Kubee Chart` is a helm chart that supports:
+* the following templating tools:
+  * a [Jsonnet](jsonnet-chart.md)
+  * a [Kustomize](kustomize-project.md)
+* a [cluster values file](cluster-values.md)
+* [CRDs chart](crds-chart.md) as dependencies
+
+They are installed with `kubee helmet`.
+
+
+## Definition
 
 A `Kubee Helmet Chart`:
 * is a Chart
     * that installs only one application
     * with the name of the app installed (ie grafana, not grafana operator)
     * that depends on:
-        * the [kubee Cluster Library Chart](../../resources/charts/cluster/README.md) to share cluster and installation wide
+        * the [kubee Cluster Library Chart](../../charts/cluster/README.md) to share cluster and installation wide
             * `values.yaml` file
             * and `library`
         * and optionally:
@@ -48,3 +54,9 @@ The values file should contain different nodes for:
 * the chart itself
 * the external services (opsgenie, new relic, grafana cloud, ...) - making clear what the parameters are for.
 
+## Kind
+
+
+* a [app charts](app-chart.md) - a chart that installs an application
+* a [CRD charts](crds-chart.md) - a chart that installs CRDS
+* a [Cluster Chart](cluster-chart.md) - a chart that drives the installation of kubernetes

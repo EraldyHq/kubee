@@ -13,48 +13,20 @@ in a standalone mode.
 kubee helmet --cluster cluster-name play vault
 ```
 
-## Dev / Contrib
-
-* Download dependency:
-```bash
-helm dependency build
-```
-
-* Install
-
-```bash
-# KUBEE_APP_NAMESPACE=vault
-helm upgrade --install -n vault --create-namespace vault .
-# with kubee
-kubee-helm upgrade --install --create-namespace vault .
-```
-
 ## Features
 
 ### Kubee Charts Features
 
   These [kubee charts](../../docs/site/kubee-helmet-chart.md) add their features when `enabled`.
 
-* [vault](https://helm.releases.hashicorp.com/README.md)
+* [traefik](../traefik/README.md) creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| enabled | bool | `false` |  |
-| hostname | string | `""` |  |
-| kvSecretStore.mountPath | string | `"secret"` |  |
-| kvSecretStore.version | int | `2` |  |
-| namespace | string | `"vault"` |  |
-| vault.injector.enabled | bool | `false` |  |
-| vault.server.affinity | string | `""` |  |
-| vault.server.dataStorage.size | string | `"200Mi"` |  |
-| vault.server.dataStorage.storageClass | string | `"local-path"` |  |
-| vault.server.ingress.enabled | bool | `false` |  |
-| vault.server.standalone.config | string | `"ui = true\n\n# https://developer.hashicorp.com/vault/docs/configuration/listener/tcp#tls_cert_file\nlistener \"tcp\" {\n  tls_disable = 1\n  address = \"[::]:8200\"\n  cluster_address = \"[::]:8201\"\n  # Enable unauthenticated metrics access (necessary for Prometheus Operator)\n  #telemetry {\n  #  unauthenticated_metrics_access = \"true\"\n  #}\n}\nstorage \"file\" {\n  path = \"/vault/data\"\n}\n\n# Example configuration for enabling Prometheus metrics in your config.\n#telemetry {\n#  prometheus_retention_time = \"30s\"\n#  disable_hostname = true\n#}\n"` |  |
-| vault.server.standalone.enabled | bool | `true` |  |
-
-## Contrib / Dev
-
-See [contrib](contrib/contrib.md)
+| enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
+| hostname | string | `""` | The public hostname |
+| namespace | string | `"vault"` | The installation namespace |
+| vault | object | | The [vault values](https://github.com/hashicorp/vault-helm/blob/v0.28.0/values.yaml) |
 

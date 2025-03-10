@@ -55,9 +55,8 @@ Install in no time, in your VPS:
 | [traefik](charts/traefik/README.md) | A sub-chart of Traefik | na |
 | [traefik-crds](charts/traefik-crds/README.md) | A Helm chart for Kubernetes | na |
 | [traefik-forward-auth](charts/traefik-forward-auth/README.md) | traefik-forward-auth for the Kubee Platform | na |
-| [trust-manager-crds](charts/trust-manager-crds/README.md) | The trust manager crds kubee chart | na |
-| [vault](charts/vault/README.md) | A Umbrella chart of vault | na |
-| [whoami](charts/whoami/README.md) | A whoami app | na |
+| [vault](charts/vault/README.md) | Kubee Vault Chart | stable |
+| [whoami](charts/whoami/README.md) | Kubee Whoami Chart | stable |
 
 ## Steps
 

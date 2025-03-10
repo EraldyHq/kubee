@@ -1,19 +1,57 @@
-# Not a string, a boolean so no quote
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
 enabled: false
-# The hostname (create an ingress if not empty)
-hostname: ''
-# The installation namespace
+
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace
 namespace: 'vault'
-# A KV secret store
-kvSecretStore:
-  # The Vault KV secret engine version.
-  # This can be either "v1" or "v2", defaults to "v2"
-  version: 2
-  # the mount Path
-  mountPath: 'secret'
+
+# @schema
+# title: Hostname
+# description: The public hostname
+# required: true
+# minLength: 1
+# format: hostname
+# @schema
+# -- The public hostname
+hostname: ''
+
+# The Engines
+# Internal, the data is used by external secret to connect to
+# It's not possible to create h
+# @ignored
+engines:
+  # The default engine is used by
+  default:
+    # @schema
+    # const: kv
+    # @schema
+    # [Kv Type](https://developer.hashicorp.com/vault/docs/secrets/kv)
+    kind: kv
+    # @schema
+    # const: 2
+    # @schema
+    # The Vault KV secret engine version.
+    version: 2 # This can be either "v1" or "v2", defaults to "v2"
+    # @schema
+    # const: secret
+    # @schema
+    # The mount Path
+    mountPath: 'secret'
 
 # Vault
-# A copy of https://raw.githubusercontent.com/hashicorp/vault-helm/main/values.yaml
+# https://github.com/hashicorp/vault-helm/blob/v0.29.1/values.yaml
+# @ignored
 vault:
   server:
     # allow deployment to single node services such as Minikube

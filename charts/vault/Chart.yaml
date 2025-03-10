@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-vault
-description: A Umbrella chart of vault
+description: Kubee Vault Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -21,12 +21,19 @@ version: 0.1.0 # The version doesn't matter and can stay the same
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "0.28.0" # The version of the app packaged (docker)
+appVersion: "0.28.0" # The version of the app packaged
 # Example:
 #NAME                                    CHART VERSION   APP VERSION     DESCRIPTION
 #hashicorp/vault                         0.29.1          1.18.1          Official HashiCorp Vault Chart
 #hashicorp/vault                         0.29.0          1.18.1          Official HashiCorp Vault Chart
 #hashicorp/vault                         0.28.1          1.17.2          Official HashiCorp Vault Chart
+
+annotations:
+  chart.kubee/type: "app"
+  chart.kubee/status: "stable"
+  chart.kubee/kind: |
+    - helm
+
 
 dependencies:
   - name: vault
