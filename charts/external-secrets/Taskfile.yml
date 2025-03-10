@@ -4,7 +4,7 @@ tasks:
   # Generate the values.schema.json
   schema:
     cmds:
-      - helm schema --helm-docs-compatibility-mode -k additionalProperties --dependencies-filter kubee-external-dns
+      - helm schema --helm-docs-compatibility-mode -k additionalProperties --dependencies-filter kubee-external-secrets
   # Generate the docs
   docs:
     cmds:
@@ -12,13 +12,13 @@ tasks:
   # Output the template in the out directory
   tpl:
     cmds:
-      - kubee helmet template --out external-dns
+      - kubee helmet template --out external-secrets
   # Install
   play:
     cmds:
-      - kubee helmet play external-dns
+      - kubee helmet play external-secrets
   # Update charts/ directory
   dep:
     cmds:
-      - kubee helmet update-dependencies external-dns
+      - kubee helmet update-dependencies external-secrets
 

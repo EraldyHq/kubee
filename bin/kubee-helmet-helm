@@ -321,10 +321,10 @@ kubee_crds_function(){
 
   # Crd defined in Chart.yaml ?
   local CHART_CRDS_YAML;
-  local HELM_CRDS_ANNOTATIONS_ADDRESS='.annotations.kubee/crds'
+  local HELM_CRDS_ANNOTATIONS_ADDRESS='.annotations."chart.kubee/crds"'
   CHART_CRDS_YAML=$(echo::eval "yq '$HELM_CRDS_ANNOTATIONS_ADDRESS' $CHART_FILE_PATH")
   if [ "$CHART_CRDS_YAML" == "null" ] || [ "$CHART_CRDS_YAML" == "" ]; then
-    echo::debug "No Crds dependency"
+    echo::info "No Crds dependency"
     return
   fi
 

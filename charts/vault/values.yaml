@@ -47,7 +47,7 @@ engines:
     # const: secret
     # @schema
     # The mount Path
-    mountPath: 'secret'
+    mount_path: 'secret'
 
 # Vault
 # https://github.com/hashicorp/vault-helm/blob/v0.29.1/values.yaml

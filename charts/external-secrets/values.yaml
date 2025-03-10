@@ -1,15 +1,36 @@
-# Not a string, a boolean so no quote
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
 enabled: false
-# Namespace
+
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace
 namespace: 'external-secrets'
+
 # Cluster Secret Store
 # We support only vault for now
-# If the api token is not empty and vault is enabled, a vault secret store is created
 store:
+  # @schema
+  # minLength: 1
+  # required: true
+  # @schema
+  # @ignored The name of the store
   name: 'kubee-external-secret-store'
   vault:
+    # -- Vault Api Token. If the api token is not empty and vault is enabled, a vault secret store is created
     api_token: ''
 
+# @ignored
+# https://github.com/external-secrets/external-secrets/blob/v0.14.3/deploy/charts/external-secrets/values.yaml
 external-secrets:
   # Installed with our chart
   installCRDs: false

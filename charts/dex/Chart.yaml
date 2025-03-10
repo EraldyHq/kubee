@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-dex
-description: The dex kubee chart
+description: Kubee Dex Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #

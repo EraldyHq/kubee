@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-external-secrets
-description: A Helm sub chart for External Secrets
+description: Kubee External Secrets Charts
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -21,19 +21,22 @@ version: 0.0.1
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "0.10.7" # The version of the app packaged
+appVersion: "0.14.3" # The version of the app packaged
 
 annotations:
   app.kubernetes.io/name: "external-secrets"
+  chart.kubee/status: "stable"
+  chart.kubee/kind: "app"
+  chart.kubee/category: "secret"
   chart.kubee/crds: |
-    - name: kubee-external-secrets
-      version: 0.10.7
+    - name: kubee-external-secrets-crds
+      version: 0.14.3
       repository: file://../external-secrets-crds
 
 # https://github.com/external-secrets/external-secrets/releases
 dependencies:
   - name: external-secrets
-    version: 0.10.7
+    version: 0.14.3
     repository: https://charts.external-secrets.io
     alias: external-secrets
     #condition: external-secrets.enabled
@@ -41,3 +44,7 @@ dependencies:
     version: 0.0.1
     repository: file://../cluster
     alias: cluster
+  - name: kubee-vault
+    version: 0.0.1
+    repository: file://../vault
+    alias: vault

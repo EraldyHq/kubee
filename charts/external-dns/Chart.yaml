@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-external-dns
-description: The external-dns kubee chart
+description: Kubee External Dns Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -25,7 +25,11 @@ appVersion: "1.15.2" # The version of the external dns chart without the v
 
 annotations:
   app.kubernetes.io/name: 'external-dns'
-
+  chart.kubee/status: "stable"
+  chart.kubee/kind: "app"
+  chart.kubee/category: "dns"
+  chart.kubee/engines: |
+    - helm
 # https://github.com/kubernetes-sigs/external-dns/tree/master/charts/external-dns
 dependencies:
   - name: kubee-cluster

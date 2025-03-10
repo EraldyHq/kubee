@@ -31,10 +31,10 @@ Install in no time, in your VPS:
 | [cert-manager](charts/cert-manager/README.md) | Kubee Cert-Manager Chart | stable | app | certificate
 | [cert-manager-crds](charts/cert-manager-crds/README.md) | Kubee Cert-Manager Crds Chart | stable | crds | certificate
 | [cluster](charts/cluster/README.md) | Kubee Cluster Chart | stable | library | cluster
-| [dex](charts/dex/README.md) | The dex kubee chart | stable | app | auth
-| [external-dns](charts/external-dns/README.md) | The external-dns kubee chart | na | na | na
-| [external-secret-crds](charts/external-secret-crds/README.md) | Grafana CRDS | na | na | na
-| [external-secrets](charts/external-secrets/README.md) | A Helm sub chart for External Secrets | na | na | na
+| [dex](charts/dex/README.md) | Kubee Dex Chart | stable | app | auth
+| [external-dns](charts/external-dns/README.md) | Kubee External Dns Chart | stable | app | dns
+| [external-secrets](charts/external-secrets/README.md) | Kubee External Secrets Charts | stable | app | secret
+| [external-secrets-crds](charts/external-secrets-crds/README.md) | Kubee External Secret Crds Chart | stable | crds | secret
 | [gogs](charts/gogs/README.md) | A kubee gogs chart | na | na | na
 | [grafana](charts/grafana/README.md) | A sub-chart of the Grafana Operator | stable | app | na
 | [grafana-crds](charts/grafana-crds/README.md) | Grafana CRDS | stable | crds | na

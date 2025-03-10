@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "enabled": {
+      "default": false,
+      "description": "Boolean to indicate that this chart is or will be installed in the cluster",
+      "required": [],
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "external-secrets": {
+      "description": " https://github.com/external-secrets/external-secrets/blob/v0.14.3/deploy/charts/external-secrets/values.yaml",
+      "properties": {
+        "installCRDs": {
+          "default": false,
+          "description": "Installed with our chart",
+          "required": [],
+          "title": "installCRDs",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "installCRDs"
+      ],
+      "title": "external-secrets"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "namespace": {
+      "default": "external-secrets",
+      "description": "The installation namespace",
+      "minLength": 1,
+      "required": [],
+      "title": "Namespace"
+    },
+    "store": {
+      "description": " We support only vault for now",
+      "properties": {
+        "name": {
+          "default": "kubee-external-secret-store",
+          "description": " minLength: 1 required: true @schema @ignored The name of the store",
+          "minLength": 1,
+          "required": [],
+          "title": "name"
+        },
+        "vault": {
+          "properties": {
+            "api_token": {
+              "default": "",
+              "description": "Vault Api Token. If the api token is not empty and vault is enabled, a vault secret store is created",
+              "required": [],
+              "title": "api_token"
+            }
+          },
+          "required": [],
+          "title": "vault",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "vault"
+      ],
+      "title": "store"
+    }
+  },
+  "required": [
+    "enabled",
+    "namespace"
+  ],
+  "type": "object"
+}
