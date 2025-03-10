@@ -24,7 +24,7 @@ version: "0.16.0"
 appVersion: "0.0.0"
 
 annotations:
-  chart.kubee/type: "crds"
+  chart.kubee/kind: "crds"
   chart.kubee/status: "stable"
-  chart.kubee/kind: |
+  chart.kubee/engines: |
     - helm

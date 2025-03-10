@@ -24,39 +24,42 @@ Install in no time, in your VPS:
 
 ## List of Charts
 
-| Kubee Chart | Description | Status |
-|------------------|-------------|--------|
-| [alertmanager](charts/alertmanager/README.md) | Kubee AlertManager Chart | stable |
-| [argocd](charts/argocd/README.md) | Kubee ArgoCd Chart | stable |
-| [cert-manager](charts/cert-manager/README.md) | The Cert Manager Kubee Chart | na |
-| [cert-manager-crds](charts/cert-manager-crds/README.md) | The cert manager crds kubee chart | na |
-| [cluster](charts/cluster/README.md) | The kubee cluster chart | na |
-| [dex](charts/dex/README.md) | The dex kubee chart | na |
-| [external-dns](charts/external-dns/README.md) | The external-dns kubee chart | na |
-| [external-secret-crds](charts/external-secret-crds/README.md) | Grafana CRDS | na |
-| [external-secrets](charts/external-secrets/README.md) | A Helm sub chart for External Secrets | na |
-| [gogs](charts/gogs/README.md) | A kubee gogs chart | na |
-| [grafana](charts/grafana/README.md) | A sub-chart of the Grafana Operator | stable |
-| [healthchecks](charts/healthchecks/README.md) | A Kube-e Chart to monitor healthchecks.io | stable |
-| [k3s-ansible](charts/k3s-ansible/README.md) | K3s Ansible Kubee Chart | na |
-| [keycloak](charts/keycloak/README.md) | A kubee keycloak chart | na |
-| [kubernetes-dashboard](charts/kubernetes-dashboard/README.md) | Kubernetes Dashboard Kubee Chart | na |
-| [kubernetes-monitoring](charts/kubernetes-monitoring/README.md) | Kubee Kubernetes Monitoring Chart | na |
-| [mailpit](charts/mailpit/README.md) | Kubee Mailpit Chart | na |
-| [mailu](charts/mailu/README.md) | Kubee Mail Chart | na |
-| [mariadb](charts/mariadb/README.md) | Kubee Mariadb Chart | na |
-| [node-exporter](charts/node-exporter/README.md) | Kubee Node Exporter Chart | na |
-| [oauth2-proxy](charts/oauth2-proxy/README.md) | The oauth2-proxy kubee chart | na |
-| [postal](charts/postal/README.md) | Kubee Postal Chart | na |
-| [prometheus](charts/prometheus/README.md) | Kubee Prometheus Chart | na |
-| [prometheus-adapter](charts/prometheus-adapter/README.md) | Kubee Prometheus Adapter Chart | na |
-| [prometheus-crds](charts/prometheus-crds/README.md) | Kubee Prometheus CRDS Chart | na |
-| [pushgateway](charts/pushgateway/README.md) | Kubee PushGateway Chart | na |
-| [traefik](charts/traefik/README.md) | A sub-chart of Traefik | na |
-| [traefik-crds](charts/traefik-crds/README.md) | A Helm chart for Kubernetes | na |
-| [traefik-forward-auth](charts/traefik-forward-auth/README.md) | traefik-forward-auth for the Kubee Platform | na |
-| [vault](charts/vault/README.md) | Kubee Vault Chart | stable |
-| [whoami](charts/whoami/README.md) | Kubee Whoami Chart | stable |
+| Kubee Chart | Description | Status | Kind | Group |
+|------------------|-------------|--------|------|------|
+| [alertmanager](charts/alertmanager/README.md) | Kubee AlertManager Chart | stable | app | monitoring
+| [argocd](charts/argocd/README.md) | Kubee ArgoCd Chart | stable | na | na
+| [cert-manager](charts/cert-manager/README.md) | The Cert Manager Kubee Chart | na | na | na
+| [cert-manager-crds](charts/cert-manager-crds/README.md) | The cert manager crds kubee chart | na | na | na
+| [cluster](charts/cluster/README.md) | The kubee cluster chart | na | na | na
+| [dex](charts/dex/README.md) | The dex kubee chart | na | na | na
+| [external-dns](charts/external-dns/README.md) | The external-dns kubee chart | na | na | na
+| [external-secret-crds](charts/external-secret-crds/README.md) | Grafana CRDS | na | na | na
+| [external-secrets](charts/external-secrets/README.md) | A Helm sub chart for External Secrets | na | na | na
+| [gogs](charts/gogs/README.md) | A kubee gogs chart | na | na | na
+| [grafana](charts/grafana/README.md) | A sub-chart of the Grafana Operator | stable | app | na
+| [grafana-crds](charts/grafana-crds/README.md) | Grafana CRDS | stable | crds | na
+| [healthchecks](charts/healthchecks/README.md) | A Kube-e Chart to monitor healthchecks.io | stable | app | na
+| [k3s-ansible](charts/k3s-ansible/README.md) | K3s Ansible Kubee Chart | na | na | na
+| [keycloak](charts/keycloak/README.md) | A kubee keycloak chart | na | na | na
+| [kubernetes-dashboard](charts/kubernetes-dashboard/README.md) | Kubernetes Dashboard Kubee Chart | na | na | na
+| [kubernetes-monitoring](charts/kubernetes-monitoring/README.md) | Kubee Kubernetes Monitoring Chart | na | na | na
+| [mailpit](charts/mailpit/README.md) | Kubee Mailpit Chart | na | na | na
+| [mailu](charts/mailu/README.md) | Kubee Mail Chart | na | na | na
+| [mariadb](charts/mariadb/README.md) | Kubee Mariadb Chart | na | na | na
+| [node-exporter](charts/node-exporter/README.md) | Kubee Node Exporter Chart | na | na | na
+| [oauth2-proxy](charts/oauth2-proxy/README.md) | The oauth2-proxy kubee chart | na | na | na
+| [postal](charts/postal/README.md) | Kubee Postal Chart | na | na | na
+| [prometheus](charts/prometheus/README.md) | Kubee Prometheus Chart | na | na | na
+| [prometheus-adapter](charts/prometheus-adapter/README.md) | Kubee Prometheus Adapter Chart | na | na | na
+| [prometheus-crds](charts/prometheus-crds/README.md) | Kubee Prometheus CRDS Chart | na | na | na
+| [pushgateway](charts/pushgateway/README.md) | Kubee PushGateway Chart | na | na | na
+| [traefik](charts/traefik/README.md) | A sub-chart of Traefik | na | na | na
+| [traefik-crds](charts/traefik-crds/README.md) | A Helm chart for Kubernetes | na | na | na
+| [traefik-forward-auth](charts/traefik-forward-auth/README.md) | traefik-forward-auth for the Kubee Platform | na | na | na
+| [trust-manager-crds](charts/trust-manager-crds/README.md) | Kubee Trust manager crds chart | stable | crds | na
+| [values](charts/values/README.md) | A Values Helm chart | stable | internal | na
+| [vault](charts/vault/README.md) | Kubee Vault Chart | stable | app | na
+| [whoami](charts/whoami/README.md) | Kubee Whoami Chart | stable | app | na
 
 ## Steps
 

@@ -25,8 +25,8 @@ annotations:
   app.kubernetes.io/name: "grafana"
   artifacthub.io/operator: "true"
   chart.kubee/status: "stable"
-  chart.kubee/type: "app"
-  chart.kubee/kinds: |
+  chart.kubee/kind: "app"
+  chart.kubee/engines: |
     - helm
   chart.chart.kubee/crds: |
     - name: kubee-grafana-crds

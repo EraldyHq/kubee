@@ -19,11 +19,20 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 
 # This is the version number of the application being deployed.
 # The version of prometheus operator
-appVersion: "v0.28.0"
+appVersion: "0.28.0"
+
+keywords:
+  - monitoring
+  - prometheus
+  - kubee
 
 annotations:
   app.kubernetes.io/name: "prometheus"
   chart.kubee/status: "stable"
+  chart.kubee/kind: "app"
+  chart.kubee/category: "monitoring"
+  chart.kubee/engines: |
+    - jsonnet
   chart.kubee/crds: |
     - name: kubee-prometheus-crds
       version: 0.79.2

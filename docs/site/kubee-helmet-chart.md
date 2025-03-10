@@ -60,3 +60,4 @@ The values file should contain different nodes for:
 * a [app charts](app-chart.md) - a chart that installs an application
 * a [CRD charts](crds-chart.md) - a chart that installs CRDS
 * a [Cluster Chart](cluster-chart.md) - a chart that drives the installation of kubernetes
+* a `library chart` - a chart that shares values and function

@@ -1,6 +1,16 @@
 version: '3'
 
 tasks:
+  docs:
+    cmds:
+      - |
+        # Create the .helmdocsignore file
+        HELM_DOCS_IGNORE=".helmdocsignore"        
+        rm "$HELM_DOCS_IGNORE"
+        echo "# Ignore charts dependencies directories" >> "$HELM_DOCS_IGNORE"
+        echo "# Should be at the root of repo see issue: https://github.com/norwoodj/helm-docs/issues/206" >> "$HELM_DOCS_IGNORE"
+        find "charts" -maxdepth 2 -mindepth 1 -type d  -name "charts" >> "$HELM_DOCS_IGNORE"
+
   # Generate the readme
   readme:
     cmds:
@@ -10,8 +20,9 @@ tasks:
         cp "Chart.yaml" "$OUTPUT_DIR"
         cp "README.md.gotmpl" "$OUTPUT_DIR"
         MODEL_PATH="$OUTPUT_DIR/model.yaml"
+        rm "$MODEL_PATH"
         CHARTS_PATH="charts"
-        yq '{.name: { "description": .description, "appVersion": .appVersion, "type": .annotations."chart.kubee/type" // "na", "status": .annotations."chart.kubee/status" // "na", "kind": (.annotations."chart.kubee/kinds" | from_yaml), "deprecated": .annotations.deprecated  // false }} | . as $item ireduce ({}; . * $item )' $(find "$CHARTS_PATH" -maxdepth 2 -type f  -name "Chart.yaml") > $MODEL_PATH
+        yq '{.name: { "description": .description, "appVersion": .appVersion, "kind": .annotations."chart.kubee/kind" // "na", "status": .annotations."chart.kubee/status" // "na", "engines": (.annotations."chart.kubee/engines" | from_yaml), "deprecated": .annotations.deprecated  // false, "category": .annotations."chart.kubee/category" // "na" }} | . as $item ireduce ({}; . * $item )' $(find "$CHARTS_PATH" -maxdepth 2 -type f  -name "Chart.yaml") > $MODEL_PATH
         # Path argument in helm-docs should be relative to chart-search-root (not absolute ...)
         (cd $OUTPUT_DIR; helm-docs)
         cp "$OUTPUT_DIR/README.md" "README.md"

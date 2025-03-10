@@ -29,9 +29,9 @@ appVersion: "0.28.0" # The version of the app packaged
 #hashicorp/vault                         0.28.1          1.17.2          Official HashiCorp Vault Chart
 
 annotations:
-  chart.kubee/type: "app"
+  chart.kubee/kind: "app"
   chart.kubee/status: "stable"
-  chart.kubee/kind: |
+  chart.kubee/engines: |
     - helm
 
 

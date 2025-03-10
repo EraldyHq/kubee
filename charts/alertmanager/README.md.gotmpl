@@ -1,0 +1,51 @@
+
+{{ template "kubee-header" .}}
+
+This is a {{ template "kubee-jsonnet-chart-label"  "jsonnet chart" }} that installs [Prometheus Alert manager](https://prometheus.io/docs/alerting/latest/alertmanager/)
+
+`Prometheus Alert manager` receives alerts from Prometheus
+and manage them, ie:
+* silence,
+* group,
+* aggregate
+* route them to:
+    * email
+    * or an external incident management platform such as OpsGenie.
+
+
+## Chart Features
+
+### Alert Notifications Channels
+
+The following alert notifications channels are implemented:
+
+* Email
+* OpsGenie (if api_key is not null)
+
+### WatchDog
+
+The `Watchdog` is a cron monitoring system that monitors the livelihood of the prometheus monitoring system itself.
+
+Prometheus AlertManager should ping it at interval:
+* via email
+* and http requests
+otherwise it's considered dead.
+
+The cron monitoring system should alert you if it does not receive any ping.
+
+This monitoring system is also known as the [DeadMansSnitch](https://en.wikipedia.org/wiki/Dead_man%27s_switch)
+
+It's implemented with the [watchdog alert](https://runbooks.prometheus-operator.dev/runbooks/general/watchdog).
+
+
+{{ template "kubee-chart-features-section" . }}
+
+{{ template "kubee-installation-instruction" . }}
+
+{{ template "chart.valuesSection" . }}
+
+## Contrib / Dev
+
+See [contrib](contrib/contrib.md)
+
+

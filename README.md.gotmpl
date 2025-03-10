@@ -28,14 +28,11 @@ Install in no time, in your VPS:
 
 {{ $model := (.Files.Get "model.yaml") | fromYaml }}
 
-| Kubee Chart | Description | Status |
-|------------------|-------------|--------|
+| Kubee Chart | Description | Status | Kind | Category |
+|------------------|-------------|--------|------|----------|
 {{- range $key, $values := $model }}
 {{- $name := trimPrefix "kubee-" $key }}
-{{- if and (ne $values.type "app") (ne $values.type "na") }}
-{{- continue }}
-{{- end}}
-| [{{ $name }}](charts/{{$name}}/README.md) | {{ $values.description }} | {{ $values.status }} | 
+| [{{ $name }}](charts/{{$name}}/README.md) | {{ $values.description }} | {{ $values.status }} | {{ $values.kind }} | {{ $values.category }}  
 {{- end }}
 
 

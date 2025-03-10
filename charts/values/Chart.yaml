@@ -24,7 +24,7 @@ version: 0.1.0
 appVersion: "0.0.1"
 
 annotations:
-  chart.kubee/type: "internal"
+  chart.kubee/kind: "internal"
   chart.kubee/status: "stable"
-  chart.kubee/kind: |
+  chart.kubee/engines: |
     - helm

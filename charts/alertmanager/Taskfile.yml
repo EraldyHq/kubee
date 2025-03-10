@@ -8,7 +8,9 @@ tasks:
   # Generate the docs
   docs:
     cmds:
-      - helm-docs
+      # --template-files defines the template to render in order
+      # Relative path is from chart-search-root
+      - helm-docs --chart-search-root=. --template-files=../../.helm-docs/helm-docs-extra-templates.gohtml --template-files=README.md.gotmpl
   # Output the template in the out directory
   tpl:
     cmds:

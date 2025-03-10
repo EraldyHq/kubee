@@ -1,11 +1,24 @@
-# Should be at the root of repo
-# see issue: https://github.com/norwoodj/helm-docs/issues/206
-resources/charts/stable/cert-manager/charts
-resources/charts/stable/dex/charts
-resources/charts/stable/external-dns/charts
-resources/charts/stable/kubernetes-dashboard/charts
-resources/charts/stable/mailpit/charts
-resources/charts/stable/mariadb/charts
-resources/charts/stable/oauth2-proxy/charts
-resources/charts/stable/postal/charts
-resources/charts/stable/traefik/charts
+# Should be at the root of repo see issue: https://github.com/norwoodj/helm-docs/issues/206
+charts/oauth2-proxy/charts
+charts/prometheus/charts
+charts/pushgateway/charts
+charts/mailpit/charts
+charts/keycloak/charts
+charts/vault/charts
+charts/argocd/charts
+charts/mariadb/charts
+charts/postal/charts
+charts/traefik-forward-auth/charts
+charts/grafana/charts
+charts/alertmanager/charts
+charts/healthchecks/charts
+charts/traefik/charts
+charts/whoami/charts
+charts/external-dns/charts
+charts/prometheus-adapter/charts
+charts/external-secrets/charts
+charts/kubernetes-dashboard/charts
+charts/dex/charts
+charts/kubernetes-monitoring/charts
+charts/cert-manager/charts
+charts/gogs/charts

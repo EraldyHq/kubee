@@ -78,7 +78,7 @@ local alertmanager = (import './kube-prometheus/components/alertmanager.libsonne
     name: values.alert_manager_name,  // main by default, mandatory for installation
     version: values.alert_manager_version,
     namespace: values.alert_manager_namespace,
-    image: 'quay.io/prometheus/alertmanager:' + values.alert_manager_version,
+    image: 'quay.io/prometheus/alertmanager:v' + values.alert_manager_version,
     // Number of replicas of each shard to deploy
     // Default is 1 for an alert manager crd but kube-prometheus set it to 2
     replicas: 1,

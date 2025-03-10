@@ -1,29 +1,49 @@
-# Enable or disable alert manager
-# Not a string, a boolean so no quote
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
 enabled: false
-# version
-# https://github.com/prometheus/alertmanager/releases
-version: "v0.28.0"
-# The installation namespace
-# The same value as kube-prometheus
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace (create an ingress if not empty)
 namespace: 'monitoring'
-# Instance name
+
+# @schema
+# title: Hostname
+# description: The public hostname
+# required: true
+# minLength: 1
+# format: hostname
+# @schema
+# -- The public hostname
+hostname: ''
+
+
+# -- The [alert manager version](https://github.com/prometheus/alertmanager/releases)
+version: "0.28.0"
+
+# @schema
+# const: kubee
+# @schema
+# @ignored Instance name
 # The operator uses it to create unique alertmanager
 # It's also a Kube-Prometheus mandatory variable
 name: 'kubee'
-# hostname (install an ingress if not empty)
-hostname: ''
 
-# Memory
+
 resources:
+  # -- Memory
   memory: '50Mi'
 
 
-# Watchdog is the receiver of the watchdog alert
-# https://runbooks.prometheus-operator.dev/runbooks/general/watchdog
-# The Watchdog alert pings a cron monitoring system at fix interval via http or email.
-# The cron monitoring system should alert you if it does not receive this alert.
-# This monitoring system is also known as the `DeadMansSnitch`
+# -- `Watchdog`: the receiver of the [watchdog alert](https://runbooks.prometheus-operator.dev/runbooks/general/watchdog)
 # Example of cron monitoring system: https://healthchecks.io/
 watchdog:
   # Email address (to check if we can send email)
@@ -37,13 +57,13 @@ watchdog:
     # The interval of notification (By default, one http request every 10 min)
     repeat_interval: '10m'
 
-# Opsgenie integration to send alert
-# Enabled if the api key is not empty
-# critical and warning alert are sent to opsgenie
+
 opsgenie:
+  # -- Opsgenie Api Key to send alert. If the api key is not empty,
+  # critical and warning alerts are sent to opsgenie
   api_key: ''
-# Pager Duty
-# https://prometheus.io/docs/alerting/latest/configuration/#pagerduty_config
+
+# @ignored - Not yet finished - [Pager Duty](https://prometheus.io/docs/alerting/latest/configuration/#pagerduty_config)
 pagerduty:
   # The service key is known as integration key in pagerduty documentation
   service_key: ''
@@ -53,15 +73,18 @@ pagerduty:
 
 # Secret
 secret:
-  # The kind of Secret manifest created
-  # Valid values are:
-  # `Secret`: A Kubernetes Secret manifest is created, the values are passed in the values.yaml with environment variables substitution
-  # `ExternalSecret`: A ExternalSecret Manifest is created that retrieves the value in a store (External Secret should be installed).
-  #                   Used for GitOps pulling such as in ArgoCd where the git repository is pulled and applied.
+  # @schema
+  # enum: [ 'Secret', 'ExternalSecret' ]
+  # @schema
+  # -- The kind of Secret manifest created
   kind: 'Secret'
 
 
-# Internal, don't change
-# Used to not output manifest from cross helm dependency
+# -- @ignored Internal Kubee constant
 kubee_internal:
+  # @schema
+  # const: false
+  # @schema
+  # Constant used to not output template from kubee cross dependency in Chart.yaml
+  # Don't change, don't touch
   install_cross_dependency: false

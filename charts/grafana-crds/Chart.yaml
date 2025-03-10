@@ -19,6 +19,6 @@ keywords:
 
 annotations:
   chart.kubee/status: "stable"
-  chart.kubee/type: "crds"
-  chart.kubee/kinds: |
+  chart.kubee/kind: "crds"
+  chart.kubee/engines: |
     - helm

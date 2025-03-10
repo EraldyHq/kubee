@@ -37,15 +37,17 @@ annotations:
       #  "stable" - can be installed
       #  "incubator" - been developed
       #  "deprecated" - no more maintained
-  chart.kubee/type: "crds"
+  chart.kubee/category: monitoring
+  chart.kubee/kind: "crds"
     #  "app"  - apps
-    #  "crds" - can be installed
-    #  "cluster" - been developed
+    #  "crds" - crds
+    #  "cluster" - cluster driver
     #  "internal" - internal
-  chart.kubee/kind: |
-    - helm # helm only
-    - jsonnet # needs jsonnet
-    - kustomize # neets kustomize
+    #  "library" - lib and shared values
+  chart.kubee/engines: |
+    - helm 
+    - jsonnet
+    - kustomize
 ```
 
 

@@ -23,8 +23,8 @@ appVersion: "v0.0.1"
 
 annotations:
   chart.kubee/status: "stable"
-  chart.kubee/type: "app"
-  chart.kubee/kinds: |
+  chart.kubee/kind: "app"
+  chart.kubee/engines: |
     - helm
 
 dependencies:
