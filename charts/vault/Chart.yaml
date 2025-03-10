@@ -36,3 +36,7 @@ dependencies:
     version: 0.0.1
     repository: file://../cluster
     alias: cluster
+  - name: kubee-traefik
+    version: 0.0.1
+    repository: file://../traefik
+    alias: traefik

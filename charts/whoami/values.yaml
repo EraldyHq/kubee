@@ -1,11 +1,31 @@
-# Enabled
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
 enabled: false
-# Namespace
+
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace
 namespace: 'whoami'
 
-# Hostname
+# @schema
+# title: Hostname
+# description: The public hostname
+# required: true
+# minLength: 1
+# format: hostname
+# @schema
+# -- The public hostname
 hostname: ''
 
-# The traefik authentication middleware name to apply
+# -- The traefik authentication middleware name to apply. None if empty.
 auth_middleware: ''
 

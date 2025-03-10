@@ -1,17 +1,12 @@
 {{ define "chart-to-feature-desc" }}
 {{- $chart := . }}
-{{- if eq $chart "kubee-traefik"}}
-creates [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
-{{ else if eq $chart "kubee-cert-manager" }}
-adds [server certificates](https://cert-manager.io/docs/usage/certificate/) to the servers
-{{ else if eq $chart "kubee-external-secrets" }}
-defines secret as [external secrets](https://external-secrets.io/latest/introduction/getting-started/#create-your-first-externalsecret) for GitOps integration (if chosen)
-{{ else if eq $chart "kubee-grafana" }}
-creates [dashboards](https://grafana.com/grafana/dashboards/)
-{{ else if eq $chart "kubee-prometheus" }}
-creates [metrics scraping jobs](https://prometheus.io/docs/concepts/jobs_instances/) and [alert rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
+{{- if eq $chart "kubee-traefik"}}creates [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
+{{- else if eq $chart "kubee-cert-manager" }}adds [server certificates](https://cert-manager.io/docs/usage/certificate/) to the servers
+{{- else if eq $chart "kubee-external-secrets" }}defines secret as [external secrets](https://external-secrets.io/latest/introduction/getting-started/#create-your-first-externalsecret) for GitOps integration (if chosen)
+{{- else if eq $chart "kubee-grafana" }}creates [dashboards](https://grafana.com/grafana/dashboards/)
+{{- else if eq $chart "kubee-prometheus" }}creates [metrics scraping jobs](https://prometheus.io/docs/concepts/jobs_instances/) and [alert rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
+{{- end }}
 {{ end }}
-{{end }}
 
 {{/* Create an URL */}}
 {{ define "kubee-admin-user-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}admin user{{end}}](../../docs/site/admin-user.md){{ end }}
@@ -24,13 +19,16 @@ creates [metrics scraping jobs](https://prometheus.io/docs/concepts/jobs_instanc
 
 ### Kubee Charts Features
 
-These {{ template "kubee-chart-label" "kubee charts"  }} add their features when `enabled`.
+  These {{ template "kubee-chart-label" "kubee charts"  }} add their features when `enabled`.
 
-{{- range .Dependencies  }}
-{{- if eq .Name "kubee-cluster" }}
-{{- continue }}
-{{- end }}
-* [{{ trimPrefix "kubee-" .Name  }}]({{ trimPrefix "file://" .Repository  }}/README.md) {{template "chart-to-feature-desc" .Name }}
-  {{ end }}
+{{ range .Dependencies  }}
+{{- if eq .Name "kubee-cluster" }}{{- continue }}{{- end }}* [{{ trimPrefix "kubee-" .Name  }}]({{ trimPrefix "file://" .Repository  }}/README.md) {{ template "chart-to-feature-desc" .Name }}{{- end }}
 {{ end }}
 
+{{ define "kubee-installation-instruction" }}
+## Installation
+
+```bash
+kubee helmet --cluster cluster-name play {{ trimPrefix "kubee-" .Name }}
+```
+{{ end}}

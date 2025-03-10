@@ -20,14 +20,22 @@ version: 0.0.1
 # It is recommended to use it with quotes.
 appVersion: "v1.10.3" # Whoami version
 
+annotations:
+  chart.kubee/status: "stable"
+  chart.kubee/type: "app"
+  chart.kubee/kind: |
+    - helm
 
 dependencies:
   - name: kubee-cluster
     version: 0.0.1
     alias: cluster
+    repository: file://../cluster
   - name: kubee-cert-manager
     version: 0.0.1
     alias: cert_manager
+    repository: file://../cert-manager
   - name: kubee-traefik
     version: 0.0.1
     alias: traefik
+    repository: file://../traefik
