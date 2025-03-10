@@ -1,0 +1,50 @@
+
+{{ template "kubee-header" .}}
+
+## About
+
+This app:
+* installs the [Grafana Operator](#grafana-operator)
+* instantiate a `Grafana Instance`
+
+
+## Grafana Operator
+
+`Grafana Operator` is a Kubernetes operator built to help you manage your Grafana instances and its resources from within Kubernetes.
+
+The Operator can install and manage:
+* local Grafana instances,
+* Dashboards
+* and Datasource's through Kubernetes Custom resources.
+
+The Grafana Operator automatically syncs the Kubernetes Custom resources and the actual resources in the Grafana Instance.
+
+## Features
+
+
+### Automatic Creation of the Prometheus Data Source
+
+This chart will create for you the Prometheus Data source automatically.
+
+### Auth Form Protection
+
+This chart will protect the authentication form with HTTP authentication headers.
+
+### Support of Internal and External Grafana Instance
+
+By default, `grafana` is installed on the cluster but if you choose `external`, you
+can use a remote instance such as a [Grafana Cloud instance](https://grafana.com/docs/grafana-cloud/developer-resources/infrastructure-as-code/grafana-operator/operator-dashboards-folders-datasources/#grafana-operator-setup)
+
+
+{{ template "kubee-chart-features-section" . }}
+
+
+{{ template "kubee-installation-instruction" . }}
+
+
+{{ template "chart.valuesSection" . }}
+| `grafana-operator` | | | [Optional Grafana Operator Helm Values](https://github.com/grafana/grafana-operator/blob/{{ template "chart.appVersion" . }}/deploy/helm/grafana-operator/values.yaml)
+
+
+
+

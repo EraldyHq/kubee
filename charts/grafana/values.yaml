@@ -1,32 +1,65 @@
-# Not a string, a boolean so no quote
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
 enabled: false
-# namespace
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace
 namespace: 'grafana'
-# The name of the instance (known also as label)
+
+# @schema
+# title: Hostname
+# description: The public hostname
+# format: hostname
+# @schema
+# -- The public hostname
+# The hostname may be used in Prometheus alert to reference dashboard
+# For a Grafana cloud instance, you need to enter: <Grafana-cloud-stack-name>.grafana.net
+hostname: ''
+
+# @ignored The name of the instance (known also as label)
 # It's used :
 # * as selector to apply CRD objects such as Dashboard, .... to this instance. https://grafana.github.io/grafana-operator/docs/overview/#instanceselector
 # * as the instance name
 name: 'grafana'
-# The type of instance:
-# * internal: installation of grafana in the cluster
-# * external: grafana api (for instance: grafana cloud instance, if external, the apiToken is mandatory)
+
+# @schema
+# enum: [ 'internal', 'external', '']
+# @schema
+# -- The type of instance:
+# * internal: installation of grafana in the cluster.
+# * external: grafana api (for instance: grafana cloud instance, if external, the `api_token` is mandatory).
 # An empty type does not install any instance
 type: 'internal'
-# The hostname
-# A non-empty Hostname for a cluster instance will create an ingress
-# The hostname may be used in Prometheus alert to reference dashboard
-# For a Grafana cloud instance, you need to enter: <Grafana-cloud-stack-name>.grafana.net
-hostname: ''
-# The auth credential (used for an external instance)
+
+
+# -- The auth credential (used only for an external instance).
+# See [doc](https://grafana.com/docs/grafana-cloud/developer-resources/infrastructure-as-code/grafana-operator/operator-dashboards-folders-datasources/#grafana-operator-setup)
 api_token: ''
 
+# @ignored
 # The data sources created
 data_sources:
   prometheus:
+    # @schema
+    # const: prometheus
+    # @schema
     name: 'prometheus'
 
-# Don't install cross-dependency
-# used in dependency condition in chart.yaml
-# Don't touch
+
+# -- @ignored Internal Kubee constant
 kubee_internal:
-  dont_install_dependency: false
+  # @schema
+  # const: false
+  # @schema
+  # Constant used to not output template from kubee cross dependency in Chart.yaml
+  # Don't change, don't touch
+  install_cross_dependency: false

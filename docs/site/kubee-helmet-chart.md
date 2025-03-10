@@ -56,3 +56,10 @@ The values file should contain different nodes for:
 * a [CRD charts](crds-chart.md) - a chart that installs CRDS
 * a [Cluster Chart](cluster-chart.md) - a chart that drives the installation of kubernetes
 * a `library chart` - a chart that shares values and function
+
+## Status
+
+* `alpha`: the chart is in development
+* `beta`: the chart can be installed but is not yet dully tested
+* `stable`: the chart can be installed
+* `depreacted`: the chart has been deprecated. An installation may work.

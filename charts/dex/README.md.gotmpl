@@ -13,7 +13,12 @@ This {{ template "kubee-chart-label" "kubee chart" }} installs the [dex identity
 ### Automatic Users
 The {{ template "kubee-admin-user-label" "admin user" }} is created with its email as login.
 
+### Auth Form Protection
+
+This chart will protect the authentication form with HTTP authentication headers.
+
 ### Automatic Clients
+
 If their secret value is not empty, the following clients are added:
 
 * {{ template "kubee-chart-page-label" "oauth2-proxy" }} (if {{ template "kubee-enabled-label" "enabled" }})

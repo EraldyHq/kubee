@@ -35,8 +35,8 @@ Install in no time, in your VPS:
 | [external-dns](charts/external-dns/README.md) | Kubee External Dns Chart | stable | app | dns
 | [external-secrets](charts/external-secrets/README.md) | Kubee External Secrets Charts | stable | app | secret
 | [external-secrets-crds](charts/external-secrets-crds/README.md) | Kubee External Secret Crds Chart | stable | crds | secret
-| [gogs](charts/gogs/README.md) | A kubee gogs chart | na | na | na
-| [grafana](charts/grafana/README.md) | A sub-chart of the Grafana Operator | stable | app | na
+| [gogs](charts/gogs/README.md) | Kubee Gogs Chart | alpha | app | git
+| [grafana](charts/grafana/README.md) | Kubee Grafana Chart | stable | app | monitoring
 | [grafana-crds](charts/grafana-crds/README.md) | Grafana CRDS | stable | crds | na
 | [healthchecks](charts/healthchecks/README.md) | A Kube-e Chart to monitor healthchecks.io | stable | app | na
 | [k3s-ansible](charts/k3s-ansible/README.md) | K3s Ansible Kubee Chart | na | na | na

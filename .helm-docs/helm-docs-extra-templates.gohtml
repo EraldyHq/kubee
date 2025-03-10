@@ -31,6 +31,8 @@
 
 {{ define "kubee-kubectl-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubectl{{end}}](../../docs/site/kubectl.md){{ end }}
 
+{{ define "kubee-chart-status-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}chart status{{end}}](../../docs/site/kubee-helmet-chart.md#status){{ end }}
+
 
 
 {{/* based on https://github.com/norwoodj/helm-docs/blob/37d3055fece566105cf8cff7c17b7b2355a01677/pkg/document/template.go#L178C2-L188C53 */}}
@@ -59,5 +61,13 @@ kubee helmet --cluster cluster-name play {{ trimPrefix "kubee-" .Name }}
 {{ template "chart.typeBadge" . }}{{ template "chart.versionBadge" . }}{{ template "chart.appVersionBadge" . }}
 
 # {{ template "chart.description" . }}
+
+{{/*  Annotations is not yet supported, we need to parse Chart.Yaml */}}
+{{/*  https://github.com/norwoodj/helm-docs/issues/287 */}}
+{{ $chartYaml := (.Files.Get "Chart.yaml") | fromYaml }}
+{{- if eq (index $chartYaml.annotations "chart.kubee/status") "alpha" }}
+> [!WARNING]
+> This chart is in the {{ template "kubee-chart-status-label" "alpha status" }} and is not fit to be installed.
+{{- end }}
 
 {{end}}

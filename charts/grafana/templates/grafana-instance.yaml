@@ -71,6 +71,7 @@ Test:
       annotations:
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.traefik.namespace }}-{{.Values.traefik.middlewares.auth_headers.name}}@kubernetescrd'
         {{- if ne .Values.cert_manager.enabled false }}
         cert-manager.io/cluster-issuer: '{{ .Values.cert_manager.issuers.public.name }}'
         {{- end }}

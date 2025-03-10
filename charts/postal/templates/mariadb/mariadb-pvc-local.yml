@@ -1,10 +1,15 @@
 {{- if ne .Values.cluster.distriution "k3s"}}
 {{ fail "Cluster is not k3s, sotrage class is unknown/unimplemented" }}
 {{- end}}
+{{ $ := mergeOverwrite $ (dict "component" "mariadb") }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postal-mariadb-pvc-local-kubee
+  labels:
+      {{- include "kubee-manifest-labels" . | indent 4}}
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   accessModes:
     - ReadWriteOnce
@@ -12,4 +17,4 @@ spec:
   storageClassName: local-path
   resources:
     requests:
-      storage: 500Mi # minimum 2 times the repo of 300Mb
+      storage: {{.Values.conf_kube.main_db.volume_storage_size}}

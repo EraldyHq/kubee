@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-grafana
-description: A sub-chart of the Grafana Operator
+description: Kubee Grafana Chart
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives
@@ -26,6 +26,7 @@ annotations:
   artifacthub.io/operator: "true"
   chart.kubee/status: "stable"
   chart.kubee/kind: "app"
+  chart.kubee/category: "monitoring"
   chart.kubee/engines: |
     - helm
   chart.chart.kubee/crds: |
@@ -49,9 +50,14 @@ dependencies:
     version: 0.0.1
     repository: file://../prometheus
     alias: prometheus
-    condition: kubee_internal.dont_install_dependency
+    condition: kubee_internal.install_cross_dependency
   - name: kubee-cert-manager
     version: 0.0.1
     repository: file://../cert-manager
     alias: cert_manager
-    condition: kubee_internal.dont_install_dependency
+    condition: kubee_internal.install_cross_dependency
+  - name: kubee-traefik
+    version: 0.0.1
+    repository: file://../traefik
+    alias: traefik
+    condition: kubee_internal.install_cross_dependency

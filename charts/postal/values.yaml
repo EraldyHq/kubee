@@ -383,6 +383,8 @@ conf_kube:
     # [MARIADB_ROOT_HOST](https://mariadb.com/kb/en/mariadb-server-docker-official-image-environment-variables/#mariadb_master_host)
     # ie GRANT ALL PRIVILEGES ON *.* TO 'root'@'root_host'
     root_host: '%'
+    # The size of the volume
+    volume_storage_size: 500Mi
     # The resources
     resources:
       limits:
