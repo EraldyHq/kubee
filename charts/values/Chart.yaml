@@ -26,5 +26,6 @@ appVersion: "0.0.1"
 annotations:
   chart.kubee/kind: "internal"
   chart.kubee/status: "stable"
+  chart.kubee/category: "internal"
   chart.kubee/engines: |
     - helm

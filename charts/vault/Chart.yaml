@@ -31,6 +31,7 @@ appVersion: "0.28.0" # The version of the app packaged
 annotations:
   chart.kubee/kind: "app"
   chart.kubee/status: "stable"
+  chart.kubee/category: "secret"
   chart.kubee/engines: |
     - helm
 

@@ -26,5 +26,6 @@ appVersion: "0.0.0"
 annotations:
   chart.kubee/kind: "crds"
   chart.kubee/status: "stable"
+  chart.kubee/category: "certificate"
   chart.kubee/engines: |
     - helm

@@ -19,6 +19,8 @@
 
 {{ define "kubee-jsonnet-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee jsonnet chart{{end}}](../../docs/site/jsonnet-chart.md){{ end }}
 
+{{ define "kubee-cluster-values-file-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cluster values file{{end}}](../../docs/site/cluster-values.md){{ end }}
+
 {{/* based on https://github.com/norwoodj/helm-docs/blob/37d3055fece566105cf8cff7c17b7b2355a01677/pkg/document/template.go#L178C2-L188C53 */}}
 {{ define "kubee-chart-features-section" }}
 

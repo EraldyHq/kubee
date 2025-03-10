@@ -24,8 +24,8 @@ Install in no time, in your VPS:
 
 ## List of Charts
 
-| Kubee Chart | Description | Status | Kind | Group |
-|------------------|-------------|--------|------|------|
+| Kubee Chart | Description | Status | Kind | Category |
+|------------------|-------------|--------|------|----------|
 | [alertmanager](charts/alertmanager/README.md) | Kubee AlertManager Chart | stable | app | monitoring
 | [argocd](charts/argocd/README.md) | Kubee ArgoCd Chart | stable | na | na
 | [cert-manager](charts/cert-manager/README.md) | The Cert Manager Kubee Chart | na | na | na
@@ -55,11 +55,11 @@ Install in no time, in your VPS:
 | [pushgateway](charts/pushgateway/README.md) | Kubee PushGateway Chart | na | na | na
 | [traefik](charts/traefik/README.md) | A sub-chart of Traefik | na | na | na
 | [traefik-crds](charts/traefik-crds/README.md) | A Helm chart for Kubernetes | na | na | na
-| [traefik-forward-auth](charts/traefik-forward-auth/README.md) | traefik-forward-auth for the Kubee Platform | na | na | na
-| [trust-manager-crds](charts/trust-manager-crds/README.md) | Kubee Trust manager crds chart | stable | crds | na
-| [values](charts/values/README.md) | A Values Helm chart | stable | internal | na
-| [vault](charts/vault/README.md) | Kubee Vault Chart | stable | app | na
-| [whoami](charts/whoami/README.md) | Kubee Whoami Chart | stable | app | na
+| [traefik-forward-auth](charts/traefik-forward-auth/README.md) | traefik-forward-auth for the Kubee Platform | deprecated | app | auth
+| [trust-manager-crds](charts/trust-manager-crds/README.md) | Kubee Trust manager crds chart | stable | crds | certificate
+| [values](charts/values/README.md) | A Values Helm chart | stable | internal | internal
+| [vault](charts/vault/README.md) | Kubee Vault Chart | stable | app | secret
+| [whoami](charts/whoami/README.md) | Kubee Whoami Chart | stable | app | ingress
 
 ## Steps
 

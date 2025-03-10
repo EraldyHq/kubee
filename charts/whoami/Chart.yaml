@@ -24,6 +24,7 @@ appVersion: "v1.10.3" # Whoami version
 annotations:
   chart.kubee/status: "stable"
   chart.kubee/kind: "app"
+  chart.kubee/category: "ingress"
   chart.kubee/engines: |
     - helm
 
