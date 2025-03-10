@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "hosts": {
+      "description": "Hosts",
+      "properties": {
+        "agents": {
+          "description": " - fqdn: '' # The full qualified name (Mandatory) ie kubee-loc-server-01.example.com   ip: ''   # The Ip Mandatory for an ssh/vps cluster   name: '' # The name Mandatory for a docker cluster (ie the container name) @ignored. Not yet in the template The Agents. [Optional]",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "agents"
+        },
+        "all": {
+          "description": "Configuration for all hosts",
+          "properties": {
+            "admin_user": {
+              "description": "[Optional] - An extra admin user added to the Host OS. (ie in the wheel group, used when ssh was hardened by banning root connection). The name and public key should not be empty.",
+              "properties": {
+                "public_key": {
+                  "default": "",
+                  "description": "The public key of the private key",
+                  "required": [],
+                  "title": "public_key",
+                  "type": "string"
+                },
+                "username": {
+                  "default": "",
+                  "description": "The name",
+                  "required": [],
+                  "title": "username",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "username",
+                "public_key"
+              ],
+              "title": "admin_user"
+            },
+            "connection": {
+              "description": "Connection",
+              "properties": {
+                "type": {
+                  "default": "ssh",
+                  "description": " For ansible, ansible_connection. Example of values: ansible.builtin.ssh, community.docker.docker, ... https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#connecting-to-hosts-behavioral-inventory-parameters",
+                  "required": [],
+                  "title": "type"
+                },
+                "username": {
+                  "default": "root",
+                  "description": " ie ansible_user https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html#connecting-to-hosts-behavioral-inventory-parameters",
+                  "required": [],
+                  "title": "username"
+                }
+              },
+              "required": [],
+              "title": "connection"
+            }
+          },
+          "required": [],
+          "title": "all",
+          "type": "object"
+        },
+        "servers": {
+          "description": "The Servers (Mandatory) The number of hosts server must be odd to avoid split brain issues with etcd The minimum number is: - 1 for a single server cluster - 3 for a [high availability cluster](https://docs.k3s.io/datastore/ha-embedded)",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "servers"
+        }
+      },
+      "required": [
+        "all"
+      ],
+      "title": "hosts",
+      "type": "object"
+    },
+    "server_args": {
+      "description": "The [k3s Server Args](https://docs.k3s.io/cli/server) Example: `--kube-apiserver-arg=\"admission-control-config-file=/var/lib/rancher/k3s/server/psa.yaml\"`",
+      "items": {
+        "required": []
+      },
+      "required": [],
+      "title": "server_args"
+    },
+    "token": {
+      "default": "",
+      "description": "The [k3s Token](https://docs.k3s.io/cli/token) (Mandatory). A random secret value that should not change ever because it's used to encrypt the data on disk. You can generate one with `openssl rand -base64 64 | tr -d '\\n'`)",
+      "minLength": 32,
+      "required": [],
+      "title": "token"
+    },
+    "version": {
+      "default": "v1.32.1+k3s1",
+      "description": "The [K3s version](https://github.com/k3s-io/k3s/releases)",
+      "required": [],
+      "title": "version"
+    }
+  },
+  "required": [
+    "hosts"
+  ],
+  "type": "object"
+}

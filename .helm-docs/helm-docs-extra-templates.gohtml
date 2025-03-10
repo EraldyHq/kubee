@@ -29,6 +29,8 @@
 
 {{ define "kubee-cloudflare-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cloudflare{{end}}](../../docs/site/cloudflare.md){{ end }}
 
+{{ define "kubee-cluster-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cluster chart{{end}}](../../docs/site/cluster-chart.md){{ end }}
+
 {{ define "kubee-kubectl-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubectl{{end}}](../../docs/site/kubectl.md){{ end }}
 
 {{ define "kubee-chart-status-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}chart status{{end}}](../../docs/site/kubee-helmet-chart.md#status){{ end }}

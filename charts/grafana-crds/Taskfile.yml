@@ -1,0 +1,9 @@
+version: '3'
+
+tasks:
+  # Generate the docs
+  docs:
+    cmds:
+      - helm-docs --chart-search-root=. --template-files=../../.helm-docs/helm-docs-extra-templates.gohtml --template-files=README.md.gotmpl
+
+

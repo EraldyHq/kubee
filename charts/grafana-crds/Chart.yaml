@@ -6,19 +6,21 @@ description: Grafana CRDS
 type: application
 
 # This is the chart version.
+# Grafana Operator Version
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 version: 5.16.0
 
 # This is the version number of the application being deployed.
-# Grafana Operator Version
-appVersion: "v5.16.0"
+appVersion: "0.0.0"
 
 keywords:
   - crds
   - grafana
+  - kubee
 
 annotations:
   chart.kubee/status: "stable"
   chart.kubee/kind: "crds"
+  chart.kubee/category: "monitoring"
   chart.kubee/engines: |
     - helm

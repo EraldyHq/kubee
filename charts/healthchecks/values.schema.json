@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "enabled": {
+      "default": false,
+      "description": "Boolean to indicate that this chart is or will be installed in the cluster",
+      "required": [],
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "hostname": {
+      "default": "healthchecks.io",
+      "description": "The public hostname",
+      "format": "hostname",
+      "minLength": 1,
+      "required": [],
+      "title": "Hostname"
+    },
+    "namespace": {
+      "default": "monitoring",
+      "description": "The installation namespace",
+      "minLength": 1,
+      "required": [],
+      "title": "Namespace"
+    },
+    "project_uuids": {
+      "description": "[Projects uuid](https://healthchecks.io/docs/configuring_prometheus/) to monitor",
+      "items": {
+        "required": []
+      },
+      "required": [],
+      "title": "project_uuids"
+    },
+    "read_only_api_key": {
+      "default": "",
+      "description": "The [api key](https://healthchecks.io/docs/configuring_prometheus/). The auth credential (used for an external instance)",
+      "required": [],
+      "title": "read_only_api_key"
+    },
+    "type": {
+      "default": "external",
+      "description": " enum: [ 'external', 'internal' ] @schema @ignored - The type of instance: * external: monitoring via api * internal: (not yet supported) installation of healthchecks in the cluster             ie https://github.com/healthchecks/healthchecks",
+      "enum": [
+        "external",
+        "internal"
+      ],
+      "required": [],
+      "title": "type"
+    }
+  },
+  "required": [
+    "enabled",
+    "namespace",
+    "hostname"
+  ],
+  "type": "object"
+}

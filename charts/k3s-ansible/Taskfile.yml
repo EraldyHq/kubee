@@ -12,12 +12,5 @@ tasks:
   # Output the template in the out directory
   tpl:
     cmds:
-      - kubee helmet template --out healthchecks
-  play:
-    cmds:
-      - kubee helmet play healthchecks
-  # recreate the /charts directory
-  dep-force:
-    cmds:
-      - kubee helmet update-dependencies -f healthchecks
+      - kubee helmet template --out k3s-ansible
 

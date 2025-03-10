@@ -1,18 +1,45 @@
-# Not a string, a boolean so no quote
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
 enabled: false
-# namespace
+
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace
 namespace: 'monitoring'
-# The type of instance:
+
+# @schema
+# title: Hostname
+# description: The public hostname
+# required: true
+# minLength: 1
+# format: hostname
+# @schema
+# -- The public hostname
+hostname: 'healthchecks.io'
+
+# @schema
+# enum: [ 'external', 'internal' ]
+# @schema
+# @ignored - The type of instance:
 # * external: monitoring via api
 # * internal: (not yet supported) installation of healthchecks in the cluster
 #             ie https://github.com/healthchecks/healthchecks
 type: external
-# hostname
-hostname: 'healthchecks.io'
-# api key
-# https://healthchecks.io/docs/configuring_prometheus/
+
+# -- The [api key](https://healthchecks.io/docs/configuring_prometheus/).
 # The auth credential (used for an external instance)
 read_only_api_key: ''
-# projects uuid
-# https://healthchecks.io/docs/configuring_prometheus/
+
+# -- [Projects uuid](https://healthchecks.io/docs/configuring_prometheus/)
+# to monitor
 project_uuids: []
+

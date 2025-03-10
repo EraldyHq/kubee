@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-healthchecks
-description: A Kube-e Chart to monitor healthchecks.io
+description: Kubee Healthchecks Chart
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives
@@ -24,6 +24,7 @@ appVersion: "v0.0.1"
 annotations:
   chart.kubee/status: "stable"
   chart.kubee/kind: "app"
+  chart.kubee/category: "monitoring"
   chart.kubee/engines: |
     - helm
 

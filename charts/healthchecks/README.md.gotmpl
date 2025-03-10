@@ -1,0 +1,40 @@
+
+{{ template "kubee-header" .}}
+
+This {{ template "kubee-chart-label" "Kubee Chart" }} permits to monitor a `healthchecks` installation (by default, [healthchecks.io](https://healthchecks.io))
+
+It doesn't support yet the installation of a [Healthchecks instance](https://github.com/healthchecks/healthchecks) on the cluster.
+
+## Usage
+
+
+You can use `healthcheck.io` as:
+* [Watchdog](https://runbooks.prometheus-operator.dev/runbooks/general/watchdog/) if you have installed {{ template "kubee-chart-page-label" "alertManager" }}  
+* cron job monitor if you don't want to use {{ template "kubee-chart-page-label" "pushgateway" }}
+
+
+## Features
+
+### Metrics Scraping
+
+It will scrape the [Healthchecks.io prometheus endpoint](https://healthchecks.io/docs/configuring_prometheus/)
+
+You will find the metrics scrapped on this [page](https://healthchecks.io/docs/configuring_prometheus/)
+
+### healthcheck.io Monitoring
+
+This chart aims to monitor `healthcheck.io` itself thanks to [TargetDownAlert](https://runbooks.prometheus-operator.dev/runbooks/general/targetdown/)
+
+
+
+{{ template "kubee-chart-features-section" . }}
+
+
+{{ template "kubee-installation-instruction" . }}
+
+
+{{ template "chart.valuesSection" . }}
+
+
+
+
