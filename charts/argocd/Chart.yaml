@@ -25,6 +25,8 @@ appVersion: "v2.14.4" # The version of argocd (in kustomization.yml url)
 
 annotations:
   chart.kubee/status: "stable"
+  chart.kubee/kind: "app"
+  chart.kubee/category: "ci-cd"
   chart.kubee/engines: |
     - helm
     - kustomize

@@ -1,0 +1,1512 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "cert_manager": {
+      "description": "The Cert Manager Kubee Chart",
+      "properties": {
+        "cert-manager": {
+          "description": " defined by either the name or alias of your dependency in Chart.yaml @ignored",
+          "properties": {
+            "clusterResourceNamespace": {
+              "default": "",
+              "description": "cluster-resource-namespace=my-namespace https://cert-manager.io/docs/configuration/#cluster-resource-namespace The Cluster Resource Namespace is defaulted as being the `cert-manager` namespace, A ClusterIssuer CA will create the certificate in this namespace https://cert-manager.io/docs/configuration/ca/#deployment",
+              "required": [],
+              "title": "clusterResourceNamespace"
+            },
+            "crds": {
+              "properties": {
+                "enabled": {
+                  "default": false,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                }
+              },
+              "required": [],
+              "title": "crds",
+              "type": "object"
+            },
+            "namespace": {
+              "default": "{{ .Values.namespace }}",
+              "description": "Installation namespace",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
+            "prometheus": {
+              "description": " https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/README.template.md#prometheus",
+              "properties": {
+                "enabled": {
+                  "default": false,
+                  "description": "We don't create it ourselves because it's pretty hard.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "servicemonitor": {
+                  "properties": {
+                    "enabled": {
+                      "default": false,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [],
+                  "title": "servicemonitor",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "prometheus"
+            },
+            "webhook": {
+              "properties": {
+                "timeoutSeconds": {
+                  "default": 4,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [],
+              "title": "webhook",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "cert-manager"
+        },
+        "enabled": {
+          "default": "false",
+          "description": "If true, cert-manager is or will be installed on the cluster When disabled, the default ingress certificate specified on Traefik is used Not a string, a boolean so no quote",
+          "required": [],
+          "title": "enabled"
+        },
+        "global": {
+          "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+          "required": [],
+          "title": "global",
+          "type": "object"
+        },
+        "issuers": {
+          "description": "The ca issuers",
+          "properties": {
+            "kubee": {
+              "description": "The kubee issuer is used to create certificates for the internal service and pods (ie the local private domain cluster.local)",
+              "properties": {
+                "bundle_name": {
+                  "const": "kubee-ca-bundle",
+                  "default": "kubee-ca-bundle",
+                  "description": " const: 'kubee-ca-bundle' @schema The kubee cert bundle with the root CA and the kubee ca cert It's distributed to clients to create secure TLS connection",
+                  "required": [],
+                  "title": "bundle_name"
+                },
+                "name": {
+                  "const": "kubee-ca",
+                  "default": "kubee-ca",
+                  "description": " const: 'kubee-ca' @schema The kubee issuer name.",
+                  "required": [],
+                  "title": "name"
+                }
+              },
+              "required": [],
+              "title": "kubee"
+            },
+            "public": {
+              "description": "The public issuer name. The public issuer is used to create certificate for public access (ie public network / public domain name) Its name should be changed to `letsencrypt-prod` when the `letsencrypt-staging` is working and validated",
+              "properties": {
+                "name": {
+                  "default": "letsencrypt-staging",
+                  "description": " enum: [ 'letsencrypt-staging', 'letsencrypt-prod' ] required: true @schema The public issuer name.",
+                  "enum": [
+                    "letsencrypt-staging",
+                    "letsencrypt-prod"
+                  ],
+                  "required": [],
+                  "title": "name"
+                }
+              },
+              "required": [],
+              "title": "public"
+            }
+          },
+          "required": [],
+          "title": "issuers",
+          "type": "object"
+        },
+        "kubee_internal": {
+          "description": " Don't touch, used to block template output of cross dependency",
+          "properties": {
+            "install_cross_dependency": {
+              "default": false,
+              "required": [],
+              "title": "install_cross_dependency",
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "title": "kubee_internal"
+        },
+        "namespace": {
+          "default": "cert-manager",
+          "description": "The installation namespace",
+          "required": [],
+          "title": "namespace"
+        },
+        "trust-manager": {
+          "description": " @ignored",
+          "properties": {
+            "app": {
+              "properties": {
+                "metrics": {
+                  "properties": {
+                    "service": {
+                      "properties": {
+                        "servicemonitor": {
+                          "properties": {
+                            "enabled": {
+                              "default": false,
+                              "description": "We do it ourselves so that there is some logic",
+                              "required": [],
+                              "title": "enabled",
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [],
+                          "title": "servicemonitor",
+                          "type": "object"
+                        }
+                      },
+                      "required": [],
+                      "title": "service",
+                      "type": "object"
+                    }
+                  },
+                  "required": [],
+                  "title": "metrics",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "app",
+              "type": "object"
+            },
+            "crds": {
+              "properties": {
+                "enabled": {
+                  "default": "false",
+                  "description": " no matches for kind \"Bundle\" in version \"trust.cert-manager.io/v1alpha1\"",
+                  "required": [],
+                  "title": "enabled"
+                }
+              },
+              "required": [],
+              "title": "crds",
+              "type": "object"
+            },
+            "secretTargets": {
+              "description": "Traefik require the TLS data to be secret",
+              "properties": {
+                "authorizedSecrets": {
+                  "description": " not be good executing from another context when creating our values file",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "required": [],
+                        "type": "string"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "authorizedSecrets"
+                },
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                }
+              },
+              "required": [],
+              "title": "secretTargets",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "trust-manager"
+        }
+      },
+      "required": [],
+      "title": "kubee-cert-manager",
+      "type": "object"
+    },
+    "cluster": {
+      "description": "The kubee cluster chart",
+      "properties": {
+        "auth": {
+          "description": "Cluster Auth",
+          "properties": {
+            "admin_user": {
+              "description": "The admin user  * created as admin user in Kubernetes and other app  * added in basicAuth",
+              "properties": {
+                "cluster_role": {
+                  "default": "cluster-admin",
+                  "description": " required: true enum: [ 'cluster-admin', 'admin' ] @schema Kubernetes clusterRole * `cluster-admin` has full access * `admin` does not have access to node and cluster scope related object such as ClusterRoleBinding",
+                  "enum": [
+                    "cluster-admin",
+                    "admin"
+                  ],
+                  "required": [],
+                  "title": "cluster_role"
+                },
+                "email": {
+                  "default": "",
+                  "description": " format: email minLength: 1 @schema The admin email It's used by default in apps. For instance: * letsencrypt registration email * alert notifications: prometheus, argocd",
+                  "format": "email",
+                  "minLength": 1,
+                  "required": [],
+                  "title": "email"
+                },
+                "password": {
+                  "default": "",
+                  "description": " required: true minLength: 1 @schema The admin password",
+                  "minLength": 1,
+                  "required": [],
+                  "title": "password"
+                },
+                "username": {
+                  "default": "admin",
+                  "description": " required: true minLength: 3 @schema The username",
+                  "minLength": 3,
+                  "required": [],
+                  "title": "username"
+                }
+              },
+              "required": [],
+              "title": "admin_user"
+            },
+            "trusted_proxies": {
+              "description": "Trusted Proxies If trusted, reverse proxies handler will proxy and augment the sensitive X-Forwarded-* request headers.  You should set the CIDR value of: * internal proxy such as traefik * and external proxy such as cloudflare It's used by Traefik and all auth application that needs the real ip and trust the X-forward headers",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "trusted_proxies"
+            }
+          },
+          "required": [],
+          "title": "auth",
+          "type": "object"
+        },
+        "chart": {
+          "default": "k3s-ansible",
+          "description": "The cluster chart. The cluster chart is responsible for the installation/management of Kubernetes on the nodes",
+          "required": [],
+          "title": "chart"
+        },
+        "distribution": {
+          "default": "k3s",
+          "description": "The kubernetes distribution k3s is the distribution that has a cluster chart implemented.",
+          "required": [],
+          "title": "distribution"
+        },
+        "dns": {
+          "description": " it's used by cert-manager for the DNS01 proof and by external dns",
+          "properties": {
+            "cloudflare": {
+              "description": "Cloudflare Enabled if the domain list is not empty",
+              "properties": {
+                "api_token": {
+                  "description": " `ApiToken` is now the preferred method (ApiKey is deprecated)",
+                  "properties": {
+                    "key": {
+                      "default": "cloudflare-api-token",
+                      "description": " required: true minLength: 1 @schema The key property (in the secret of k8s or any other provider)",
+                      "minLength": 1,
+                      "required": [],
+                      "title": "key"
+                    },
+                    "kind": {
+                      "default": "Secret",
+                      "description": " required: true enum: [ 'Secret', 'ExternalSecret' ] @schema The type of secret A secret or external secret The chart is responsible for supporting them",
+                      "enum": [
+                        "Secret",
+                        "ExternalSecret"
+                      ],
+                      "required": [],
+                      "title": "kind"
+                    },
+                    "property": {
+                      "default": "",
+                      "description": " Used with the External Secret type",
+                      "required": [],
+                      "title": "property"
+                    },
+                    "value": {
+                      "default": "",
+                      "description": " (Used with the k8s secret type to create a Kubernetes secret)",
+                      "required": [],
+                      "title": "value"
+                    }
+                  },
+                  "required": [],
+                  "title": "api_token"
+                },
+                "dns_zones": {
+                  "description": " format: hostname required: true minLength: 0 @schema The dns Zones that are managed by cloudflare, Cloudflare is enabled if the list is not empty",
+                  "format": "hostname",
+                  "items": {
+                    "required": []
+                  },
+                  "minLength": 0,
+                  "required": [],
+                  "title": "dns_zones"
+                }
+              },
+              "required": [],
+              "title": "cloudflare"
+            }
+          },
+          "required": [],
+          "title": "dns"
+        },
+        "email": {
+          "description": "Default smtp server parameters",
+          "properties": {
+            "smtp": {
+              "description": "Smtp Configuration",
+              "properties": {
+                "from": {
+                  "default": "",
+                  "description": " format: email required: false @schema the default from",
+                  "format": "email",
+                  "required": [],
+                  "title": "from"
+                },
+                "hello": {
+                  "default": "",
+                  "description": "hello (used to present itself, normally the email apex domain name)",
+                  "required": [],
+                  "title": "hello",
+                  "type": "string"
+                },
+                "host": {
+                  "default": "",
+                  "description": " title: Smtp host description: The smtp hostname required: true format: hostname @schema The smtp host if the host is not empty, smtp configuration are added for example for argocd email notifications",
+                  "format": "hostname",
+                  "required": [],
+                  "title": "Smtp host"
+                },
+                "password": {
+                  "default": "",
+                  "description": "the auth connection password",
+                  "required": [],
+                  "title": "password",
+                  "type": "string"
+                },
+                "port": {
+                  "default": 465,
+                  "description": " title: Smtp Port description: The Smtp port type: integer required: false @schema the smtp port",
+                  "required": [],
+                  "title": "Smtp Port",
+                  "type": "integer"
+                },
+                "username": {
+                  "default": "",
+                  "description": "the auth connection username",
+                  "required": [],
+                  "title": "username",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "smtp"
+            }
+          },
+          "required": [],
+          "title": "email",
+          "type": "object"
+        },
+        "global": {
+          "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+          "required": [],
+          "title": "global",
+          "type": "object"
+        },
+        "name": {
+          "default": "kubee",
+          "description": "The cluster name used: * to identify the cluster (for instance, on prometheus remote-write metrics, the name is added as label) * as default first instance name for operator (for instance, prometheus operator allows to install multiple prometheus that needs to be unique. Kube-prometheus asks for a unique name)",
+          "required": [],
+          "title": "name"
+        }
+      },
+      "required": [],
+      "title": "kubee-cluster",
+      "type": "object"
+    },
+    "components": {
+      "description": "ArgoCd Components parameters",
+      "properties": {
+        "argocd_application_controller": {
+          "properties": {
+            "resources": {
+              "properties": {
+                "memory": {
+                  "default": "400Mi",
+                  "description": "Controller Memory. The controller may go out of hand with memory Works at 238 and peak at 370",
+                  "required": [],
+                  "title": "memory"
+                }
+              },
+              "required": [],
+              "title": "resources",
+              "type": "object"
+            }
+          },
+          "required": [
+            "resources"
+          ],
+          "title": "argocd_application_controller",
+          "type": "object"
+        }
+      },
+      "required": [
+        "argocd_application_controller"
+      ],
+      "title": "components",
+      "type": "object"
+    },
+    "conf": {
+      "description": "ArgoCd Configurations",
+      "properties": {
+        "controller_kubectl_parallelism_limit": {
+          "default": "1",
+          "description": "Control the `--kubectl-parallelism-limit` parameters of [argocd-application-controller](https://argo-cd.readthedocs.io/en/stable/operator-manual/server-commands/argocd-application-controller/) Number of allowed concurrent kubectl fork/execs. Any value less the 1 means no limit. (default 20) We change the default to [avoid CPU spike](https://github.com/argoproj/argo-cd/discussions/6964#discussioncomment-1164100)",
+          "required": [],
+          "title": "controller_kubectl_parallelism_limit"
+        },
+        "controller_metrics_cache_expiration": {
+          "default": "24h0m0s",
+          "description": "Control the `--metrics-cache-expiration duration` parameter (disabled  by default. e.g. 24h0m0s) of [argocd-application-controller](https://argo-cd.readthedocs.io/en/stable/operator-manual/server-commands/argocd-application-controller/) As recommended [here](https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/#application-controller-metrics)",
+          "required": [],
+          "title": "controller_metrics_cache_expiration"
+        },
+        "reposerver_parallelism_limit": {
+          "default": "1",
+          "description": "Control the `reposerver.parallelism.limit` parameter [argocd-repo-server](https://argo-cd.readthedocs.io/en/stable/operator-manual/server-commands/argocd-repo-server/) Limit on number of concurrent manifests generate requests (manifest tool invocations) We change the default to avoid [CPU spike](https://github.com/argoproj/argo-cd/discussions/6964#discussioncomment-1164100)",
+          "required": [],
+          "title": "reposerver_parallelism_limit"
+        }
+      },
+      "required": [],
+      "title": "conf",
+      "type": "object"
+    },
+    "external_secrets": {
+      "description": "A Helm sub chart for External Secrets",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "description": "Not a string, a boolean so no quote",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "external-secrets": {
+          "properties": {
+            "installCRDs": {
+              "default": false,
+              "description": "Installed with our chart",
+              "required": [],
+              "title": "installCRDs",
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "title": "external-secrets",
+          "type": "object"
+        },
+        "global": {
+          "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+          "required": [],
+          "title": "global",
+          "type": "object"
+        },
+        "namespace": {
+          "default": "external-secrets",
+          "description": "Namespace",
+          "required": [],
+          "title": "namespace",
+          "type": "string"
+        },
+        "store": {
+          "description": " We support only vault for now If the api token is not empty and vault is enabled, a vault secret store is created",
+          "properties": {
+            "name": {
+              "default": "kubee-external-secret-store",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            },
+            "vault": {
+              "properties": {
+                "api_token": {
+                  "default": "",
+                  "required": [],
+                  "title": "api_token",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "vault",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "store"
+        }
+      },
+      "required": [],
+      "title": "kubee-external-secrets",
+      "type": "object"
+    },
+    "git": {
+      "description": "Git",
+      "properties": {
+        "repo": {
+          "description": "[Git Repo](https://argo-cd.readthedocs.io/en/stable/operator-manual/argocd-repositories-yaml/)",
+          "properties": {
+            "password": {
+              "default": "",
+              "required": [],
+              "title": "password",
+              "type": "string"
+            },
+            "url": {
+              "default": "",
+              "description": " !!! The extension `.git` is mandatory in the URL Not https://github.com/user/argocd but https://github.com/user/argocd.git",
+              "required": [],
+              "title": "url"
+            },
+            "username": {
+              "default": "",
+              "description": "Basic Auth",
+              "required": [],
+              "title": "username",
+              "type": "string"
+            }
+          },
+          "required": [
+            "username",
+            "password"
+          ],
+          "title": "repo"
+        },
+        "webhook": {
+          "description": "[WebHook auth](https://argo-cd.readthedocs.io/en/latest/operator-manual/webhook/)",
+          "properties": {
+            "password": {
+              "default": "",
+              "required": [],
+              "title": "password",
+              "type": "string"
+            },
+            "secret": {
+              "default": "",
+              "required": [],
+              "title": "secret",
+              "type": "string"
+            },
+            "service": {
+              "default": "github",
+              "description": "The service (github, gitlab, gogs, bitbucket, azuredevops)",
+              "required": [],
+              "title": "service",
+              "type": "string"
+            },
+            "username": {
+              "default": "",
+              "required": [],
+              "title": "username",
+              "type": "string"
+            },
+            "uuid": {
+              "default": "",
+              "required": [],
+              "title": "uuid",
+              "type": "string"
+            }
+          },
+          "required": [
+            "service",
+            "secret",
+            "username",
+            "password",
+            "uuid"
+          ],
+          "title": "webhook"
+        }
+      },
+      "required": [],
+      "title": "git",
+      "type": "object"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "grafana": {
+      "description": "A sub-chart of the Grafana Operator",
+      "properties": {
+        "api_token": {
+          "default": "",
+          "description": "The auth credential (used for an external instance)",
+          "required": [],
+          "title": "api_token",
+          "type": "string"
+        },
+        "data_sources": {
+          "description": "The data sources created",
+          "properties": {
+            "prometheus": {
+              "properties": {
+                "name": {
+                  "default": "prometheus",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "prometheus",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "data_sources",
+          "type": "object"
+        },
+        "enabled": {
+          "default": false,
+          "description": "Not a string, a boolean so no quote",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "global": {
+          "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+          "required": [],
+          "title": "global",
+          "type": "object"
+        },
+        "hostname": {
+          "default": "",
+          "description": " A non-empty Hostname for a cluster instance will create an ingress The hostname may be used in Prometheus alert to reference dashboard For a Grafana cloud instance, you need to enter: \u003cGrafana-cloud-stack-name\u003e.grafana.net",
+          "required": [],
+          "title": "hostname"
+        },
+        "kubee_internal": {
+          "description": " used in dependency condition in chart.yaml Don't touch",
+          "properties": {
+            "dont_install_dependency": {
+              "default": false,
+              "required": [],
+              "title": "dont_install_dependency",
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "title": "kubee_internal"
+        },
+        "name": {
+          "default": "grafana",
+          "description": " It's used : * as selector to apply CRD objects such as Dashboard, .... to this instance. https://grafana.github.io/grafana-operator/docs/overview/#instanceselector * as the instance name",
+          "required": [],
+          "title": "name"
+        },
+        "namespace": {
+          "default": "grafana",
+          "description": "namespace",
+          "required": [],
+          "title": "namespace",
+          "type": "string"
+        },
+        "type": {
+          "default": "internal",
+          "description": " * internal: installation of grafana in the cluster * external: grafana api (for instance: grafana cloud instance, if external, the apiToken is mandatory) An empty type does not install any instance",
+          "required": [],
+          "title": "type"
+        }
+      },
+      "required": [],
+      "title": "kubee-grafana",
+      "type": "object"
+    },
+    "hostname": {
+      "default": "",
+      "description": "The argocd hostname (if not empty, an ingress is created)",
+      "required": [],
+      "title": "hostname"
+    },
+    "kubee_internal": {
+      "description": "@ignored Internal Kubee constant",
+      "properties": {
+        "install_cross_dependency": {
+          "const": false,
+          "default": "false",
+          "description": " const: false @schema Constant used to not output template from kubee cross dependency in Chart.yaml Don't change, don't touch",
+          "required": [],
+          "title": "install_cross_dependency"
+        }
+      },
+      "required": [],
+      "title": "kubee_internal"
+    },
+    "namespace": {
+      "default": "argocd",
+      "description": "Namespace",
+      "required": [],
+      "title": "namespace"
+    },
+    "prometheus": {
+      "description": "Kubee Prometheus Chart",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "description": "Enabled",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "exporter_auth": {
+          "description": " This is a global authentication configuration for all exporters",
+          "properties": {
+            "kube_rbac_proxy": {
+              "description": " # https://github.com/brancz/kube-rbac-proxy Kube Prometheus uses rbac-proxy to add an authorization layer on exporter We disable it by default: - to minimize memory (20M by exporters) and the head-heck of authorization problem. - because there is also network policy If enabled, the exporter (node and state metrics) will get an extra containers that handle RBAC authorization",
+              "properties": {
+                "enabled": {
+                  "default": false,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "version": {
+                  "default": "v0.18.2",
+                  "required": [],
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "kube_rbac_proxy"
+            },
+            "network_policy": {
+              "description": " They allow only ingress communication from a prometheus server",
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                }
+              },
+              "required": [],
+              "title": "network_policy"
+            }
+          },
+          "required": [],
+          "title": "exporter_auth"
+        },
+        "global": {
+          "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+          "required": [],
+          "title": "global",
+          "type": "object"
+        },
+        "grafana_cloud": {
+          "description": "grafana cloud remote write prometheus integration",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "password": {
+              "default": "",
+              "description": "The password",
+              "required": [],
+              "title": "password",
+              "type": "string"
+            },
+            "relabel_keep_regex": {
+              "default": "",
+              "description": " Example: `phpfpm_*` would send only the metrics starting with phpfpm `(phpfpm|argocd|node|traefik)_(.*)` would send the metrics starting with phpfpm, argocd, node and traefik Doc: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config By default, no filtering is applied",
+              "required": [],
+              "title": "relabel_keep_regex"
+            },
+            "username": {
+              "default": "",
+              "description": "The username",
+              "required": [],
+              "title": "username",
+              "type": "string"
+            }
+          },
+          "required": [],
+          "title": "grafana_cloud",
+          "type": "object"
+        },
+        "hostname": {
+          "default": "",
+          "description": " If not null, an ingress is added",
+          "required": [],
+          "title": "hostname"
+        },
+        "kubee_internal": {
+          "description": " in the prometheus release It's used in the chart dependencies condition",
+          "properties": {
+            "install_cross_dependency": {
+              "default": false,
+              "description": "Don't modify the value, don't change",
+              "required": [],
+              "title": "install_cross_dependency",
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "title": "kubee_internal"
+        },
+        "max_block_duration": {
+          "default": "30m",
+          "description": "storage.tsdb.max-block-duration=2h) Note that the default value is * 1h for the prometheus query ui * 1h for the grafana explore panel (ie last hour) * 15m for Kubernetes dashboard * 24h for Headlamp We chose 30m to be below the target of 400Mi memory size with kubernetes monitoring installed",
+          "required": [],
+          "title": "max_block_duration"
+        },
+        "name": {
+          "default": "kubee",
+          "description": " (used by clients such as the grafana Chart to create a connection)",
+          "required": [],
+          "title": "name"
+        },
+        "namespace": {
+          "default": "monitoring",
+          "description": " used by clients such as the Grafana Chart to create the data source URI",
+          "required": [],
+          "title": "namespace"
+        },
+        "new_relic": {
+          "description": "new relic remote write prometheus integration",
+          "properties": {
+            "bearer": {
+              "default": "",
+              "description": "for remote write",
+              "required": [],
+              "title": "bearer",
+              "type": "string"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "relabel_keep_regex": {
+              "default": "",
+              "description": " Example: `phpfpm_*` would send only the metrics starting with phpfpm `(phpfpm|argocd|node|traefik)_(.*)` would send the metrics starting with phpfpm, argocd, node and traefik Doc: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config By default, no filtering is applied",
+              "required": [],
+              "title": "relabel_keep_regex"
+            }
+          },
+          "required": [],
+          "title": "new_relic",
+          "type": "object"
+        },
+        "operator": {
+          "description": "Prometheus Operator",
+          "properties": {
+            "resources": {
+              "description": "CPU/Memory",
+              "properties": {
+                "memory": {
+                  "default": "50Mi",
+                  "description": "Memory of the prometheus operator instance (value based on experience)",
+                  "required": [],
+                  "title": "memory",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "resources",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "operator",
+          "type": "object"
+        },
+        "resources": {
+          "description": "Memory Limit",
+          "properties": {
+            "memory": {
+              "default": "400Mi",
+              "description": " Dynamically, if you query data above the max_block_duration, data is loaded in memory Why? 400Mi. This is: * the default of Kube-Prometheus with default memory setting. * the amount that we get after installing kubernetes-monitoring This is our goal",
+              "required": [],
+              "title": "memory"
+            }
+          },
+          "required": [],
+          "title": "resources",
+          "type": "object"
+        },
+        "retention": {
+          "default": "30m",
+          "description": "storage.tsdb.retention.time=24h) Data in memory is 2 hour old, by setting retention to 2h, we don't allow to query data over 2 hours and to load data in memory The default is 24h Why 30m? Equal to max_block_duration so that we are sure that we will not increase memory of the prometheus pod",
+          "required": [],
+          "title": "retention"
+        },
+        "scrape_interval": {
+          "default": "1m",
+          "description": " It does influence memory as Prometheus keeps by default 2 hours of scraping in memory (max_block_duration) Default was 30s",
+          "required": [],
+          "title": "scrape_interval"
+        },
+        "secret": {
+          "description": "The kind of secret created",
+          "properties": {
+            "kind": {
+              "default": "Secret",
+              "description": " Values supported `Secret` or `ExternalSecret` With `ExternalSecret`, you can use a gitops pull solutions such as ArgoCd/Flux.",
+              "required": [],
+              "title": "kind"
+            }
+          },
+          "required": [],
+          "title": "secret",
+          "type": "object"
+        },
+        "version": {
+          "default": "3.1.0",
+          "description": " https://github.com/prometheus/prometheus/releases",
+          "required": [],
+          "title": "version"
+        }
+      },
+      "required": [],
+      "title": "kubee-prometheus",
+      "type": "object"
+    },
+    "secret": {
+      "description": "Kind of secret generated",
+      "properties": {
+        "kind": {
+          "default": "Secret",
+          "description": " enum: [ 'Secret', 'ExternalSecret' ] @schema Valid values are: `Secret`: A Kubernetes Secret manifest is created, the values are passed in the values.yaml with environment variables substitution `ExternalSecret`: A ExternalSecret Manifest is created that retrieves the value in a store (External Secret should be installed).                   Used for GitOps pulling such as in ArgoCd where the git repository is pulled and applied.",
+          "enum": [
+            "Secret",
+            "ExternalSecret"
+          ],
+          "required": [],
+          "title": "kind"
+        }
+      },
+      "required": [],
+      "title": "secret"
+    },
+    "traefik": {
+      "description": "A sub-chart of Traefik",
+      "properties": {
+        "auth": {
+          "description": "Ingress Auth Configuration",
+          "properties": {
+            "middleware_name": {
+              "default": "basic-auth",
+              "description": " That's applied for internal web app (such as Traefik Dashboard, Prometheus, Alert Manager, ...) The app or api endpoints are still available from an internal container The supported auth are basic-auth and forward-auth Before changing to forward-auth, you should test it with the whoami chart",
+              "required": [],
+              "title": "middleware_name"
+            },
+            "private_networks": {
+              "description": " used for Ingress Ip restrictions (Traefik IpAllowList) example for a home ip: 143.176.206.80/32",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "private_networks"
+            }
+          },
+          "required": [],
+          "title": "auth",
+          "type": "object"
+        },
+        "default_certificate": {
+          "description": " Set the default certificate as default traefik cert Mandatory for kubernetes-dashboard on a local development The rootCA should be added to the OS/Browser as trusted root CA https://doc.traefik.io/traefik/https/tls/#default-certificate",
+          "properties": {
+            "cert": {
+              "default": "",
+              "description": "set-file KUBEE.traefik.defaultCertificate.cert=cert/kube-x.dev+1.pem",
+              "required": [],
+              "title": "cert"
+            },
+            "key": {
+              "default": "",
+              "description": "set-file KUBEE.traefik.defaultCertificate.key=cert/kube-x.dev+1-key.pem",
+              "required": [],
+              "title": "key"
+            }
+          },
+          "required": [],
+          "title": "default_certificate"
+        },
+        "enabled": {
+          "default": "false",
+          "description": " Not a string, no quote",
+          "required": [],
+          "title": "enabled"
+        },
+        "entrypoints": {
+          "description": " Used by template that creates IngressRoute (http and tcp)",
+          "properties": {
+            "smtps": {
+              "properties": {
+                "name": {
+                  "default": "smtps",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "smtps",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "entrypoints"
+        },
+        "global": {
+          "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+          "required": [],
+          "title": "global",
+          "type": "object"
+        },
+        "hostname": {
+          "default": "",
+          "description": " The FQDN is dnsName.apexDomain If not empty, an ingress is created example: hostname: 'traefik-haship.nip.io'",
+          "required": [],
+          "title": "hostname"
+        },
+        "kubee_internal": {
+          "description": "Don't change",
+          "properties": {
+            "install_cross_dependency": {
+              "default": false,
+              "required": [],
+              "title": "install_cross_dependency",
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "title": "kubee_internal",
+          "type": "object"
+        },
+        "middlewares": {
+          "description": " https://doc.traefik.io/traefik/middlewares",
+          "properties": {
+            "auth_headers": {
+              "description": "Middleware to apply auth headers on website with an authentication form",
+              "properties": {
+                "name": {
+                  "default": "auth-headers",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "auth_headers",
+              "type": "object"
+            },
+            "basic_auth": {
+              "description": " With the email as main identifier https://doc.traefik.io/traefik/middlewares/http/basicauth/ The admin user is added",
+              "properties": {
+                "name": {
+                  "default": "basic-auth",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "users": {
+                  "description": "List of extra users alongside the admin user",
+                  "required": [],
+                  "title": "users",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "basic_auth"
+            },
+            "forward_auth": {
+              "description": " https://doc.traefik.io/traefik/middlewares/http/forwardauth/",
+              "properties": {
+                "name": {
+                  "default": "forward-auth",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "forward_auth"
+            },
+            "forward_auth_bearer": {
+              "description": " It can be applied on Kube API client such as Kubernetes Dashboard'",
+              "properties": {
+                "name": {
+                  "default": "forward-auth-bearer",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "forward_auth_bearer"
+            },
+            "git_hooks": {
+              "description": " Used in Gitops app such as Argocd https://doc.traefik.io/traefik/middlewares/http/ipallowlist/",
+              "properties": {
+                "name": {
+                  "default": "git-hooks",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "service": {
+                  "default": "github",
+                  "required": [],
+                  "title": "service",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "git_hooks"
+            },
+            "private_network": {
+              "description": " Ip are given via the auth.private_networks",
+              "properties": {
+                "name": {
+                  "default": "private-network",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "private_network"
+            }
+          },
+          "required": [],
+          "title": "middlewares"
+        },
+        "namespace": {
+          "default": "kube-system",
+          "description": " The kube-system namespace tells kubernetes that this app has a higher priority",
+          "required": [],
+          "title": "namespace"
+        },
+        "traefik": {
+          "description": " https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml",
+          "properties": {
+            "additionalArguments": {
+              "items": {
+                "anyOf": [
+                  {
+                    "required": [],
+                    "type": "string"
+                  },
+                  {
+                    "required": [],
+                    "type": "string"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "additionalArguments",
+              "type": "array"
+            },
+            "ingressRoute": {
+              "description": " https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#access-traefik-dashboard-without-exposing-it",
+              "properties": {
+                "dashboard": {
+                  "properties": {
+                    "enabled": {
+                      "default": false,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [],
+                  "title": "dashboard",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "ingressRoute"
+            },
+            "metrics": {
+              "properties": {
+                "prometheus": {
+                  "description": "Prometheus is enabled by default",
+                  "properties": {
+                    "service": {
+                      "description": " This value creates a dedicated metrics service to use with ServiceMonitor Enable Prometheus Metrics https://doc.traefik.io/traefik/observability/metrics/prometheus/ Metrics Info: https://doc.traefik.io/traefik/observability/metrics/overview/#global-metrics",
+                      "properties": {
+                        "enabled": {
+                          "default": false,
+                          "required": [],
+                          "title": "enabled",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [],
+                      "title": "service"
+                    }
+                  },
+                  "required": [],
+                  "title": "prometheus",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "metrics",
+              "type": "object"
+            },
+            "nodeSelector": {
+              "description": "nodeSelector is the simplest recommended form of node selection constraint.",
+              "required": [],
+              "title": "nodeSelector"
+            },
+            "ports": {
+              "properties": {
+                "smtp": {
+                  "description": " It creates the smtp [entrypoint](https://doc.traefik.io/traefik/routing/entrypoints/) - \"--entryPoints.smtp.address=:8025/tcp\"",
+                  "properties": {
+                    "expose": {
+                      "description": "Defines whether the port is listed in the service if service.type is LoadBalancer or NodePort.",
+                      "properties": {
+                        "default": {
+                          "default": true,
+                          "required": [],
+                          "title": "default",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [],
+                      "title": "expose",
+                      "type": "object"
+                    },
+                    "exposedPort": {
+                      "default": 25,
+                      "description": "Port on the host",
+                      "required": [],
+                      "title": "exposedPort",
+                      "type": "integer"
+                    },
+                    "port": {
+                      "default": 8025,
+                      "description": "Container port",
+                      "required": [],
+                      "title": "port",
+                      "type": "integer"
+                    },
+                    "protocol": {
+                      "default": "TCP",
+                      "description": "Protocol",
+                      "required": [],
+                      "title": "protocol",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "smtp"
+                },
+                "smtps": {
+                  "description": "SMTP submission over TLS",
+                  "properties": {
+                    "expose": {
+                      "description": "Defines whether the port is listed in the service if service.type is LoadBalancer or NodePort.",
+                      "properties": {
+                        "default": {
+                          "default": true,
+                          "required": [],
+                          "title": "default",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [],
+                      "title": "expose",
+                      "type": "object"
+                    },
+                    "exposedPort": {
+                      "default": 465,
+                      "description": "Port on the host",
+                      "required": [],
+                      "title": "exposedPort",
+                      "type": "integer"
+                    },
+                    "port": {
+                      "default": 8465,
+                      "description": "Container port",
+                      "required": [],
+                      "title": "port",
+                      "type": "integer"
+                    },
+                    "protocol": {
+                      "default": "TCP",
+                      "description": "Protocol",
+                      "required": [],
+                      "title": "protocol",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "smtps",
+                  "type": "object"
+                },
+                "web": {
+                  "description": "Redirections",
+                  "properties": {
+                    "redirections": {
+                      "description": "https://doc.traefik.io/traefik/routing/entrypoints/#redirection",
+                      "properties": {
+                        "entryPoint": {
+                          "properties": {
+                            "scheme": {
+                              "default": "https",
+                              "required": [],
+                              "title": "scheme",
+                              "type": "string"
+                            },
+                            "to": {
+                              "default": "websecure",
+                              "required": [],
+                              "title": "to",
+                              "type": "string"
+                            }
+                          },
+                          "required": [],
+                          "title": "entryPoint",
+                          "type": "object"
+                        }
+                      },
+                      "required": [],
+                      "title": "redirections",
+                      "type": "object"
+                    }
+                  },
+                  "required": [],
+                  "title": "web",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "ports",
+              "type": "object"
+            },
+            "providers": {
+              "properties": {
+                "kubernetesCRD": {
+                  "properties": {
+                    "allowEmptyServices": {
+                      "default": "true",
+                      "description": " https://acouvreur.github.io/sablier/#/guides/code-server-traefik-kubernetes?id=_3-deploy-traefik-using-helm",
+                      "required": [],
+                      "title": "allowEmptyServices"
+                    }
+                  },
+                  "required": [],
+                  "title": "kubernetesCRD",
+                  "type": "object"
+                },
+                "kubernetesIngress": {
+                  "properties": {
+                    "allowEmptyServices": {
+                      "default": true,
+                      "description": "return 503, needed to start stopped container with sablier",
+                      "required": [],
+                      "title": "allowEmptyServices",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [],
+                  "title": "kubernetesIngress",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "providers",
+              "type": "object"
+            },
+            "service": {
+              "properties": {
+                "ipFamilies": {
+                  "items": {
+                    "anyOf": [
+                      {
+                        "required": [],
+                        "type": "string"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "ipFamilies",
+                  "type": "array"
+                },
+                "ipFamilyPolicy": {
+                  "default": "SingleStack",
+                  "description": " You can't set up a nodePort because the port is a high-end port between 30000-32767 You can install it as DaemonSet + Node port ? https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#install-as-a-daemonset",
+                  "required": [],
+                  "title": "ipFamilyPolicy"
+                },
+                "spec": {
+                  "properties": {
+                    "externalTrafficPolicy": {
+                      "default": "Local",
+                      "description": "Allow Origin Remote IP to be forwarded",
+                      "required": [],
+                      "title": "externalTrafficPolicy",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "spec",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "service",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "traefik"
+        }
+      },
+      "required": [],
+      "title": "kubee-traefik",
+      "type": "object"
+    }
+  },
+  "required": [
+    "git",
+    "conf",
+    "components"
+  ],
+  "type": "object"
+}

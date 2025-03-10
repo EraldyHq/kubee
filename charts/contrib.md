@@ -37,7 +37,7 @@ annotations:
       #  "stable" - can be installed
       #  "incubator" - been developed
       #  "deprecated" - no more maintained
-  chart.kubee/category: monitoring
+  chart.kubee/category: monitoring 
   chart.kubee/kind: "crds"
     #  "app"  - apps
     #  "crds" - crds

@@ -43,12 +43,7 @@ A `Kubee Helmet Chart`:
 
 Each `values.yaml` file should contain at least the following properties:
 * `namespace = name`: the namespace where to install the chart
-* `enabled = false`: if the chart is used or not. The value should be false. It's used to:
-    * conditionally applied manifest. If there is no grafana, don't install the dashboard
-    * cluster bootstrapping (ie install all charts at once)
-
-> [!Info]
-> The `enabled` property comes from the [Helm best practices](https://helm.sh/docs/chart_best_practices/dependencies/#conditions-and-tags)
+* `enabled = false`: the [enabled](chart-enabled.md)
 
 The values file should contain different nodes for:
 * the chart itself

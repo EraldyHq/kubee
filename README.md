@@ -27,11 +27,11 @@ Install in no time, in your VPS:
 | Kubee Chart | Description | Status | Kind | Category |
 |------------------|-------------|--------|------|----------|
 | [alertmanager](charts/alertmanager/README.md) | Kubee AlertManager Chart | stable | app | monitoring
-| [argocd](charts/argocd/README.md) | Kubee ArgoCd Chart | stable | na | na
-| [cert-manager](charts/cert-manager/README.md) | The Cert Manager Kubee Chart | na | na | na
-| [cert-manager-crds](charts/cert-manager-crds/README.md) | The cert manager crds kubee chart | na | na | na
-| [cluster](charts/cluster/README.md) | The kubee cluster chart | na | na | na
-| [dex](charts/dex/README.md) | The dex kubee chart | na | na | na
+| [argocd](charts/argocd/README.md) | Kubee ArgoCd Chart | stable | app | ci-cd
+| [cert-manager](charts/cert-manager/README.md) | Kubee Cert-Manager Chart | stable | app | certificate
+| [cert-manager-crds](charts/cert-manager-crds/README.md) | Kubee Cert-Manager Crds Chart | stable | crds | certificate
+| [cluster](charts/cluster/README.md) | Kubee Cluster Chart | stable | library | cluster
+| [dex](charts/dex/README.md) | The dex kubee chart | stable | app | auth
 | [external-dns](charts/external-dns/README.md) | The external-dns kubee chart | na | na | na
 | [external-secret-crds](charts/external-secret-crds/README.md) | Grafana CRDS | na | na | na
 | [external-secrets](charts/external-secrets/README.md) | A Helm sub chart for External Secrets | na | na | na

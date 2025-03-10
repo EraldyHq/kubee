@@ -36,46 +36,47 @@ clients:
     # @schema
     # const: 'kubernetes'
     # @schema
-    # -- The Kubernetes client id (ie token audience, fix value)
+    # @ignored The Kubernetes client id (ie token audience, fix value)
     client_id: 'kubernetes'
-    # -- List of trusted client id
-    # All clients that needs kubernetes access should be in that list.
+    # -- List of kubernetes trusted client id
+    # (All clients that needs kubernetes access should be in that list.)
     trusted_peers: []
+  # -- Oauth2_proxy client
   oauth2_proxy:
     # @schema
     # const: 'oauth2-proxy'
     # @schema
-    # -- The oauth2-proxy client id.
+    # The oauth2-proxy client id.
     # If changed, all kubee charts that depends on it should be deployed again (traefik,...)
     client_id: 'oauth2-proxy'
     # @schema
     # title: 'The oauth2-proxy client id secret'
     # @schema
-    # -- The oidc client secret (It is used to exchange the code between oauth2-proxy and dex).
+    # The oidc client secret (It is used to exchange the code between oauth2-proxy and dex).
     # Example: `openssl rand -base64 32`
     secret: ''
-  # Kubectl (ie kubectl oidc-login)
+  # -- Kubectl (ie kubectl oidc-login)
   # Added if the secret is not empty
   kubectl:
     # @schema
     # const: 'kubectl'
     # @schema
-    # -- The kubectl client id
+    # The kubectl client id
     client_id: 'kubectl' # If changed, all kubectl config should be modified
-    # -- The oidc client secret (used to exchange the code between kubectl and dex)
+    # The oidc client secret (used to exchange the code between kubectl and dex)
     # Example: `openssl rand -base64 32`
     secret: ''
-  # Postal
+  # -- Postal client
   postal:
     # @schema
     # title: Postal Client Id
     # required: true
     # minLength: 1
     # @schema
-    # -- The postal client id.
+    # The postal client id.
     # If changed, postal should be redeployed
     client_id: 'oauth2-proxy'
-    # -- The oidc client secret (used to exchange the code between postal and dex)
+    # The oidc client secret (used to exchange the code between postal and dex)
     # Example: `openssl rand -base64 32`
     secret: ''
 

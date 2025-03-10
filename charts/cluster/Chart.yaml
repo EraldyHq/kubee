@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-cluster
-description: The kubee cluster chart
+description: Kubee Cluster Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -16,3 +16,8 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "0.0.1" # The version of the app packaged
+
+annotations:
+  chart.kubee/status: "stable"
+  chart.kubee/kind: "library"
+  chart.kubee/category: "cluster"

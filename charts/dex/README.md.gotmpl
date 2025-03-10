@@ -5,22 +5,31 @@
 
 # {{ template "chart.description" . }}
 
-`Dex` is an authentication application that supports:
+This {{ template "kubee-chart-label" "kubee chart" }} installs the [dex identity provider](https://dexidp.io/).
+
+`Dex` supports:
 * a local password store
 * and connectors to other open identity provider
 
 
 ## Features
 
-By default,
-* the admin user is created with its email as login.
-* [oauth2-proxy](../oauth2-proxy/README.md) is added as client if enabled
-* `kubectl` is added as client if its secret value is not empty
+### Automatic Users
+The {{ template "kubee-admin-user-label" "admin user" }} is created with its email as login.
+
+### Automatic Clients
+If their secret value is not empty, the following clients are added:
+
+* {{ template "kubee-chart-page-label" "oauth2-proxy" }} (if {{ template "kubee-enabled-label" "enabled" }})
+* {{ template "kubee-chart-page-label" "postal" }} (if {{ template "kubee-enabled-label" "enabled" }})
+* {{ template "kubee-kubectl-label" "kubectl" }} 
+
+{{ template "kubee-chart-features-section" . }}
+
 
 ## Cluster Values Example
 
-
-In your [cluster](../../../docs/site/cluster-creation.md) values file, you need to fill at minimum this values:
+In your {{ template "kubee-cluster-values-file-label" "cluster values file" }}, you need to fill at minimum this values:
 ```yaml
 dex:
   enabled: true
@@ -34,13 +43,15 @@ dex:
       secret: '${DEX_KUBECTL_CLI_SECRET}'
 ```
 
-In the cluster `.envrc` file, set the env `DEX_OAUTH_CLI_SECRET` and `DEX_KUBECTL_CLI_SECRET` with your favorite identity store.
+In the cluster `.envrc` file, set the env `DEX_OAUTH_CLI_SECRET` and `DEX_KUBECTL_CLI_SECRET` with your favorite secret store.
 
-Example with `pass`
+Example with {{ template "kubee-pass-label" . }}:
 ```bash
 export DEX_FORWARD_AUTH_CLI_SECRET
 DEX_FORWARD_AUTH_CLI_SECRET=$(pass "cluster_name/dex/forward-auth-cli-secret")
 ```
+
+{{ template "kubee-installation-instruction" . }}
 
 {{ template "chart.valuesSection" . }}
 | dex | object | | [Chart Dex values](https://github.com/dexidp/helm-charts/blob/dex-{{ template "chart.appVersion" . }}/charts/dex/values.yaml) |

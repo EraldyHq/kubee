@@ -5,22 +5,25 @@
 
 # {{ template "chart.description" . }}
 
-This `kubee chart` represents a `kubee cluster`.
+This `library chart` represents a `kubee cluster`.
 
-It adds support for:
+It adds support for sharing:
 * cluster values
   * name 
   * nodes 
 * common app values such as:
   * users (admin) 
   * email
-  * [cloudflare dns](../../../../docs/site/cloudflare.md)
+  * {{ template "kubee-cloudflare-label" . }}
   * trusted proxies
 * and a [common library of functions](templates/_helpers.tpl)
 
 
 This chart is a dependency of all `Kubee charts`
 
+## Installation
+
+You don't install a library chart.
 
 
 {{ template "chart.valuesSection" . }}

@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-cert-manager
-description: The Cert Manager Kubee Chart
+description: Kubee Cert-Manager Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -27,6 +27,9 @@ appVersion: "v1.17.1-v0.16.0"
 
 annotations:
   app.kubernetes.io/name: "cert-manager"
+  chart.kubee/status: "stable"
+  chart.kubee/kind: "app"
+  chart.kubee/category: "certificate"
   chart.kubee/crds: |
     - name: kubee-cert-manager-crds
       version: 1.17.1

@@ -1,3 +1,4 @@
+# Ignore charts dependencies directories
 # Should be at the root of repo see issue: https://github.com/norwoodj/helm-docs/issues/206
 charts/oauth2-proxy/charts
 charts/prometheus/charts

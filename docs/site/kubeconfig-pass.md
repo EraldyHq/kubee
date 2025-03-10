@@ -3,7 +3,7 @@
 `kubee` will generate a kube config file dynamically if
 * the `KUBECONFIG` env is not set 
 * no default config file is found at `~/.kube/config`
-* the command `pass` is found
+* the command [pass](pass.md) is found
 
 
 ## How
