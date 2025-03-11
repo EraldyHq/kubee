@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-k3s-ansible
-description: K3s Ansible Kubee Chart
+description: Kubee K3s-ansible cluster Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #

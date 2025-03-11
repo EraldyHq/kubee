@@ -1,7 +1,42 @@
 version: '3'
 
 tasks:
+
+  # Generate the template in the out directory
+  tpl:
+    cmds:
+      - kubee helmet template --out $(basename {{.USER_WORKING_DIR}})
+  # Restart
+  restart:
+    cmds:
+      - kubee app restart $(basename {{.USER_WORKING_DIR}})
+  play:
+    cmds:
+      - kubee helmet play $(basename {{.USER_WORKING_DIR}})
+  # recreate the /charts directory
+  dep:
+    cmds:
+      - kubee helmet update-dependencies -f $(basename {{.USER_WORKING_DIR}})
+  # recreate the /charts directory
+  dep-force:
+    cmds:
+      - kubee helmet update-dependencies -f $(basename {{.USER_WORKING_DIR}})
+  # Generate the values.schema.json
+  schema:
+    cmds:
+        - helm schema -chart-search-root {{.USER_WORKING_DIR}} --helm-docs-compatibility-mode -k additionalProperties
+  # Generate the readme
   docs:
+    cmds:
+      - |
+        if [ "{{.USER_WORKING_DIR}}" == "{{.TASK_DIR}}" ]; then
+          echo "We don't generate for all charts for now"
+          exit 1
+        fi
+        helm-docs --chart-search-root={{.USER_WORKING_DIR}} --template-files={{.TASK_DIR}}/.helm-docs/helm-docs-extra-templates.gohtml --template-files=README.md.gotmpl
+
+  # Generate the .helmdocsignore file
+  docsignore:
     cmds:
       - |
         # Create the .helmdocsignore file
@@ -11,7 +46,7 @@ tasks:
         echo "# Should be at the root of repo see issue: https://github.com/norwoodj/helm-docs/issues/206" >> "$HELM_DOCS_IGNORE"
         find "charts" -maxdepth 2 -mindepth 1 -type d  -name "charts" >> "$HELM_DOCS_IGNORE"
 
-  # Generate the readme
+  # Generate the root Readme.md
   readme:
     cmds:
       - |
@@ -26,7 +61,3 @@ tasks:
         # Path argument in helm-docs should be relative to chart-search-root (not absolute ...)
         (cd $OUTPUT_DIR; helm-docs)
         cp "$OUTPUT_DIR/README.md" "README.md"
-        
-  
-      
-      

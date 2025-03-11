@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-grafana-crds
-description: Grafana CRDS
+description: Kubee Grafana Crds Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 type: application

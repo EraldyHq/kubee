@@ -37,10 +37,10 @@ Install in no time, in your VPS:
 | [external-secrets-crds](charts/external-secrets-crds/README.md) | Kubee External Secret Crds Chart | stable | crds | secret
 | [gogs](charts/gogs/README.md) | Kubee Gogs Chart | alpha | app | git
 | [grafana](charts/grafana/README.md) | Kubee Grafana Chart | stable | app | monitoring
-| [grafana-crds](charts/grafana-crds/README.md) | Grafana CRDS | stable | crds | monitoring
+| [grafana-crds](charts/grafana-crds/README.md) | Kubee Grafana Crds Chart | stable | crds | monitoring
 | [healthchecks](charts/healthchecks/README.md) | Kubee Healthchecks Chart | stable | app | monitoring
-| [k3s-ansible](charts/k3s-ansible/README.md) | K3s Ansible Kubee Chart | beta | cluster | k3s
-| [keycloak](charts/keycloak/README.md) | A kubee keycloak chart | na | na | na
+| [k3s-ansible](charts/k3s-ansible/README.md) | Kubee K3s-ansible cluster Chart | beta | cluster | k3s
+| [keycloak](charts/keycloak/README.md) | A kubee keycloak chart | alpha | app | auth
 | [kubernetes-dashboard](charts/kubernetes-dashboard/README.md) | Kubernetes Dashboard Kubee Chart | na | na | na
 | [kubernetes-monitoring](charts/kubernetes-monitoring/README.md) | Kubee Kubernetes Monitoring Chart | na | na | na
 | [mailpit](charts/mailpit/README.md) | Kubee Mailpit Chart | na | na | na

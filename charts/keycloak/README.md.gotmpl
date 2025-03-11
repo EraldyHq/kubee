@@ -1,0 +1,46 @@
+
+{{ template "kubee-header" .}}
+
+
+> [!INFO] We recommend {{ template "kubee-chart-page-label" "dex"}}.
+> As it's less heavy.
+
+The manifests in this directory is the first attempt
+to install [Keycloak](https://www.keycloak.org/) without operator
+based on [starting_keycloak](https://www.keycloak.org/server/configuration#_starting_keycloak)
+
+## Dev Note
+
+### No Helm
+They don't have any official Helm, they have an operator.
+
+### start-dev (HTTP is enabled)
+
+Dev mode from the getting started guid
+https://raw.githubusercontent.com/keycloak/keycloak-quickstarts/refs/heads/main/kubernetes/keycloak.yaml
+
+### Prod
+
+https://github.com/lukaszbudnik/keycloak-kubernetes/blob/main/keycloak.yaml
+
+
+
+
+
+## Features
+
+
+
+{{ template "kubee-chart-features-section" . }}
+
+
+{{ template "kubee-installation-instruction" . }}
+
+
+{{ template "chart.valuesSection" . }}
+
+## Dev/Contrib
+
+See [Contrib](contrib.md)
+
+
