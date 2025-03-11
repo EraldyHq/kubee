@@ -10,32 +10,35 @@
 {{- end }}
 {{ end }}
 
-{{/* Create an URL */}}
-{{ define "kubee-admin-user-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}admin user{{end}}](../../docs/site/admin-user.md){{ end }}
+{{ define "kubee-site-url" }}https://github.com/EraldyHq/kubee/blob/main/docs/site{{ end }}}
+{{ define "kubee-chart-url" }}https://github.com/EraldyHq/kubee/blob/main/charts{{ end }}}
 
 {{/* Create an URL */}}
-{{ define "kubee-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee chart{{end}}](../../docs/site/kubee-helmet-chart.md){{ end }}
+{{ define "kubee-admin-user-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}admin user{{end}}]({{ template "kubee-site-url" .}}/admin-user.md){{ end }}
 
-{{ define "kubee-enabled-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}enabled{{end}}](../../docs/site/chart-enabled.md){{ end }}
+{{/* Create an URL */}}
+{{ define "kubee-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee chart{{end}}]({{ template "kubee-site-url" .}}/kubee-helmet-chart.md){{ end }}
 
-{{ define "kubee-pass-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}pass{{end}}](../../docs/site/pass.md){{ end }}
+{{ define "kubee-enabled-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}enabled{{end}}]({{ template "kubee-site-url" .}}/chart-enabled.md){{ end }}
+
+{{ define "kubee-pass-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}pass{{end}}]({{ template "kubee-site-url" .}}/pass.md){{ end }}
 
 {{/* The link to the page */}}
-{{ define "kubee-chart-page-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}{{ fail "chart name is mandatory"}}{{end}}](../{{.}}/README.md){{ end }}
+{{ define "kubee-chart-page-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}{{ fail "chart name is mandatory"}}{{end}}]({{ template "kubee-chart-url" .}}/{{.}}/README.md){{ end }}
 
-{{ define "kubee-crds-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee crds chart{{end}}](../../docs/site/crds-chart.md){{ end }}
+{{ define "kubee-crds-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee crds chart{{end}}]({{ template "kubee-site-url" .}}/crds-chart.md){{ end }}
 
-{{ define "kubee-jsonnet-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee jsonnet chart{{end}}](../../docs/site/jsonnet-chart.md){{ end }}
+{{ define "kubee-jsonnet-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee jsonnet chart{{end}}]({{ template "kubee-site-url" .}}/jsonnet-chart.md){{ end }}
 
-{{ define "kubee-cluster-values-file-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cluster values file{{end}}](../../docs/site/cluster-values.md){{ end }}
+{{ define "kubee-cluster-values-file-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cluster values file{{end}}]({{ template "kubee-site-url" .}}/cluster-values.md){{ end }}
 
-{{ define "kubee-cloudflare-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cloudflare{{end}}](../../docs/site/cloudflare.md){{ end }}
+{{ define "kubee-cloudflare-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cloudflare{{end}}]({{ template "kubee-site-url" .}}/cloudflare.md){{ end }}
 
-{{ define "kubee-cluster-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cluster chart{{end}}](../../docs/site/cluster-chart.md){{ end }}
+{{ define "kubee-cluster-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cluster chart{{end}}]({{ template "kubee-site-url" .}}/cluster-chart.md){{ end }}
 
-{{ define "kubee-kubectl-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubectl{{end}}](../../docs/site/kubectl.md){{ end }}
+{{ define "kubee-kubectl-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubectl{{end}}]({{ template "kubee-site-url" .}}/kubectl.md){{ end }}
 
-{{ define "kubee-chart-status-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}chart status{{end}}](../../docs/site/kubee-helmet-chart.md#status){{ end }}
+{{ define "kubee-chart-status-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}chart status{{end}}]({{ template "kubee-site-url" .}}/kubee-helmet-chart.md#status){{ end }}
 
 
 
@@ -47,7 +50,7 @@
   These {{ template "kubee-chart-label" "kubee charts"  }} add their features when `enabled`.
 
 {{ range .Dependencies  }}
-{{- if or (eq .Name "kubee-cluster") (not (hasPrefix "kubee" .Name)) }}{{- continue }}{{- end }}* [{{ trimPrefix "kubee-" .Name  }}]({{ trimPrefix "file://" .Repository  }}/README.md) {{ template "chart-to-feature-desc" .Name }}{{- end }}
+{{- if or (eq .Name "kubee-cluster") (not (hasPrefix "kubee" .Name)) }}{{- continue }}{{- end }}* [{{ trimPrefix "kubee-" .Name  }}]({{ template "kubee-chart-url" .}}/{{ trimPrefix "kubee-" .Name  }}/README.md) {{ template "chart-to-feature-desc" .Name }}{{- end }}
 {{ end }}
 
 {{ define "kubee-installation-command" }}
