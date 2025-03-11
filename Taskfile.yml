@@ -6,6 +6,9 @@ tasks:
   tpl:
     cmds:
       - kubee helmet template --out $(basename {{.USER_WORKING_DIR}})
+  tpl-debug:
+    cmds:
+      - kubee --debug helmet template --out $(basename {{.USER_WORKING_DIR}})
   # Restart
   restart:
     cmds:
@@ -64,5 +67,5 @@ tasks:
         CHARTS_PATH="charts"
         yq '{.name: { "description": .description, "appVersion": .appVersion, "kind": .annotations."chart.kubee/kind" // "na", "status": .annotations."chart.kubee/status" // "na", "engines": (.annotations."chart.kubee/engines" | from_yaml), "deprecated": .annotations.deprecated  // false, "category": .annotations."chart.kubee/category" // "na" }} | . as $item ireduce ({}; . * $item )' $(find "$CHARTS_PATH" -maxdepth 2 -type f  -name "Chart.yaml") > $MODEL_PATH
         # Path argument in helm-docs should be relative to chart-search-root (not absolute ...)
-        (cd $OUTPUT_DIR; helm-docs)
+        (cd $OUTPUT_DIR; helm-docs --template-files={{.TASK_DIR}}/.helm-docs/helm-docs-extra-templates.gohtml --template-files=README.md.gotmpl)
         cp "$OUTPUT_DIR/README.md" "README.md"

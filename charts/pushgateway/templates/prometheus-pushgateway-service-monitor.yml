@@ -1,21 +1,21 @@
+{{- if .Values.prometheus.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: pushgateway
-  labels:
-    app.kubernetes.io/name: pushgateway
+  labels: {{ include "kubee-manifest-labels" .| nindent 4}}
 spec:
   jobLabel: pushgateway
   selector:
     matchLabels:
-      # scrape services with the following label
-      app.kubernetes.io/name: pushgateway
+    # scrape services with the following label
+      {{ include "kubee-pod-labels" . | nindent 6}}
   endpoints:
     - honorLabels: true
       # honorLabels should always been true
       # See https://github.com/prometheus/pushgateway/blob/master/README.md#configure-the-pushgateway-as-a-target-to-scrape
       # interval: 1h
-      interval: 30s
+      interval: {{.Values.prometheus.scrape_interval}}
       path: /metrics
       targetPort: 9091
       # Target label relabeling
@@ -29,3 +29,4 @@ spec:
         - sourceLabels: [ __name__ ]
           regex: "(go|process|pushgateway).*"
           action: drop
+{{- end }}

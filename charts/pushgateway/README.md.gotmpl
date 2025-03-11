@@ -1,0 +1,54 @@
+{{ template "kubee-header" .}}
+
+This {{ template "kubee-chart-label" "Kubee Chart" }} installs [pushgateway exporter](https://github.com/prometheus/pushgateway)
+to monitor cron/ephemeral task.
+
+You can push metrics to it that will be gathered by Prometheus.
+
+## Example
+
+* The metrics to push
+```bash
+RESULT=$(cat <<-'EOF'
+# TYPE gitbackup_repo_count counter
+# HELP gitbackup_repo_count the repos processed
+gitbackup_repo_count {state="dumped", reason="changed"} 13
+gitbackup_repo_count {state="skipped", reason="unchanged"} 139
+gitbackup_repo_count {state="skipped", reason="empty"} 1
+gitbackup_repo_count {state="skipped", reason="fork"} 50
+gitbackup_repo_count {state="skipped", reason="pattern"} 1
+EOF
+```
+* Jobs and instance label
+```bash
+JOB="git_hosting_backup"
+INSTANCE="github-s3"
+```
+* The push
+```bash
+PUSHGATEWAY_API_URL=${PUSHGATEWAY_API_URL:-http://pushgateway.monitoring.svc.cluster.local:9091/metrics}
+echo "$RESULT" | curl --fail -m 10 --retry 5 -s --data-binary @- "$PUSHGATEWAY_API_URL/job/$JOB/instance/$INSTANCE"
+```
+
+
+## Features
+
+{{ template "kubee-chart-features-section" . }}
+
+
+## Install
+
+{{ template "kubee-installation-command" . }}
+
+
+
+{{ template "chart.valuesSection" . }}
+
+
+
+
+## Contrib / Dev
+
+See [contrib](contrib.md)
+
+

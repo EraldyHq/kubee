@@ -22,3 +22,10 @@ version: 0.79.2 # The version of the chart (doesn't matter and can stay the same
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "v0.79.2" # The version of prometheus operator
+
+annotations:
+  chart.kubee/status: "stable"
+  chart.kubee/kind: "crds"
+  chart.kubee/category: "monitoring"
+  chart.kubee/engines: |
+    - jsonnet

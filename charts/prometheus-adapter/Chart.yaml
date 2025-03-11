@@ -23,6 +23,13 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # It is recommended to use it with quotes.
 appVersion: "v0.14.0" # The version of kube-prometheus operator
 
+annotations:
+  chart.kubee/status: "alpha"
+  chart.kubee/kind: "app"
+  chart.kubee/category: "monitoring"
+  chart.kubee/engines: |
+    - jsonnet
+
 dependencies:
   - name: kubee-cluster
     version: 0.0.1

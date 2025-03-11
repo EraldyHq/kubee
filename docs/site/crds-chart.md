@@ -9,6 +9,12 @@ A CRDs chart is a chart that contains only [CRDS](https://kubernetes.io/docs/con
 These charts are dependencies of [app charts](app-chart.md)
 and are normally not installed directly.
 
+But you can also install them individually:
+
+Example:
+```bash
+kubee -n prometheus helmet play prometheus-crds
+```
 
 ## Why?
 

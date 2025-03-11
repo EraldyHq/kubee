@@ -14,7 +14,7 @@ Install in no time, in your VPS:
 
 * Single node Kubernetes with a goal on low memory consumption. A single node can host 110 containers, that's a lot of applications.
 * Zero configuration. The {{ template "kubee-chart-label" "kubee charts" }} being aware of each other, they are preconfigured and needs a minimal set of parameters.
-* Cluster configuration. Every chart configuration is saved in a single cluster values file making it quick and easy to see the state of the cluster.
+* Cluster configuration. Every chart configuration is saved in a {{ template "kubee-cluster-values-file-label" "single cluster values file" }} making it quick and easy to see the state of the cluster.
 
 ## App examples
 
@@ -29,7 +29,7 @@ Install in no time, in your VPS:
 * No downtime thanks to [Rolling Update](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/)
 * CI/CD Deployment with [ArgoCd](charts/argocd/README.md), Flux
 
-## List of Charts
+## List of Kubee Charts
 
 
 {{ $model := (.Files.Get "model.yaml") | fromYaml }}

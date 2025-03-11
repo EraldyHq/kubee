@@ -36,3 +36,9 @@ rm -rf out && \
     "main.jsonnet"  \
     | xargs -I{} sh -c 'cat {} | gojsontoyaml > "{}.yaml" && rm {}' -- {}
 ```
+
+## Note
+### Why we don't use the Community Chart
+
+They are also available in the community chart [prometheus-operator-crds](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-operator-crds)
+We have it here to be able to install it automatically as dependency of [the prometheus chart](../prometheus/README.md)
