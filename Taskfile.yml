@@ -13,6 +13,10 @@ tasks:
   play:
     cmds:
       - kubee helmet play $(basename {{.USER_WORKING_DIR}})
+  # install with debug
+  play-debug:
+    cmds:
+      - kubee --debug helmet play $(basename {{.USER_WORKING_DIR}})
   # recreate the /charts directory
   dep:
     cmds:

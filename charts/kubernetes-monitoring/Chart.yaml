@@ -25,7 +25,7 @@ annotations:
   chart.kubee/kind: "app"
   chart.kubee/category: "kubernetes"
   chart.kubee/engines: |
-    - helm
+    - jsonnet
 
 dependencies:
   - name: kubee-cluster

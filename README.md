@@ -44,12 +44,12 @@ Install in no time, in your VPS:
 | [kubernetes-dashboard](charts/kubernetes-dashboard/README.md) | Kubee Kubernetes Dashboard Chart | stable | app | kubernetes
 | [kubernetes-monitoring](charts/kubernetes-monitoring/README.md) | Kubee Kubernetes Monitoring Chart | stable | app | kubernetes
 | [mailpit](charts/mailpit/README.md) | Kubee Mailpit Chart | stable | app | mail
-| [mailu](charts/mailu/README.md) | Kubee Mail Chart | na | na | na
-| [mariadb](charts/mariadb/README.md) | Kubee Mariadb Chart | na | na | na
-| [node-exporter](charts/node-exporter/README.md) | Kubee Node Exporter Chart | na | na | na
-| [oauth2-proxy](charts/oauth2-proxy/README.md) | The oauth2-proxy kubee chart | na | na | na
-| [postal](charts/postal/README.md) | Kubee Postal Chart | na | na | na
-| [prometheus](charts/prometheus/README.md) | Kubee Prometheus Chart | na | na | na
+| [mailu](charts/mailu/README.md) | Kubee Mail Chart | alpha | app | mail
+| [mariadb](charts/mariadb/README.md) | Kubee Mariadb Chart | stable | app | database
+| [node-exporter](charts/node-exporter/README.md) | Kubee Node Exporter Chart | deprecated | app | monitoring
+| [oauth2-proxy](charts/oauth2-proxy/README.md) | Kubee Oauth2-Proxy Chart | stable | app | auth
+| [postal](charts/postal/README.md) | Kubee Postal Chart | stable | app | mail
+| [prometheus](charts/prometheus/README.md) | Kubee Prometheus Chart | stable | app | monitoring
 | [prometheus-adapter](charts/prometheus-adapter/README.md) | Kubee Prometheus Adapter Chart | na | na | na
 | [prometheus-crds](charts/prometheus-crds/README.md) | Kubee Prometheus CRDS Chart | na | na | na
 | [pushgateway](charts/pushgateway/README.md) | Kubee PushGateway Chart | na | na | na

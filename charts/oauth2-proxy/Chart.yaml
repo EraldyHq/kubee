@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-oauth2-proxy
-description: The oauth2-proxy kubee chart
+description: Kubee Oauth2-Proxy Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -23,6 +23,12 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # It is recommended to use it with quotes.
 appVersion: "7.8.1" # The oauth2 proxy version
 
+annotations:
+  chart.kubee/status: "stable"
+  chart.kubee/kind: "app"
+  chart.kubee/category: "auth"
+  chart.kubee/engines: |
+    - helm
 
 dependencies:
   - name: kubee-cluster

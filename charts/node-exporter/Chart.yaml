@@ -23,6 +23,14 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # It is recommended to use it with quotes.
 appVersion: "0.76.2" # The version of prometheus operator
 
+annotations:
+  chart.kubee/status: "deprecated"
+  chart.kubee/kind: "app"
+  chart.kubee/category: "monitoring"
+  chart.kubee/engines: |
+    - helm
+    - jsonnet
+
 # deprecated for kubernetes-monitoring
 deprecated: true
 

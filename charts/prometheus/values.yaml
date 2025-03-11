@@ -1,18 +1,38 @@
-# Enabled
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
 enabled: false
-# The installation namespace
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace.
 # used by clients such as the Grafana Chart to create the data source URI
 namespace: 'monitoring'
-# The name of the prometheus instance
+
+# @schema
+# title: Hostname
+# description: The public hostname
+# required: true
+# format: hostname
+# @schema
+# -- The public hostname. If not empty, an ingress is added
+hostname: ''
+
+# @ignored The name of the prometheus instance
 # (used by clients such as the grafana Chart to create a connection)
 name: 'kubee'
-# The prometheus version
-# https://github.com/prometheus/prometheus/releases
+
+# -- The [prometheus version](https://github.com/prometheus/prometheus/releases)
 version: '3.1.0'
-# Hostname
-# If not null, an ingress is added
-hostname: ''
-# Memory Limit
+
+# -- Prometheus Server Memory Limit
 resources:
   # Depend on scrape interval, max_block_duration, number of metrics scraped, number of recording rules
   # Dynamically, if you query data above the max_block_duration, data is loaded in memory
@@ -22,13 +42,14 @@ resources:
   # * the amount that we get after installing kubernetes-monitoring
   # This is our goal
   memory: '400Mi'
-# Retention
-# How long to retain data (it's the prometheus server argument --storage.tsdb.retention.time=24h)
+
+# -- Retention. How long to retain data (it's the prometheus server argument storage.tsdb.retention.time=24h).
 # Data in memory is 2 hour old, by setting retention to 2h, we don't allow to query data over 2 hours and to load data in memory
-# The default is 24h
+# The default is 24h.
 # Why 30m? Equal to max_block_duration so that we are sure that we will not increase memory of the prometheus pod
 retention: '30m'
-# The duration that Prometheus keeps the data in memory
+
+# -- The duration that Prometheus keeps the data in memory.
 # The default is 2h. If the value is 2h, no arguments is applied.
 # It's the prometheus tsdb server argument --storage.tsdb.max-block-duration=2h)
 # Note that the default value is
@@ -38,12 +59,12 @@ retention: '30m'
 # * 24h for Headlamp
 # We chose 30m to be below the target of 400Mi memory size with kubernetes monitoring installed
 max_block_duration: '30m'
-# The default scrape interval for target
+# -- The default scrape interval for target
 # It does influence memory as Prometheus keeps by default 2 hours of scraping in memory (max_block_duration)
-# Default was 30s
+# Default was 30s.
 scrape_interval: '1m'
 
-# Exporter authentication
+# -- Exporter authentication.
 # This is a global authentication configuration for all exporters
 exporter_auth:
   # Network Policy
@@ -62,7 +83,7 @@ exporter_auth:
     enabled: false
     version: 'v0.18.2'
 
-# grafana cloud remote write prometheus integration
+# -- Grafana cloud remote write prometheus integration
 grafana_cloud:
   enabled: false
   # The username
@@ -76,7 +97,7 @@ grafana_cloud:
   # Doc: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
   # By default, no filtering is applied
   relabel_keep_regex: ''
-# new relic remote write prometheus integration
+# -- New relic remote write prometheus integration
 new_relic:
   enabled: false
   # for remote write
@@ -92,22 +113,25 @@ new_relic:
 operator:
   # CPU/Memory
   resources:
-    # Memory of the prometheus operator instance (value based on experience)
+    # -- Prometheus Operator max memory
     memory: '50Mi'
 
 
 
-# The kind of secret created
+# The
 secret:
-  # The kind of manifest created
-  # Values supported `Secret` or `ExternalSecret`
-  # With `ExternalSecret`, you can use a gitops pull solutions such as ArgoCd/Flux.
+  # @schema
+  # enum: [ `Secret`, `ExternalSecret`]
+  # @schema
+  # -- Kind of secret created
+  # Values supported are `Secret` or `ExternalSecret`
   kind: 'Secret'
 
-
-# Tweak to not output the template of the kubee cross-dependency chart
-# in the prometheus release
-# It's used in the chart dependencies condition
+# -- @ignored Internal Kubee constant
 kubee_internal:
-  # Don't modify the value, don't change
+  # @schema
+  # const: false
+  # @schema
+  # Constant used to not output template from kubee cross dependency in Chart.yaml
+  # Don't change, don't touch
   install_cross_dependency: false

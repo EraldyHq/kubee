@@ -24,11 +24,18 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # https://github.com/prometheus-operator/prometheus-operator/releases
 appVersion: "v0.79.2" # The version of prometheus operator (should be the same on crds)
 
+
+
 annotations:
   # Used to download the library with kube-prometheus-downloader-helper
   # https://github.com/prometheus-operator/kube-prometheus/releases
   kube-prometheus/version: "0.14.0"
   app.kubernetes.io/name: "prometheus"
+  chart.kubee/status: "stable"
+  chart.kubee/kind: "app"
+  chart.kubee/category: "monitoring"
+  chart.kubee/engines: |
+    - helm
   chart.kubee/crds: |
     - name: kubee-prometheus-crds
       version: 0.79.2

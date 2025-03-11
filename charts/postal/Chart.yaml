@@ -21,10 +21,15 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # https://github.com/postalserver/postal/releases without the v
 appVersion: "3.3.4" # The postal version
 
-
 annotations:
   # The name of the app
   app.kubernetes.io/name: postal
+  chart.kubee/status: "stable"
+  chart.kubee/kind: "app"
+  chart.kubee/category: "mail"
+  chart.kubee/engines: |
+    - helm
+
 
 dependencies:
   - name: kubee-cluster

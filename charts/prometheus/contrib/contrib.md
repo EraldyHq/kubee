@@ -37,6 +37,13 @@ task tpl
 ## How to
 
 
+### Get Access
+
+2 methods:
+* Kubectl Proxy:
+    * Template: http://localhost:8001/api/v1/namespaces/$NAMESPACE/services/http:prometheus:9090/proxy/
+    * URL with prometheus as namespace: http://localhost:8001/api/v1/namespaces/prometheus/services/http:prometheus:9090/proxy/
+* Ingress: https://$HOSTNAME
 
 ### Verify that the prometheus instance is up and running
 

@@ -1,0 +1,10 @@
+
+{{ template "kubee-header" .}}
+
+A kubee chart to install the [mailu server](https://mailu.io)
+
+
+{{ template "chart.valuesSection" . }}
+| mailu | object | | [the mailpit values](https://github.com/Mailu/helm-charts/blob/mailu-{{ template "chart.appVersion" . }}/mailu/values.yaml) |
+
+

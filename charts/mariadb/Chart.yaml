@@ -23,6 +23,9 @@ appVersion: "0.37.1"
 
 annotations:
   app.kubernetes.io/name: mariadb
+  chart.kubee/status: stable
+  chart.kubee/category: database
+  chart.kubee/kind: app
   chart.kubee/crds: |
     - name: mariadb-operator-crds
       repository: https://helm.mariadb.com/mariadb-operator

@@ -1,0 +1,30 @@
+{{ template "kubee-header" .}}
+
+This {{ template "kubee-jsonnet-chart-label" "jsonnet kubee chart" }} installs and configures:
+* the [prometheus operator](https://prometheus-operator.dev/)
+* and a [prometheus server](https://prometheus.io/)
+
+## Features
+
+### Add the following Mixin (Alerts and Dashboard)
+
+* the [Prometheus Alert and dashboards](https://monitoring.mixins.dev/prometheus/#dashboards)
+* the [Prometheus Operator Alerts](https://monitoring.mixins.dev/prometheus-operator/)
+* the [General Alerting rules](https://runbooks.prometheus-operator.dev/runbooks/general/) (`AlertDown`, ...)
+
+{{ template "kubee-chart-features-section" . }}
+
+## Install
+
+{{ template "kubee-installation-command" . }}
+
+
+{{ template "chart.valuesSection" . }}
+
+
+
+## Contrib / Dev
+
+See [contrib](contrib/contrib.md)
+
+

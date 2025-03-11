@@ -5,6 +5,8 @@
 {{- else if eq $chart "kubee-external-secrets" }}defines secret as [external secrets](https://external-secrets.io/latest/introduction/getting-started/#create-your-first-externalsecret) for GitOps integration (if chosen)
 {{- else if eq $chart "kubee-grafana" }}creates [dashboards](https://grafana.com/grafana/dashboards/)
 {{- else if eq $chart "kubee-prometheus" }}creates [metrics scraping jobs](https://prometheus.io/docs/concepts/jobs_instances/) and [alert rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
+{{- else if eq $chart "kubee-alertmanager" }}creates a connection to alertmanager
+{{- else if eq $chart "kubee-dex" }} adds Oidc Auth integration
 {{- end }}
 {{ end }}
 

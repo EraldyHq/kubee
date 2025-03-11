@@ -1,12 +1,40 @@
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
 enabled: false
 
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace
 namespace: 'mail'
 
+# @schema
+# title: Hostname
+# description: The public hostname
+# required: true
+# minLength: 1
+# format: hostname
+# @schema
+# -- The public hostname
 hostname: ''
 
+# @schema
+# required: true
+# minLength: 1
+# format: hostname
+# @schema
+# -- The mail domain
 domain: ''
 
-
+# @ignored
 mailu:
   ## hostnames:
   ##   - mail.example.com
@@ -33,7 +61,11 @@ mailu:
 
 
 
-# Don't change, don't touch
-# Used to not output template from cross dependency in Chart.yaml
+# -- @ignored Internal Kubee constant
 kubee_internal:
+  # @schema
+  # const: false
+  # @schema
+  # Constant used to not output template from kubee cross dependency in Chart.yaml
+  # Don't change, don't touch
   install_cross_dependency: false
