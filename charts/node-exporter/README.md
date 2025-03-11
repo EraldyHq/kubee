@@ -7,10 +7,12 @@
 # Kubee Node Exporter Chart
 
 > [!WARNING]
+> This chart is in the [deprecated status](../../docs/site/kubee-helmet-chart.md#status) and is not fit to be installed or upgraded
+
+> [!WARNING]
 > [Incorporated to kubernetes-monitoring](../../charts/kubernetes-monitoring/README.md)
 
 This [kubee chart](../../docs/site/kubee-helmet-chart.md) installs:
 * Node exporter (prometheus exporter that gather OS system metrics.)
 * and the Node mixins (alert and dashboard)
-
 

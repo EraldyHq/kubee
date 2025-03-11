@@ -4,7 +4,7 @@
 
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![Version: 34.4.0](https://img.shields.io/badge/Version-34.4.0-informational?style=flat-square) ![AppVersion: 0.0.0](https://img.shields.io/badge/AppVersion-0.0.0-informational?style=flat-square)
 
-# A Helm chart for Kubernetes
+# Kubee Traefik Crds Chart
 
 > [!WARNING]
 > This chart is in the [deprecated status](../../docs/site/kubee-helmet-chart.md#status) and is not fit to be installed or upgraded
@@ -13,7 +13,7 @@
 > Traefik does publish now a CRDS Chart.
 > This chart has become obsolete.
 
-This [Crds Chart](../../docs/site/crds-chart.md) chart installs the Traefik CRDs.
+This [Crds Chart](../../docs/site/crds-chart.md) installs the Traefik CRDs.
 
 ## Dev
 

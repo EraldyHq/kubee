@@ -4,7 +4,7 @@
 
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![Version: 1.17.1](https://img.shields.io/badge/Version-1.17.1-informational?style=flat-square) ![AppVersion: 0.0.0](https://img.shields.io/badge/AppVersion-0.0.0-informational?style=flat-square)
 
-# The cert manager crds kubee chart
+# Kubee Cert-Manager Crds Chart
 
 This [crds chart](../../docs/site/crds-chart.md) installs the CRDs of cert-manager.
 

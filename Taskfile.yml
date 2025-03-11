@@ -38,7 +38,7 @@ tasks:
           # Error: plugin "schema" exited with error
           DEPENDENCIES_FILTER=$(yq '[.dependencies[].name] | filter(match("kubee-.*")) | join (" ")' {{.USER_WORKING_DIR}}/Chart.yaml)
           helm schema --chart-search-root {{.USER_WORKING_DIR}} --helm-docs-compatibility-mode -k additionalProperties --dependencies-filter $DEPENDENCIES_FILTER
-  # Generate the readme
+  # Generate the current Chart doc
   docs:
     cmds:
       - |
@@ -48,8 +48,8 @@ tasks:
         fi
         helm-docs --chart-search-root={{.USER_WORKING_DIR}} --template-files={{.TASK_DIR}}/.helm-docs/helm-docs-extra-templates.gohtml --template-files=README.md.gotmpl
 
-  # Generate the .helmdocsignore file
-  docsignore:
+  # Generate the .helmdocsignore file at the project root
+  docs-ignore:
     cmds:
       - |
         # Create the .helmdocsignore file
@@ -58,6 +58,14 @@ tasks:
         echo "# Ignore charts dependencies directories" >> "$HELM_DOCS_IGNORE"
         echo "# Should be at the root of repo see issue: https://github.com/norwoodj/helm-docs/issues/206" >> "$HELM_DOCS_IGNORE"
         find "charts" -maxdepth 2 -mindepth 1 -type d  -name "charts" >> "$HELM_DOCS_IGNORE"
+
+  # Generate all README helm-docs for all charts
+  docs-all:
+    cmds:
+      - |
+        # A -exec command must be terminated with a ; (A parameter of its own) 
+        # You usually need to type \; or ';' to avoid shell interpretation 
+        find "{{.TASK_DIR}}/charts" -maxdepth 2 -mindepth 1 -type f  -name "Chart.yaml" -exec bash -c 'cd "$(dirname "{}")" && task docs' ';'
 
   # Generate the root Readme.md
   readme:

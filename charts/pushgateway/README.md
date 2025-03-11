@@ -43,6 +43,7 @@ echo "$RESULT" | curl --fail -m 10 --retry 5 -s --data-binary @- "$PUSHGATEWAY_A
   These [kubee charts](../../docs/site/kubee-helmet-chart.md) add their features when `enabled`.
 
 * [cert-manager](../cert-manager/README.md) adds [server certificates](https://cert-manager.io/docs/usage/certificate/) to the servers
+* [prometheus](../prometheus/README.md) creates [metrics scraping jobs](https://prometheus.io/docs/concepts/jobs_instances/) and [alert rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
 * [traefik](../traefik/README.md) creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
 
 ## Install

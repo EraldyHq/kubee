@@ -4,7 +4,7 @@
 
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![AppVersion: 0.22.1](https://img.shields.io/badge/AppVersion-0.22.1-informational?style=flat-square)
 
-# The dex kubee chart
+# Kubee Dex Chart
 
 This [kubee chart](../../docs/site/kubee-helmet-chart.md) installs the [dex identity provider](https://dexidp.io/).
 
@@ -17,7 +17,12 @@ This [kubee chart](../../docs/site/kubee-helmet-chart.md) installs the [dex iden
 ### Automatic Users
 The [admin user](../../docs/site/admin-user.md) is created with its email as login.
 
+### Auth Form Protection
+
+This chart will protect the authentication form with HTTP authentication headers.
+
 ### Automatic Clients
+
 If their secret value is not empty, the following clients are added:
 
 * [oauth2-proxy](../oauth2-proxy/README.md) (if [enabled](../../docs/site/chart-enabled.md))

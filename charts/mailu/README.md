@@ -7,7 +7,9 @@
 # Kubee Mail Chart
 
 > [!WARNING]
-> This chart is in the [alpha status](../../docs/site/kubee-helmet-chart.md#status) and is not fit to be installed.
+> This chart is in the [alpha status](../../docs/site/kubee-helmet-chart.md#status) and is not fit to be installed or upgraded
+
+A kubee chart to install the [mailu server](https://mailu.io)
 
 ## Values
 
@@ -16,7 +18,6 @@
 | domain | string | `""` | The mail domain |
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
 | hostname | string | `""` | The public hostname |
-| kubee_internal.install_cross_dependency | bool | `false` |  |
 | namespace | string | `"mail"` | The installation namespace |
 | mailu | object | | [the mailpit values](https://github.com/Mailu/helm-charts/blob/mailu-2.1.2/mailu/values.yaml) |
 

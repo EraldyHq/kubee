@@ -4,7 +4,10 @@
 
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![AppVersion: 34.3.0](https://img.shields.io/badge/AppVersion-34.3.0-informational?style=flat-square)
 
-# traefik-forward-auth for the Kubee Platform
+# Kubee Traefik Forward Auth Chart
+
+> [!WARNING]
+> This chart is in the [deprecated status](../../docs/site/kubee-helmet-chart.md#status) and is not fit to be installed or upgraded
 
 > [!WARNING]
 > Deprecated for [oauth2-proxy](../oauth2-proxy/README.md)

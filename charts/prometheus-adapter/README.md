@@ -7,7 +7,7 @@
 # Kubee Prometheus Adapter Chart
 
 > [!WARNING]
-> This chart is in the [alpha status](../../docs/site/kubee-helmet-chart.md#status) and is not fit to be installed.
+> This chart is in the [alpha status](../../docs/site/kubee-helmet-chart.md#status) and is not fit to be installed or upgraded
 
 This [jsonnet kubee chart](../../docs/site/jsonnet-chart.md) installs and configures
 [prometheus adapter](https://github.com/kubernetes-sigs/prometheus-adapter)

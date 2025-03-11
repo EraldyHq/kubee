@@ -7,7 +7,7 @@
 # Kubee Gogs Chart
 
 > [!WARNING]
-> This chart is in the [alpha status](../../docs/site/kubee-helmet-chart.md#status) and is not fit to be installed.
+> This chart is in the [alpha status](../../docs/site/kubee-helmet-chart.md#status) and is not fit to be installed or upgraded
 
 This [kubee crds chart](../../docs/site/crds-chart.md) installs the `Git service` [Gogs](https://gogs.io/)
 

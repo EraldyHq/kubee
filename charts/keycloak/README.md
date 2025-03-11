@@ -4,17 +4,17 @@
 
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![AppVersion: 0.13](https://img.shields.io/badge/AppVersion-0.13-informational?style=flat-square)
 
-# A kubee keycloak chart
+# Kubee Keycloak Chart
 
 > [!WARNING]
-> This chart is in the [alpha status](../../docs/site/kubee-helmet-chart.md#status) and is not fit to be installed.
+> This chart is in the [alpha status](../../docs/site/kubee-helmet-chart.md#status) and is not fit to be installed or upgraded
 
 > [!INFO] We recommend [dex](../dex/README.md).
 > As it's less heavy.
 
 The manifests in this directory is the first attempt
-to install Keycloak without operator
-based on https://www.keycloak.org/server/configuration#_starting_keycloak
+to install [Keycloak](https://www.keycloak.org/) without operator
+based on [starting_keycloak](https://www.keycloak.org/server/configuration#_starting_keycloak)
 
 ## Dev Note
 

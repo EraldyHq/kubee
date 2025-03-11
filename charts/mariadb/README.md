@@ -6,7 +6,8 @@
 
 # Kubee Mariadb Chart
 
-This [kubee chart](../../docs/site/kubee-helmet-chart.md) installs the [MariaDb Operator](https://github.com/mariadb-operator/mariadb-operator).
+This [kubee chart](../../docs/site/kubee-helmet-chart.md) installs the [MariaDb Operator](https://github.com/mariadb-operator/mariadb-operator)
+to help you maintain and create [MariaDb database](https://mariadb.com/)
 
 ## Installation
 

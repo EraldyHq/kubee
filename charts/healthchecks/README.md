@@ -8,7 +8,7 @@
 
 This [Kubee Chart](../../docs/site/kubee-helmet-chart.md) permits to monitor a `healthchecks` installation (by default, [healthchecks.io](https://healthchecks.io))
 
-It doesn't support yet the installation of a [Healthchecks instance](https://github.com/healthchecks/healthchecks)
+It doesn't support yet the installation of a [Healthchecks instance](https://github.com/healthchecks/healthchecks) on the cluster.
 
 ## Usage
 

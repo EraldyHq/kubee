@@ -4,7 +4,7 @@
 
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![Version: 5.16.0](https://img.shields.io/badge/Version-5.16.0-informational?style=flat-square) ![AppVersion: 0.0.0](https://img.shields.io/badge/AppVersion-0.0.0-informational?style=flat-square)
 
-# Grafana CRDS
+# Kubee Grafana Crds Chart
 
 This [kubee crds chart](../../docs/site/crds-chart.md) installs the [grafana](../grafana/README.md) CRDs.
 

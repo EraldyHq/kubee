@@ -4,7 +4,7 @@
 
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![AppVersion: 34.4.1](https://img.shields.io/badge/AppVersion-34.4.1-informational?style=flat-square)
 
-# A sub-chart of Traefik
+# Kubee Traefik Chart
 
 This [kubee chart](../../docs/site/kubee-helmet-chart.md) installs the [traefik proxy](https://traefik.io)
 
@@ -39,7 +39,7 @@ The [traefik-crds chart](../traefik-crds/README.md) is installed automatically i
 | auth.private_networks | list | `[]` | The Private Network ranges used for Ingress Ip restrictions (Traefik IpAllowList) Example for a home ip: 143.176.206.80/32 |
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
 | hostname | string | `""` | The public Traefik dashboard hostname example: hostname: 'traefik-haship.nip.io' |
-| middlewares.basic_auth.users | object | `{}` | List of extra users alongside the admin user Example: users:   emailUser1: password1   emailUser2: password2 |
+| middlewares.basic_auth.users | object | `{}` | List of extra users alongside the admin user |
 | namespace | string | `"kube-system"` | The installation namespace. The kube-system namespace tells kubernetes that this app has a higher priority |
 | traefik | object | | [the Optional Traefik Chart values](https://github.com/traefik/traefik-helm-chart/blob/v34.4.1/traefik/values.yaml) |
 

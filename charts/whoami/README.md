@@ -4,22 +4,24 @@
 
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![AppVersion: v1.10.3](https://img.shields.io/badge/AppVersion-v1.10.3-informational?style=flat-square)
 
+# Kubee Whoami Chart
+
 `Whoami` is an `app` that permits to debug and test traefik. It will print the HTTP request.
 
 ## Features
 
 ### Kubee Charts Features
 
-These [kubee charts](../../docs/site/kubee-helmet-chart.md) add their features when `enabled`.
+  These [kubee charts](../../docs/site/kubee-helmet-chart.md) add their features when `enabled`.
 
 * [cert-manager](../cert-manager/README.md) adds [server certificates](https://cert-manager.io/docs/usage/certificate/) to the servers
-* [traefik](../traefik/README.md) creates [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
+* [traefik](../traefik/README.md) creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| auth_middleware | string | `""` | The traefik authentication middleware name to apply |
+| auth_middleware | string | `""` | The traefik authentication middleware name to apply. None if empty. |
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
 | hostname | string | `""` | The public hostname |
 | namespace | string | `"whoami"` | The installation namespace |

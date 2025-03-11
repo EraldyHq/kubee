@@ -4,6 +4,8 @@
 
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 0.28.0](https://img.shields.io/badge/AppVersion-0.28.0-informational?style=flat-square)
 
+# Kubee Vault Chart
+
 A [kubee chart](../../docs/site/kubee-helmet-chart.md) that [installs Vault](https://developer.hashicorp.com/vault/docs/platform/k8s)
 in a standalone mode.
 

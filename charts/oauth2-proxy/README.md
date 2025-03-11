@@ -4,7 +4,7 @@
 
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![AppVersion: 7.8.1](https://img.shields.io/badge/AppVersion-7.8.1-informational?style=flat-square)
 
-# The oauth2-proxy kubee chart
+# Kubee Oauth2-Proxy Chart
 
 ## About
 This [Kubee Chart](../../docs/site/kubee-helmet-chart.md) installs [Oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/) as:
