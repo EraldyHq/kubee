@@ -15,6 +15,7 @@ Install in no time, in your VPS:
 * Single node Kubernetes with a goal on low memory consumption. A single node can host 110 containers, that's a lot of applications.
 * Zero configuration. The [kubee charts](../../docs/site/kubee-helmet-chart.md) being aware of each other, they are preconfigured and needs a minimal set of parameters.
 * Cluster configuration. Every chart configuration is saved in a [single cluster values file](../../docs/site/cluster-values.md) making it quick and easy to see the state of the cluster.
+* One-shot Chart Installation. CRDs dependencies are automatically managed.
 
 ## App examples
 
@@ -31,42 +32,49 @@ Install in no time, in your VPS:
 
 ## List of Kubee Charts
 
-| Kubee Chart | Description | Status | Kind | Category |
-|------------------|-------------|--------|------|----------|
-| [alertmanager](charts/alertmanager/README.md) | Kubee AlertManager Chart | stable | app | monitoring
-| [argocd](charts/argocd/README.md) | Kubee ArgoCd Chart | stable | app | ci-cd
-| [cert-manager](charts/cert-manager/README.md) | Kubee Cert-Manager Chart | stable | app | certificate
-| [cert-manager-crds](charts/cert-manager-crds/README.md) | Kubee Cert-Manager Crds Chart | stable | crds | certificate
-| [cluster](charts/cluster/README.md) | Kubee Cluster Chart | stable | library | cluster
-| [dex](charts/dex/README.md) | Kubee Dex Chart | stable | app | auth
-| [external-dns](charts/external-dns/README.md) | Kubee External Dns Chart | stable | app | dns
-| [external-secrets](charts/external-secrets/README.md) | Kubee External Secrets Charts | stable | app | secret
-| [external-secrets-crds](charts/external-secrets-crds/README.md) | Kubee External Secret Crds Chart | stable | crds | secret
-| [gogs](charts/gogs/README.md) | Kubee Gogs Chart | alpha | app | git
-| [grafana](charts/grafana/README.md) | Kubee Grafana Chart | stable | app | monitoring
-| [grafana-crds](charts/grafana-crds/README.md) | Kubee Grafana Crds Chart | stable | crds | monitoring
-| [healthchecks](charts/healthchecks/README.md) | Kubee Healthchecks Chart | stable | app | monitoring
-| [k3s-ansible](charts/k3s-ansible/README.md) | Kubee K3s-ansible Cluster Chart | beta | cluster | k3s
-| [keycloak](charts/keycloak/README.md) | Kubee Keycloak Chart | alpha | app | auth
-| [kubernetes-dashboard](charts/kubernetes-dashboard/README.md) | Kubee Kubernetes Dashboard Chart | stable | app | kubernetes
-| [kubernetes-monitoring](charts/kubernetes-monitoring/README.md) | Kubee Kubernetes Monitoring Chart | stable | app | kubernetes
-| [mailpit](charts/mailpit/README.md) | Kubee Mailpit Chart | stable | app | mail
-| [mailu](charts/mailu/README.md) | Kubee Mail Chart | alpha | app | mail
-| [mariadb](charts/mariadb/README.md) | Kubee Mariadb Chart | stable | app | database
-| [node-exporter](charts/node-exporter/README.md) | Kubee Node Exporter Chart | deprecated | app | monitoring
-| [oauth2-proxy](charts/oauth2-proxy/README.md) | Kubee Oauth2-Proxy Chart | stable | app | auth
-| [postal](charts/postal/README.md) | Kubee Postal Chart | stable | app | mail
-| [prometheus](charts/prometheus/README.md) | Kubee Prometheus Chart | stable | app | monitoring
-| [prometheus-adapter](charts/prometheus-adapter/README.md) | Kubee Prometheus Adapter Chart | alpha | app | monitoring
-| [prometheus-crds](charts/prometheus-crds/README.md) | Kubee Prometheus CRDS Chart | stable | crds | monitoring
-| [pushgateway](charts/pushgateway/README.md) | Kubee PushGateway Chart | stable | app | monitoring
-| [traefik](charts/traefik/README.md) | A sub-chart of Traefik | na | na | na
-| [traefik-crds](charts/traefik-crds/README.md) | A Helm chart for Kubernetes | na | na | na
-| [traefik-forward-auth](charts/traefik-forward-auth/README.md) | traefik-forward-auth for the Kubee Platform | deprecated | app | auth
-| [trust-manager-crds](charts/trust-manager-crds/README.md) | Kubee Trust manager crds chart | stable | crds | certificate
-| [values](charts/values/README.md) | A Values Helm chart | stable | internal | internal
-| [vault](charts/vault/README.md) | Kubee Vault Chart | stable | app | secret
-| [whoami](charts/whoami/README.md) | Kubee Whoami Chart | stable | app | ingress
+| Kubee Chart | Status  | Kind | Category |
+|-----------|---------|------|----------|
+| [AlertManager ](charts/alertmanager/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | monitoring
+| [ArgoCd ](charts/argocd/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | ci-cd
+| [Cert-Manager ](charts/cert-manager/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | certificate
+| [Cert-Manager Crds ](charts/cert-manager-crds/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | crds | certificate
+| [Cluster ](charts/cluster/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | library | cluster
+| [Dex ](charts/dex/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | auth
+| [External Dns ](charts/external-dns/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | dns
+| [External Secrets Charts](charts/external-secrets/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | secret
+| [External Secret Crds ](charts/external-secrets-crds/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | crds | secret
+| [Gogs ](charts/gogs/README.md) | [alpha](../../docs/site/kubee-helmet-chart.md#status) | app | git
+| [Grafana ](charts/grafana/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | monitoring
+| [Grafana Crds ](charts/grafana-crds/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | crds | monitoring
+| [Healthchecks ](charts/healthchecks/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | monitoring
+| [K3s-ansible Cluster ](charts/k3s-ansible/README.md) | [beta](../../docs/site/kubee-helmet-chart.md#status) | cluster | k3s
+| [Keycloak ](charts/keycloak/README.md) | [alpha](../../docs/site/kubee-helmet-chart.md#status) | app | auth
+| [Kubernetes Dashboard ](charts/kubernetes-dashboard/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | kubernetes
+| [Kubernetes Monitoring ](charts/kubernetes-monitoring/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | kubernetes
+| [Mailpit ](charts/mailpit/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | mail
+| [Mail ](charts/mailu/README.md) | [alpha](../../docs/site/kubee-helmet-chart.md#status) | app | mail
+| [Mariadb ](charts/mariadb/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | database
+| [Node Exporter ](charts/node-exporter/README.md) | [deprecated](../../docs/site/kubee-helmet-chart.md#status) | app | monitoring
+| [Oauth2-Proxy ](charts/oauth2-proxy/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | auth
+| [Postal ](charts/postal/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | mail
+| [Prometheus ](charts/prometheus/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | monitoring
+| [Prometheus Adapter ](charts/prometheus-adapter/README.md) | [alpha](../../docs/site/kubee-helmet-chart.md#status) | app | monitoring
+| [Prometheus Crds ](charts/prometheus-crds/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | crds | monitoring
+| [PushGateway ](charts/pushgateway/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | monitoring
+| [Traefik ](charts/traefik/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | proxy
+| [Traefik Crds ](charts/traefik-crds/README.md) | [deprecated](../../docs/site/kubee-helmet-chart.md#status) | crds | proxy
+| [Traefik Forward Auth ](charts/traefik-forward-auth/README.md) | [deprecated](../../docs/site/kubee-helmet-chart.md#status) | app | auth
+| [Trust manager crds chart](charts/trust-manager-crds/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | crds | certificate
+| [Values ](charts/values/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | internal | internal
+| [Vault ](charts/vault/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | secret
+| [Whoami ](charts/whoami/README.md) | [stable](../../docs/site/kubee-helmet-chart.md#status) | app | http
+
+Note that you are not limited to Kubee Charts.
+You can install yourself any chart,
+but you would need to configure them yourself.
+
+To make your charts, `kubee`  compatible and reuse the configuration of dependent chart,
+you can read the [kubee chart documentation](../../docs/site/kubee-helmet-chart.md).
 
 ## Steps
 

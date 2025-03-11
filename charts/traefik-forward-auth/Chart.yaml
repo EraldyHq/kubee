@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-traefik-forward-auth
-description: traefik-forward-auth for the Kubee Platform
+description: Kubee Traefik Forward Auth Chart
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives

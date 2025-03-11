@@ -18,6 +18,8 @@ kubee -n prometheus helmet play prometheus-crds
 
 ## Why?
 
+### They are not bundled with the operator
+
 They are not bundled with the operator for [many reasons](https://helm.sh/docs/chart_best_practices/custom_resource_definitions)
 
 One of many is that the declaration must be
@@ -29,3 +31,8 @@ namespace: "external-secrets" from "":
 no matches for kind "ClusterSecretStore" in version "external-secrets.io/v1beta1"
 ensure CRDs are installed first
 ```
+
+### Why the CRDs are in Helm template directory and not in the CRDs directory
+
+The crd are not in the `crds` directory
+because we want this Chart to be able to upgrade.

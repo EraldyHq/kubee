@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-traefik
-description: A sub-chart of Traefik
+description: Kubee Traefik Chart
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives
@@ -18,22 +18,30 @@ version: 0.0.1
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "34.4.0" # Traefik Version
+appVersion: "34.4.1" # Traefik Version
 # https://github.com/cert-manager/cert-manager/releases
 
 annotations:
   app.kubernetes.io/name: "traefik"
+  chart.kubee/status: "stable"
+  chart.kubee/kind: "app"
+  chart.kubee/category: "proxy"
+  chart.kubee/engines: |
+    - helm
+  # The version between Traefik and CRD does not follow
+  # https://github.com/traefik/traefik-helm-chart/releases
+  # https://github.com/traefik/traefik-helm-chart
   chart.kubee/crds: |
-    - name: kubee-traefik-crds
-      version: 34.4.0
-      repository: file://../traefik-crds
+    - name: traefik-crds
+      version: 1.5.0
+      repository: https://traefik.github.io/charts
 
 dependencies:
   - name: traefik
     # https://helm.sh/docs/chart_best_practices/dependencies/#versions
     # ~33.1.0, equivalent to >= 33.1.0, < 33.2.0
     # https://github.com/traefik/traefik-helm-chart/releases
-    version: 34.4.0
+    version: 34.4.1
     repository: https://traefik.github.io/charts
     alias: traefik
     #condition: certManager.enabled

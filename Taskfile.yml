@@ -30,8 +30,14 @@ tasks:
       - kubee helmet update-dependencies -f $(basename {{.USER_WORKING_DIR}})
   # Generate the values.schema.json
   schema:
+
     cmds:
-        - helm schema --chart-search-root {{.USER_WORKING_DIR}} --helm-docs-compatibility-mode -k additionalProperties
+        - |
+          # dependency filter is due to this Traefik error
+          # FATA[2025-03-11T14:44:41+01:00] Error while parsing comment of key kind: yaml: found character that cannot start any token 
+          # Error: plugin "schema" exited with error
+          DEPENDENCIES_FILTER=$(yq '[.dependencies[].name] | filter(match("kubee-.*")) | join (" ")' {{.USER_WORKING_DIR}}/Chart.yaml)
+          helm schema --chart-search-root {{.USER_WORKING_DIR}} --helm-docs-compatibility-mode -k additionalProperties --dependencies-filter $DEPENDENCIES_FILTER
   # Generate the readme
   docs:
     cmds:

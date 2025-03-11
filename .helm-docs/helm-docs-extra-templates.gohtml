@@ -72,9 +72,10 @@ kubee helmet --cluster cluster-name play {{ trimPrefix "kubee-" .Name }}
 {{/*  Annotations is not yet supported, we need to parse Chart.Yaml */}}
 {{/*  https://github.com/norwoodj/helm-docs/issues/287 */}}
 {{ $chartYaml := (.Files.Get "Chart.yaml") | fromYaml }}
-{{- if eq (index $chartYaml.annotations "chart.kubee/status") "alpha" }}
+{{ $chartStatus := index $chartYaml.annotations "chart.kubee/status" }}
+{{- if or (eq $chartStatus "alpha") (eq $chartStatus "deprecated") (eq $chartStatus "internal") }}
 > [!WARNING]
-> This chart is in the {{ template "kubee-chart-status-label" "alpha status" }} and is not fit to be installed.
+> This chart is in the {{ template "kubee-chart-status-label" (printf "%s status" $chartStatus) }} and is not fit to be installed or upgraded
 {{- end }}
 
 {{end}}

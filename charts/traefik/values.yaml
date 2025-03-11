@@ -1,15 +1,36 @@
-# Enabled
-# Not a string, no quote
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
 enabled: false
-# The installation namespace
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace.
 # The kube-system namespace tells kubernetes that this app has a higher priority
 namespace: 'kube-system'
 
-# A default certificate Used to provide https locally
+# @schema
+# title: Hostname
+# description: The public hostname
+# required: true
+# format: hostname
+# @schema
+# -- The public Traefik dashboard hostname
+# example: hostname: 'traefik-haship.nip.io'
+hostname: ''
+
+# @ignored The [default certificate](https://doc.traefik.io/traefik/https/tls/#default-certificate)
+# It's used to provide https locally
 # Set the default certificate as default traefik cert
 # Mandatory for kubernetes-dashboard on a local development
 # The rootCA should be added to the OS/Browser as trusted root CA
-# https://doc.traefik.io/traefik/https/tls/#default-certificate
 default_certificate:
   # The PEM content file
   # Not a path to the cert file relative to the working directory (ie cluster directory)
@@ -23,68 +44,95 @@ default_certificate:
   key: ''
 
 
-# Traefik dashboard
-# The FQDN is dnsName.apexDomain
-# If not empty, an ingress is created
-# example: hostname: 'traefik-haship.nip.io'
-hostname: ''
 
 # Ingress Auth Configuration
 auth:
-  # The middleware auth name ingress Authentication
-  # That's applied for internal web app (such as Traefik Dashboard, Prometheus, Alert Manager, ...)
+  # @schema
+  # enum: ['basic-auth','forward-auth']
+  # @schema
+  # -- The authentication middleware
+  # This middleware is applied on internal web app (such as Traefik Dashboard, Prometheus, Alert Manager, ...)
   # The app or api endpoints are still available from an internal container
-  # The supported auth are basic-auth and forward-auth
+  # The supported middleware name are basic-auth and forward-auth
   # Before changing to forward-auth, you should test it with the whoami chart
   middleware_name: 'basic-auth'
-  # Private Network ranges
+  # -- The Private Network ranges
   # used for Ingress Ip restrictions (Traefik IpAllowList)
-  # example for a home ip: 143.176.206.80/32
+  # Example for a home ip: 143.176.206.80/32
   private_networks: [ ]
 
-# List of middlewares used in Kubee charts
-# https://doc.traefik.io/traefik/middlewares
+# List of [middlewares](https://doc.traefik.io/traefik/middlewares)
+# referenced in Kubee charts
+# The names are constant
 middlewares:
   # A basic Auth Middleware
   # With the email as main identifier
   # https://doc.traefik.io/traefik/middlewares/http/basicauth/
   # The admin user is added
   basic_auth:
+    # @schema
+    # const: basic-auth
+    # @schema
+    # @ignored
     name: 'basic-auth'
-    # List of extra users alongside the admin user
+    # -- List of extra users alongside the admin user
     users: {}
     # Example:
     # users:
     #   emailUser1: password1
     #   emailUser2: password2
+
+  # @ignored
   # Create an IP Allow list for webhook of git service
   # Used in Gitops app such as Argocd
   # https://doc.traefik.io/traefik/middlewares/http/ipallowlist/
   git_hooks:
+    # @schema
+    # const: git-hooks
+    # @schema
     name: 'git-hooks'
     service: 'github' # only supported for now
+  # @ignored
   # Forward Auth to oauth2-proxy
   # https://doc.traefik.io/traefik/middlewares/http/forwardauth/
   forward_auth:
+    # @schema
+    # const: forward-auth
+    # @schema
     name: 'forward-auth'
+  # @ignored
   # Forward Auth middleware to oauth2-proxy that pass through a signed bearer
   # It can be applied on Kube API client such as Kubernetes Dashboard'
   forward_auth_bearer:
+    # @schema
+    # const: forward-auth-bearer
+    # @schema
     name: 'forward-auth-bearer'
+  # @ignored
   # Middleware to apply auth headers on website with an authentication form
   auth_headers:
+    # @schema
+    # const: auth-headers
+    # @schema
     name: 'auth-headers'
+  # @ignored
   # Private Network to allow only connection from known ip
   # Ip are given via the auth.private_networks
   private_network:
     name: 'private-network'
 
-# Name of entrypoint
+# @ignored
+# Constant Name of additional entrypoint
 # Used by template that creates IngressRoute (http and tcp)
 entrypoints:
   smtps:
+    # @schema
+    # const: smtps
+    # @schema
+    # The port for SMTP over TLS (465)
     name: 'smtps'
 
+# @ignored
 # Traefik Helm Values
 # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml
 traefik:
@@ -201,8 +249,12 @@ traefik:
   # It can be used to store TLS certificates along with `certificatesResolvers.<name>.acme.storage`  option
 
 
-
-# Don't change
+# -- @ignored Internal Kubee constant
 kubee_internal:
+  # @schema
+  # const: false
+  # @schema
+  # Constant used to not output template from kubee cross dependency in Chart.yaml
+  # Don't change, don't touch
   install_cross_dependency: false
 

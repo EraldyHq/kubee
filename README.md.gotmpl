@@ -15,6 +15,7 @@ Install in no time, in your VPS:
 * Single node Kubernetes with a goal on low memory consumption. A single node can host 110 containers, that's a lot of applications.
 * Zero configuration. The {{ template "kubee-chart-label" "kubee charts" }} being aware of each other, they are preconfigured and needs a minimal set of parameters.
 * Cluster configuration. Every chart configuration is saved in a {{ template "kubee-cluster-values-file-label" "single cluster values file" }} making it quick and easy to see the state of the cluster.
+* One-shot Chart Installation. CRDs dependencies are automatically managed.
 
 ## App examples
 
@@ -34,13 +35,23 @@ Install in no time, in your VPS:
 
 {{ $model := (.Files.Get "model.yaml") | fromYaml }}
 
-| Kubee Chart | Description | Status | Kind | Category |
-|------------------|-------------|--------|------|----------|
+| Kubee Chart | Status  | Kind | Category |
+|-----------|---------|------|----------|
 {{- range $key, $values := $model }}
 {{- $name := trimPrefix "kubee-" $key }}
-| [{{ $name }}](charts/{{$name}}/README.md) | {{ $values.description }} | {{ $values.status }} | {{ $values.kind }} | {{ $values.category }}  
+{{- $description := trimSuffix "Chart" (trimPrefix "Kubee " $values.description)  }}
+{{- if or (eq $values.status "internal") }}
+{{ continue }}
+{{- end }}
+| [{{ $description }}](charts/{{$name}}/README.md) | {{ template "kubee-chart-status-label" $values.status }} | {{ $values.kind }} | {{ $values.category }}  
 {{- end }}
 
+Note that you are not limited to Kubee Charts. 
+You can install yourself any chart, 
+but you would need to configure them yourself.
+
+To make your charts, `kubee`  compatible and reuse the configuration of dependent chart, 
+you can read the {{ template "kubee-chart-label" "kubee chart documentation" }}.
 
 ## Steps
 

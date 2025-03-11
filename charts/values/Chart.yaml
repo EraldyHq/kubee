@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-values
-description: A Values Helm chart
+description: Kubee Values Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #

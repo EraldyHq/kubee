@@ -1,0 +1,70 @@
+
+{{ template "kubee-header" .}}
+
+This {{ template "kubee-chart-label" "kubee chart" }} installs the [traefik proxy](https://traefik.io)
+
+
+
+## Features
+
+### Traefik Dashboard
+
+If a `hostname` is given, the [traefik dashboard](https://doc.traefik.io/traefik/operations/dashboard/) is configured 
+with authentication (See `auth.middleware_name`) 
+
+### Monitoring  
+
+The [Traefik Mixin](https://monitoring.mixins.dev/traefik/) is installed (Grafana and Scrape)
+
+### Automatic CRDS
+The [traefik-crds chart](../traefik-crds/README.md) is installed automatically if not found.
+
+{{ template "kubee-chart-features-section" . }}
+
+
+
+{{ template "chart.valuesSection" . }}
+| traefik | object | | [the Optional Traefik Chart values](https://github.com/traefik/traefik-helm-chart/blob/v{{ template "chart.appVersion" . }}/traefik/values.yaml) |
+
+
+## FAQ
+### Where do I set the trusted Proxy?
+
+If you put your Cluster being a proxy such as Cloudflare.
+You need to set the trusted cidrs in the `ports.websecure.forwardedHeaders.trustedIPs`
+
+```yaml
+# Kubee Helm
+traefik:
+  # Traefik Helm
+  traefik:
+    ports:
+      websecure:
+        forwardedHeaders:
+          trustedIPs: ['173.245.48.0/20','103.21.244.0/22','103.22.200.0/22']
+```
+
+It enables the forwarding of X-Headers
+[Doc](https://doc.traefik.io/traefik/v2.3/routing/entrypoints/#forwarded-headers)
+
+### Where can I set the Values of the Traefik Helm Chart?
+
+This chart is an Umbrella Chart based on the [Traefik Chart](https://github.com/traefik/traefik-helm-chart):
+* [Markdown](https://github.com/traefik/traefik-helm-chart/blob/master/traefik/VALUES.md)
+
+You can set this extra values under the `traefik/traefk` node of you cluster values file.
+```yaml
+# Kubee Traefik Helm
+traefik:
+  # Traefik Helm
+  traefik:
+    ports:
+      websecure:
+        forwardedHeaders:
+          trustedIPs: ['173.245.48.0/20','103.21.244.0/22','103.22.200.0/22']
+```
+
+
+### How can I contribute (Dev)
+
+The dev documentation is available [here](contrib/contrib.md)
