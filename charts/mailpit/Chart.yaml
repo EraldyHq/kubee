@@ -19,8 +19,15 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 # https://github.com/axllent/mailpit/releases
-appVersion: "v1.22.3" # The mail pit version
+appVersion: "0.22.2" # The mail pit version
 
+
+annotations:
+  chart.kubee/status: "stable"
+  chart.kubee/kind: "app"
+  chart.kubee/category: "mail"
+  chart.kubee/engines: |
+    - helm
 
 dependencies:
   - name: mailpit

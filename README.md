@@ -43,7 +43,7 @@ Install in no time, in your VPS:
 | [keycloak](charts/keycloak/README.md) | Kubee Keycloak Chart | alpha | app | auth
 | [kubernetes-dashboard](charts/kubernetes-dashboard/README.md) | Kubee Kubernetes Dashboard Chart | stable | app | kubernetes
 | [kubernetes-monitoring](charts/kubernetes-monitoring/README.md) | Kubee Kubernetes Monitoring Chart | stable | app | kubernetes
-| [mailpit](charts/mailpit/README.md) | Kubee Mailpit Chart | na | na | na
+| [mailpit](charts/mailpit/README.md) | Kubee Mailpit Chart | stable | app | mail
 | [mailu](charts/mailu/README.md) | Kubee Mail Chart | na | na | na
 | [mariadb](charts/mariadb/README.md) | Kubee Mariadb Chart | na | na | na
 | [node-exporter](charts/node-exporter/README.md) | Kubee Node Exporter Chart | na | na | na
