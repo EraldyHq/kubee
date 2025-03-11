@@ -9,7 +9,13 @@ Install in no time, in your VPS:
 * [kubernetes](https://github.com/kubernetes/kubernetes), the container leader hosting platform
 * and a set of integrated packaged applications (known as `charts` in Kubernetes)
 
+## Features
 
+* Single node Kubernetes with a goal of low memory consumption. A single node can host 110 containers, that's a lot of applications.
+* Zero configuration. The kubee charts being aware of each other, they are preconfigured and needs a minimal set of parameters.
+* Cluster configuration. Every chart configuration is saved in a single cluster values file making it quick and easy to the state of the cluster.
+
+## App examples
 
 * `Admin Dashboard` with [Kubernetes Dashboard](./charts/kubernetes-dashboard)
 * Certificate Provisioning and monitoring with [cert-manager](./charts/cert-manager/README.md)
