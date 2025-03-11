@@ -43,7 +43,7 @@ Install in no time, in your VPS:
 {{- if or (eq $values.status "internal") }}
 {{ continue }}
 {{- end }}
-| [{{ $description }}](charts/{{$name}}/README.md) | {{ template "kubee-chart-status-label" $values.status }} | {{ $values.kind }} | {{ $values.category }}  
+| [{{ $description }}]({{ template "kubee-chart-url"}}/{{$name}}/README.md) | {{ template "kubee-chart-status-label" $values.status }} | {{ $values.kind }} | {{ $values.category }}  
 {{- end }}
 
 Note that you are not limited to Kubee Charts. 
