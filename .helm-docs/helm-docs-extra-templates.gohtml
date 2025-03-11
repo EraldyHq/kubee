@@ -10,8 +10,8 @@
 {{- end }}
 {{ end }}
 
-{{ define "kubee-site-url" }}https://github.com/EraldyHq/kubee/blob/main/docs/site{{ end }}}
-{{ define "kubee-chart-url" }}https://github.com/EraldyHq/kubee/blob/main/charts{{ end }}}
+{{ define "kubee-site-url" }}https://github.com/EraldyHq/kubee/blob/main/docs/site{{ end }}
+{{ define "kubee-chart-url" }}https://github.com/EraldyHq/kubee/blob/main/charts{{ end }}
 
 {{/* Create an URL */}}
 {{ define "kubee-admin-user-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}admin user{{end}}]({{ template "kubee-site-url" .}}/admin-user.md){{ end }}
