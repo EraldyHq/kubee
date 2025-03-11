@@ -9,7 +9,7 @@ Install in no time, in your VPS:
 * [kubernetes](https://github.com/kubernetes/kubernetes), the container leader hosting platform
 * and a set of integrated packaged applications (known as `charts` in Kubernetes)
 
-## Features
+
 
 * `Admin Dashboard` with [Kubernetes Dashboard](./charts/kubernetes-dashboard)
 * Certificate Provisioning and monitoring with [cert-manager](./charts/cert-manager/README.md)
