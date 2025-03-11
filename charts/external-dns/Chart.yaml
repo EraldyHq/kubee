@@ -31,6 +31,10 @@ annotations:
   chart.kubee/category: "dns"
   chart.kubee/engines: |
     - helm
+  chart.kubee/crds: |
+    - name: kubee-external-dns-crds
+      version: 0.15.1
+      repository: file://../external-dns-crds
 # https://github.com/kubernetes-sigs/external-dns/tree/master/charts/external-dns
 dependencies:
   - name: kubee-cluster
