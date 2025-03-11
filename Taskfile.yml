@@ -24,7 +24,7 @@ tasks:
   # Generate the values.schema.json
   schema:
     cmds:
-        - helm schema -chart-search-root {{.USER_WORKING_DIR}} --helm-docs-compatibility-mode -k additionalProperties
+        - helm schema --chart-search-root {{.USER_WORKING_DIR}} --helm-docs-compatibility-mode -k additionalProperties
   # Generate the readme
   docs:
     cmds:

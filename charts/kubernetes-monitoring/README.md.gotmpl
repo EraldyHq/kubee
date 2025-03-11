@@ -1,0 +1,52 @@
+
+{{ template "kubee-header" .}}
+
+This {{ template "kubee-jsonnet-chart-label" "jsonnet kubee chart" }} installs monitoring 
+for:
+* the core Kubernetes components 
+* and for the hosts/node (cpu/memory/storage)
+
+The core systems Kubernetes components are:
+* Api Server
+* Controller Manager
+* Core Dns
+* Kubelet
+* Kube Proxy
+* Scheduler 
+
+
+## Features
+
+
+### Metrics, Prometheus Rules and Dashboard
+
+The following monitoring elements are installed:
+* [Kube-prometheus Prometheus scrape config](https://github.com/prometheus-operator/kube-prometheus)
+* [Kubernetes Rules and Grafana dashboards](https://monitoring.mixins.dev/kubernetes/)
+* [Node Rules and Grafana dashboards](https://monitoring.mixins.dev/node-exporter/#dashboards)
+
+
+The dashboards are using metrics from:
+* the `Kubernetes System components`
+* the `Kube-State-Metrics` exporter
+* the [node exporter](https://github.com/prometheus/node_exporter)
+
+The Kubernetes components metrics reference list is available [here](https://kubernetes.io/docs/reference/instrumentation/metrics/)
+* `apiserver_xxx`: Api server metrics
+* `kubeexx`: Kubelet metrics:
+
+
+{{ template "kubee-chart-features-section" . }}
+
+{{ template "kubee-installation-instruction" . }}
+
+
+{{ template "chart.valuesSection" . }}
+
+
+## Dev/Contrib
+
+If you want to contribute to the development of this chart. Check [Dev/Contrib page](contrib/contrib.md)
+
+
+

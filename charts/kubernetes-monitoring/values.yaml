@@ -1,20 +1,33 @@
-# Install Monitoring for the core Kubernetes components
-# Api Server, Dns, Controller Manager, Kubelet, Scheduler
 
-# Not a string, a boolean so no quote
+
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
 enabled: false
-# namespace. This is a monitoring component
+
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace
 namespace: 'monitoring'
 
 
 # Scrape of the kubelet (CPU and Memory Resources)
 kubelet:
+  # -- Enable kubelet monitoring
   enabled: true
-  # Default 30s
-  # Headlamp uses a CPU rate functon over 1 minutes
+  # -- Scrape interval.
+  # Why 45s. Headlamp uses a CPU rate functon over 1 minutes
   # If the scrape interval is above 1m, there is no data returned
   scrape_interval: '45s'
-  # For memory and cost optimization, low level metrics are dropped
+  # -- Metrics Optimization. For memory and cost optimization, low level metrics are dropped
   # For api server, Buckets metrics are high cardinality metrics
   # that are not used in alerting but in debugging
   # and consume a lot of memory
@@ -22,10 +35,11 @@ kubelet:
 
 # Scrape of the api server
 api_server:
+  # -- Enable Api Server monitoring
   enabled: true
-  # Default 30s (and 5s for sli)
+  # -- Scrape Interval (Normal default was 30s and 5s for sli)
   scrape_interval: '60s'
-  # For memory and cost optimization, low level metrics are dropped
+  # -- Metrics Optimization. For memory and cost optimization, low level metrics are dropped
   # For api server, Buckets metrics are high cardinality metrics
   # that are not used in alerting but in debugging
   # and consume a lot of memory
@@ -33,38 +47,43 @@ api_server:
 
 # Scrape of the Core Dns server
 core_dns:
+  # -- Enable Core DNS monitoring
   enabled: true
-  # Default 15s
+  # -- Scrape Interval (normal default was 15s)
   scrape_interval: '30s'
 
-# Kube State Metrics Exporter
-# It exports apps/functional state metrics
-# https://github.com/kubernetes/kube-state-metrics
+
 kube_state_metrics:
+  # -- Enable [Kube State Metrics Exporter](https://github.com/kubernetes/kube-state-metrics).
+  # It exports apps/functional state metrics.
   enabled: true
-  # https://github.com/kubernetes/kube-state-metrics/releases
+  # -- [Kube State Metrics Version](https://github.com/kubernetes/kube-state-metrics/releases)
   version: 'v2.14.0'
-  # The scrape interval
+  # -- The scrape interval
   scrape_interval: '60s'
-  # The memory of the exporter
+  # -- The max memory of the exporter
   memory: '50Mi'
 
-# Node Exporter to gather server resources metrics
-# https://github.com/prometheus/node_exporter
+
 node_exporter:
+  # -- Enable [Node Exporter](https://github.com/prometheus/node_exporter)
+  # It will gather server resources metrics
   enabled: true
-  # https://github.com/prometheus/node_exporter/releases
+  # -- [Node Exporter Version](https://github.com/prometheus/node_exporter/releases)
   version: 'v1.8.2'
-  # Default was 15s
+  # -- Scrape Interval (Default was 15s)
   scrape_interval: '45s'
-  # The memory of the exporter
-  # Kube Prometheus set 180Mi
+  # -- Max memory of the exporter (On Kube Prometheus, it was set to 180Mi)
   memory: '50Mi'
-  # For memory and cost optimization, low levels metrics are dropped
+  # -- Memory and cost optimization. Low levels metrics are dropped
   scrape_metrics_optimization: true
 
 
-# Don't change, don't touch
-# Used to not output template from cross dependency in Chart.yaml
+# -- @ignored Internal Kubee constant
 kubee_internal:
+  # @schema
+  # const: false
+  # @schema
+  # Constant used to not output template from kubee cross dependency in Chart.yaml
+  # Don't change, don't touch
   install_cross_dependency: false

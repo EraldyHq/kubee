@@ -48,12 +48,15 @@
 {{- if or (eq .Name "kubee-cluster") (not (hasPrefix "kubee" .Name)) }}{{- continue }}{{- end }}* [{{ trimPrefix "kubee-" .Name  }}]({{ trimPrefix "file://" .Repository  }}/README.md) {{ template "chart-to-feature-desc" .Name }}{{- end }}
 {{ end }}
 
-{{ define "kubee-installation-instruction" }}
-## Installation
-
+{{ define "kubee-installation-command" }}
 ```bash
 kubee helmet --cluster cluster-name play {{ trimPrefix "kubee-" .Name }}
 ```
+{{end}}
+{{ define "kubee-installation-instruction" }}
+## Installation
+
+{{ template "kubee-installation-command" . }}
 {{ end}}
 
 {{ define "kubee-header" }}

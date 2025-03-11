@@ -20,6 +20,12 @@ version: 0.0.1 # The version of the chart (doesn't matter and can stay the same)
 # It is recommended to use it with quotes.
 appVersion: "v5.16.0" # The hash version of kubernetes mixin
 
+annotations:
+  chart.kubee/status: "stable"
+  chart.kubee/kind: "app"
+  chart.kubee/category: "kubernetes"
+  chart.kubee/engines: |
+    - helm
 
 dependencies:
   - name: kubee-cluster

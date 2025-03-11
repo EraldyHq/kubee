@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-kubernetes-dashboard
-description: Kubernetes Dashboard Kubee Chart
+description: Kubee Kubernetes Dashboard Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -25,6 +25,11 @@ appVersion: "7.11.0" # The version of the app packaged
 
 annotations:
   app.kubernetes.io/name: 'kubernetes-dashboard'
+  chart.kubee/status: "stable"
+  chart.kubee/kind: "app"
+  chart.kubee/category: "kubernetes"
+  chart.kubee/engines: |
+    - helm
 
 # https://artifacthub.io/packages/helm/k8s-dashboard/kubernetes-dashboard
 dependencies:

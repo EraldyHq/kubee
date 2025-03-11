@@ -39,10 +39,10 @@ Install in no time, in your VPS:
 | [grafana](charts/grafana/README.md) | Kubee Grafana Chart | stable | app | monitoring
 | [grafana-crds](charts/grafana-crds/README.md) | Kubee Grafana Crds Chart | stable | crds | monitoring
 | [healthchecks](charts/healthchecks/README.md) | Kubee Healthchecks Chart | stable | app | monitoring
-| [k3s-ansible](charts/k3s-ansible/README.md) | Kubee K3s-ansible cluster Chart | beta | cluster | k3s
-| [keycloak](charts/keycloak/README.md) | A kubee keycloak chart | alpha | app | auth
-| [kubernetes-dashboard](charts/kubernetes-dashboard/README.md) | Kubernetes Dashboard Kubee Chart | na | na | na
-| [kubernetes-monitoring](charts/kubernetes-monitoring/README.md) | Kubee Kubernetes Monitoring Chart | na | na | na
+| [k3s-ansible](charts/k3s-ansible/README.md) | Kubee K3s-ansible Cluster Chart | beta | cluster | k3s
+| [keycloak](charts/keycloak/README.md) | Kubee Keycloak Chart | alpha | app | auth
+| [kubernetes-dashboard](charts/kubernetes-dashboard/README.md) | Kubee Kubernetes Dashboard Chart | stable | app | kubernetes
+| [kubernetes-monitoring](charts/kubernetes-monitoring/README.md) | Kubee Kubernetes Monitoring Chart | stable | app | kubernetes
 | [mailpit](charts/mailpit/README.md) | Kubee Mailpit Chart | na | na | na
 | [mailu](charts/mailu/README.md) | Kubee Mail Chart | na | na | na
 | [mariadb](charts/mariadb/README.md) | Kubee Mariadb Chart | na | na | na

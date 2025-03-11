@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubee-keycloak
-description: A kubee keycloak chart
+description: Kubee Keycloak Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
