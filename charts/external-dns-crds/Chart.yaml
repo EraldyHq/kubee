@@ -1,7 +1,6 @@
 apiVersion: v2
-name: kubee-external-dns
-description: Kubee External Dns Chart
-
+name: kubee-external-dns-crds
+description: Kubee External Dns Crds Chart
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives
@@ -11,42 +10,20 @@ description: Kubee External Dns Chart
 # a dependency of application charts to inject those utilities and functions into the rendering
 # pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: application
-
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
-# Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.0.0
-
+# [External DNS version](https://github.com/kubernetes-sigs/external-dns/releases)
+version: 0.15.1
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-# [External DNS version](https://github.com/kubernetes-sigs/external-dns/releases)
-appVersion: "0.15.1" # The version of the external dns chart without the v
+#
+appVersion: "0.0.0"
 
 annotations:
-  app.kubernetes.io/name: 'external-dns'
   chart.kubee/status: "stable"
-  chart.kubee/kind: "app"
+  chart.kubee/kind: "crds"
   chart.kubee/category: "dns"
   chart.kubee/engines: |
     - helm
-# https://github.com/kubernetes-sigs/external-dns/tree/master/charts/external-dns
-dependencies:
-  - name: kubee-cluster
-    version: 0.0.1
-    alias: cluster
-    repository: file://../cluster
-  # for service monitor
-  - name: kubee-prometheus
-    version: 0.0.1
-    alias: prometheus
-    repository: file://../prometheus
-  - name: kubee-traefik
-    version: 0.0.1
-    alias: traefik
-    repository: file://../traefik
-  - name: external-dns
-    # https://github.com/kubernetes-sigs/external-dns/releases
-    version: 1.15.2
-    repository: https://kubernetes-sigs.github.io/external-dns/

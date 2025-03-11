@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: external-dns
+  namespace: {{.Values.namespace}}
+  labels: {{ include "kubee-manifest-labels" . | nindent 4}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{ include "kubee-pod-labels" . | nindent 6}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels: {{ include "kubee-pod-labels" . | nindent 8}}
+    spec:
+      serviceAccountName: external-dns
+      securityContext:
+        fsGroup: 65534
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: external-dns
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 65532
+            runAsNonRoot: true
+            runAsUser: 65532
+          image: registry.k8s.io/external-dns/external-dns:v{{.Values.version}}
+          imagePullPolicy: IfNotPresent
+          env:
+          {{- $cloudlare := and (gt (len .Values.cluster.dns.cloudflare.dns_zones 0))(ne .Values.cluster.dns.cloudflare.api_token '') }}
+          {{- if $cloudlare }}
+            - name: CF_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: {{include "external-dns-cloudflare-secret-name"}}
+                  name: api_token
+          {{- end}}
+          args:
+            - --log-level={{.Values.log.level}}
+            - --log-format={{.Values.log.format}}
+            - --interval={{.Values.interval}}
+            - --source=service # service # https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/service/
+            - --source=ingress # https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/ingress/
+            {{- if .Values.traefik.enabled}}
+            - --source=traefik-proxy # https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/
+            {{- end}}
+            - --policy=upsert-only
+            - --registry={{.Values.registry}}
+            {{- if $cloudlare }}
+            - --provider=cloudflare
+            - --cloudflare-dns-records-per-page={{.Values.providers.cloudflare.dns_records_per_page}}
+            {{- end}}
+            - -provider-cache-time={{.Values.provider_cache_time}}
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 7979
+          livenessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5

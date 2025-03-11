@@ -5,8 +5,7 @@ kind: ServiceMonitor
 metadata:
   name: {{ include "kubee-name" .}}
   namespace: {{.Values.namespace}}
-  labels:
-    {{- include "kubee-manifest-labels" . | indent 4}}
+  labels: {{ include "kubee-manifest-labels" . | nindent 4}}
 spec:
   jobLabel: {{ index .Chart.Annotations "app.kubernetes.io/name" }}
   namespaceSelector:
@@ -14,8 +13,7 @@ spec:
       - {{.Values.namespace}}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ index .Chart.Annotations "app.kubernetes.io/name"}}
-      app.kubernetes.io/instance: {{.Release.Name}}
+      {{ include "kubee-pod-labels" . | nindent 6}}
   endpoints:
     - port: http
       path: /metrics

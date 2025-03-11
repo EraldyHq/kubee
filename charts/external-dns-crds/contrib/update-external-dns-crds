@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# This script update the version
+# and crd from the upstream sub-chart
+
+source bashlib-error.sh
+error::set_strict_mode
+error::set_trap
+source bashlib-echo.sh
+
+# this works for executed script or sourced script
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+CHART_VERSION=$(yq '.version' "$SCRIPT_DIR/../Chart.yaml")
+
+# Link was on the CRD page
+echo::info "Download the CRD of $CHART_VERSION"
+curl \
+  -s \
+  -o "$SCRIPT_DIR/../templates/crd-manifest.yaml" \
+  --fail \
+  "https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v${CHART_VERSION}/docs/contributing/crd-source/crd-manifest.yaml"
+
+echo::success "The chart was updated"

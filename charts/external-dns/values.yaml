@@ -16,6 +16,36 @@ enabled: false
 # -- The installation namespace
 namespace: 'external-dns'
 
+# -- [External DNS version](https://github.com/kubernetes-sigs/external-dns/releases)
+version: 0.15.1
+
+# -- Log
+log:
+  # Log level
+  level: info
+  # Log format.
+  format: text
+
+# @schema
+# enum: [ 'txt', 'aws-sd', 'dynamodb' & 'noop' ]
+# -- [Registry](https://kubernetes-sigs.github.io/external-dns/latest/docs/registry/registry/)
+# to persists metadata pertaining to DNS records.
+# `txt` stores DNS record metadata in TXT records (such as ownership, ...)
+registry: txt
+
+
+# -- Interval for DNS sync.
+interval: 1m
+
+# -- The local DNS cache to avoid [rate limiting](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/)
+# If a DNS entry is deleted manually, the recovery will need to wait this interval for resynchronization.
+provider_cache_time: 1d # You turned if off with the value `0m`, You empty the cache by restarting the pod.
+
+
+providers:
+  cloudflare:
+    # [Rate limit option](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/)
+    dns_records_per_page: 100
 
 # @ignored
 external-dns:
