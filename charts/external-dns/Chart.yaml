@@ -50,7 +50,7 @@ dependencies:
     version: 0.0.1
     alias: traefik
     repository: file://../traefik
-  - name: external-dns
+  #- name: external-dns
     # https://github.com/kubernetes-sigs/external-dns/releases
-    version: 1.15.2
-    repository: https://kubernetes-sigs.github.io/external-dns/
+  #  version: 1.15.2
+  #  repository: https://kubernetes-sigs.github.io/external-dns/

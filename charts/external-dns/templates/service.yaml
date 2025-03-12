@@ -6,8 +6,7 @@ metadata:
   labels: {{ include "kubee-manifest-labels" . | nindent 4}}
 spec:
   type: ClusterIP
-  selector:
-    labels: {{ include "kubee-pod-labels" . | nindent 6}}
+  selector: {{ include "kubee-pod-labels" . | nindent 4}}
   ports:
     - name: http
       port: 7979

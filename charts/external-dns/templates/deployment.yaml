@@ -67,15 +67,15 @@ spec:
             - name: CF_API_TOKEN
               valueFrom:
                 secretKeyRef:
-                  key: {{include "external-dns-cloudflare-secret-name" .}}
-                  name: api_token
+                  name: {{include "external-dns-cloudflare-secret-name" .}}
+                  key: api_token
             {{- end}}
             {{- range .Values.provider.env}}
             - name: {{.name}}
               valueFrom:
                 secretKeyRef:
-                  key: {{include "external-dns-provider-secret-name" .}}
-                  name: {{.name}}
+                  name: {{include "external-dns-provider-secret-name" .}}
+                  key: {{.name}}
             {{- end }}
           livenessProbe:
             httpGet:

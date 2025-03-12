@@ -194,3 +194,10 @@ spec:
     targets:
       - "100 1 443 service.example.com"
 ```
+
+## Support 
+### CRD ownership fix
+
+```bash
+kubee kubectl patch CustomResourceDefinition dnsendpoints.externaldns.k8s.io --type=merge   -p '{"metadata": {"labels": {"app.kubernetes.io/managed-by": "Helm"}, "annotations": {"meta.helm.sh/release-namespace": "external-dns", "meta.helm.sh/release-name": "external-dns-crds"}}}'
+```
