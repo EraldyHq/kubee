@@ -145,6 +145,7 @@ spec:
             {{- if .Values.traefik.enabled}}
             {{- /* # https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/  */}}
             - '--source=traefik-proxy'
+            - '--traefik-disable-legacy' # https://github.com/kubernetes-sigs/external-dns/issues/4834
             {{- end}}
             - '--policy={{.Values.server.policy}}'
             - '--registry={{.Values.server.registry.type}}'
