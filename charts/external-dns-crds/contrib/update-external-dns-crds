@@ -12,12 +12,14 @@ source bashlib-echo.sh
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 CHART_VERSION=$(yq '.version' "$SCRIPT_DIR/../Chart.yaml")
 
-# Link was on the CRD page
+# Extracted from the Helm Chart
 echo::info "Download the CRD of $CHART_VERSION"
 curl \
   -s \
-  -o "$SCRIPT_DIR/../templates/crd-manifest.yaml" \
+  -o "$SCRIPT_DIR/../templates/dnsendpoint.yaml" \
   --fail \
-  "https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v${CHART_VERSION}/docs/contributing/crd-source/crd-manifest.yaml"
+  "https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v${CHART_VERSION}/charts/external-dns/crds/dnsendpoint.yaml"
+
+
 
 echo::success "The chart was updated"

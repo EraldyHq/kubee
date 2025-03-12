@@ -35,30 +35,52 @@ spec:
           image: registry.k8s.io/external-dns/external-dns:v{{.Values.version}}
           imagePullPolicy: IfNotPresent
           env:
-          {{- $cloudlare := and (gt (len .Values.cluster.dns.cloudflare.dns_zones 0))(ne .Values.cluster.dns.cloudflare.api_token '') }}
-          {{- if $cloudlare }}
+          {{- $cloudflare := and (gt (len .Values.cluster.dns.cloudflare.dns_zones 0))(ne .Values.cluster.dns.cloudflare.api_token '')(eq .Values.provider "") }}
+          {{- if $cloudflare }}
             - name: CF_API_TOKEN
               valueFrom:
                 secretKeyRef:
                   key: {{include "external-dns-cloudflare-secret-name"}}
                   name: api_token
           {{- end}}
+          {{- range .Values.env }}
+            - name: {{.name}}
+              valueFrom:
+                secretKeyRef:
+                  key: {{include "external-dns-provider-secret-name"}}
+                  name: {{.name}}
+          {{- end }}
           args:
             - --log-level={{.Values.log.level}}
             - --log-format={{.Values.log.format}}
             - --interval={{.Values.interval}}
-            - --source=service # service # https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/service/
-            - --source=ingress # https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/ingress/
+            {{- range .Values.sources }}
+            - --source={{.}}
+            {{- end }}
             {{- if .Values.traefik.enabled}}
             - --source=traefik-proxy # https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/
             {{- end}}
-            - --policy=upsert-only
+            - --policy={{.Values.policy}}
             - --registry={{.Values.registry}}
-            {{- if $cloudlare }}
+            {{- if $cloudflare }}
             - --provider=cloudflare
             - --cloudflare-dns-records-per-page={{.Values.providers.cloudflare.dns_records_per_page}}
+            {{- else }}
+            - --provider={{ required "The provider name is required" .Values.provider}}
             {{- end}}
-            - -provider-cache-time={{.Values.provider_cache_time}}
+            {{- range .Values.server.managed_record_types }}
+            - --managed-record-types={{.}}
+            {{- end }}
+            - --provider-cache-time={{.Values.cache_time}}
+            {{- range .Values.domain_filter}}
+            - --domain-filter={{.}}
+            {{- end}}
+            {{- if ne .Values.regex_domain_filter ""}}
+            - --regexp={{.Values.regex_domain_filter}}
+            {{- end }}
+            {{- range .Values.args }}
+            - {{.}}
+            {{- end }}
           ports:
             - name: http
               protocol: TCP

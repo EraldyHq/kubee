@@ -1,0 +1,644 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "args": {
+      "description": " type: \"array\" items:   type: string   examples: [ '--aws-batch-change-interval=1s' ] @schema An array of args to be added to the external dns server Providers are driven by some args. Refer to their documentation to discover them.",
+      "items": {
+        "examples": [
+          "--aws-batch-change-interval=1s"
+        ],
+        "required": [],
+        "type": "string"
+      },
+      "required": [],
+      "title": "args",
+      "type": "array"
+    },
+    "cache_time": {
+      "default": "4h",
+      "description": "The local DNS cache to avoid [rate limiting](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/) If a DNS entry is deleted/modified manually, the recovery will need to wait this interval for resynchronization.",
+      "required": [],
+      "title": "cache_time"
+    },
+    "cluster": {
+      "description": "Kubee Cluster Chart",
+      "properties": {
+        "auth": {
+          "description": "Cluster Auth",
+          "properties": {
+            "admin_user": {
+              "description": "The admin user  * created as admin user in Kubernetes and other app  * added in basicAuth",
+              "properties": {
+                "cluster_role": {
+                  "default": "cluster-admin",
+                  "description": " required: true enum: [ 'cluster-admin', 'admin' ] @schema Kubernetes clusterRole * `cluster-admin` has full access * `admin` does not have access to node and cluster scope related object such as ClusterRoleBinding",
+                  "enum": [
+                    "cluster-admin",
+                    "admin"
+                  ],
+                  "required": [],
+                  "title": "cluster_role"
+                },
+                "email": {
+                  "default": "",
+                  "description": " format: email minLength: 1 @schema The admin email It's used by default in apps. For instance: * letsencrypt registration email * alert notifications: prometheus, argocd",
+                  "format": "email",
+                  "minLength": 1,
+                  "required": [],
+                  "title": "email"
+                },
+                "password": {
+                  "default": "",
+                  "description": " required: true minLength: 1 @schema The admin password",
+                  "minLength": 1,
+                  "required": [],
+                  "title": "password"
+                },
+                "username": {
+                  "default": "admin",
+                  "description": " required: true minLength: 3 @schema The username",
+                  "minLength": 3,
+                  "required": [],
+                  "title": "username"
+                }
+              },
+              "required": [],
+              "title": "admin_user"
+            },
+            "trusted_proxies": {
+              "description": "Trusted Proxies If trusted, reverse proxies handler will proxy and augment the sensitive X-Forwarded-* request headers.  You should set the CIDR value of: * internal proxy such as traefik * and external proxy such as cloudflare It's used by Traefik and all auth application that needs the real ip and trust the X-forward headers",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "trusted_proxies"
+            }
+          },
+          "required": [],
+          "title": "auth",
+          "type": "object"
+        },
+        "chart": {
+          "default": "k3s-ansible",
+          "description": "The cluster chart. The cluster chart is responsible for the installation/management of Kubernetes on the nodes",
+          "required": [],
+          "title": "chart"
+        },
+        "distribution": {
+          "default": "k3s",
+          "description": "The kubernetes distribution k3s is the distribution that has a cluster chart implemented.",
+          "required": [],
+          "title": "distribution"
+        },
+        "dns": {
+          "description": " it's used by cert-manager for the DNS01 proof and by external dns",
+          "properties": {
+            "cloudflare": {
+              "description": "Cloudflare Enabled if the domain list is not empty",
+              "properties": {
+                "api_token": {
+                  "description": " `ApiToken` is now the preferred method (ApiKey is deprecated)",
+                  "properties": {
+                    "key": {
+                      "default": "cloudflare-api-token",
+                      "description": " required: true minLength: 1 @schema The key property (in the secret of k8s or any other provider)",
+                      "minLength": 1,
+                      "required": [],
+                      "title": "key"
+                    },
+                    "kind": {
+                      "default": "Secret",
+                      "description": " required: true enum: [ 'Secret', 'ExternalSecret' ] @schema The type of secret A secret or external secret The chart is responsible for supporting them",
+                      "enum": [
+                        "Secret",
+                        "ExternalSecret"
+                      ],
+                      "required": [],
+                      "title": "kind"
+                    },
+                    "property": {
+                      "default": "",
+                      "description": " Used with the External Secret type",
+                      "required": [],
+                      "title": "property"
+                    },
+                    "value": {
+                      "default": "",
+                      "description": " (Used with the k8s secret type to create a Kubernetes secret)",
+                      "required": [],
+                      "title": "value"
+                    }
+                  },
+                  "required": [],
+                  "title": "api_token"
+                },
+                "dns_zones": {
+                  "description": " format: hostname required: true minLength: 0 @schema The dns Zones that are managed by cloudflare, Cloudflare is enabled if the list is not empty",
+                  "format": "hostname",
+                  "items": {
+                    "required": []
+                  },
+                  "minLength": 0,
+                  "required": [],
+                  "title": "dns_zones"
+                }
+              },
+              "required": [],
+              "title": "cloudflare"
+            }
+          },
+          "required": [],
+          "title": "dns"
+        },
+        "email": {
+          "description": "Default smtp server parameters",
+          "properties": {
+            "smtp": {
+              "description": "Smtp Configuration",
+              "properties": {
+                "from": {
+                  "default": "",
+                  "description": " format: email required: false @schema the default from",
+                  "format": "email",
+                  "required": [],
+                  "title": "from"
+                },
+                "hello": {
+                  "default": "",
+                  "description": "hello (used to present itself, normally the email apex domain name)",
+                  "required": [],
+                  "title": "hello",
+                  "type": "string"
+                },
+                "host": {
+                  "default": "",
+                  "description": " title: Smtp host description: The smtp hostname required: true format: hostname @schema The smtp host if the host is not empty, smtp configuration are added for example for argocd email notifications",
+                  "format": "hostname",
+                  "required": [],
+                  "title": "Smtp host"
+                },
+                "password": {
+                  "default": "",
+                  "description": "the auth connection password",
+                  "required": [],
+                  "title": "password",
+                  "type": "string"
+                },
+                "port": {
+                  "default": 465,
+                  "description": " title: Smtp Port description: The Smtp port type: integer required: false @schema the smtp port",
+                  "required": [],
+                  "title": "Smtp Port",
+                  "type": "integer"
+                },
+                "username": {
+                  "default": "",
+                  "description": "the auth connection username",
+                  "required": [],
+                  "title": "username",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "smtp"
+            }
+          },
+          "required": [],
+          "title": "email",
+          "type": "object"
+        },
+        "global": {
+          "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+          "required": [],
+          "title": "global",
+          "type": "object"
+        },
+        "name": {
+          "default": "kubee",
+          "description": "The cluster name used: * to identify the cluster (for instance, on prometheus remote-write metrics, the name is added as label) * as default first instance name for operator (for instance, prometheus operator allows to install multiple prometheus that needs to be unique. Kube-prometheus asks for a unique name)",
+          "required": [],
+          "title": "name"
+        }
+      },
+      "required": [],
+      "title": "kubee-cluster",
+      "type": "object"
+    },
+    "domain_filter": {
+      "description": "Domain filter (optional) limit to only domains; change to match the zone Create DNS records for host names that match E.g. `example.org` will allow the zone `example.org` and all subdomains (ie `xx.example.org`) `a.example.com` will allow for zone `example.com` `.example.com` will not attempt to match parent zones.",
+      "items": {
+        "examples": [
+          "10.0.0.in-addr.arpa"
+        ],
+        "format": "hostname",
+        "required": [],
+        "type": "string"
+      },
+      "required": [],
+      "title": "domain_filter",
+      "type": "array"
+    },
+    "enabled": {
+      "default": false,
+      "description": "Boolean to indicate that this chart is or will be installed in the cluster",
+      "required": [],
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "env": {
+      "description": " type: \"array\" items:   type: object   properties:     name:       title: an env name       type: string       examples: [DNSIMPLE_OAUTH]     value:       title: an env value       type: string       examples: [YOUR_DNSIMPLE_API_KEY] @schema The env of the external dns server An array of name, value env stored in secrets and passed as env to the Providers secret are driven by env. Refer to their documentation to discover them.",
+      "items": {
+        "properties": {
+          "name": {
+            "examples": [
+              "DNSIMPLE_OAUTH"
+            ],
+            "required": [],
+            "title": "an env name",
+            "type": "string"
+          },
+          "value": {
+            "examples": [
+              "YOUR_DNSIMPLE_API_KEY"
+            ],
+            "required": [],
+            "title": "an env value",
+            "type": "string"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "required": [],
+      "title": "env",
+      "type": "array"
+    },
+    "external-dns": {
+      "properties": {
+        "env": {
+          "items": {
+            "anyOf": [
+              {
+                "properties": {
+                  "name": {
+                    "default": "CF_API_KEY",
+                    "required": [],
+                    "title": "name",
+                    "type": "string"
+                  },
+                  "valueFrom": {
+                    "properties": {
+                      "secretKeyRef": {
+                        "properties": {
+                          "key": {
+                            "default": "apiKey",
+                            "required": [],
+                            "title": "key",
+                            "type": "string"
+                          },
+                          "name": {
+                            "default": "cloudflare-api-key",
+                            "required": [],
+                            "title": "name",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "key"
+                        ],
+                        "title": "secretKeyRef",
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "secretKeyRef"
+                    ],
+                    "title": "valueFrom",
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "name",
+                  "valueFrom"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "name": {
+                    "default": "CF_API_EMAIL",
+                    "required": [],
+                    "title": "name",
+                    "type": "string"
+                  },
+                  "valueFrom": {
+                    "properties": {
+                      "secretKeyRef": {
+                        "properties": {
+                          "key": {
+                            "default": "email",
+                            "required": [],
+                            "title": "key",
+                            "type": "string"
+                          },
+                          "name": {
+                            "default": "cloudflare-api-key",
+                            "required": [],
+                            "title": "name",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "key"
+                        ],
+                        "title": "secretKeyRef",
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "secretKeyRef"
+                    ],
+                    "title": "valueFrom",
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "name",
+                  "valueFrom"
+                ],
+                "type": "object"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "env",
+          "type": "array"
+        },
+        "provider": {
+          "properties": {
+            "name": {
+              "default": "cloudflare",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "title": "provider",
+          "type": "object"
+        },
+        "serviceMonitor": {
+          "properties": {
+            "enabled": {
+              "const": false,
+              "default": "false",
+              "description": "We generate ourselves the monitor",
+              "required": [],
+              "title": "enabled"
+            }
+          },
+          "required": [],
+          "title": "serviceMonitor",
+          "type": "object"
+        }
+      },
+      "required": [
+        "serviceMonitor",
+        "provider",
+        "env"
+      ],
+      "title": "external-dns",
+      "type": "object"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "interval": {
+      "default": "1m",
+      "description": "Interval for DNS sync.",
+      "required": [],
+      "title": "interval"
+    },
+    "kubee_internal": {
+      "description": "@ignored Internal Kubee constant",
+      "properties": {
+        "install_cross_dependency": {
+          "const": false,
+          "default": "false",
+          "description": " const: false @schema Constant used to not output template from kubee cross dependency in Chart.yaml Don't change, don't touch",
+          "required": [],
+          "title": "install_cross_dependency"
+        }
+      },
+      "required": [],
+      "title": "kubee_internal"
+    },
+    "log": {
+      "description": "Log",
+      "properties": {
+        "format": {
+          "default": "text",
+          "description": " enum: [text, json] @schema Log format.",
+          "enum": [
+            "text",
+            "json"
+          ],
+          "required": [],
+          "title": "format"
+        },
+        "level": {
+          "default": "info",
+          "description": " enum: [panic, debug, info, warning, error, fatal] @schema Log level",
+          "enum": [
+            "panic",
+            "debug",
+            "info",
+            "warning",
+            "error",
+            "fatal"
+          ],
+          "required": [],
+          "title": "level"
+        }
+      },
+      "required": [],
+      "title": "log"
+    },
+    "managed_record_types": {
+      "description": " https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/pdns/#using-crd-source-to-manage-dns-records-in-powerdns",
+      "items": {
+        "anyOf": [
+          {
+            "required": [],
+            "type": "string"
+          },
+          {
+            "required": [],
+            "type": "string"
+          },
+          {
+            "required": [],
+            "type": "string"
+          },
+          {
+            "required": [],
+            "type": "string"
+          },
+          {
+            "required": [],
+            "type": "string"
+          }
+        ],
+        "required": []
+      },
+      "required": [],
+      "title": "managed_record_types"
+    },
+    "namespace": {
+      "default": "external-dns",
+      "description": "The installation namespace",
+      "minLength": 1,
+      "required": [],
+      "title": "Namespace"
+    },
+    "policy": {
+      "default": "upsert-only",
+      "description": "Policy prevent ExternalDNS from deleting any records, omit to enable full synchronization",
+      "required": [],
+      "title": "policy",
+      "type": "string"
+    },
+    "provider": {
+      "default": "",
+      "description": " Only [one provider is currently supported](https://github.com/kubernetes-sigs/external-dns/issues/2568) Default to cloudflare if the api_key and the dns zones are specified in the cluster chart",
+      "required": [],
+      "title": "provider"
+    },
+    "providers": {
+      "description": " Specific provider args",
+      "properties": {
+        "cloudflare": {
+          "properties": {
+            "dns_records_per_page": {
+              "default": 100,
+              "description": "[Rate limit option](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/)",
+              "required": [],
+              "title": "dns_records_per_page",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "dns_records_per_page"
+          ],
+          "title": "cloudflare",
+          "type": "object"
+        }
+      },
+      "required": [
+        "cloudflare"
+      ],
+      "title": "providers"
+    },
+    "regex_domain_filter": {
+      "default": "",
+      "description": " It overrides domain filters and can be specified only once. example: (example\\\\.org|company\\\\.com)$",
+      "required": [],
+      "title": "regex_domain_filter"
+    },
+    "registry": {
+      "description": "The metadata store",
+      "properties": {
+        "txt": {
+          "properties": {
+            "encrypt": {
+              "default": false,
+              "description": " type: boolean @schema Encrypt Key is mandatory if true",
+              "required": [],
+              "title": "encrypt",
+              "type": "boolean"
+            },
+            "encrypt_aes_key": {
+              "default": "",
+              "description": "txt-encrypt=true)",
+              "required": [],
+              "title": "encrypt_aes_key"
+            },
+            "owner_id": {
+              "default": "kubee",
+              "description": "A name that identifies this instance of ExternalDNS",
+              "required": [],
+              "title": "owner_id",
+              "type": "string"
+            },
+            "prefix": {
+              "default": "",
+              "description": " Could contain record type template like '%{record_type}-prefix-'. Mutual exclusive with txt-suffix!",
+              "required": [],
+              "title": "prefix"
+            },
+            "suffix": {
+              "default": "",
+              "description": " Could contain record type template like '-%{record_type}-suffix'. Mutual exclusive with txt-prefix!",
+              "required": [],
+              "title": "suffix"
+            }
+          },
+          "required": [
+            "owner_id"
+          ],
+          "title": "txt",
+          "type": "object"
+        },
+        "type": {
+          "default": "txt",
+          "description": " enum: [ 'txt', 'aws-sd', 'dynamodb', 'noop' ] @schema [Registry](https://kubernetes-sigs.github.io/external-dns/latest/docs/registry/registry/) where to persist metadata such as [ownership of record](https://kubernetes-sigs.github.io/external-dns/latest/docs/initial-design/#ownership) to not overwrite records not managed by External DNS `txt` stores DNS record metadata in TXT records",
+          "enum": [
+            "txt",
+            "aws-sd",
+            "dynamodb",
+            "noop"
+          ],
+          "required": [],
+          "title": "type"
+        }
+      },
+      "required": [
+        "txt"
+      ],
+      "title": "registry",
+      "type": "object"
+    },
+    "sources": {
+      "description": " type: array items:   type: string @schema [Source](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/about/) [Traefik](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/) is added if enabled.",
+      "items": {
+        "required": [],
+        "type": "string"
+      },
+      "required": [],
+      "title": "sources",
+      "type": "array"
+    },
+    "version": {
+      "default": "0.15.1",
+      "description": "[External DNS version](https://github.com/kubernetes-sigs/external-dns/releases)",
+      "required": [],
+      "title": "version"
+    }
+  },
+  "required": [
+    "enabled",
+    "namespace",
+    "registry",
+    "policy",
+    "external-dns"
+  ],
+  "type": "object"
+}

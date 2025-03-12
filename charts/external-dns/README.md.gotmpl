@@ -12,9 +12,10 @@ This kubee chart will install [external-dns](https://github.com/kubernetes-sigs/
 ### Auto Source
 
 The DNS records are created from [sources](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/service/)
+that are [annotated](https://kubernetes-sigs.github.io/external-dns/latest/docs/annotations/annotations/)
 
 These sources are automatically enabled.
-* [Ingress](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/ingress/)
+* [Ingress](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/ingress/) - `hostname` is retrieved from `spec.rules.host` metadata
 * [Service](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/service/)
 * [TraefikIngress](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/) if {{ template "kubee-chart-page-label" "Traefik" }} is enabled
 * [CRD](https://kubernetes-sigs.github.io/external-dns/latest/docs/contributing/crd-source/). Example:
