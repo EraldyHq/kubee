@@ -5,12 +5,12 @@ https://helm.sh/docs/chart_template_guide/named_templates/#declaring-and-using-t
 
 
 {{define "external-dns-cloudflare-secret-name" }}
-{{- include "kubee-name" (merge . (dict "component" "cloudflare")) }}
+{{- include "kubee-name" (mergeOverwrite . (dict "component" "cloudflare")) }}
 {{end }}
 
 
 {{define "external-dns-provider-secret-name" }}
-{{- include "kubee-name" (merge . (dict "component" .Values.provider)) }}
+{{- include "kubee-name" (mergeOverwrite . (dict "component" .Values.provider)) }}
 {{end }}
 
 {{define "external-dns-provider-name" }}

@@ -23,26 +23,41 @@ spec:
       initContainers:
         # WebHook
         # https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/webhook-provider/#run-an-externaldns-in-tree-provider-as-a-webhook
-        - name: webhook
+        - name: webhook-provider
           {{- if eq .Values.provider.type "in-tree"}}
           image: registry.k8s.io/external-dns/external-dns:v{{.Values.version}}
           {{- else}}
           image: {{.Values.provider.image}}
           {{- end}}
           restartPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 65532
+            runAsNonRoot: true
+            runAsUser: 65532
           {{- $providerName := trim (include "external-dns-provider-name" .) }}
           args:
           {{- if eq .Values.provider.type "in-tree"}}
-            - --webhook-server
+            - '--webhook-server'
+            - '--metrics-address=:{{.Values.provider.ports.metrics}}'
             - --source=ingress # required but not used
             - --log-level={{.Values.provider.in_tree.common.log.level}}
             - --log-format={{.Values.provider.in_tree.common.log.format}}
-            - --request-time-out={{.Values.provider.in_tree.common.request_time_out}}
+            - --request-timeout={{.Values.provider.in_tree.common.request_timeout}}
             {{- if hasPrefix "cloudflare" $providerName }}
             - --provider=cloudflare
             - --cloudflare-dns-records-per-page={{.Values.provider.in_tree.cloudflare.dns_records_per_page}}
-            - --cloudflare-proxied={{.Values.provider.in_tree.cloudflare.proxied}}
             - --cloudflare-region-key={{.Values.provider.in_tree.cloudflare.region_key}}
+              {{- if eq .Values.provider.in_tree.cloudflare.proxied true}}
+            - --cloudflare-proxied
+              {{- else}}
+            - --no-cloudflare-proxied
+              {{- end}}
             {{- else}}
             - --provider=$providerName
             {{- end }}
@@ -79,25 +94,32 @@ spec:
             {{- end }}
           livenessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: {{.Values.provider.ports.health}}
             initialDelaySeconds: 10
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
-              path: /ready
+              path: /healthz
               port: {{.Values.provider.ports.health}}
             initialDelaySeconds: 10
             timeoutSeconds: 5
           ports:
             - containerPort: {{.Values.provider.ports.webhook}}
               name: webhook
+            {{- if eq .Values.provider.type "in-tree" }}
+              {{- if ne .Values.provider.ports.metrics .Values.provider.ports.health }}
+              {{- fail (printf "For an intree provider, the metrics (%s) and health (%s) port should be the same" .Values.provider.ports.metrics .Values.provider.ports.health)}}
+              {{- end }}
+            {{- end}}
             - containerPort: {{.Values.provider.ports.metrics}}
               name: metrics
             - containerPort: {{.Values.provider.ports.health}}
               name: health
       containers:
         - name: external-dns
+          image: registry.k8s.io/external-dns/external-dns:v{{.Values.version}}
+          imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -108,15 +130,15 @@ spec:
             runAsGroup: 65532
             runAsNonRoot: true
             runAsUser: 65532
-          image: registry.k8s.io/external-dns/external-dns:v{{.Values.version}}
-          imagePullPolicy: IfNotPresent
           args:
+            - '--provider=webhook'
+            - '--webhook-provider-url=localhost:{{.Values.provider.ports.webhook}}'
+            - '--webhook-provider-read-timeout={{.Values.server.webhook_read_timeout}}'
+            - '--webhook-provider-write-timeout={{.Values.server.webhook_write_timeout}}'
+            - '--metrics-address=:7979'
             - '--log-level={{.Values.server.log.level}}'
             - '--log-format={{.Values.server.log.format}}'
             - '--interval={{.Values.server.interval}}'
-            - '--webhook-url=localhost:{{.Values.provider.ports.webhook}}'
-            - '--webhook-read-timeout={{.Values.server.webhook_read_timeout}}'
-            - '--webhook-write-timeout={{.Values.server.webhook_write_timeout}}'
             {{- range .Values.server.sources }}
             - '--source={{.}}'
             {{- end }}

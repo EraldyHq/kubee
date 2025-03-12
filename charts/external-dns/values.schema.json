@@ -530,11 +530,11 @@
                   "required": [],
                   "title": "regex_domain_filter"
                 },
-                "request_time_out": {
+                "request_timeout": {
                   "default": "30s",
                   "description": "Request Timeout",
                   "required": [],
-                  "title": "request_time_out",
+                  "title": "request_timeout",
                   "type": "string"
                 },
                 "zone_id_filter": {
@@ -548,7 +548,7 @@
               },
               "required": [
                 "log",
-                "request_time_out"
+                "request_timeout"
               ],
               "title": "common",
               "type": "object"
@@ -740,10 +740,10 @@
                 },
                 "owner_id": {
                   "default": "kubee",
-                  "description": "A name that identifies this instance of ExternalDNS",
+                  "description": " minLength: 1 @schema A name that identifies this instance of ExternalDNS",
+                  "minLength": 1,
                   "required": [],
-                  "title": "owner_id",
-                  "type": "string"
+                  "title": "owner_id"
                 },
                 "prefix": {
                   "default": "",
@@ -758,9 +758,7 @@
                   "title": "suffix"
                 }
               },
-              "required": [
-                "owner_id"
-              ],
+              "required": [],
               "title": "txt",
               "type": "object"
             },
