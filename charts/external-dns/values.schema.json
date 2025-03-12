@@ -1,25 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "properties": {
-    "args": {
-      "description": " type: \"array\" items:   type: string   examples: [ '--aws-batch-change-interval=1s' ] @schema An array of args to be added to the external dns server Providers are driven by some args. Refer to their documentation to discover them.",
-      "items": {
-        "examples": [
-          "--aws-batch-change-interval=1s"
-        ],
-        "required": [],
-        "type": "string"
-      },
-      "required": [],
-      "title": "args",
-      "type": "array"
-    },
-    "cache_time": {
-      "default": "4h",
-      "description": "The local DNS cache to avoid [rate limiting](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/) If a DNS entry is deleted/modified manually, the recovery will need to wait this interval for resynchronization.",
-      "required": [],
-      "title": "cache_time"
-    },
     "cluster": {
       "description": "Kubee Cluster Chart",
       "properties": {
@@ -224,54 +205,12 @@
       "title": "kubee-cluster",
       "type": "object"
     },
-    "domain_filter": {
-      "description": "Domain filter (optional) limit to only domains; change to match the zone Create DNS records for host names that match E.g. `example.org` will allow the zone `example.org` and all subdomains (ie `xx.example.org`) `a.example.com` will allow for zone `example.com` `.example.com` will not attempt to match parent zones.",
-      "items": {
-        "examples": [
-          "10.0.0.in-addr.arpa"
-        ],
-        "format": "hostname",
-        "required": [],
-        "type": "string"
-      },
-      "required": [],
-      "title": "domain_filter",
-      "type": "array"
-    },
     "enabled": {
       "default": false,
       "description": "Boolean to indicate that this chart is or will be installed in the cluster",
       "required": [],
       "title": "Enabled",
       "type": "boolean"
-    },
-    "env": {
-      "description": " type: \"array\" items:   type: object   properties:     name:       title: an env name       type: string       examples: [DNSIMPLE_OAUTH]     value:       title: an env value       type: string       examples: [YOUR_DNSIMPLE_API_KEY] @schema The env of the external dns server An array of name, value env stored in secrets and passed as env to the Providers secret are driven by env. Refer to their documentation to discover them.",
-      "items": {
-        "properties": {
-          "name": {
-            "examples": [
-              "DNSIMPLE_OAUTH"
-            ],
-            "required": [],
-            "title": "an env name",
-            "type": "string"
-          },
-          "value": {
-            "examples": [
-              "YOUR_DNSIMPLE_API_KEY"
-            ],
-            "required": [],
-            "title": "an env value",
-            "type": "string"
-          }
-        },
-        "required": [],
-        "type": "object"
-      },
-      "required": [],
-      "title": "env",
-      "type": "array"
     },
     "external-dns": {
       "properties": {
@@ -421,12 +360,6 @@
       "title": "global",
       "type": "object"
     },
-    "interval": {
-      "default": "1m",
-      "description": "Interval for DNS sync.",
-      "required": [],
-      "title": "interval"
-    },
     "kubee_internal": {
       "description": "@ignored Internal Kubee constant",
       "properties": {
@@ -441,67 +374,6 @@
       "required": [],
       "title": "kubee_internal"
     },
-    "log": {
-      "description": "Log",
-      "properties": {
-        "format": {
-          "default": "text",
-          "description": " enum: [text, json] @schema Log format.",
-          "enum": [
-            "text",
-            "json"
-          ],
-          "required": [],
-          "title": "format"
-        },
-        "level": {
-          "default": "info",
-          "description": " enum: [panic, debug, info, warning, error, fatal] @schema Log level",
-          "enum": [
-            "panic",
-            "debug",
-            "info",
-            "warning",
-            "error",
-            "fatal"
-          ],
-          "required": [],
-          "title": "level"
-        }
-      },
-      "required": [],
-      "title": "log"
-    },
-    "managed_record_types": {
-      "description": " https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/pdns/#using-crd-source-to-manage-dns-records-in-powerdns",
-      "items": {
-        "anyOf": [
-          {
-            "required": [],
-            "type": "string"
-          },
-          {
-            "required": [],
-            "type": "string"
-          },
-          {
-            "required": [],
-            "type": "string"
-          },
-          {
-            "required": [],
-            "type": "string"
-          },
-          {
-            "required": [],
-            "type": "string"
-          }
-        ],
-        "required": []
-      },
-      "required": [],
-      "title": "managed_record_types"
-    },
     "namespace": {
       "default": "external-dns",
       "description": "The installation namespace",
@@ -509,122 +381,439 @@
       "required": [],
       "title": "Namespace"
     },
-    "policy": {
-      "default": "upsert-only",
-      "description": "Policy prevent ExternalDNS from deleting any records, omit to enable full synchronization",
-      "required": [],
-      "title": "policy",
-      "type": "string"
-    },
     "provider": {
-      "default": "",
-      "description": " Only [one provider is currently supported](https://github.com/kubernetes-sigs/external-dns/issues/2568) Default to cloudflare if the api_key and the dns zones are specified in the cluster chart",
-      "required": [],
-      "title": "provider"
-    },
-    "providers": {
-      "description": " Specific provider args",
+      "description": " Only [one provider is currently supported](https://github.com/kubernetes-sigs/external-dns/issues/2568) Default to cloudflare if the api_key and the dns zones are specified in the cluster chart https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/webhook-provider/ The ideal setup for providers is to run as a sidecar in the same pod of the ExternalDNS container, listening only on localhost",
       "properties": {
-        "cloudflare": {
+        "args": {
+          "description": " type: \"array\" items:   type: string   examples: [ '--aws-batch-change-interval=1s' ] @schema An array of args to be added to the external dns server Providers are driven by some args. Refer to their documentation to discover them.",
+          "items": {
+            "examples": [
+              "--aws-batch-change-interval=1s"
+            ],
+            "required": [],
+            "type": "string"
+          },
+          "required": [],
+          "title": "args",
+          "type": "array"
+        },
+        "env": {
+          "description": " type: \"array\" items:   type: object   properties:     name:       title: an env name       type: string       examples: [DNSIMPLE_OAUTH]     value:       title: an env value       type: string       examples: [YOUR_DNSIMPLE_API_KEY] @schema The env of the external dns server An array of name, value env stored in secrets and passed as env to the Providers secret are driven by env. Refer to their documentation to discover them.",
+          "items": {
+            "properties": {
+              "name": {
+                "examples": [
+                  "DNSIMPLE_OAUTH"
+                ],
+                "required": [],
+                "title": "an env name",
+                "type": "string"
+              },
+              "value": {
+                "examples": [
+                  "YOUR_DNSIMPLE_API_KEY"
+                ],
+                "required": [],
+                "title": "an env value",
+                "type": "string"
+              }
+            },
+            "required": [],
+            "type": "object"
+          },
+          "required": [],
+          "title": "env",
+          "type": "array"
+        },
+        "image": {
+          "default": "",
+          "description": " Example: image: ghcr.io/mconfalonieri/external-dns-hetzner-webhook:v0.7.0",
+          "required": [],
+          "title": "image"
+        },
+        "in_tree": {
+          "description": "In-tree arguments",
           "properties": {
-            "dns_records_per_page": {
-              "default": 100,
-              "description": "[Rate limit option](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/)",
+            "cloudflare": {
+              "description": "cloudflare specific",
+              "properties": {
+                "dns_records_per_page": {
+                  "default": 100,
+                  "description": " type: integer @schema How many DNS records to fetch per request This is a [Rate limit option](https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/cloudflare/#throttling). Cloudflare API has a global rate limit of [1,200 requests per five minutes](https://developers.cloudflare.com/fundamentals/api/reference/limits/) See also: `cache_time`",
+                  "required": [],
+                  "title": "dns_records_per_page",
+                  "type": "integer"
+                },
+                "proxied": {
+                  "default": "false",
+                  "description": " The annotation `external-dns.alpha.kubernetes.io/cloudflare-proxied: \"true\"` override this value.",
+                  "required": [],
+                  "title": "proxied"
+                },
+                "region_key": {
+                  "default": "global",
+                  "description": " example value: `eu` [full list](https://developers.cloudflare.com/data-localization/regional-services/get-started/)",
+                  "required": [],
+                  "title": "region_key"
+                }
+              },
               "required": [],
-              "title": "dns_records_per_page",
+              "title": "cloudflare",
+              "type": "object"
+            },
+            "common": {
+              "description": "Common to all in-tree provider",
+              "properties": {
+                "domain_filter": {
+                  "description": "Domain filter (optional) limit to only domains; change to match the zone Create DNS records for host names that match E.g. `example.org` will allow the zone `example.org` and all subdomains (ie `xx.example.org`) `a.example.com` will allow for zone `example.com` `.example.com` will not attempt to match parent zones.",
+                  "items": {
+                    "examples": [
+                      "10.0.0.in-addr.arpa"
+                    ],
+                    "format": "hostname",
+                    "required": [],
+                    "type": "string"
+                  },
+                  "required": [],
+                  "title": "domain_filter",
+                  "type": "array"
+                },
+                "exclude_domains": {
+                  "description": " type: array items:   type: string   format: hostname   examples: ['10.0.0.in-addr.arpa'] @schema exclude a domain or subdomain Example: `ignore.this.example.com`",
+                  "items": {
+                    "examples": [
+                      "10.0.0.in-addr.arpa"
+                    ],
+                    "format": "hostname",
+                    "required": [],
+                    "type": "string"
+                  },
+                  "required": [],
+                  "title": "exclude_domains",
+                  "type": "array"
+                },
+                "log": {
+                  "description": "Log",
+                  "properties": {
+                    "format": {
+                      "default": "text",
+                      "description": " enum: [text, json] @schema Log format.",
+                      "enum": [
+                        "text",
+                        "json"
+                      ],
+                      "required": [],
+                      "title": "format"
+                    },
+                    "level": {
+                      "default": "info",
+                      "description": " enum: [panic, debug, info, warning, error, fatal] @schema Log level",
+                      "enum": [
+                        "panic",
+                        "debug",
+                        "info",
+                        "warning",
+                        "error",
+                        "fatal"
+                      ],
+                      "required": [],
+                      "title": "level"
+                    }
+                  },
+                  "required": [],
+                  "title": "log",
+                  "type": "object"
+                },
+                "regex_domain_filter": {
+                  "default": "",
+                  "description": " It overrides domain filters and can be specified only once. example: `(example\\\\.org|company\\\\.com)$` or `example*`",
+                  "required": [],
+                  "title": "regex_domain_filter"
+                },
+                "request_time_out": {
+                  "default": "30s",
+                  "description": "Request Timeout",
+                  "required": [],
+                  "title": "request_time_out",
+                  "type": "string"
+                },
+                "zone_id_filter": {
+                  "description": " example value: `023e105f4ecef8ad9ca31a8372d0c353`",
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "zone_id_filter"
+                }
+              },
+              "required": [
+                "log",
+                "request_time_out"
+              ],
+              "title": "common",
+              "type": "object"
+            }
+          },
+          "required": [
+            "common",
+            "cloudflare"
+          ],
+          "title": "in_tree",
+          "type": "object"
+        },
+        "name": {
+          "default": "",
+          "description": " Required for an in-tree provider",
+          "required": [],
+          "title": "name"
+        },
+        "ports": {
+          "description": "Ports",
+          "properties": {
+            "health": {
+              "default": 8888,
+              "required": [],
+              "title": "health",
+              "type": "integer"
+            },
+            "metrics": {
+              "default": 8888,
+              "required": [],
+              "title": "metrics",
+              "type": "integer"
+            },
+            "webhook": {
+              "default": 8888,
+              "required": [],
+              "title": "webhook",
               "type": "integer"
             }
           },
           "required": [
-            "dns_records_per_page"
+            "webhook",
+            "health",
+            "metrics"
           ],
-          "title": "cloudflare",
-          "type": "object"
-        }
-      },
-      "required": [
-        "cloudflare"
-      ],
-      "title": "providers"
-    },
-    "regex_domain_filter": {
-      "default": "",
-      "description": " It overrides domain filters and can be specified only once. example: (example\\\\.org|company\\\\.com)$",
-      "required": [],
-      "title": "regex_domain_filter"
-    },
-    "registry": {
-      "description": "The metadata store",
-      "properties": {
-        "txt": {
-          "properties": {
-            "encrypt": {
-              "default": false,
-              "description": " type: boolean @schema Encrypt Key is mandatory if true",
-              "required": [],
-              "title": "encrypt",
-              "type": "boolean"
-            },
-            "encrypt_aes_key": {
-              "default": "",
-              "description": "txt-encrypt=true)",
-              "required": [],
-              "title": "encrypt_aes_key"
-            },
-            "owner_id": {
-              "default": "kubee",
-              "description": "A name that identifies this instance of ExternalDNS",
-              "required": [],
-              "title": "owner_id",
-              "type": "string"
-            },
-            "prefix": {
-              "default": "",
-              "description": " Could contain record type template like '%{record_type}-prefix-'. Mutual exclusive with txt-suffix!",
-              "required": [],
-              "title": "prefix"
-            },
-            "suffix": {
-              "default": "",
-              "description": " Could contain record type template like '-%{record_type}-suffix'. Mutual exclusive with txt-prefix!",
-              "required": [],
-              "title": "suffix"
-            }
-          },
-          "required": [
-            "owner_id"
-          ],
-          "title": "txt",
+          "title": "ports",
           "type": "object"
         },
         "type": {
-          "default": "txt",
-          "description": " enum: [ 'txt', 'aws-sd', 'dynamodb', 'noop' ] @schema [Registry](https://kubernetes-sigs.github.io/external-dns/latest/docs/registry/registry/) where to persist metadata such as [ownership of record](https://kubernetes-sigs.github.io/external-dns/latest/docs/initial-design/#ownership) to not overwrite records not managed by External DNS `txt` stores DNS record metadata in TXT records",
+          "default": "in-tree",
+          "description": " enum: ['in-tree','external'] @schema Provider Type",
           "enum": [
-            "txt",
-            "aws-sd",
-            "dynamodb",
-            "noop"
+            "in-tree",
+            "external"
           ],
           "required": [],
           "title": "type"
         }
       },
       "required": [
-        "txt"
+        "ports",
+        "in_tree"
       ],
-      "title": "registry",
-      "type": "object"
+      "title": "provider"
     },
-    "sources": {
-      "description": " type: array items:   type: string @schema [Source](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/about/) [Traefik](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/) is added if enabled.",
-      "items": {
-        "required": [],
-        "type": "string"
+    "server": {
+      "properties": {
+        "cache_time": {
+          "default": "4h",
+          "description": "The local DNS cache to avoid [rate limiting](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/) If a DNS entry is deleted/modified manually, the recovery will need to wait this interval for resynchronization.",
+          "required": [],
+          "title": "cache_time"
+        },
+        "interval": {
+          "default": "1m",
+          "description": "Interval for DNS sync.",
+          "required": [],
+          "title": "interval"
+        },
+        "log": {
+          "description": "Log",
+          "properties": {
+            "format": {
+              "default": "text",
+              "description": " enum: [text, json] @schema Log format.",
+              "enum": [
+                "text",
+                "json"
+              ],
+              "required": [],
+              "title": "format"
+            },
+            "level": {
+              "default": "info",
+              "description": " enum: [panic, debug, info, warning, error, fatal] @schema Log level",
+              "enum": [
+                "panic",
+                "debug",
+                "info",
+                "warning",
+                "error",
+                "fatal"
+              ],
+              "required": [],
+              "title": "level"
+            }
+          },
+          "required": [],
+          "title": "log"
+        },
+        "namespaced": {
+          "const": false,
+          "default": "false",
+          "description": " const: false @schema For info, ExternalDNS does not in a namespaced scope (Role and RoleBinding are cluster role). We don't support a namespaced scope",
+          "required": [],
+          "title": "namespaced"
+        },
+        "policy": {
+          "default": "upsert-only",
+          "description": " enum: [upsert-only, sync] @schema Policy Synchronization * upsert-only: Prevent deleting any records * sync: if you want DNS entries to get deleted as well",
+          "enum": [
+            "upsert-only",
+            "sync"
+          ],
+          "required": [],
+          "title": "policy"
+        },
+        "record_filtering": {
+          "description": "Record Type Filtering",
+          "properties": {
+            "exclude": {
+              "description": " type: array items:    enum: [A, AAAA, CNAME, NS, SRV, MX, TXT] @schema Record types to exclude",
+              "items": {
+                "enum": [
+                  "A",
+                  "AAAA",
+                  "CNAME",
+                  "NS",
+                  "SRV",
+                  "MX",
+                  "TXT"
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "exclude",
+              "type": "array"
+            },
+            "managed": {
+              "description": " type: array items:    enum: [A, AAAA, CNAME, NS, SRV, MX, TXT] @schema Record types to manage",
+              "items": {
+                "enum": [
+                  "A",
+                  "AAAA",
+                  "CNAME",
+                  "NS",
+                  "SRV",
+                  "MX",
+                  "TXT"
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "managed",
+              "type": "array"
+            }
+          },
+          "required": [],
+          "title": "record_filtering",
+          "type": "object"
+        },
+        "registry": {
+          "description": "The metadata store",
+          "properties": {
+            "txt": {
+              "properties": {
+                "encrypt": {
+                  "default": false,
+                  "description": " type: boolean @schema Encrypt Key is mandatory if true",
+                  "required": [],
+                  "title": "encrypt",
+                  "type": "boolean"
+                },
+                "encrypt_aes_key": {
+                  "default": "",
+                  "description": "txt-encrypt=true)",
+                  "required": [],
+                  "title": "encrypt_aes_key"
+                },
+                "owner_id": {
+                  "default": "kubee",
+                  "description": "A name that identifies this instance of ExternalDNS",
+                  "required": [],
+                  "title": "owner_id",
+                  "type": "string"
+                },
+                "prefix": {
+                  "default": "",
+                  "description": " Could contain record type template like '%{record_type}-prefix-'. Mutual exclusive with txt-suffix! `%{record_type}` should be included, as any other value will cause a weird duplication of database records.",
+                  "required": [],
+                  "title": "prefix"
+                },
+                "suffix": {
+                  "default": "",
+                  "description": " Could contain record type template like '-%{record_type}-suffix'. Mutual exclusive with txt-prefix! `%{record_type}` should be included, as any other value will cause a weird duplication of database records.",
+                  "required": [],
+                  "title": "suffix"
+                }
+              },
+              "required": [
+                "owner_id"
+              ],
+              "title": "txt",
+              "type": "object"
+            },
+            "type": {
+              "default": "txt",
+              "description": " enum: [ 'txt', 'aws-sd', 'dynamodb', 'noop' ] @schema [Registry](https://kubernetes-sigs.github.io/external-dns/latest/docs/registry/registry/) where to persist metadata such as [ownership of record](https://kubernetes-sigs.github.io/external-dns/latest/docs/initial-design/#ownership) to not overwrite records not managed by External DNS `txt` stores DNS record metadata in TXT records",
+              "enum": [
+                "txt",
+                "aws-sd",
+                "dynamodb",
+                "noop"
+              ],
+              "required": [],
+              "title": "type"
+            }
+          },
+          "required": [
+            "txt"
+          ],
+          "title": "registry",
+          "type": "object"
+        },
+        "sources": {
+          "description": " type: array items:   type: string @schema [Source](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/about/) [Traefik](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/) is added if enabled.",
+          "items": {
+            "required": [],
+            "type": "string"
+          },
+          "required": [],
+          "title": "sources",
+          "type": "array"
+        },
+        "webhook_read_timeout": {
+          "default": "5s",
+          "description": " url: 'http://localhost:8888' The read timeout for the webhook provider in duration format (default: 5s)",
+          "required": [],
+          "title": "webhook_read_timeout"
+        },
+        "webhook_write_timeout": {
+          "default": "10s",
+          "description": "The write timeout for the webhook provider in duration format (default: 10s)",
+          "required": [],
+          "title": "webhook_write_timeout",
+          "type": "string"
+        }
       },
-      "required": [],
-      "title": "sources",
-      "type": "array"
+      "required": [
+        "registry",
+        "record_filtering",
+        "webhook_write_timeout"
+      ],
+      "title": "server",
+      "type": "object"
     },
     "version": {
       "default": "0.15.1",
@@ -636,8 +825,7 @@
   "required": [
     "enabled",
     "namespace",
-    "registry",
-    "policy",
+    "server",
     "external-dns"
   ],
   "type": "object"

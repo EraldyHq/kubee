@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: external-dns
+  name: {{ include "kubee-name" .}}
   namespace: {{.Values.namespace}}
   labels: {{ include "kubee-manifest-labels" . | nindent 4}}
 spec:
@@ -20,13 +20,89 @@ spec:
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
+      initContainers:
+        # WebHook
+        # https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/webhook-provider/#run-an-externaldns-in-tree-provider-as-a-webhook
+        - name: webhook
+          {{- if eq .Values.provider.type "in-tree"}}
+          image: registry.k8s.io/external-dns/external-dns:v{{.Values.version}}
+          {{- else}}
+          image: {{.Values.provider.image}}
+          {{- end}}
+          restartPolicy: Always
+          {{- $providerName := trim (include "external-dns-provider-name" .) }}
+          args:
+          {{- if eq .Values.provider.type "in-tree"}}
+            - --webhook-server
+            - --source=ingress # required but not used
+            - --log-level={{.Values.provider.in_tree.common.log.level}}
+            - --log-format={{.Values.provider.in_tree.common.log.format}}
+            - --request-time-out={{.Values.provider.in_tree.common.request_time_out}}
+            {{- if hasPrefix "cloudflare" $providerName }}
+            - --provider=cloudflare
+            - --cloudflare-dns-records-per-page={{.Values.provider.in_tree.cloudflare.dns_records_per_page}}
+            - --cloudflare-proxied={{.Values.provider.in_tree.cloudflare.proxied}}
+            - --cloudflare-region-key={{.Values.provider.in_tree.cloudflare.region_key}}
+            {{- else}}
+            - --provider=$providerName
+            {{- end }}
+            {{- range .Values.provider.in_tree.common.domain_filter}}
+            - --domain-filter={{.}}
+            {{- end}}
+            {{- if ne .Values.provider.in_tree.common.regex_domain_filter ""}}
+            - --regex-domain-filter={{.Values.regex_domain_filter}}
+            {{- end }}
+            {{- range .Values.provider.in_tree.common.exclude_domains}}
+            - --exclude-domains={{.}}
+            {{- end }}
+            {{- range .Values.provider.in_tree.common.zone_id_filter}}
+            - --zone-id-filter={{.}}
+            {{- end }}
+          {{- end}}
+            {{- range .Values.provider.args }}
+            - {{.}}
+            {{- end }}
+          env:
+            {{- if and (eq .Values.provider.type "in-tree") (eq $providerName "cloudflare-cluster") }}
+            - name: CF_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: {{include "external-dns-cloudflare-secret-name" .}}
+                  name: api_token
+            {{- end}}
+            {{- range .Values.provider.env}}
+            - name: {{.name}}
+              valueFrom:
+                secretKeyRef:
+                  key: {{include "external-dns-provider-secret-name" .}}
+                  name: {{.name}}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{.Values.provider.ports.health}}
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: {{.Values.provider.ports.health}}
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+          ports:
+            - containerPort: {{.Values.provider.ports.webhook}}
+              name: webhook
+            - containerPort: {{.Values.provider.ports.metrics}}
+              name: metrics
+            - containerPort: {{.Values.provider.ports.health}}
+              name: health
       containers:
         - name: external-dns
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
-              - ALL
+                - ALL
             privileged: false
             readOnlyRootFilesystem: true
             runAsGroup: 65532
@@ -34,52 +110,48 @@ spec:
             runAsUser: 65532
           image: registry.k8s.io/external-dns/external-dns:v{{.Values.version}}
           imagePullPolicy: IfNotPresent
-          env:
-          {{- $cloudflare := and (gt (len .Values.cluster.dns.cloudflare.dns_zones 0))(ne .Values.cluster.dns.cloudflare.api_token '')(eq .Values.provider "") }}
-          {{- if $cloudflare }}
-            - name: CF_API_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  key: {{include "external-dns-cloudflare-secret-name"}}
-                  name: api_token
-          {{- end}}
-          {{- range .Values.env }}
-            - name: {{.name}}
-              valueFrom:
-                secretKeyRef:
-                  key: {{include "external-dns-provider-secret-name"}}
-                  name: {{.name}}
-          {{- end }}
           args:
-            - --log-level={{.Values.log.level}}
-            - --log-format={{.Values.log.format}}
-            - --interval={{.Values.interval}}
-            {{- range .Values.sources }}
-            - --source={{.}}
+            - '--log-level={{.Values.server.log.level}}'
+            - '--log-format={{.Values.server.log.format}}'
+            - '--interval={{.Values.server.interval}}'
+            - '--webhook-url=localhost:{{.Values.provider.ports.webhook}}'
+            - '--webhook-read-timeout={{.Values.server.webhook_read_timeout}}'
+            - '--webhook-write-timeout={{.Values.server.webhook_write_timeout}}'
+            {{- range .Values.server.sources }}
+            - '--source={{.}}'
             {{- end }}
             {{- if .Values.traefik.enabled}}
-            - --source=traefik-proxy # https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/
+            {{- /* # https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/  */}}
+            - '--source=traefik-proxy'
             {{- end}}
-            - --policy={{.Values.policy}}
-            - --registry={{.Values.registry}}
-            {{- if $cloudflare }}
-            - --provider=cloudflare
-            - --cloudflare-dns-records-per-page={{.Values.providers.cloudflare.dns_records_per_page}}
-            {{- else }}
-            - --provider={{ required "The provider name is required" .Values.provider}}
-            {{- end}}
-            {{- range .Values.server.managed_record_types }}
-            - --managed-record-types={{.}}
+            - '--policy={{.Values.server.policy}}'
+            - '--registry={{.Values.server.registry.type}}'
+            {{- if eq .Values.server.registry.type "txt"}}
+            - '--txt-owner-id={{.Values.server.registry.txt.owner_id}}'
+              {{- if ne .Values.server.registry.txt.prefix ""}}
+                {{- if not contains "%{record_type}" .Values.server.registry.txt.prefix }}{{fail "txt prefix should contains %{record_type}"}}{{end}}
+            - '--txt-prefix={{.Values.server.registry.txt.prefix}}'
+              {{- end }}
+              {{- if ne .Values.server.registry.txt.suffix ""}}
+                {{- if ne .Values.server.registry.txt.prefix ""}}{{fail "txt prefix and suffix can not be set together"}}{{end}}
+                {{- if not contains "%{record_type}" .Values.server.registry.txt.suffix }}{{fail "txt suffix should contains %{record_type}"}}{{end}}
+            - '--txt-suffix={{.Values.server.registry.txt.suffix}}'
+              {{- end }}
+              {{- if eq .Values.server.registry.txt.encrypt true}}
+            - '--txt-encrypt=true'
+                {{- if eq .Values.server.registry.txt.encrypt_aes_key ""}}{{fail "server.registry.txt.encrypt_aes_key is mandtory for encryption"}}{{end}}
+            - '--encrypt-aes-key={{.Values.server.registry.txt.encrypt_aes_key}}'
+              {{- end }}
             {{- end }}
-            - --provider-cache-time={{.Values.cache_time}}
-            {{- range .Values.domain_filter}}
-            - --domain-filter={{.}}
-            {{- end}}
-            {{- if ne .Values.regex_domain_filter ""}}
-            - --regexp={{.Values.regex_domain_filter}}
+            {{- range .Values.server.record_filtering.managed }}
+            - '--managed-record-types={{.}}'
             {{- end }}
-            {{- range .Values.args }}
-            - {{.}}
+            {{- range .Values.server.record_filtering.exclude }}
+            - '--exclude-record-types={{.}}'
+            {{- end }}
+            - '--provider-cache-time={{.Values.server.cache_time}}'
+            {{- range .Values.server.args }}
+            - '{{.}}'
             {{- end }}
           ports:
             - name: http

@@ -568,7 +568,7 @@ kubee::get_cluster_values_files_for_chart(){
     CHART_VALUES=$(echo::eval "yq '.$ACTUAL_CHART_ALIAS' $CLUSTER_VALUES_FILE")
     if [ "$CHART_VALUES" == "null" ]; then
       # CRD chart does not have any value in the cluster values files
-      if [ "$IS_CRD_CHART" != "1" ]; then
+      if [ "$CHART_TYPE" != "crds" ]; then
         echo::warn "No values found for the actual chart $ACTUAL_CHART_ALIAS in the cluster value file $KUBEE_CLUSTER_VALUES_FILE"
       fi
       echo "${CLUSTER_FILES[@]}"

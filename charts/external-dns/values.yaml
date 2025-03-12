@@ -20,183 +20,235 @@ namespace: 'external-dns'
 version: 0.15.1
 
 
-# -- Log
-log:
-  # @schema
-  # enum: [panic, debug, info, warning, error, fatal]
-  # @schema
-  # Log level
-  level: info
-  # @schema
-  # enum: [text, json]
-  # @schema
-  # Log format.
-  format: text
-
-# The metadata store
-registry:
-  # @schema
-  # enum: [ 'txt', 'aws-sd', 'dynamodb', 'noop' ]
-  # @schema
-  # [Registry](https://kubernetes-sigs.github.io/external-dns/latest/docs/registry/registry/)
-  # where to persist metadata such as [ownership of record](https://kubernetes-sigs.github.io/external-dns/latest/docs/initial-design/#ownership) to not overwrite records not managed by External DNS
-  # `txt` stores DNS record metadata in TXT records
-  type: 'txt'
-  txt:
-    # A name that identifies this instance of ExternalDNS
-    owner_id: "kubee"
-    # A custom string that's prefixed to each ownership DNS record (optional).
-    # Could contain record type template like '%{record_type}-prefix-'. Mutual exclusive with txt-suffix!
-    prefix: ''
-    # A custom string that's suffixed to the host portion of each ownership DNS record (optional).
-    # Could contain record type template like '-%{record_type}-suffix'. Mutual exclusive with txt-prefix!
-    suffix: ''
+server:
+  # -- Log
+  log:
     # @schema
-    # type: boolean
+    # enum: [panic, debug, info, warning, error, fatal]
     # @schema
-    # Encrypt
-    # Key is mandatory if true
-    encrypt: false
-    # Set TXT record decryption and encryption 32 byte aes key (required when --txt-encrypt=true)
-    encrypt_aes_key: ''
+    # Log level
+    level: info
+    # @schema
+    # enum: [text, json]
+    # @schema
+    # Log format.
+    format: text
+  # The metadata store
+  registry:
+    # @schema
+    # enum: [ 'txt', 'aws-sd', 'dynamodb', 'noop' ]
+    # @schema
+    # [Registry](https://kubernetes-sigs.github.io/external-dns/latest/docs/registry/registry/)
+    # where to persist metadata such as [ownership of record](https://kubernetes-sigs.github.io/external-dns/latest/docs/initial-design/#ownership) to not overwrite records not managed by External DNS
+    # `txt` stores DNS record metadata in TXT records
+    type: 'txt'
+    txt:
+      # @schema
+      # minLength: 1
+      # @schema
+      # A name that identifies this instance of ExternalDNS
+      owner_id: "kubee"
+      # A custom string that's prefixed to each ownership DNS record (optional).
+      # Could contain record type template like '%{record_type}-prefix-'. Mutual exclusive with txt-suffix!
+      # `%{record_type}` should be included, as any other value will cause a weird duplication of database records.
+      prefix: ''
+      # A custom string that's suffixed to the host portion of each ownership DNS record (optional).
+      # Could contain record type template like '-%{record_type}-suffix'. Mutual exclusive with txt-prefix!
+      # `%{record_type}` should be included, as any other value will cause a weird duplication of database records.
+      suffix: ''
+      # @schema
+      # type: boolean
+      # @schema
+      # Encrypt
+      # Key is mandatory if true
+      encrypt: false
+      # Set TXT record decryption and encryption 32 byte aes key (required when --txt-encrypt=true)
+      encrypt_aes_key: ''
 
-# @schema
-# type: array
-# items:
-#   type: string
-# @schema
-# [Source](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/about/)
-# [Traefik](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/) is added if enabled.
-sources:
-  - service # For services without ingress such as loadbalancer https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/service/
-  - ingress # https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/ingress/
-
-
-# -- Interval for DNS sync.
-interval: '1m'
-
-# -- The local DNS cache to avoid [rate limiting](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/)
-# If a DNS entry is deleted/modified manually, the recovery will need to wait this interval for resynchronization.
-cache_time: '4h' # You turned if off with the value `0m`, You empty the cache by restarting the pod., 1d
-
-# Request Timeout
-request_time_out: '30s'
-
-# Record Type Filtering
-record_filtering:
   # @schema
-  # enum: [A, AAAA, CNAME, NS, SRV, TXT]
+  # type: array
+  # items:
+  #   type: string
   # @schema
-  # Record types to manage
-  managed: # [Ref](https://github.com/kubernetes-sigs/external-dns/blob/724b86b8b867db9420c51b6a8bc9d26118bf213d/pkg/apis/externaldns/types.go#L471C110-L471C124)
-    - 'A'
-    - 'AAAA'
-    - 'CNAME'
-    - 'TXT'
-    - 'MX'
-    - 'SRV'
-  # @schema
-  # enum: [A, AAAA, CNAME, NS, SRV, TXT]
-  # @schema
-  # Record types to exclude
-  exclude: [] # [Ref](https://github.com/kubernetes-sigs/external-dns/blob/724b86b8b867db9420c51b6a8bc9d26118bf213d/pkg/apis/externaldns/types.go#L472)
+  # [Source](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/about/)
+  # [Traefik](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/) is added if enabled.
+  sources:
+    - service # For services without ingress such as loadbalancer https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/service/
+    - ingress # https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/ingress/
+    - crd
 
 
-# @schema
-# enum: [upsert-only, sync]
-# @schema
-# Policy Synchronization
-# * upsert-only: Prevent deleting any records
-# * sync: if you want DNS entries to get deleted as well
-policy: upsert-only
+  # -- Interval for DNS sync.
+  interval: '1m'
+
+  # -- The local DNS cache to avoid [rate limiting](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/)
+  # If a DNS entry is deleted/modified manually, the recovery will need to wait this interval for resynchronization.
+  cache_time: '4h' # You turned if off with the value `0m`, You empty the cache by restarting the pod., 1d
+
+  # @schema
+  # const: false
+  # @schema
+  # For info, ExternalDNS does not in a namespaced scope (Role and RoleBinding are cluster role).
+  # We don't support a namespaced scope
+  namespaced: false
+
+  # Record Type Filtering
+  record_filtering:
+    # @schema
+    # type: array
+    # items:
+    #    enum: [A, AAAA, CNAME, NS, SRV, MX, TXT]
+    # @schema
+    # Record types to manage
+    managed: # [Ref](https://github.com/kubernetes-sigs/external-dns/blob/724b86b8b867db9420c51b6a8bc9d26118bf213d/pkg/apis/externaldns/types.go#L471C110-L471C124)
+      - A
+      - AAAA
+      - CNAME
+      - TXT
+      - MX
+      - SRV
+    # @schema
+    # type: array
+    # items:
+    #    enum: [A, AAAA, CNAME, NS, SRV, MX, TXT]
+    # @schema
+    # Record types to exclude
+    exclude: [] # [Ref](https://github.com/kubernetes-sigs/external-dns/blob/724b86b8b867db9420c51b6a8bc9d26118bf213d/pkg/apis/externaldns/types.go#L472)
+
+  # @schema
+  # enum: [upsert-only, sync]
+  # @schema
+  # Policy Synchronization
+  # * upsert-only: Prevent deleting any records
+  # * sync: if you want DNS entries to get deleted as well
+  policy: upsert-only
+
+  # The URL of the remote endpoint to call for the webhook provider (default: http://localhost:8888)")
+  # url: 'http://localhost:8888'
+  # The read timeout for the webhook provider in duration format (default: 5s)
+  webhook_read_timeout: '5s'
+  # The write timeout for the webhook provider in duration format (default: 10s)
+  webhook_write_timeout: '10s'
+
 
 # The provider
 # Only [one provider is currently supported](https://github.com/kubernetes-sigs/external-dns/issues/2568)
 # Default to cloudflare if the api_key and the dns zones are specified in the cluster chart
-provider: ''
-
-# @schema
-# type: "array"
-# items:
-#   type: object
-#   properties:
-#     name:
-#       title: an env name
-#       type: string
-#       examples: [DNSIMPLE_OAUTH]
-#     value:
-#       title: an env value
-#       type: string
-#       examples: [YOUR_DNSIMPLE_API_KEY]
-# @schema
-# The env of the external dns server
-# An array of name, value env stored in secrets and passed as env to the
-# Providers secret are driven by env. Refer to their documentation to discover them.
-env: []
-# @schema
-# type: "array"
-# items:
-#   type: string
-#   examples: [ '--aws-batch-change-interval=1s' ]
-# @schema
-# An array of args to be added to the external dns server
-# Providers are driven by some args. Refer to their documentation to discover them.
-args: []
-
-# Domain Filtering
-domain_filtering:
+# https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/webhook-provider/
+# The ideal setup for providers is to run as a sidecar in the same pod of the ExternalDNS container, listening only on localhost
+provider:
   # @schema
-  # type: array
+  # enum: ['in-tree','external']
+  # @schema
+  # Provider Type
+  type: 'in-tree'
+  # The name of the provider
+  # Required for an in-tree provider
+  name: ''
+  # Required if external
+  # Example: image: ghcr.io/mconfalonieri/external-dns-hetzner-webhook:v0.7.0
+  image: ''
+  # Ports
+  ports:
+    webhook: 8888
+    health: 8888
+    metrics: 8888
+  # @schema
+  # type: "array"
   # items:
   #   type: string
-  #   format: hostname
-  #   examples: ['10.0.0.in-addr.arpa']
+  #   examples: [ '--aws-batch-change-interval=1s' ]
   # @schema
-  # -- Domain filter
-  # (optional) limit to only domains; change to match the zone
-  # Create DNS records for host names that match
-  # E.g.
-  # `example.org` will allow the zone `example.org` and all subdomains (ie `xx.example.org`)
-  # `a.example.com` will allow for zone `example.com`
-  # `.example.com` will not attempt to match parent zones.
-  domain_filter: []
-  # Limits possible domains and target zone with a regex.
-  # It overrides domain filters and can be specified only once.
-  # example: `(example\\.org|company\\.com)$` or `example*`
-  regex_domain_filter: ''
+  # An array of args to be added to the external dns server
+  # Providers are driven by some args. Refer to their documentation to discover them.
+  args: [ ]
   # @schema
-  # type: array
+  # type: "array"
   # items:
-  #   type: string
-  #   format: hostname
-  #   examples: ['10.0.0.in-addr.arpa']
+  #   type: object
+  #   properties:
+  #     name:
+  #       title: an env name
+  #       type: string
+  #       examples: [DNSIMPLE_OAUTH]
+  #     value:
+  #       title: an env value
+  #       type: string
+  #       examples: [YOUR_DNSIMPLE_API_KEY]
   # @schema
-  # exclude a domain or subdomain
-  # Example: `ignore.this.example.com`
-  exclude_domains: []
-  # (optional) limit to a specific zone.
-  # example value: `023e105f4ecef8ad9ca31a8372d0c353`
-  zone_id_filter: ''
+  # The env of the external dns server
+  # An array of name, value env stored in secrets and passed as env to the
+  # Providers secret are driven by env. Refer to their documentation to discover them.
+  env: [ ]
 
+  # In-tree arguments
+  in_tree:
+    # Common to all in-tree provider
+    common:
+      # Log
+      log:
+        # @schema
+        # enum: [panic, debug, info, warning, error, fatal]
+        # @schema
+        # Log level
+        level: info
+        # @schema
+        # enum: [text, json]
+        # @schema
+        # Log format.
+        format: text
+      # Request Timeout
+      request_time_out: '30s'
+      # @schema
+      # type: array
+      # items:
+      #   type: string
+      #   format: hostname
+      #   examples: ['10.0.0.in-addr.arpa']
+      # @schema
+      # -- Domain filter
+      # (optional) limit to only domains; change to match the zone
+      # Create DNS records for host names that match
+      # E.g.
+      # `example.org` will allow the zone `example.org` and all subdomains (ie `xx.example.org`)
+      # `a.example.com` will allow for zone `example.com`
+      # `.example.com` will not attempt to match parent zones.
+      domain_filter: [ ]
+      # Limits possible domains and target zone with a regex.
+      # It overrides domain filters and can be specified only once.
+      # example: `(example\\.org|company\\.com)$` or `example*`
+      regex_domain_filter: ''
+      # @schema
+      # type: array
+      # items:
+      #   type: string
+      #   format: hostname
+      #   examples: ['10.0.0.in-addr.arpa']
+      # @schema
+      # exclude a domain or subdomain
+      # Example: `ignore.this.example.com`
+      exclude_domains: [ ]
+      # (optional) limit to a specific zone.
+      # example value: `023e105f4ecef8ad9ca31a8372d0c353`
+      zone_id_filter: []
+    # cloudflare specific
+    cloudflare:
+      # @schema
+      # type: integer
+      # @schema
+      # How many DNS records to fetch per request
+      # This is a [Rate limit option](https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/cloudflare/#throttling).
+      # Cloudflare API has a global rate limit of [1,200 requests per five minutes](https://developers.cloudflare.com/fundamentals/api/reference/limits/)
+      # See also: `cache_time`
+      dns_records_per_page: 100
+      # (optional) enable the proxy feature of Cloudflare (DDOS protection, CDN...)
+      # The annotation `external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"` override this value.
+      proxied: false
+      # Configure which region can decrypt HTTPS requests
+      # example value: `eu`
+      # [full list](https://developers.cloudflare.com/data-localization/regional-services/get-started/)
+      region_key: 'global'
 
-# Specific provider flags
-providers:
-  cloudflare:
-    # @schema
-    # type: integer
-    # @schema
-    # How many DNS records to fetch per request
-    # This is a [Rate limit option](https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/cloudflare/#throttling).
-    # Cloudflare API has a global rate limit of [1,200 requests per five minutes](https://developers.cloudflare.com/fundamentals/api/reference/limits/)
-    # See also: `cache_time`
-    dns_records_per_page: 100
-    # (optional) enable the proxy feature of Cloudflare (DDOS protection, CDN...)
-    # The annotation `external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"` override this value.
-    cloudflare_proxied: false
-    # Configure which region can decrypt HTTPS requests
-    # example value: `eu`
-    # [full list](https://developers.cloudflare.com/data-localization/regional-services/get-started/)
-    cloudflare_region_key: 'global'
 
 # @ignored
 external-dns:

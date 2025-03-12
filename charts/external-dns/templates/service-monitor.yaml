@@ -15,7 +15,7 @@ spec:
     matchLabels:
       {{ include "kubee-pod-labels" . | nindent 6}}
   endpoints:
-    - port: http
+    - targetPort: {{.Values.provider.ports.metrics}}
       path: /metrics
       interval: {{.Values.prometheus.scrape_interval}}
 {{- end }}

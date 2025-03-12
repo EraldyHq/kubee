@@ -14,9 +14,30 @@ and are created/deleted once k8s resources are created/deleted.
 
 https://kubernetes-sigs.github.io/external-dns/latest/docs/initial-design/#ownership
 
+## WebHook
+
+```bash
+# source is mandatory
+docker run --rm \
+  -e  KUBERNETES_SERVICE_HOST="localhost" \
+  -e  KUBERNETES_SERVICE_PORT=688 \
+  registry.k8s.io/external-dns/external-dns:v0.15.1 \
+  --webhook-server \
+  --provider=cloudflare \
+  --source=ingress
+```
+
+## Image
+
+```bash
+docker inspect --format='{{.Config.Cmd}}' registry.k8s.io/external-dns/external-dns:v0.15.1
+```
+Entrypoint: `/ko-app/external-dns`
+
 ## Config / Flag
 
-See [here](https://github.com/kubernetes-sigs/external-dns/blob/724b86b8b867db9420c51b6a8bc9d26118bf213d/pkg/apis/externaldns/types.go#L423)
+ * [Doc](https://kubernetes-sigs.github.io/external-dns/latest/docs/flags/)
+ * [Code](https://github.com/kubernetes-sigs/external-dns/blob/724b86b8b867db9420c51b6a8bc9d26118bf213d/pkg/apis/externaldns/types.go#L423)
 with default value [here](https://github.com/kubernetes-sigs/external-dns/blob/724b86b8b867db9420c51b6a8bc9d26118bf213d/pkg/apis/externaldns/types.go#L217C1-L217C29)
 
 ## Tls
