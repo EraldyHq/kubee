@@ -9,6 +9,8 @@ spec:
   selector: {{ include "kubee-pod-labels" . | nindent 4}}
   ports:
     - name: http
-      port: 7979
-      targetPort: http
+      {{- /* Port of the service */}}
+      port: {{.Values.provider.ports.metrics}}
+      {{- /* Port of the container */}}
+      targetPort: {{.Values.provider.ports.metrics}}
       protocol: TCP

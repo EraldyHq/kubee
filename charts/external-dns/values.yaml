@@ -21,7 +21,7 @@ version: 0.15.1
 
 
 server:
-  # -- Log
+  # @ignored Log
   log:
     # @schema
     # enum: [panic, debug, info, warning, error, fatal]
@@ -33,7 +33,7 @@ server:
     # @schema
     # Log format.
     format: text
-  # The metadata store
+  # @ignored The metadata store
   registry:
     # @schema
     # enum: [ 'txt', 'aws-sd', 'dynamodb', 'noop' ]
@@ -70,7 +70,7 @@ server:
   # items:
   #   type: string
   # @schema
-  # [Source](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/about/)
+  # @ignored [Source](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/about/)
   # [Traefik](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/) is added if enabled.
   sources:
     - service # For services without ingress such as loadbalancer https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/service/
@@ -83,16 +83,17 @@ server:
 
   # -- The local DNS cache to avoid [rate limiting](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/)
   # If a DNS entry is deleted/modified manually, the recovery will need to wait this interval for resynchronization.
+  # Or you need to restart the pod.
   cache_time: '4h' # You turned if off with the value `0m`, You empty the cache by restarting the pod., 1d
 
   # @schema
   # const: false
   # @schema
-  # For info, ExternalDNS does not in a namespaced scope (Role and RoleBinding are cluster role).
+  # @ignored For info, ExternalDNS does not in a namespaced scope (Role and RoleBinding are cluster role).
   # We don't support a namespaced scope
   namespaced: false
 
-  # Record Type Filtering
+  # @ignored Record Type Filtering
   record_filtering:
     # @schema
     # type: array
@@ -118,16 +119,16 @@ server:
   # @schema
   # enum: [upsert-only, sync]
   # @schema
-  # Policy Synchronization
-  # * upsert-only: Prevent deleting any records
-  # * sync: if you want DNS entries to get deleted as well
+  # -- Policy Synchronization.
+  # `upsert-only`: Prevent deleting any records.
+  # `sync`: if you want DNS entries to get deleted as well
   policy: upsert-only
 
   # The URL of the remote endpoint to call for the webhook provider (default: http://localhost:8888)")
   # url: 'http://localhost:8888'
-  # The read timeout for the webhook provider in duration format (default: 5s)
+  # @ignored The read timeout for the webhook provider in duration format (default: 5s)
   webhook_read_timeout: '5s'
-  # The write timeout for the webhook provider in duration format (default: 10s)
+  # @ignored The write timeout for the webhook provider in duration format (default: 10s)
   webhook_write_timeout: '10s'
 
 
@@ -138,22 +139,24 @@ server:
 # The ideal setup for providers is to run as a sidecar in the same pod of the ExternalDNS container, listening only on localhost
 provider:
   # @schema
-  # enum: ['in-tree','external']
+  # enum: ['in-tree','out-tree']
   # @schema
-  # Provider Type
+  # -- Webhook Provider. `in-tree` or `out-tree`
+  # `in-tree` will use `external-dns` as webhook provider.
+  # With `out-tree`, you need to provide the image
   type: 'in-tree'
-  # The name of the provider
-  # Required for an in-tree provider
+  # -- The name of the provider (Required for an in-tree provider)
   name: ''
-  # Required if external
-  # Example: image: ghcr.io/mconfalonieri/external-dns-hetzner-webhook:v0.7.0
+  # -- Required if the provider is `out-tree`
+  # Example: `ghcr.io/mconfalonieri/external-dns-hetzner-webhook:v0.7.0`
   image: ''
   # Ports
   ports:
+    # -- The webhook/http  port
     webhook: 8888
-    # Metrics
+    # -- The metrics port
     metrics: 7978
-    # Health
+    # -- The health port
     health: 7978
   # @schema
   # type: "array"
@@ -187,7 +190,7 @@ provider:
   in_tree:
     # Common to all in-tree provider
     common:
-      # Log
+      # @ignored Log
       log:
         # @schema
         # enum: [panic, debug, info, warning, error, fatal]
@@ -199,7 +202,7 @@ provider:
         # @schema
         # Log format.
         format: text
-      # Request Timeout
+      # @ignored Request Timeout
       request_timeout: '30s'
       # @schema
       # type: array

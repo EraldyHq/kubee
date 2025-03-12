@@ -9,9 +9,13 @@ metadata:
 spec:
   forwardAuth:
     address: "https://oauth2-proxy.{{ .Values.oauth2_proxy.namespace }}.svc.cluster.local"
-    # https://doc.traefik.io/traefik/middlewares/http/forwardauth/#insecureskipverify
     tls:
+      {{- if eq .Values.cert_manager.enabled true }}
       caSecret: {{ .Values.cert_manager.issuers.kubee.bundle_name }}
-      {{/* insecureSkipVerify: true - Only if you get an http error 500 */}}
+      {{- else}}
+      {{/* May help if you get an http error 500 */}}
+      {{/* https://doc.traefik.io/traefik/middlewares/http/forwardauth/#insecureskipverify */}}
+      insecureSkipVerify: true
+      {{- end }}
     authResponseHeaders:
       - X-Forwarded-User

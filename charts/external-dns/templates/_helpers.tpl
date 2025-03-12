@@ -22,3 +22,15 @@ cloudflare-cluster
 {{ fail "For an intree provider the provider name is required"}}
 {{end}}
 {{end}}
+
+{{define "external-dns-container-security-context"}}
+allowPrivilegeEscalation: false
+capabilities:
+  drop:
+    - ALL
+privileged: false
+readOnlyRootFilesystem: true
+runAsGroup: 65532
+runAsNonRoot: true
+runAsUser: 65532
+{{end}}

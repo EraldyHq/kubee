@@ -9,6 +9,8 @@ spec:
   selector:
     matchLabels: {{ include "kubee-pod-labels" . | nindent 6}}
   strategy:
+    {{- /* Rectreate is the default value of the Helm Chart */}}
+    {{- /* https://github.com/kubernetes-sigs/external-dns/blob/a3f41889657f9843de194482a7cdb964513b4c31/charts/external-dns/values.yaml#L67*/}}
     type: Recreate
   template:
     metadata:
@@ -20,6 +22,12 @@ spec:
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
+      {{- if .Values.cert_manager.enabled }}
+      volumes:
+        - name: ca
+          secret:
+            secretName: {{ .Values.cert_manager.issuers.kubee.bundle_name }}
+      {{- end }}
       initContainers:
         # WebHook
         # https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/webhook-provider/#run-an-externaldns-in-tree-provider-as-a-webhook
@@ -30,16 +38,8 @@ spec:
           image: {{.Values.provider.image}}
           {{- end}}
           restartPolicy: Always
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-            privileged: false
-            readOnlyRootFilesystem: true
-            runAsGroup: 65532
-            runAsNonRoot: true
-            runAsUser: 65532
+          {{/* Same secruity context on both pod */}}
+          securityContext: {{ include "external-dns-container-security-context" . | nindent 12}}
           {{- $providerName := trim (include "external-dns-provider-name" .) }}
           args:
           {{- if eq .Values.provider.type "in-tree"}}
@@ -77,6 +77,9 @@ spec:
             {{- range .Values.provider.args }}
             - {{.}}
             {{- end }}
+            {{- if .Values.cert_manager.enabled }}
+            - '--tls-ca=/etc/external-dns/ca.crt'
+            {{- end}}
           env:
             {{- if and (eq .Values.provider.type "in-tree") (eq $providerName "cloudflare-cluster") }}
             - name: CF_API_TOKEN
@@ -92,6 +95,13 @@ spec:
                   name: {{include "external-dns-provider-secret-name" .}}
                   key: {{.name}}
             {{- end }}
+          {{- if eq .Values.cert_manager.enabled true}}
+          volumeMounts:
+            - name: ca
+              mountPath: /etc/external-dns/ca.crt
+              readOnly: true
+              subPath: ca.crt
+          {{- end}}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -120,19 +130,10 @@ spec:
         - name: external-dns
           image: registry.k8s.io/external-dns/external-dns:v{{.Values.version}}
           imagePullPolicy: IfNotPresent
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-            privileged: false
-            readOnlyRootFilesystem: true
-            runAsGroup: 65532
-            runAsNonRoot: true
-            runAsUser: 65532
+          securityContext: {{ include "external-dns-container-security-context" . | nindent 12}}
           args:
             - '--provider=webhook'
-            - '--webhook-provider-url=localhost:{{.Values.provider.ports.webhook}}'
+            - '--webhook-provider-url=http://localhost:{{.Values.provider.ports.webhook}}'
             - '--webhook-provider-read-timeout={{.Values.server.webhook_read_timeout}}'
             - '--webhook-provider-write-timeout={{.Values.server.webhook_write_timeout}}'
             - '--metrics-address=:7979'
@@ -198,3 +199,4 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
+

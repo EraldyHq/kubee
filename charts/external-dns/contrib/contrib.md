@@ -43,7 +43,7 @@ with default value [here](https://github.com/kubernetes-sigs/external-dns/blob/7
 ## Tls
 
 * `--tls-ca`: When using TLS communication, the path to the certificate authority to verify server communications (optionally specify --tls-client-cert for two-way TLS)")
-* `--tls-client-cert`: When using TLS communication, the path to the certificate to present as a client (not required for TLS
+* `--tls-client-cert`: When using TLS communication, the path to the certificate to present as a client (not required for TLS)
 * `--tls-client-cert-key`: When using TLS communication, the path to the certificate key to use with the client certificate (not required for TLS)")
 
 ## Monitoring
@@ -66,133 +66,39 @@ WebhookServer:                false,
 `webhook-provider-write-timeout`: The write timeout for the webhook provider in duration format (default: 10s)
 `webhook-server`: When enabled, runs as a webhook server instead of a controller. (default: false)
 
-## Source Service (Load Balancer)
 
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: nginx
-  annotations:
-    external-dns.alpha.kubernetes.io/hostname: example.com
-    external-dns.alpha.kubernetes.io/ttl: "120" #optional
-spec:
-  selector:
-    app: nginx
-  type: LoadBalancer
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
-```
 
 ## Template
 
 If --fqdn-template flag is specified, e.g. --fqdn-template={{.Name}}.my-org.com,
 ExternalDNS will use service/ingress specifications for the provided template to generate DNS name.
 
-## CRD
+## Test
 
-### Record A
-
-```yaml
+```bash
+cat > /tmp/dns-definition-test.yaml << EOF
 apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
-  name: examplearecord
+  name: bytletest
 spec:
   endpoints:
-  - dnsName: example.com
+  - dnsName: test.bytle.net
     recordTTL: 60
     recordType: A
     targets:
-    - 10.0.0.1
+    - 10.0.0.2
+EOF
+```
+```bash
+kubee kubectl apply -n external-dns -f /tmp/dns-definition-test.yaml
 ```
 
-### Record CNAME
+## Support 
+### CRD ownership fix
 
-```yaml
-apiVersion: externaldns.k8s.io/v1alpha1
-kind: DNSEndpoint
-metadata:
-  name: examplecnamerecord
-spec:
-  endpoints:
-  - dnsName: test-a.example.com
-    recordTTL: 300
-    recordType: CNAME
-    targets:
-    - example.com
-```
-
-### Record TXT
-
-https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/txt-record/
-
-```yaml
-apiVersion: externaldns.k8s.io/v1alpha1
-kind: DNSEndpoint
-metadata:
-  name: exampletxtrecord
-spec:
-  endpoints:
-  - dnsName: example.com
-    recordTTL: 3600
-    recordType: TXT
-    targets:
-      - '"v=spf1 include:spf.protection.example.com include:example.org -all"'
-      - '"apple-domain-verification=XXXXXXXXXXXXX"'
-```
-
-### Record NS
-
-https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/ns-record/
-```yaml
-apiVersion: externaldns.k8s.io/v1alpha1
-kind: DNSEndpoint
-metadata:
-  name: ns-record
-spec:
-  endpoints:
-    - dnsName: zone.example.com
-      recordTTL: 300
-      recordType: NS
-      targets:
-        - ns1.example.com
-        - ns2.example.com
-```
-### Record MX
-
-https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/mx-record/
-
-```yaml
-apiVersion: externaldns.k8s.io/v1alpha1
-kind: DNSEndpoint
-metadata:
-  name: examplemxrecord
-spec:
-  endpoints:
-  - dnsName: example.com
-    recordTTL: 3600
-    recordType: MX
-    targets:
-      - "10 mailhost1.example.com"
-```
-
-### Record SRV
-
-```yaml
-apiVersion: externaldns.k8s.io/v1alpha1
-kind: DNSEndpoint
-metadata:
-  name: examplesrvrecord
-spec:
-  endpoints:
-  - dnsName: _service._tls.example.com
-    recordTTL: 180
-    recordType: SRV
-    targets:
-      - "100 1 443 service.example.com"
+```bash
+kubee kubectl patch CustomResourceDefinition dnsendpoints.externaldns.k8s.io --type=merge   -p '{"metadata": {"labels": {"app.kubernetes.io/managed-by": "Helm"}, "annotations": {"meta.helm.sh/release-namespace": "external-dns", "meta.helm.sh/release-name": "external-dns-crds"}}}'
 ```
 
 ## Support 
