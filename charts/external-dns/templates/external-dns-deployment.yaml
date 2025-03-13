@@ -33,7 +33,7 @@ spec:
         # https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/webhook-provider/#run-an-externaldns-in-tree-provider-as-a-webhook
         - name: webhook-provider
           {{- if eq .Values.provider.type "in-tree"}}
-          image: registry.k8s.io/external-dns/external-dns:v{{.Values.version}}
+          image: {{.Values.image}}
           {{- else}}
           image: {{.Values.provider.image}}
           {{- end}}
@@ -109,7 +109,7 @@ spec:
               name: health
       containers:
         - name: external-dns
-          image: registry.k8s.io/external-dns/external-dns:v{{.Values.version}}
+          image: {{.Values.image}}
           imagePullPolicy: IfNotPresent
           securityContext: {{ include "external-dns-container-security-context" . | nindent 12}}
           args:

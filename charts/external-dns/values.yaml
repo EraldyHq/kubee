@@ -16,9 +16,12 @@ enabled: false
 # -- The installation namespace
 namespace: 'external-dns'
 
-# -- [External DNS version](https://github.com/kubernetes-sigs/external-dns/releases)
-version: 0.15.1
 
+# -- Image with the [External DNS version](https://github.com/kubernetes-sigs/external-dns/releases)
+image: registry.k8s.io/external-dns/external-dns:v0.15.1
+# It's not always published right-away in the kubernetes registry. You can check it on the [Helm Chart](https://github.com/kubernetes-sigs/external-dns/blob/external-dns-helm-chart-1.15.2/charts/external-dns/Chart.yaml)
+# And official staging images are also available at:
+# https://console.cloud.google.com/gcr/images/k8s-staging-external-dns/global/external-dns?inv=1&invt=Abr7-w&walkthrough_id=panels--container-registry--images
 
 server:
   # @ignored Log
