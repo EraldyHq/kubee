@@ -1,6 +1,6 @@
 {{ define "chart-to-feature-desc" }}
 {{- $chart := . }}
-{{- if eq $chart "kubee-traefik"}}creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined or add authorizations.
+{{- if eq $chart "kubee-traefik"}}creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
 {{- else if eq $chart "kubee-cert-manager" }}adds [server certificates](https://cert-manager.io/docs/usage/certificate/) to the servers
 {{- else if eq $chart "kubee-external-secrets" }}defines secret as [external secrets](https://external-secrets.io/latest/introduction/getting-started/#create-your-first-externalsecret) for GitOps integration (if chosen)
 {{- else if eq $chart "kubee-grafana" }}creates [dashboards](https://grafana.com/grafana/dashboards/)

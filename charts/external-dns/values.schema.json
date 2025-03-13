@@ -338,10 +338,9 @@
           "type": "array"
         },
         "endpoints": {
-          "description": "Endpoints",
           "properties": {
             "health": {
-              "description": "The health port",
+              "description": "The health",
               "properties": {
                 "path": {
                   "default": "/healthz",
@@ -350,20 +349,21 @@
                   "type": "string"
                 },
                 "port": {
-                  "default": 7978,
+                  "default": 8080,
+                  "description": " type: integer @schema The health port (Not 7979 as this is already taken by external-dns) By default, this is the same value as for the metrics",
                   "required": [],
                   "title": "port",
                   "type": "integer"
                 }
               },
               "required": [
-                "port",
                 "path"
               ],
-              "title": "health"
+              "title": "health",
+              "type": "object"
             },
             "metrics": {
-              "description": "The metrics port",
+              "description": "The metrics",
               "properties": {
                 "path": {
                   "default": "/metrics",
@@ -372,35 +372,40 @@
                   "type": "string"
                 },
                 "port": {
-                  "default": 7978,
+                  "default": 8080,
+                  "description": " type: integer @schema The metrics port (Not 7979 as this is already taken by external-dns)",
                   "required": [],
                   "title": "port",
                   "type": "integer"
                 }
               },
               "required": [
-                "port",
                 "path"
               ],
-              "title": "metrics"
+              "title": "metrics",
+              "type": "object"
             },
             "webhook": {
               "description": "The webhook/http  port",
               "properties": {
                 "port": {
                   "default": 8888,
+                  "description": " type: integer @schema The webhook port",
                   "required": [],
                   "title": "port",
                   "type": "integer"
                 }
               },
-              "required": [
-                "port"
-              ],
-              "title": "webhook"
+              "required": [],
+              "title": "webhook",
+              "type": "object"
             }
           },
-          "required": [],
+          "required": [
+            "webhook",
+            "metrics",
+            "health"
+          ],
           "title": "endpoints",
           "type": "object"
         },

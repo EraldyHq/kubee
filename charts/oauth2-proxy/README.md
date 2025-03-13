@@ -23,6 +23,7 @@ Note:
 
 Steps:
 * In your [cluster values file](https://github.com/EraldyHq/kubee/blob/main/docs/site/cluster-values.md)
+
     * Enable `oauth2-proxy` and `dex`
     * And set the minimal `oauth2-proxy` cluster Values files
 ```yaml

@@ -6,7 +6,7 @@
 
 # Kubee External Dns Chart
 
-This kubee chart will install [external-dns](https://github.com/kubernetes-sigs/external-dns)
+This [kubee chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) will install [external-dns](https://github.com/kubernetes-sigs/external-dns)
 
 `External DNS` can update your domain/public DNS based on:
 * [metadata annotations](https://kubernetes-sigs.github.io/external-dns/latest/docs/annotations/annotations/) on Ingress, Service, ...
@@ -30,7 +30,7 @@ These sources are automatically enabled.
 Prometheus is automatically configured if enabled.
 You can monitor [Rate Limit Metrics](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/#monitoring)
 
-### Support In-tree and WebHook DNS
+### Support In-tree and WebHook DNS Provider
 
 This chart supports all provider type:
 + [in-tree DNS provider](https://kubernetes-sigs.github.io/external-dns/latest/#the-latest-release)
@@ -42,7 +42,7 @@ This chart supports all provider type:
 
 * [cert-manager](https://github.com/EraldyHq/kubee/blob/main/charts/cert-manager/README.md) adds [server certificates](https://cert-manager.io/docs/usage/certificate/) to the servers
 * [prometheus](https://github.com/EraldyHq/kubee/blob/main/charts/prometheus/README.md) creates [metrics scraping jobs](https://prometheus.io/docs/concepts/jobs_instances/) and [alert rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
-* [traefik](https://github.com/EraldyHq/kubee/blob/main/charts/traefik/README.md) creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined or add authorizations.
+* [traefik](https://github.com/EraldyHq/kubee/blob/main/charts/traefik/README.md) creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
 
 ## Installation
 

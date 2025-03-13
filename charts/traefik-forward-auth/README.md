@@ -97,6 +97,7 @@ staticClients:
 ### Cluster Values file
 
 * You should set at minimal the following values in your [Cluster Values file](https://github.com/EraldyHq/kubee/blob/main/docs/site/cluster-values.md)
+
 ```yaml
 traefik_forward_auth:
   enabled: true
