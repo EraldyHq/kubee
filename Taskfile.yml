@@ -30,14 +30,25 @@ tasks:
       - kubee helmet update-dependencies -f $(basename {{.USER_WORKING_DIR}})
   # Generate the values.schema.json
   schema:
-
     cmds:
         - |
+          COMMAND="helm schema --chart-search-root {{.USER_WORKING_DIR}} --helm-docs-compatibility-mode -k additionalProperties"
           # dependency filter is due to this Traefik error
           # FATA[2025-03-11T14:44:41+01:00] Error while parsing comment of key kind: yaml: found character that cannot start any token 
           # Error: plugin "schema" exited with error
           DEPENDENCIES_FILTER=$(yq '[.dependencies[].name] | filter(match("kubee-.*")) | join (" ")' {{.USER_WORKING_DIR}}/Chart.yaml)
-          helm schema --chart-search-root {{.USER_WORKING_DIR}} --helm-docs-compatibility-mode -k additionalProperties --dependencies-filter $DEPENDENCIES_FILTER
+          if [ "$DEPENDENCIES_FILTER" != "" ]; then
+            COMMAND="$COMMAND --dependencies-filter $DEPENDENCIES_FILTER"
+          fi;
+          echo "Executing: $COMMAND"
+          eval "$COMMAND"
+  # Generate all README helm-docs for all charts
+  schema-all:
+    cmds:
+      - | 
+        # We don't use find exec because it will not stop at first error
+        # xargs exit 255 is mandatory to stop at first error
+        find "{{.TASK_DIR}}/charts" -maxdepth 2 -mindepth 1 -type f  -name "Chart.yaml" | xargs -I {} bash -c 'cd "$(dirname "{}")" && echo "Executing on $PWD" && task schema || exit 255'
   # Generate the current Chart doc
   docs:
     cmds:
@@ -65,7 +76,7 @@ tasks:
       - |
         # A -exec command must be terminated with a ; (A parameter of its own) 
         # You usually need to type \; or ';' to avoid shell interpretation 
-        find "{{.TASK_DIR}}/charts" -maxdepth 2 -mindepth 1 -type f  -name "Chart.yaml" -exec bash -c 'cd "$(dirname "{}")" && task docs' ';'
+        find "{{.TASK_DIR}}/charts" -maxdepth 2 -mindepth 1 -type f  -name "Chart.yaml"  | xargs -I {} bash -c 'cd "$(dirname "{}")" && task docs || exit 255'
 
   # Generate the root Readme.md
   readme:

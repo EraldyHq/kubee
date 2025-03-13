@@ -121,7 +121,7 @@ operator:
 # The
 secret:
   # @schema
-  # enum: [ `Secret`, `ExternalSecret`]
+  # enum: [ 'Secret', 'ExternalSecret']
   # @schema
   # -- Kind of secret created
   # Values supported are `Secret` or `ExternalSecret`

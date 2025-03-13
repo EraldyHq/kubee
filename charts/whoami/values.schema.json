@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "auth_middleware": {
+      "default": "",
+      "description": "The traefik authentication middleware name to apply. None if empty.",
+      "required": [],
+      "title": "auth_middleware"
+    },
+    "enabled": {
+      "default": false,
+      "description": "Boolean to indicate that this chart is or will be installed in the cluster",
+      "required": [],
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "hostname": {
+      "default": "",
+      "description": "The public hostname",
+      "format": "hostname",
+      "minLength": 1,
+      "required": [],
+      "title": "Hostname"
+    },
+    "namespace": {
+      "default": "whoami",
+      "description": "The installation namespace",
+      "minLength": 1,
+      "required": [],
+      "title": "Namespace"
+    }
+  },
+  "required": [
+    "enabled",
+    "namespace",
+    "hostname"
+  ],
+  "type": "object"
+}

@@ -67,15 +67,18 @@ It will create:
 * `letsencrypt-prod` for the `production environment`
 
 The issuers solve the challenge:
-
-* `http01` (default, ie an A or CNAME record should be present in the DNS Zone)
-* and optional [DNS01 from cloudflare](#automatic-dns01-cloudflare-challenge-configuration)
+* `http01` (default, ie an A or CNAME record should be present in the DNS Zone).
+You can use the [external-dns](https://github.com/EraldyHq/kubee/blob/main/charts/external-dns/README.md) chart
+to automate the creation.
+* `dns01` with [DNS01 from cloudflare](#automatic-dns01-cloudflare-challenge-configuration)
 
 The
 * `letsencrypt-staging`. This is the Default used to:
   * ensure that the verification process is working properly before moving to production.
   * without hitting the [prod rate limits](https://letsencrypt.org/docs/rate-limits/)
 * `letsencrypt-prod` issues valid signed certificate
+
+### Challenge
 
 ### Kubee Internal CA
 
@@ -95,12 +98,25 @@ to create:
 
 By default, the `http01` challenge is executed.
 
-If [Cloudflare is set as a DNS provider in your cluster values file](../../../../docs/site/cloudflare.md),
-a `dns01` is executed.
-
-You can then:
+When configured, you can:
 * issue wildcard certificate
-* use dns name without creating A records.
+* use a dns name without creating A records.
+
+Example after getting a [cloudflare api token](https://github.com/EraldyHq/kubee/blob/main/docs/site/cloudflare.md)
+
+```yaml
+cert_manager:
+    issuers:
+      public:
+        dns01:
+          cloudflare:
+            api_token:
+              value: '${KUBEE_CLOUDFLARE_API_TOKEN}'
+            # The dns Zone that are managed by cloudflare
+            dns_zones:
+              - my-apex-domain.tld
+              - another-apex-domain.tld
+```
 
 ## Config
 
@@ -115,9 +131,9 @@ See `How-to` at [Securely Maintaining a trust-manager Installation](https://cert
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| enabled | bool | `false` | If true, cert-manager is or will be installed on the cluster When disabled, the default ingress certificate specified on Traefik is used Not a string, a boolean so no quote |
+| enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster When disabled, the default ingress certificate specified on Traefik is used |
 | issuers.kubee | object | `{"bundle_name":"kubee-ca-bundle","name":"kubee-ca"}` | The kubee issuer is used to create certificates for the internal service and pods (ie the local private domain cluster.local) |
-| issuers.public | object | `{"name":"letsencrypt-staging"}` | The public issuer name. The public issuer is used to create certificate for public access (ie public network / public domain name) Its name should be changed to `letsencrypt-prod` when the `letsencrypt-staging` is working and validated |
+| issuers.public | object | `{"dns01":{"cloudflare":{"api_token":{"key":"cloudflare-api-token","kind":"Secret","property":"","value":""},"dns_zones":[]}},"name":"letsencrypt-staging"}` | The public issuer name. The public issuer is used to create certificate for public access (ie public network / public domain name) Its name should be changed to `letsencrypt-prod` when the `letsencrypt-staging` is working and validated |
 | namespace | string | `"cert-manager"` | The installation namespace |
 
 For the whole set of values, see the [values file](values.yaml)
@@ -133,6 +149,12 @@ The certificates are:
 * issued by:
     * Common Name (CN)	(STAGING) Counterfeit Cashew R10
     * Organization (O)	(STAGING) Let's Encrypt
+
+### Why Only Cloudflare for DNS01?
+
+The [DNS01 configuration](https://cert-manager.io/docs/configuration/acme/dns01/) is not
+really standardized. If you need another one, opens an [%!s(uint8=105)](https://github.com/EraldyHq/kubee/issues)
+.
 
 ## Contrib / Dev
 

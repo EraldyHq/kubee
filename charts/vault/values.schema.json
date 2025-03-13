@@ -1,0 +1,176 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "enabled": {
+      "default": false,
+      "description": "Boolean to indicate that this chart is or will be installed in the cluster",
+      "required": [],
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "engines": {
+      "description": " Internal, the data is used by external secret to connect to It's not possible to create h @ignored",
+      "properties": {
+        "default": {
+          "description": "The default engine is used by",
+          "properties": {
+            "kind": {
+              "const": "kv",
+              "default": "kv",
+              "description": " const: kv @schema [Kv Type](https://developer.hashicorp.com/vault/docs/secrets/kv)",
+              "required": [],
+              "title": "kind"
+            },
+            "mount_path": {
+              "const": "secret",
+              "default": "secret",
+              "description": " const: secret @schema The mount Path",
+              "required": [],
+              "title": "mount_path"
+            },
+            "version": {
+              "const": 2,
+              "default": "2",
+              "description": " const: 2 @schema The Vault KV secret engine version.",
+              "required": [],
+              "title": "version"
+            }
+          },
+          "required": [],
+          "title": "default",
+          "type": "object"
+        }
+      },
+      "required": [
+        "default"
+      ],
+      "title": "engines"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "hostname": {
+      "default": "",
+      "description": "The public hostname",
+      "format": "hostname",
+      "minLength": 1,
+      "required": [],
+      "title": "Hostname"
+    },
+    "namespace": {
+      "default": "vault",
+      "description": "The installation namespace",
+      "minLength": 1,
+      "required": [],
+      "title": "Namespace"
+    },
+    "vault": {
+      "description": " https://github.com/hashicorp/vault-helm/blob/v0.29.1/values.yaml @ignored",
+      "properties": {
+        "injector": {
+          "description": " The ui is in the server, enabled in the config of the server in standalone mode injector can inject/mount secret into pod",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ],
+          "title": "injector"
+        },
+        "server": {
+          "properties": {
+            "affinity": {
+              "default": "",
+              "description": "allow deployment to single node services such as Minikube",
+              "required": [],
+              "title": "affinity",
+              "type": "string"
+            },
+            "dataStorage": {
+              "properties": {
+                "size": {
+                  "default": "200Mi",
+                  "description": " 220Mb for 1G, 47.6 Mi for 500Mb",
+                  "required": [],
+                  "title": "size"
+                },
+                "storageClass": {
+                  "default": "local-path",
+                  "description": "https://docs.k3s.io/storage#setting-up-the-local-storage-provider",
+                  "required": [],
+                  "title": "storageClass",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "storageClass"
+              ],
+              "title": "dataStorage",
+              "type": "object"
+            },
+            "ingress": {
+              "properties": {
+                "enabled": {
+                  "default": "false",
+                  "description": " https://github.com/hashicorp/vault-helm/blob/main/templates/server-ingress.yaml",
+                  "required": [],
+                  "title": "enabled"
+                }
+              },
+              "required": [],
+              "title": "ingress",
+              "type": "object"
+            },
+            "standalone": {
+              "description": " https://developer.hashicorp.com/vault/docs/concepts/dev-server dev:  enabled: true requires a PVC for data storage to use the \"file\" backend. only 1 replica",
+              "properties": {
+                "config": {
+                  "default": "ui = true\n\n# https://developer.hashicorp.com/vault/docs/configuration/listener/tcp#tls_cert_file\nlistener \"tcp\" {\n  tls_disable = 1\n  address = \"[::]:8200\"\n  cluster_address = \"[::]:8201\"\n  # Enable unauthenticated metrics access (necessary for Prometheus Operator)\n  #telemetry {\n  #  unauthenticated_metrics_access = \"true\"\n  #}\n}\nstorage \"file\" {\n  path = \"/vault/data\"\n}\n\n# Example configuration for enabling Prometheus metrics in your config.\n#telemetry {\n#  prometheus_retention_time = \"30s\"\n#  disable_hostname = true\n#}\n",
+                  "required": [],
+                  "title": "config",
+                  "type": "string"
+                },
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "enabled",
+                "config"
+              ],
+              "title": "standalone"
+            }
+          },
+          "required": [
+            "affinity",
+            "ingress",
+            "dataStorage"
+          ],
+          "title": "server",
+          "type": "object"
+        }
+      },
+      "required": [
+        "server"
+      ],
+      "title": "vault"
+    }
+  },
+  "required": [
+    "enabled",
+    "namespace",
+    "hostname"
+  ],
+  "type": "object"
+}

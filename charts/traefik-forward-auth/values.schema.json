@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "auth": {
+      "description": "Auth Parameters",
+      "properties": {
+        "cookie_domains": {
+          "default": "",
+          "description": " creating an SSO experience Comma separated of apex domain https://github.com/thomseddon/traefik-forward-auth#auth-host-mode",
+          "required": [],
+          "title": "cookie_domains"
+        },
+        "cookie_lifetime": {
+          "default": 43200,
+          "description": "Session Lifetime in seconds, ie cookie (12 hours)",
+          "required": [],
+          "title": "cookie_lifetime",
+          "type": "integer"
+        },
+        "cookie_secret": {
+          "default": "",
+          "description": " Example command : openssl rand -base64 32 Example value   : bc989147a1d2ff433933b39b40b9b1d0",
+          "required": [],
+          "title": "cookie_secret"
+        },
+        "whitelist_email_addresses": {
+          "default": "",
+          "description": " Comma separated list of emails",
+          "required": [],
+          "title": "whitelist_email_addresses"
+        },
+        "whitelist_email_domains": {
+          "default": "",
+          "description": " With example.com, thom@example.com would be allowed but thom@another.com would not. Comma separated list of domain",
+          "required": [],
+          "title": "whitelist_email_domains"
+        }
+      },
+      "required": [
+        "cookie_lifetime"
+      ],
+      "title": "auth",
+      "type": "object"
+    },
+    "enabled": {
+      "default": false,
+      "description": "Enabled",
+      "required": [],
+      "title": "enabled",
+      "type": "boolean"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "hostname": {
+      "default": "",
+      "description": " If this value is not null, traefik-forward-auth is implemented in host mode meaning that all apps should be under the same apex domain https://github.com/thomseddon/traefik-forward-auth#auth-host-mode",
+      "required": [],
+      "title": "hostname"
+    },
+    "kubee_internal": {
+      "description": " Internal",
+      "properties": {
+        "install_cross_dependency": {
+          "default": false,
+          "required": [],
+          "title": "install_cross_dependency",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "install_cross_dependency"
+      ],
+      "title": "kubee_internal"
+    },
+    "log": {
+      "description": "Log for debugging",
+      "properties": {
+        "format": {
+          "default": "text",
+          "description": " text|json|pretty",
+          "required": [],
+          "title": "format"
+        },
+        "level": {
+          "default": "warn",
+          "description": " trace|debug|info|warn|error|fatal|panic",
+          "required": [],
+          "title": "level"
+        }
+      },
+      "required": [],
+      "title": "log",
+      "type": "object"
+    },
+    "namespace": {
+      "default": "auth",
+      "description": " For auth related apps such as oauth-proxy, dex, ....",
+      "required": [],
+      "title": "namespace"
+    },
+    "service": {
+      "default": "traefik-forward-auth",
+      "description": "Service name for internal dns access by the traefik middleware",
+      "required": [],
+      "title": "service",
+      "type": "string"
+    },
+    "version": {
+      "default": "v2.2.0",
+      "description": " https://hub.docker.com/r/thomseddon/traefik-forward-auth/tags Unfortunately, the last release is not on Docker https://github.com/thomseddon/traefik-forward-auth/issues/373 We use the v2.2.0 instead of the v2.3.0",
+      "required": [],
+      "title": "version"
+    }
+  },
+  "required": [
+    "enabled",
+    "service",
+    "auth",
+    "log"
+  ],
+  "type": "object"
+}

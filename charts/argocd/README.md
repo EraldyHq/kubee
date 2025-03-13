@@ -21,41 +21,4 @@ Configuration of:
 
 ### Email and On sync/deployment notifications
 
-The [admin user](https://github.com/EraldyHq/kubee/blob/main/docs/site/admin-user.md) will get [mailing and a on-deployed notifications](https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications)
-
-### Monitoring (Dashboard)
-
-This chart comes prepackaged with the [ArgoCd Monitoring mixin](https://monitoring.mixins.dev/argo-cd-2/) (Prometheus Rules and Dashboards)
- 
-### CPU and memory control
-CPU and memory spike on Sync needs to be controlled. We [configure them by default](docs/argocd-cpu-memory-spikes.md)
-
-### Kubee Charts Features
-
-  These [kubee charts](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) add their features when `enabled`.
-
-* [cert-manager](https://github.com/EraldyHq/kubee/blob/main/charts/cert-manager/README.md) adds [server certificates](https://cert-manager.io/docs/usage/certificate/) to the servers
-* [external-secrets](https://github.com/EraldyHq/kubee/blob/main/charts/external-secrets/README.md) defines secret as [external secrets](https://external-secrets.io/latest/introduction/getting-started/#create-your-first-externalsecret) for GitOps integration (if chosen)
-* [grafana](https://github.com/EraldyHq/kubee/blob/main/charts/grafana/README.md) creates [dashboards](https://grafana.com/grafana/dashboards/)
-* [prometheus](https://github.com/EraldyHq/kubee/blob/main/charts/prometheus/README.md) creates [metrics scraping jobs](https://prometheus.io/docs/concepts/jobs_instances/) and [alert rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
-* [traefik](https://github.com/EraldyHq/kubee/blob/main/charts/traefik/README.md) creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
-
-## Values
-
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| components.argocd_application_controller.resources.memory | string | `"400Mi"` | Controller Memory. The controller may go out of hand with memory Works at 238 and peak at 370 |
-| conf.controller_kubectl_parallelism_limit | int | `1` | Control the `--kubectl-parallelism-limit` parameters of [argocd-application-controller](https://argo-cd.readthedocs.io/en/stable/operator-manual/server-commands/argocd-application-controller/) Number of allowed concurrent kubectl fork/execs. Any value less the 1 means no limit. (default 20) We change the default to [avoid CPU spike](https://github.com/argoproj/argo-cd/discussions/6964#discussioncomment-1164100) |
-| conf.controller_metrics_cache_expiration | string | `"24h0m0s"` | Control the `--metrics-cache-expiration duration` parameter (disabled  by default. e.g. 24h0m0s) of [argocd-application-controller](https://argo-cd.readthedocs.io/en/stable/operator-manual/server-commands/argocd-application-controller/) As recommended [here](https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/#application-controller-metrics) |
-| conf.reposerver_parallelism_limit | int | `1` | Control the `reposerver.parallelism.limit` parameter [argocd-repo-server](https://argo-cd.readthedocs.io/en/stable/operator-manual/server-commands/argocd-repo-server/) Limit on number of concurrent manifests generate requests (manifest tool invocations) We change the default to avoid [CPU spike](https://github.com/argoproj/argo-cd/discussions/6964#discussioncomment-1164100) |
-| git.repo | object | `{"password":"","url":"","username":""}` | [Git Repo](https://argo-cd.readthedocs.io/en/stable/operator-manual/argocd-repositories-yaml/) |
-| git.webhook | object | `{"password":"","secret":"","service":"github","username":"","uuid":""}` | [WebHook auth](https://argo-cd.readthedocs.io/en/latest/operator-manual/webhook/) |
-| hostname | string | `""` | The argocd hostname (if not empty, an ingress is created) |
-| namespace | string | `"argocd"` | Namespace |
-| secret | object | `{"kind":"Secret"}` | Kind of secret generated |
-
-For the whole set of values, see the [values file](values.yaml)
-
-## Dev / Contrib
-
-See [contrib](contrib.md)
+The 

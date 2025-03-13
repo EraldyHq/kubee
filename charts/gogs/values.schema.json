@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "kubee": {
+      "description": "Temporary",
+      "properties": {
+        "gogs": {
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hostname": {
+              "default": "",
+              "required": [],
+              "title": "hostname",
+              "type": "string"
+            },
+            "namespace": {
+              "default": "gogs",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "namespace",
+            "hostname"
+          ],
+          "title": "gogs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "gogs"
+      ],
+      "title": "kubee",
+      "type": "object"
+    }
+  },
+  "required": [
+    "kubee"
+  ],
+  "type": "object"
+}

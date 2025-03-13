@@ -65,15 +65,19 @@ It will create:
 * `letsencrypt-prod` for the `production environment`
 
 The issuers solve the challenge:
-
-* `http01` (default, ie an A or CNAME record should be present in the DNS Zone)
-* and optional [DNS01 from cloudflare](#automatic-dns01-cloudflare-challenge-configuration)
+* `http01` (default, ie an A or CNAME record should be present in the DNS Zone).
+You can use the {{ template "kubee-chart-page-label" "external-dns" }} chart
+to automate the creation.
+* `dns01` with [DNS01 from cloudflare](#automatic-dns01-cloudflare-challenge-configuration)
 
 The
 * `letsencrypt-staging`. This is the Default used to:
   * ensure that the verification process is working properly before moving to production.
   * without hitting the [prod rate limits](https://letsencrypt.org/docs/rate-limits/)
 * `letsencrypt-prod` issues valid signed certificate
+
+
+### Challenge 
 
 
 
@@ -96,12 +100,24 @@ to create:
 
 By default, the `http01` challenge is executed.
 
-If [Cloudflare is set as a DNS provider in your cluster values file](../../../../docs/site/cloudflare.md),
-a `dns01` is executed.
-
-You can then:
+When configured, you can:
 * issue wildcard certificate
-* use dns name without creating A records.
+* use a dns name without creating A records.
+
+Example after getting a {{ template "kubee-site-page-label" ( list "cloudflare" "cloudflare api token") }}
+```yaml
+cert_manager:
+    issuers:
+      public:
+        dns01:
+          cloudflare:
+            api_token:
+              value: '${KUBEE_CLOUDFLARE_API_TOKEN}'
+            # The dns Zone that are managed by cloudflare
+            dns_zones:
+              - my-apex-domain.tld
+              - another-apex-domain.tld
+```
 
 
 ## Config
@@ -134,7 +150,10 @@ The certificates are:
     * Common Name (CN)	(STAGING) Counterfeit Cashew R10
     * Organization (O)	(STAGING) Let's Encrypt
 
+### Why Only Cloudflare for DNS01?
 
+The [DNS01 configuration](https://cert-manager.io/docs/configuration/acme/dns01/) is not
+really standardized. If you need another one, opens an {{template "kubee-issue-url" "issue or pull request"}}.
 
 ## Contrib / Dev
 

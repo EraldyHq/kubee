@@ -6,12 +6,16 @@
       "properties": {
         "middleware_name": {
           "default": "basic-auth",
-          "description": " That's applied for internal web app (such as Traefik Dashboard, Prometheus, Alert Manager, ...) The app or api endpoints are still available from an internal container The supported auth are basic-auth and forward-auth Before changing to forward-auth, you should test it with the whoami chart",
+          "description": "The authentication middleware This middleware is applied on internal web app (such as Traefik Dashboard, Prometheus, Alert Manager, ...) The app or api endpoints are still available from an internal container The supported middleware name are basic-auth and forward-auth Before changing to forward-auth, you should test it with the whoami chart",
+          "enum": [
+            "basic-auth",
+            "forward-auth"
+          ],
           "required": [],
           "title": "middleware_name"
         },
         "private_networks": {
-          "description": " used for Ingress Ip restrictions (Traefik IpAllowList) example for a home ip: 143.176.206.80/32",
+          "description": "The Private Network ranges used for Ingress Ip restrictions (Traefik IpAllowList) Example for a home ip: 143.176.206.80/32",
           "items": {
             "required": []
           },
@@ -93,66 +97,6 @@
           "required": [],
           "title": "distribution"
         },
-        "dns": {
-          "description": " it's used by cert-manager for the DNS01 proof and by external dns",
-          "properties": {
-            "cloudflare": {
-              "description": "Cloudflare Enabled if the domain list is not empty",
-              "properties": {
-                "api_token": {
-                  "description": " `ApiToken` is now the preferred method (ApiKey is deprecated)",
-                  "properties": {
-                    "key": {
-                      "default": "cloudflare-api-token",
-                      "description": " required: true minLength: 1 @schema The key property (in the secret of k8s or any other provider)",
-                      "minLength": 1,
-                      "required": [],
-                      "title": "key"
-                    },
-                    "kind": {
-                      "default": "Secret",
-                      "description": " required: true enum: [ 'Secret', 'ExternalSecret' ] @schema The type of secret A secret or external secret The chart is responsible for supporting them",
-                      "enum": [
-                        "Secret",
-                        "ExternalSecret"
-                      ],
-                      "required": [],
-                      "title": "kind"
-                    },
-                    "property": {
-                      "default": "",
-                      "description": " Used with the External Secret type",
-                      "required": [],
-                      "title": "property"
-                    },
-                    "value": {
-                      "default": "",
-                      "description": " (Used with the k8s secret type to create a Kubernetes secret)",
-                      "required": [],
-                      "title": "value"
-                    }
-                  },
-                  "required": [],
-                  "title": "api_token"
-                },
-                "dns_zones": {
-                  "description": " format: hostname required: true minLength: 0 @schema The dns Zones that are managed by cloudflare, Cloudflare is enabled if the list is not empty",
-                  "format": "hostname",
-                  "items": {
-                    "required": []
-                  },
-                  "minLength": 0,
-                  "required": [],
-                  "title": "dns_zones"
-                }
-              },
-              "required": [],
-              "title": "cloudflare"
-            }
-          },
-          "required": [],
-          "title": "dns"
-        },
         "email": {
           "description": "Default smtp server parameters",
           "properties": {
@@ -228,7 +172,7 @@
       "type": "object"
     },
     "default_certificate": {
-      "description": " Set the default certificate as default traefik cert Mandatory for kubernetes-dashboard on a local development The rootCA should be added to the OS/Browser as trusted root CA https://doc.traefik.io/traefik/https/tls/#default-certificate",
+      "description": " It's used to provide https locally Set the default certificate as default traefik cert Mandatory for kubernetes-dashboard on a local development The rootCA should be added to the OS/Browser as trusted root CA",
       "properties": {
         "cert": {
           "default": "",
@@ -247,26 +191,26 @@
       "title": "default_certificate"
     },
     "enabled": {
-      "default": "false",
-      "description": " Not a string, no quote",
+      "default": false,
+      "description": "Boolean to indicate that this chart is or will be installed in the cluster",
       "required": [],
-      "title": "enabled"
+      "title": "Enabled",
+      "type": "boolean"
     },
     "entrypoints": {
-      "description": " Used by template that creates IngressRoute (http and tcp)",
+      "description": " Constant Name of additional entrypoint Used by template that creates IngressRoute (http and tcp)",
       "properties": {
         "smtps": {
           "properties": {
             "name": {
+              "const": "smtps",
               "default": "smtps",
+              "description": " const: smtps @schema The port for SMTP over TLS (465)",
               "required": [],
-              "title": "name",
-              "type": "string"
+              "title": "name"
             }
           },
-          "required": [
-            "name"
-          ],
+          "required": [],
           "title": "smtps",
           "type": "object"
         }
@@ -284,105 +228,98 @@
     },
     "hostname": {
       "default": "",
-      "description": " The FQDN is dnsName.apexDomain If not empty, an ingress is created example: hostname: 'traefik-haship.nip.io'",
+      "description": "The public Traefik dashboard hostname example: hostname: 'traefik-haship.nip.io'",
+      "format": "hostname",
       "required": [],
-      "title": "hostname"
+      "title": "Hostname"
     },
     "kubee_internal": {
-      "description": "Don't change",
+      "description": "@ignored Internal Kubee constant",
       "properties": {
         "install_cross_dependency": {
-          "default": false,
+          "const": false,
+          "default": "false",
+          "description": " const: false @schema Constant used to not output template from kubee cross dependency in Chart.yaml Don't change, don't touch",
           "required": [],
-          "title": "install_cross_dependency",
-          "type": "boolean"
+          "title": "install_cross_dependency"
         }
       },
-      "required": [
-        "install_cross_dependency"
-      ],
-      "title": "kubee_internal",
-      "type": "object"
+      "required": [],
+      "title": "kubee_internal"
     },
     "middlewares": {
-      "description": " https://doc.traefik.io/traefik/middlewares",
+      "description": " referenced in Kubee charts The names are constant",
       "properties": {
         "auth_headers": {
-          "description": "Middleware to apply auth headers on website with an authentication form",
+          "description": " Middleware to apply auth headers on website with an authentication form",
           "properties": {
             "name": {
+              "const": "auth-headers",
               "default": "auth-headers",
+              "description": " const: auth-headers @schema",
               "required": [],
-              "title": "name",
-              "type": "string"
+              "title": "name"
             }
           },
-          "required": [
-            "name"
-          ],
-          "title": "auth_headers",
-          "type": "object"
+          "required": [],
+          "title": "auth_headers"
         },
         "basic_auth": {
           "description": " With the email as main identifier https://doc.traefik.io/traefik/middlewares/http/basicauth/ The admin user is added",
           "properties": {
             "name": {
+              "const": "basic-auth",
               "default": "basic-auth",
+              "description": " const: basic-auth @schema @ignored",
               "required": [],
-              "title": "name",
-              "type": "string"
+              "title": "name"
             },
             "users": {
               "description": "List of extra users alongside the admin user",
               "required": [],
-              "title": "users",
-              "type": "object"
+              "title": "users"
             }
           },
-          "required": [
-            "name",
-            "users"
-          ],
+          "required": [],
           "title": "basic_auth"
         },
         "forward_auth": {
-          "description": " https://doc.traefik.io/traefik/middlewares/http/forwardauth/",
+          "description": " Forward Auth to oauth2-proxy https://doc.traefik.io/traefik/middlewares/http/forwardauth/",
           "properties": {
             "name": {
+              "const": "forward-auth",
               "default": "forward-auth",
+              "description": " const: forward-auth @schema",
               "required": [],
-              "title": "name",
-              "type": "string"
+              "title": "name"
             }
           },
-          "required": [
-            "name"
-          ],
+          "required": [],
           "title": "forward_auth"
         },
         "forward_auth_bearer": {
-          "description": " It can be applied on Kube API client such as Kubernetes Dashboard'",
+          "description": " Forward Auth middleware to oauth2-proxy that pass through a signed bearer It can be applied on Kube API client such as Kubernetes Dashboard'",
           "properties": {
             "name": {
+              "const": "forward-auth-bearer",
               "default": "forward-auth-bearer",
+              "description": " const: forward-auth-bearer @schema",
               "required": [],
-              "title": "name",
-              "type": "string"
+              "title": "name"
             }
           },
-          "required": [
-            "name"
-          ],
+          "required": [],
           "title": "forward_auth_bearer"
         },
         "git_hooks": {
-          "description": " Used in Gitops app such as Argocd https://doc.traefik.io/traefik/middlewares/http/ipallowlist/",
+          "description": " Create an IP Allow list for webhook of git service Used in Gitops app such as Argocd https://doc.traefik.io/traefik/middlewares/http/ipallowlist/",
           "properties": {
             "name": {
+              "const": "git-hooks",
               "default": "git-hooks",
+              "description": " const: git-hooks @schema",
               "required": [],
-              "title": "name",
-              "type": "string"
+              "title": "name"
             },
             "service": {
               "default": "github",
@@ -392,13 +329,12 @@
             }
           },
           "required": [
-            "name",
             "service"
           ],
           "title": "git_hooks"
         },
         "private_network": {
-          "description": " Ip are given via the auth.private_networks",
+          "description": " Private Network to allow only connection from known ip Ip are given via the auth.private_networks",
           "properties": {
             "name": {
               "default": "private-network",
@@ -413,19 +349,18 @@
           "title": "private_network"
         }
       },
-      "required": [
-        "auth_headers"
-      ],
+      "required": [],
       "title": "middlewares"
     },
     "namespace": {
       "default": "kube-system",
-      "description": " The kube-system namespace tells kubernetes that this app has a higher priority",
+      "description": "The installation namespace. The kube-system namespace tells kubernetes that this app has a higher priority",
+      "minLength": 1,
       "required": [],
-      "title": "namespace"
+      "title": "Namespace"
     },
     "traefik": {
-      "description": " https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml",
+      "description": " Traefik Helm Values https://github.com/traefik/traefik-helm-chart/blob/master/traefik/values.yaml",
       "properties": {
         "additionalArguments": {
           "items": {
@@ -754,8 +689,10 @@
     }
   },
   "required": [
-    "auth",
-    "kubee_internal"
+    "enabled",
+    "namespace",
+    "hostname",
+    "auth"
   ],
   "type": "object"
 }

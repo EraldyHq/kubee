@@ -145,13 +145,6 @@
       "title": "kubee-cluster",
       "type": "object"
     },
-    "enable_private_network_middleware": {
-      "default": true,
-      "description": "Enable private network. If true and a private network has been defined in Traefik, only the IP from the private network will be able to connect to the SMTP server",
-      "required": [],
-      "title": "Private Network Restriction",
-      "type": "boolean"
-    },
     "enabled": {
       "default": false,
       "description": "Boolean to indicate that this chart is or will be installed in the cluster",
@@ -159,16 +152,97 @@
       "title": "Enabled",
       "type": "boolean"
     },
+    "exporter_auth": {
+      "description": "Exporter authentication. This is a global authentication configuration for all exporters",
+      "properties": {
+        "kube_rbac_proxy": {
+          "description": " # https://github.com/brancz/kube-rbac-proxy Kube Prometheus uses rbac-proxy to add an authorization layer on exporter We disable it by default: - to minimize memory (20M by exporters) and the head-heck of authorization problem. - because there is also network policy If enabled, the exporter (node and state metrics) will get an extra containers that handle RBAC authorization",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "version": {
+              "default": "v0.18.2",
+              "required": [],
+              "title": "version",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "version"
+          ],
+          "title": "kube_rbac_proxy"
+        },
+        "network_policy": {
+          "description": " They allow only ingress communication from a prometheus server",
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ],
+          "title": "network_policy"
+        }
+      },
+      "required": [],
+      "title": "exporter_auth"
+    },
     "global": {
       "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
       "required": [],
       "title": "global",
       "type": "object"
     },
+    "grafana_cloud": {
+      "description": "Grafana cloud remote write prometheus integration",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "password": {
+          "default": "",
+          "description": "The password",
+          "required": [],
+          "title": "password",
+          "type": "string"
+        },
+        "relabel_keep_regex": {
+          "default": "",
+          "description": " Example: `phpfpm_*` would send only the metrics starting with phpfpm `(phpfpm|argocd|node|traefik)_(.*)` would send the metrics starting with phpfpm, argocd, node and traefik Doc: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config By default, no filtering is applied",
+          "required": [],
+          "title": "relabel_keep_regex"
+        },
+        "username": {
+          "default": "",
+          "description": "The username",
+          "required": [],
+          "title": "username",
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "username",
+        "password"
+      ],
+      "title": "grafana_cloud"
+    },
     "hostname": {
       "default": "",
-      "description": "The hostname",
-      "minLength": 1,
+      "description": "The public hostname. If not empty, an ingress is added",
+      "format": "hostname",
       "required": [],
       "title": "Hostname"
     },
@@ -186,126 +260,134 @@
       "required": [],
       "title": "kubee_internal"
     },
-    "mailpit": {
-      "description": "@ignored",
+    "max_block_duration": {
+      "default": "30m",
+      "description": "The duration that Prometheus keeps the data in memory. The default is 2h. If the value is 2h, no arguments is applied. It's the prometheus tsdb server argument --storage.tsdb.max-block-duration=2h) Note that the default value is * 1h for the prometheus query ui * 1h for the grafana explore panel (ie last hour) * 15m for Kubernetes dashboard * 24h for Headlamp We chose 30m to be below the target of 400Mi memory size with kubernetes monitoring installed",
+      "required": [],
+      "title": "max_block_duration"
+    },
+    "name": {
+      "default": "kubee",
+      "description": " (used by clients such as the grafana Chart to create a connection)",
+      "required": [],
+      "title": "name"
+    },
+    "namespace": {
+      "default": "monitoring",
+      "description": "The installation namespace. used by clients such as the Grafana Chart to create the data source URI",
+      "minLength": 1,
+      "required": [],
+      "title": "Namespace"
+    },
+    "new_relic": {
+      "description": "New relic remote write prometheus integration",
       "properties": {
-        "args": {
-          "items": {
-            "anyOf": [
-              {
-                "required": [],
-                "type": "string"
-              }
-            ],
-            "required": []
+        "bearer": {
+          "default": "",
+          "description": "for remote write",
+          "required": [],
+          "title": "bearer",
+          "type": "string"
+        },
+        "enabled": {
+          "default": false,
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "relabel_keep_regex": {
+          "default": "",
+          "description": " Example: `phpfpm_*` would send only the metrics starting with phpfpm `(phpfpm|argocd|node|traefik)_(.*)` would send the metrics starting with phpfpm, argocd, node and traefik Doc: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config By default, no filtering is applied",
+          "required": [],
+          "title": "relabel_keep_regex"
+        }
+      },
+      "required": [
+        "enabled",
+        "bearer"
+      ],
+      "title": "new_relic"
+    },
+    "operator": {
+      "description": "Prometheus Operator",
+      "properties": {
+        "resources": {
+          "description": "CPU/Memory",
+          "properties": {
+            "memory": {
+              "default": "50Mi",
+              "description": "Prometheus Operator max memory",
+              "required": [],
+              "title": "memory"
+            }
           },
           "required": [],
-          "title": "args",
-          "type": "array"
-        },
-        "image": {
-          "properties": {
-            "tag": {
-              "default": "v1.22.3",
-              "description": "https://github.com/axllent/mailpit/releases",
-              "required": [],
-              "title": "tag",
-              "type": "string"
-            }
-          },
-          "required": [
-            "tag"
-          ],
-          "title": "image",
-          "type": "object"
-        },
-        "mailpit": {
-          "properties": {
-            "smtp": {
-              "properties": {
-                "tls": {
-                  "properties": {
-                    "enabled": {
-                      "default": true,
-                      "required": [],
-                      "title": "enabled",
-                      "type": "boolean"
-                    },
-                    "secretName": {
-                      "default": "mailpit-cert",
-                      "required": [],
-                      "title": "secretName",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "enabled",
-                    "secretName"
-                  ],
-                  "title": "tls",
-                  "type": "object"
-                }
-              },
-              "required": [
-                "tls"
-              ],
-              "title": "smtp",
-              "type": "object"
-            }
-          },
-          "required": [
-            "smtp"
-          ],
-          "title": "mailpit",
-          "type": "object"
-        },
-        "service": {
-          "properties": {
-            "smtp": {
-              "properties": {
-                "port": {
-                  "const": 465,
-                  "default": "465",
-                  "description": "The smtp port. The smtp port should be 465 to enable TLS to be able to route the mail via SNI on Traefik",
-                  "required": [],
-                  "title": "The smtp port"
-                }
-              },
-              "required": [
-                "port"
-              ],
-              "title": "smtp",
-              "type": "object"
-            }
-          },
-          "required": [
-            "smtp"
-          ],
-          "title": "service",
+          "title": "resources",
           "type": "object"
         }
       },
       "required": [
-        "image",
-        "service",
-        "args",
-        "mailpit"
+        "resources"
       ],
-      "title": "mailpit"
+      "title": "operator",
+      "type": "object"
     },
-    "namespace": {
-      "default": "mail",
-      "description": "The installation namespace",
-      "minLength": 1,
+    "resources": {
+      "description": "Prometheus Server Memory Limit",
+      "properties": {
+        "memory": {
+          "default": "400Mi",
+          "description": " Dynamically, if you query data above the max_block_duration, data is loaded in memory Why? 400Mi. This is: * the default of Kube-Prometheus with default memory setting. * the amount that we get after installing kubernetes-monitoring This is our goal",
+          "required": [],
+          "title": "memory"
+        }
+      },
       "required": [],
-      "title": "Namespace"
+      "title": "resources"
+    },
+    "retention": {
+      "default": "30m",
+      "description": "Retention. How long to retain data (it's the prometheus server argument storage.tsdb.retention.time=24h). Data in memory is 2 hour old, by setting retention to 2h, we don't allow to query data over 2 hours and to load data in memory The default is 24h. Why 30m? Equal to max_block_duration so that we are sure that we will not increase memory of the prometheus pod",
+      "required": [],
+      "title": "retention"
+    },
+    "scrape_interval": {
+      "default": "1m",
+      "description": "The default scrape interval for target It does influence memory as Prometheus keeps by default 2 hours of scraping in memory (max_block_duration) Default was 30s.",
+      "required": [],
+      "title": "scrape_interval"
+    },
+    "secret": {
+      "description": "The",
+      "properties": {
+        "kind": {
+          "default": "Secret",
+          "description": "Kind of secret created Values supported are `Secret` or `ExternalSecret`",
+          "enum": [
+            "Secret",
+            "ExternalSecret"
+          ],
+          "required": [],
+          "title": "kind"
+        }
+      },
+      "required": [],
+      "title": "secret",
+      "type": "object"
+    },
+    "version": {
+      "default": "3.1.0",
+      "description": "The [prometheus version](https://github.com/prometheus/prometheus/releases)",
+      "required": [],
+      "title": "version"
     }
   },
   "required": [
     "enabled",
     "namespace",
     "hostname",
-    "enable_private_network_middleware"
+    "operator",
+    "secret"
   ],
   "type": "object"
 }

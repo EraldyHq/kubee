@@ -33,7 +33,6 @@ You don't install a library chart.
 | auth.trusted_proxies | list | `[]` | Trusted Proxies If trusted, reverse proxies handler will proxy and augment the sensitive X-Forwarded-* request headers.  You should set the CIDR value of: * internal proxy such as traefik * and external proxy such as cloudflare It's used by Traefik and all auth application that needs the real ip and trust the X-forward headers |
 | chart | string | `"k3s-ansible"` | The cluster chart. The cluster chart is responsible for the installation/management of Kubernetes on the nodes |
 | distribution | string | `"k3s"` | The kubernetes distribution k3s is the distribution that has a cluster chart implemented. |
-| dns.cloudflare | object | `{"api_token":{"key":"cloudflare-api-token","kind":"Secret","property":"","value":""},"dns_zones":[]}` | Cloudflare Enabled if the domain list is not empty |
 | email.smtp | object | `{"from":"","hello":"","host":"","password":"","port":465,"username":""}` | Smtp Configuration |
 | name | string | `"kubee"` | The cluster name used: * to identify the cluster (for instance, on prometheus remote-write metrics, the name is added as label) * as default first instance name for operator (for instance, prometheus operator allows to install multiple prometheus that needs to be unique. Kube-prometheus asks for a unique name) |
 

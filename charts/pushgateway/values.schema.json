@@ -145,13 +145,6 @@
       "title": "kubee-cluster",
       "type": "object"
     },
-    "enable_private_network_middleware": {
-      "default": true,
-      "description": "Enable private network. If true and a private network has been defined in Traefik, only the IP from the private network will be able to connect to the SMTP server",
-      "required": [],
-      "title": "Private Network Restriction",
-      "type": "boolean"
-    },
     "enabled": {
       "default": false,
       "description": "Boolean to indicate that this chart is or will be installed in the cluster",
@@ -167,7 +160,8 @@
     },
     "hostname": {
       "default": "",
-      "description": "The hostname",
+      "description": "The public hostname (install an ingress if not empty)",
+      "format": "hostname",
       "minLength": 1,
       "required": [],
       "title": "Hostname"
@@ -186,126 +180,24 @@
       "required": [],
       "title": "kubee_internal"
     },
-    "mailpit": {
-      "description": "@ignored",
-      "properties": {
-        "args": {
-          "items": {
-            "anyOf": [
-              {
-                "required": [],
-                "type": "string"
-              }
-            ],
-            "required": []
-          },
-          "required": [],
-          "title": "args",
-          "type": "array"
-        },
-        "image": {
-          "properties": {
-            "tag": {
-              "default": "v1.22.3",
-              "description": "https://github.com/axllent/mailpit/releases",
-              "required": [],
-              "title": "tag",
-              "type": "string"
-            }
-          },
-          "required": [
-            "tag"
-          ],
-          "title": "image",
-          "type": "object"
-        },
-        "mailpit": {
-          "properties": {
-            "smtp": {
-              "properties": {
-                "tls": {
-                  "properties": {
-                    "enabled": {
-                      "default": true,
-                      "required": [],
-                      "title": "enabled",
-                      "type": "boolean"
-                    },
-                    "secretName": {
-                      "default": "mailpit-cert",
-                      "required": [],
-                      "title": "secretName",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "enabled",
-                    "secretName"
-                  ],
-                  "title": "tls",
-                  "type": "object"
-                }
-              },
-              "required": [
-                "tls"
-              ],
-              "title": "smtp",
-              "type": "object"
-            }
-          },
-          "required": [
-            "smtp"
-          ],
-          "title": "mailpit",
-          "type": "object"
-        },
-        "service": {
-          "properties": {
-            "smtp": {
-              "properties": {
-                "port": {
-                  "const": 465,
-                  "default": "465",
-                  "description": "The smtp port. The smtp port should be 465 to enable TLS to be able to route the mail via SNI on Traefik",
-                  "required": [],
-                  "title": "The smtp port"
-                }
-              },
-              "required": [
-                "port"
-              ],
-              "title": "smtp",
-              "type": "object"
-            }
-          },
-          "required": [
-            "smtp"
-          ],
-          "title": "service",
-          "type": "object"
-        }
-      },
-      "required": [
-        "image",
-        "service",
-        "args",
-        "mailpit"
-      ],
-      "title": "mailpit"
-    },
     "namespace": {
-      "default": "mail",
+      "default": "monitoring",
       "description": "The installation namespace",
       "minLength": 1,
       "required": [],
       "title": "Namespace"
+    },
+    "version": {
+      "default": "v1.10.0",
+      "description": "The [pushgateway version](https://hub.docker.com/r/prom/pushgateway)",
+      "required": [],
+      "title": "version"
     }
   },
   "required": [
     "enabled",
     "namespace",
-    "hostname",
-    "enable_private_network_middleware"
+    "hostname"
   ],
   "type": "object"
 }

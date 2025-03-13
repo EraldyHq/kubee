@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "domain": {
+      "default": "",
+      "description": "The mail domain",
+      "format": "hostname",
+      "minLength": 1,
+      "required": [],
+      "title": "domain"
+    },
+    "enabled": {
+      "default": false,
+      "description": "Boolean to indicate that this chart is or will be installed in the cluster",
+      "required": [],
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "hostname": {
+      "default": "",
+      "description": "The public hostname",
+      "format": "hostname",
+      "minLength": 1,
+      "required": [],
+      "title": "Hostname"
+    },
+    "kubee_internal": {
+      "description": "@ignored Internal Kubee constant",
+      "properties": {
+        "install_cross_dependency": {
+          "const": false,
+          "default": "false",
+          "description": " const: false @schema Constant used to not output template from kubee cross dependency in Chart.yaml Don't change, don't touch",
+          "required": [],
+          "title": "install_cross_dependency"
+        }
+      },
+      "required": [],
+      "title": "kubee_internal"
+    },
+    "mailu": {
+      "properties": {
+        "domain": {
+          "default": "{{ .Values.domain }}",
+          "description": "Mail Domain",
+          "required": [],
+          "title": "domain",
+          "type": "string"
+        },
+        "front": {
+          "description": " https://github.com/Mailu/helm-charts/tree/master/mailu#running-on-bare-metal-with-k3s-and-klipper-lb",
+          "properties": {
+            "externalService": {
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "externalTrafficPolicy": {
+                  "default": "Local",
+                  "required": [],
+                  "title": "externalTrafficPolicy",
+                  "type": "string"
+                },
+                "type": {
+                  "default": "LoadBalancer",
+                  "required": [],
+                  "title": "type",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "enabled",
+                "type",
+                "externalTrafficPolicy"
+              ],
+              "title": "externalService",
+              "type": "object"
+            },
+            "hostPort": {
+              "properties": {
+                "enabled": {
+                  "default": false,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "title": "hostPort",
+              "type": "object"
+            }
+          },
+          "required": [
+            "hostPort",
+            "externalService"
+          ],
+          "title": "front"
+        },
+        "hostnames": {
+          "description": " #   - mail.example.com #   - imap.example.com",
+          "items": {
+            "anyOf": [
+              {
+                "required": [],
+                "type": "string"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "hostnames"
+        },
+        "initialAccount": {
+          "description": "Initial Account",
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "password": {
+              "default": "{{ .Values.cluster.auth.admin_user.password }}",
+              "required": [],
+              "title": "password",
+              "type": "string"
+            },
+            "username": {
+              "default": "{{ .Values.cluster.auth.admin_user.username }}",
+              "required": [],
+              "title": "username",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "username",
+            "password"
+          ],
+          "title": "initialAccount",
+          "type": "object"
+        }
+      },
+      "required": [
+        "domain",
+        "initialAccount"
+      ],
+      "title": "mailu",
+      "type": "object"
+    },
+    "namespace": {
+      "default": "mail",
+      "description": "The installation namespace",
+      "minLength": 1,
+      "required": [],
+      "title": "Namespace"
+    }
+  },
+  "required": [
+    "enabled",
+    "namespace",
+    "hostname",
+    "domain",
+    "mailu"
+  ],
+  "type": "object"
+}

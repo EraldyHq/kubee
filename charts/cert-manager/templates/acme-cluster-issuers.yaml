@@ -69,7 +69,7 @@ spec:
         Selector: 'DnsName', `DnsZone`, `matchLabels` can be specified
         https://cert-manager.io/docs/configuration/acme/#adding-multiple-solver-types
       */}}
-      {{- if ge (len $.Values.cluster.dns.cloudflare.dns_zones) 0 }}
+      {{- if gt (len $.Values.issuers.public.dns01.cloudflare.dns_zones) 0 }}
       - selector:
           {{- /*
           # The selector is a DNS Zone
@@ -78,7 +78,7 @@ spec:
           # * a matchLabel because it is not possible to set a label/annotation for cert-manager in an ingress spec
           # * a DNSName because it must be exact and is obviously unknown in advance
           */}}
-          dnsZones: {{ $.Values.cluster.dns.cloudflare.dns_zones | toYaml | nindent 12 }}
+          dnsZones: {{ $.Values.issuers.public.dns01.cloudflare.dns_zones | toYaml | nindent 12 }}
         {{- /* https://cert-manager.io/docs/configuration/acme/dns01/*/}}
         dns01:
           {{- /*
@@ -92,7 +92,7 @@ spec:
             */}}
             apiTokenSecretRef:
               name: '{{ include "cert-manager-cloudflare-secret-name" $ }}'
-              key: '{{ $.Values.cluster.dns.cloudflare.api_token.key }}'
+              key: '{{ $.Values.issuers.public.dns01.cloudflare.api_token.key }}'
       {{- end -}}
 
 {{- end -}}
