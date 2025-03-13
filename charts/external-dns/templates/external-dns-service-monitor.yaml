@@ -1,3 +1,4 @@
+{{/*Monitoring of External DNS*/}}
 {{- if eq .Values.prometheus.enabled true }}
 {{ $ := mergeOverwrite $ (dict "component" "external-dns") }}
 apiVersion: monitoring.coreos.com/v1
@@ -15,7 +16,7 @@ spec:
     matchLabels:
       {{ include "kubee-pod-labels" . | nindent 6}}
   endpoints:
-    - targetPort: {{.Values.provider.ports.metrics}}
+    - targetPort: 7979
       path: /metrics
       interval: {{.Values.prometheus.scrape_interval}}
 {{- end }}

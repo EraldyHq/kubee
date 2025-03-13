@@ -1,6 +1,6 @@
 {{ define "chart-to-feature-desc" }}
 {{- $chart := . }}
-{{- if eq $chart "kubee-traefik"}}creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
+{{- if eq $chart "kubee-traefik"}}creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined or add authorizations.
 {{- else if eq $chart "kubee-cert-manager" }}adds [server certificates](https://cert-manager.io/docs/usage/certificate/) to the servers
 {{- else if eq $chart "kubee-external-secrets" }}defines secret as [external secrets](https://external-secrets.io/latest/introduction/getting-started/#create-your-first-externalsecret) for GitOps integration (if chosen)
 {{- else if eq $chart "kubee-grafana" }}creates [dashboards](https://grafana.com/grafana/dashboards/)
@@ -17,7 +17,7 @@
 {{ end }}
 
 {{ define "kubee-issue-url" }}
-  {{- $label := (index . 0) }}
+  {{- $label := . }}
   {{- printf "[%s](https://github.com/EraldyHq/kubee/issues)" $label }}
 {{ end }}
 
@@ -25,7 +25,8 @@
 {{ define "kubee-site-url" }}https://github.com/EraldyHq/kubee/blob/main/docs/site{{ end }}
 {{ define "kubee-chart-url" }}https://github.com/EraldyHq/kubee/blob/main/charts{{ end }}
 
-{{ define "kubee-admin-user-label" }}{{ template "kubee-site-page-label" list ("admin-user" .)}}{{ end }}
+{{ define "kubee-admin-user-label" }}{{ template "kubee-site-page-label" (list "admin-user" .)}}{{ end }}
+{{ define "kubee-cluster-values-file-label" }}{{ template "kubee-site-page-label" (list "cluster-values" .)}}{{ end }}
 
 {{/* Create an URL */}}
 {{ define "kubee-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee chart{{end}}]({{ template "kubee-site-url" .}}/kubee-helmet-chart.md){{ end }}
@@ -41,7 +42,7 @@
 
 {{ define "kubee-jsonnet-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee jsonnet chart{{end}}]({{ template "kubee-site-url" .}}/jsonnet-chart.md){{ end }}
 
-{{ define "kubee-cluster-values-file-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cluster values file{{end}}]({{ template "kubee-site-url" .}}/cluster-values.md){{ end }}
+
 
 {{ define "kubee-cloudflare-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cloudflare{{end}}]({{ template "kubee-site-url" .}}/cloudflare.md){{ end }}
 

@@ -40,59 +40,40 @@ spec:
           restartPolicy: Always
           {{/* Same secruity context on both pod */}}
           securityContext: {{ include "external-dns-container-security-context" . | nindent 12}}
-          {{- $providerName := trim (include "external-dns-provider-name" .) }}
           args:
           {{- if eq .Values.provider.type "in-tree"}}
             - '--webhook-server'
-            - '--metrics-address=:{{.Values.provider.ports.metrics}}'
-            - --source=ingress # required but not used
-            - --log-level={{.Values.provider.in_tree.common.log.level}}
-            - --log-format={{.Values.provider.in_tree.common.log.format}}
-            - --request-timeout={{.Values.provider.in_tree.common.request_timeout}}
-            {{- if hasPrefix "cloudflare" $providerName }}
-            - --provider=cloudflare
-            - --cloudflare-dns-records-per-page={{.Values.provider.in_tree.cloudflare.dns_records_per_page}}
-            - --cloudflare-region-key={{.Values.provider.in_tree.cloudflare.region_key}}
-              {{- if eq .Values.provider.in_tree.cloudflare.proxied true}}
-            - --cloudflare-proxied
-              {{- else}}
-            - --no-cloudflare-proxied
-              {{- end}}
-            {{- else}}
-            - --provider=$providerName
-            {{- end }}
-            {{- range .Values.provider.in_tree.common.domain_filter}}
-            - --domain-filter={{.}}
+            - '--metrics-address=:{{.Values.provider.endpoints.metrics.port}}'
+            - '--source=ingress' # required but not used
+            - '--log-level={{.Values.provider.in_tree.log.level}}'
+            - '--log-format={{.Values.provider.in_tree.log.format}}'
+            - '--request-timeout={{.Values.provider.in_tree.request_timeout}}'
+            - '--provider={{ required "For an in-tree provider, the provider name is required" .Values.provider.name}}'
+            {{- range .Values.provider.in_tree.domain_filter}}
+            - '--domain-filter={{.}}'
             {{- end}}
-            {{- if ne .Values.provider.in_tree.common.regex_domain_filter ""}}
-            - --regex-domain-filter={{.Values.regex_domain_filter}}
+            {{- if ne .Values.provider.in_tree.regex_domain_filter ""}}
+            - '--regex-domain-filter={{.Values.regex_domain_filter}}'
             {{- end }}
-            {{- range .Values.provider.in_tree.common.exclude_domains}}
-            - --exclude-domains={{.}}
+            {{- range .Values.provider.in_tree.exclude_domains}}
+            - '--exclude-domains={{.}}'
             {{- end }}
-            {{- range .Values.provider.in_tree.common.zone_id_filter}}
-            - --zone-id-filter={{.}}
+            {{- range .Values.provider.in_tree.zone_id_filter}}
+            - '--zone-id-filter={{.}}'
             {{- end }}
-          {{- end}}
+          {{- end }}
             {{- range .Values.provider.args }}
-            - {{.}}
+            - '{{.}}'
             {{- end }}
             {{- if .Values.cert_manager.enabled }}
             - '--tls-ca=/etc/external-dns/ca.crt'
             {{- end}}
           env:
-            {{- if and (eq .Values.provider.type "in-tree") (eq $providerName "cloudflare-cluster") }}
-            - name: CF_API_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: {{include "external-dns-cloudflare-secret-name" .}}
-                  key: api_token
-            {{- end}}
             {{- range .Values.provider.env}}
             - name: {{.name}}
               valueFrom:
                 secretKeyRef:
-                  name: {{include "external-dns-provider-secret-name" .}}
+                  name: {{include "external-dns-provider-secret-name" $}}
                   key: {{.name}}
             {{- end }}
           {{- if eq .Values.cert_manager.enabled true}}
@@ -104,27 +85,27 @@ spec:
           {{- end}}
           livenessProbe:
             httpGet:
-              path: /healthz
-              port: {{.Values.provider.ports.health}}
+              path: {{.Values.provider.endpoints.health.path}}
+              port: {{.Values.provider.endpoints.health.port}}
             initialDelaySeconds: 10
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
-              path: /healthz
-              port: {{.Values.provider.ports.health}}
+              path: {{.Values.provider.endpoints.health.path}}
+              port: {{.Values.provider.endpoints.health.port}}
             initialDelaySeconds: 10
             timeoutSeconds: 5
           ports:
-            - containerPort: {{.Values.provider.ports.webhook}}
+            - containerPort: {{.Values.provider.endpoints.webhook.port}}
               name: webhook
             {{- if eq .Values.provider.type "in-tree" }}
-              {{- if ne .Values.provider.ports.metrics .Values.provider.ports.health }}
-              {{- fail (printf "For an intree provider, the metrics (%s) and health (%s) port should be the same" .Values.provider.ports.metrics .Values.provider.ports.health)}}
+              {{- if ne .Values.provider.endpoints.metrics.port .Values.provider.endpoints.health.port }}
+              {{- fail (printf "For an intree provider, the metrics (%s) and health (%s) port should be the same" .Values.provider.endpoints.metrics.port .Values.provider.endpoints.health.port)}}
               {{- end }}
             {{- end}}
-            - containerPort: {{.Values.provider.ports.metrics}}
+            - containerPort: {{.Values.provider.endpoints.metrics.port}}
               name: metrics
-            - containerPort: {{.Values.provider.ports.health}}
+            - containerPort: {{.Values.provider.endpoints.health.port}}
               name: health
       containers:
         - name: external-dns
@@ -133,7 +114,7 @@ spec:
           securityContext: {{ include "external-dns-container-security-context" . | nindent 12}}
           args:
             - '--provider=webhook'
-            - '--webhook-provider-url=http://localhost:{{.Values.provider.ports.webhook}}'
+            - '--webhook-provider-url=http://localhost:{{.Values.provider.endpoints.webhook.port}}'
             - '--webhook-provider-read-timeout={{.Values.server.webhook_read_timeout}}'
             - '--webhook-provider-write-timeout={{.Values.server.webhook_write_timeout}}'
             - '--metrics-address=:7979'

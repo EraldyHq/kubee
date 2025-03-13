@@ -32,9 +32,9 @@ You can monitor [Rate Limit Metrics](https://kubernetes-sigs.github.io/external-
 
 ### Support In-tree and WebHook DNS
 
-This chart supports:
-+ `in-tree` DNS provider
-+ `external webhook` DNS provider
+This chart supports all provider type:
++ [in-tree DNS provider](https://kubernetes-sigs.github.io/external-dns/latest/#the-latest-release)
++ or [webhook DNS provider](https://kubernetes-sigs.github.io/external-dns/latest/#new-providers)
 
 ### Kubee Charts Features
 
@@ -42,9 +42,58 @@ This chart supports:
 
 * [cert-manager](https://github.com/EraldyHq/kubee/blob/main/charts/cert-manager/README.md) adds [server certificates](https://cert-manager.io/docs/usage/certificate/) to the servers
 * [prometheus](https://github.com/EraldyHq/kubee/blob/main/charts/prometheus/README.md) creates [metrics scraping jobs](https://prometheus.io/docs/concepts/jobs_instances/) and [alert rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
-* [traefik](https://github.com/EraldyHq/kubee/blob/main/charts/traefik/README.md) creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
+* [traefik](https://github.com/EraldyHq/kubee/blob/main/charts/traefik/README.md) creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined or add authorizations.
 
 ## Installation
+
+### Configuration
+
+Example of in-tree provider following the [cloudflare tutorial configuration](https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/cloudflare/) :
+* Get your [api token](https://github.com/EraldyHq/kubee/blob/main/docs/site/cloudflare.md)
+ (`Api Key` is deprecated)
+* Set your configuration in the [cluster value files](https://github.com/EraldyHq/kubee/blob/main/docs/site/cluster-values.md)
+
+```yaml
+external_dns:
+  enabled: true
+  provider:
+    type: "in-tree" # default
+    name: "cloudflare"
+    env:
+      # specific cloudflare envs
+      - name: 'CF_API_TOKEN'
+        value: '${CF_API_TOKEN}'
+    args:
+      # specific cloudflare args
+      - '--cloudflare-dns-records-per-page=100'
+      - '--cloudflare-region-key=global'
+      - '--no-cloudflare-proxied'
+    in_tree:
+        domain_filter:
+          - example.tld
+```
+
+Example of webhook provider configuration following the [Hetzner Webhook documentation](https://github.com/mconfalonieri/external-dns-hetzner-webhook):
+Set this configuration in the [cluster value files](https://github.com/EraldyHq/kubee/blob/main/docs/site/cluster-values.md)
+
+```yaml
+external_dns:
+  enabled: true
+  provider:
+    type: "webhook"
+    name: "hetzner"
+    image: "ghcr.io/mconfalonieri/external-dns-hetzner-webhook:v0.7.0"
+    env:
+      - name: 'HETZNER_API_KEY'
+        value: '${HETZNER_API_KEY}'
+    args:
+      - '--txt-prefix=reg-%{record_type}-'
+    endpoints:
+      health:
+        path: /health # The `healthz` value is the default but Hetzner Webhook does not follow the [specification](https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/webhook-provider/#exposed-endpoints)
+```
+
+### Play
 
 ```bash
 kubee helmet --cluster cluster-name play external-dns
@@ -56,21 +105,14 @@ kubee helmet --cluster cluster-name play external-dns
 |-----|------|---------|-------------|
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
 | namespace | string | `"external-dns"` | The installation namespace |
-| provider.args | list | `[]` |  |
-| provider.env | list | `[]` |  |
-| provider.image | string | `""` | Required if the provider is `out-tree` Example: `ghcr.io/mconfalonieri/external-dns-hetzner-webhook:v0.7.0` |
-| provider.in_tree.cloudflare.dns_records_per_page | int | `100` |  |
-| provider.in_tree.cloudflare.proxied | bool | `false` |  |
-| provider.in_tree.cloudflare.region_key | string | `"global"` |  |
-| provider.in_tree.common.domain_filter | list | `[]` | Domain filter (optional) limit to only domains; change to match the zone Create DNS records for host names that match E.g. `example.org` will allow the zone `example.org` and all subdomains (ie `xx.example.org`) `a.example.com` will allow for zone `example.com` `.example.com` will not attempt to match parent zones. |
-| provider.in_tree.common.exclude_domains | list | `[]` |  |
-| provider.in_tree.common.regex_domain_filter | string | `""` |  |
-| provider.in_tree.common.zone_id_filter | list | `[]` |  |
+| provider.args | list | `[]` | An array of args to be added to the external dns server Providers are driven by some args. Refer to their documentation to discover them. |
+| provider.env | list | `[]` | An array of name, value env stored in secrets and passed as env. Providers secret are driven by env. Refer to their documentation to discover them. |
+| provider.image | string | `""` | The webhook provider image. Required if the provider is `webhook`. `in-tree` uses the `external-dns` image as webhook provider. Example: `ghcr.io/mconfalonieri/external-dns-hetzner-webhook:v0.7.0` |
+| provider.in_tree.domain_filter | list | `[]` | Domain filter. Limit to only domains; change to match the zone Create DNS records for host names that match E.g. `example.org` will allow the zone `example.org` and all subdomains (ie `xx.example.org`) `a.example.com` will allow for zone `example.com` `.example.com` will not attempt to match parent zones. |
+| provider.in_tree.exclude_domains | list | `[]` | Exclude a domain or subdomain Example: `ignore.this.example.com` |
+| provider.in_tree.regex_domain_filter | string | `""` | Limits possible domains and target zone with a regex. It overrides domain filters and can be specified only once. Example: `(example\\.org|company\\.com)$` or `example*` |
 | provider.name | string | `""` | The name of the provider (Required for an in-tree provider) |
-| provider.ports.health | int | `7978` | The health port |
-| provider.ports.metrics | int | `7978` | The metrics port |
-| provider.ports.webhook | int | `8888` | The webhook/http  port |
-| provider.type | string | `"in-tree"` | Webhook Provider. `in-tree` or `out-tree` `in-tree` will use `external-dns` as webhook provider. With `out-tree`, you need to provide the image |
+| provider.type | string | `"in-tree"` | Provider. `in-tree` or `webhook` |
 | server.cache_time | string | `"4h"` | The local DNS cache to avoid [rate limiting](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/) If a DNS entry is deleted/modified manually, the recovery will need to wait this interval for resynchronization. Or you need to restart the pod. |
 | server.interval | string | `"1m"` | Interval for DNS sync. |
 | server.policy | string | `"upsert-only"` | Policy Synchronization. `upsert-only`: Prevent deleting any records. `sync`: if you want DNS entries to get deleted as well |

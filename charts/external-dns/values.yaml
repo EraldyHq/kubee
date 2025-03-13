@@ -114,7 +114,7 @@ server:
     #    enum: [A, AAAA, CNAME, NS, SRV, MX, TXT]
     # @schema
     # Record types to exclude
-    exclude: [] # [Ref](https://github.com/kubernetes-sigs/external-dns/blob/724b86b8b867db9420c51b6a8bc9d26118bf213d/pkg/apis/externaldns/types.go#L472)
+    exclude: [ ] # [Ref](https://github.com/kubernetes-sigs/external-dns/blob/724b86b8b867db9420c51b6a8bc9d26118bf213d/pkg/apis/externaldns/types.go#L472)
 
   # @schema
   # enum: [upsert-only, sync]
@@ -139,32 +139,50 @@ server:
 # The ideal setup for providers is to run as a sidecar in the same pod of the ExternalDNS container, listening only on localhost
 provider:
   # @schema
-  # enum: ['in-tree','out-tree']
+  # enum: ['in-tree','webhook']
   # @schema
-  # -- Webhook Provider. `in-tree` or `out-tree`
-  # `in-tree` will use `external-dns` as webhook provider.
-  # With `out-tree`, you need to provide the image
+  # -- Provider. `in-tree` or `webhook`
   type: 'in-tree'
   # -- The name of the provider (Required for an in-tree provider)
   name: ''
-  # -- Required if the provider is `out-tree`
+  # -- The webhook provider image.
+  # Required if the provider is `webhook`.
+  # `in-tree` uses the `external-dns` image as webhook provider.
   # Example: `ghcr.io/mconfalonieri/external-dns-hetzner-webhook:v0.7.0`
   image: ''
-  # Ports
-  ports:
-    # -- The webhook/http  port
-    webhook: 8888
-    # -- The metrics port
-    metrics: 7978
-    # -- The health port
-    health: 7978
+  # @ignored Endpoints
+  endpoints:
+    # The webhook/http  port
+    webhook:
+      # @schema
+      # type: integer
+      # @schema
+      # The webhook port
+      port: 8888
+    # The metrics
+    metrics:
+      # @schema
+      # type: integer
+      # @schema
+      # The metrics port (Not 7979 as this is already taken by external-dns)
+      port: 8080 # 8080 is the [Default](https://kubernetes-sigs.github.io/external-dns/v0.14.2/tutorials/webhook-provider/#metrics-support)
+      path: /metrics
+    # The health
+    health:
+      # @schema
+      # type: integer
+      # @schema
+      # The health port (Not 7979 as this is already taken by external-dns)
+      # By default, this is the same value as for the metrics
+      port: 8080 # 8080 is the [Default](https://kubernetes-sigs.github.io/external-dns/v0.14.2/tutorials/webhook-provider/#metrics-support)
+      path: /healthz  # Some webhook use health in place of [healthz](https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/webhook-provider/#exposed-endpoints)
   # @schema
   # type: "array"
   # items:
   #   type: string
   #   examples: [ '--aws-batch-change-interval=1s' ]
   # @schema
-  # An array of args to be added to the external dns server
+  # -- An array of args to be added to the external dns server
   # Providers are driven by some args. Refer to their documentation to discover them.
   args: [ ]
   # @schema
@@ -181,78 +199,57 @@ provider:
   #       type: string
   #       examples: [YOUR_DNSIMPLE_API_KEY]
   # @schema
-  # The env of the external dns server
-  # An array of name, value env stored in secrets and passed as env to the
+  # -- An array of name, value env stored in secrets and passed as env.
   # Providers secret are driven by env. Refer to their documentation to discover them.
   env: [ ]
-
-  # In-tree arguments
+  # In-tree Provider common arguments
   in_tree:
-    # Common to all in-tree provider
-    common:
-      # @ignored Log
-      log:
-        # @schema
-        # enum: [panic, debug, info, warning, error, fatal]
-        # @schema
-        # Log level
-        level: info
-        # @schema
-        # enum: [text, json]
-        # @schema
-        # Log format.
-        format: text
-      # @ignored Request Timeout
-      request_timeout: '30s'
+    # @ignored Log
+    log:
       # @schema
-      # type: array
-      # items:
-      #   type: string
-      #   format: hostname
-      #   examples: ['10.0.0.in-addr.arpa']
+      # enum: [panic, debug, info, warning, error, fatal]
       # @schema
-      # -- Domain filter
-      # (optional) limit to only domains; change to match the zone
-      # Create DNS records for host names that match
-      # E.g.
-      # `example.org` will allow the zone `example.org` and all subdomains (ie `xx.example.org`)
-      # `a.example.com` will allow for zone `example.com`
-      # `.example.com` will not attempt to match parent zones.
-      domain_filter: [ ]
-      # Limits possible domains and target zone with a regex.
-      # It overrides domain filters and can be specified only once.
-      # example: `(example\\.org|company\\.com)$` or `example*`
-      regex_domain_filter: ''
+      # Log level
+      level: info
       # @schema
-      # type: array
-      # items:
-      #   type: string
-      #   format: hostname
-      #   examples: ['10.0.0.in-addr.arpa']
+      # enum: [text, json]
       # @schema
-      # exclude a domain or subdomain
-      # Example: `ignore.this.example.com`
-      exclude_domains: [ ]
-      # (optional) limit to a specific zone.
-      # example value: `023e105f4ecef8ad9ca31a8372d0c353`
-      zone_id_filter: []
-    # cloudflare specific
-    cloudflare:
-      # @schema
-      # type: integer
-      # @schema
-      # How many DNS records to fetch per request
-      # This is a [Rate limit option](https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/cloudflare/#throttling).
-      # Cloudflare API has a global rate limit of [1,200 requests per five minutes](https://developers.cloudflare.com/fundamentals/api/reference/limits/)
-      # See also: `cache_time`
-      dns_records_per_page: 100
-      # (optional) enable the proxy feature of Cloudflare (DDOS protection, CDN...)
-      # The annotation `external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"` override this value.
-      proxied: false
-      # Configure which region can decrypt HTTPS requests
-      # example value: `eu`
-      # [full list](https://developers.cloudflare.com/data-localization/regional-services/get-started/)
-      region_key: 'global'
+      # Log format.
+      format: text
+    # @ignored Request Timeout
+    request_timeout: '30s'
+    # @schema
+    # type: array
+    # items:
+    #   type: string
+    #   format: hostname
+    #   examples: ['10.0.0.in-addr.arpa']
+    # @schema
+    # -- Domain filter. Limit to only domains; change to match the zone
+    # Create DNS records for host names that match
+    # E.g.
+    # `example.org` will allow the zone `example.org` and all subdomains (ie `xx.example.org`)
+    # `a.example.com` will allow for zone `example.com`
+    # `.example.com` will not attempt to match parent zones.
+    domain_filter: [ ]
+    # -- Limits possible domains and target zone with a regex.
+    # It overrides domain filters and can be specified only once.
+    # Example: `(example\\.org|company\\.com)$` or `example*`
+    regex_domain_filter: ''
+    # @schema
+    # type: array
+    # items:
+    #   type: string
+    #   format: hostname
+    #   examples: ['10.0.0.in-addr.arpa']
+    # @schema
+    # -- Exclude a domain or subdomain
+    # Example: `ignore.this.example.com`
+    exclude_domains: [ ]
+    # @ignored (optional) limit to a specific zone.
+    # example value: `023e105f4ecef8ad9ca31a8372d0c353`
+    zone_id_filter: [ ]
+
 
 
 # @ignored

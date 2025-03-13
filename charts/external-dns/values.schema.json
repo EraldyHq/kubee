@@ -325,7 +325,7 @@
       "description": " Only [one provider is currently supported](https://github.com/kubernetes-sigs/external-dns/issues/2568) Default to cloudflare if the api_key and the dns zones are specified in the cluster chart https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/webhook-provider/ The ideal setup for providers is to run as a sidecar in the same pod of the ExternalDNS container, listening only on localhost",
       "properties": {
         "args": {
-          "description": " type: \"array\" items:   type: string   examples: [ '--aws-batch-change-interval=1s' ] @schema An array of args to be added to the external dns server Providers are driven by some args. Refer to their documentation to discover them.",
+          "description": "An array of args to be added to the external dns server Providers are driven by some args. Refer to their documentation to discover them.",
           "items": {
             "examples": [
               "--aws-batch-change-interval=1s"
@@ -337,8 +337,75 @@
           "title": "args",
           "type": "array"
         },
+        "endpoints": {
+          "description": "Endpoints",
+          "properties": {
+            "health": {
+              "description": "The health port",
+              "properties": {
+                "path": {
+                  "default": "/healthz",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "port": {
+                  "default": 7978,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "port",
+                "path"
+              ],
+              "title": "health"
+            },
+            "metrics": {
+              "description": "The metrics port",
+              "properties": {
+                "path": {
+                  "default": "/metrics",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "port": {
+                  "default": 7978,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "port",
+                "path"
+              ],
+              "title": "metrics"
+            },
+            "webhook": {
+              "description": "The webhook/http  port",
+              "properties": {
+                "port": {
+                  "default": 8888,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "port"
+              ],
+              "title": "webhook"
+            }
+          },
+          "required": [],
+          "title": "endpoints",
+          "type": "object"
+        },
         "env": {
-          "description": " type: \"array\" items:   type: object   properties:     name:       title: an env name       type: string       examples: [DNSIMPLE_OAUTH]     value:       title: an env value       type: string       examples: [YOUR_DNSIMPLE_API_KEY] @schema The env of the external dns server An array of name, value env stored in secrets and passed as env to the Providers secret are driven by env. Refer to their documentation to discover them.",
+          "description": "An array of name, value env stored in secrets and passed as env. Providers secret are driven by env. Refer to their documentation to discover them.",
           "items": {
             "properties": {
               "name": {
@@ -367,134 +434,96 @@
         },
         "image": {
           "default": "",
-          "description": "Required if the provider is `out-tree` Example: `ghcr.io/mconfalonieri/external-dns-hetzner-webhook:v0.7.0`",
+          "description": "The webhook provider image. Required if the provider is `webhook`. `in-tree` uses the `external-dns` image as webhook provider. Example: `ghcr.io/mconfalonieri/external-dns-hetzner-webhook:v0.7.0`",
           "required": [],
           "title": "image"
         },
         "in_tree": {
-          "description": "In-tree arguments",
+          "description": "In-tree Provider common arguments",
           "properties": {
-            "cloudflare": {
-              "description": "cloudflare specific",
+            "domain_filter": {
+              "description": "Domain filter. Limit to only domains; change to match the zone Create DNS records for host names that match E.g. `example.org` will allow the zone `example.org` and all subdomains (ie `xx.example.org`) `a.example.com` will allow for zone `example.com` `.example.com` will not attempt to match parent zones.",
+              "items": {
+                "examples": [
+                  "10.0.0.in-addr.arpa"
+                ],
+                "format": "hostname",
+                "required": [],
+                "type": "string"
+              },
+              "required": [],
+              "title": "domain_filter",
+              "type": "array"
+            },
+            "exclude_domains": {
+              "description": "Exclude a domain or subdomain Example: `ignore.this.example.com`",
+              "items": {
+                "examples": [
+                  "10.0.0.in-addr.arpa"
+                ],
+                "format": "hostname",
+                "required": [],
+                "type": "string"
+              },
+              "required": [],
+              "title": "exclude_domains",
+              "type": "array"
+            },
+            "log": {
               "properties": {
-                "dns_records_per_page": {
-                  "default": 100,
-                  "description": " type: integer @schema How many DNS records to fetch per request This is a [Rate limit option](https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/cloudflare/#throttling). Cloudflare API has a global rate limit of [1,200 requests per five minutes](https://developers.cloudflare.com/fundamentals/api/reference/limits/) See also: `cache_time`",
+                "format": {
+                  "default": "text",
+                  "description": " enum: [text, json] @schema Log format.",
+                  "enum": [
+                    "text",
+                    "json"
+                  ],
                   "required": [],
-                  "title": "dns_records_per_page",
-                  "type": "integer"
+                  "title": "format"
                 },
-                "proxied": {
-                  "default": "false",
-                  "description": " The annotation `external-dns.alpha.kubernetes.io/cloudflare-proxied: \"true\"` override this value.",
+                "level": {
+                  "default": "info",
+                  "description": " enum: [panic, debug, info, warning, error, fatal] @schema Log level",
+                  "enum": [
+                    "panic",
+                    "debug",
+                    "info",
+                    "warning",
+                    "error",
+                    "fatal"
+                  ],
                   "required": [],
-                  "title": "proxied"
-                },
-                "region_key": {
-                  "default": "global",
-                  "description": " example value: `eu` [full list](https://developers.cloudflare.com/data-localization/regional-services/get-started/)",
-                  "required": [],
-                  "title": "region_key"
+                  "title": "level"
                 }
               },
               "required": [],
-              "title": "cloudflare",
+              "title": "log",
               "type": "object"
             },
-            "common": {
-              "description": "Common to all in-tree provider",
-              "properties": {
-                "domain_filter": {
-                  "description": "Domain filter (optional) limit to only domains; change to match the zone Create DNS records for host names that match E.g. `example.org` will allow the zone `example.org` and all subdomains (ie `xx.example.org`) `a.example.com` will allow for zone `example.com` `.example.com` will not attempt to match parent zones.",
-                  "items": {
-                    "examples": [
-                      "10.0.0.in-addr.arpa"
-                    ],
-                    "format": "hostname",
-                    "required": [],
-                    "type": "string"
-                  },
-                  "required": [],
-                  "title": "domain_filter",
-                  "type": "array"
-                },
-                "exclude_domains": {
-                  "description": " type: array items:   type: string   format: hostname   examples: ['10.0.0.in-addr.arpa'] @schema exclude a domain or subdomain Example: `ignore.this.example.com`",
-                  "items": {
-                    "examples": [
-                      "10.0.0.in-addr.arpa"
-                    ],
-                    "format": "hostname",
-                    "required": [],
-                    "type": "string"
-                  },
-                  "required": [],
-                  "title": "exclude_domains",
-                  "type": "array"
-                },
-                "log": {
-                  "properties": {
-                    "format": {
-                      "default": "text",
-                      "description": " enum: [text, json] @schema Log format.",
-                      "enum": [
-                        "text",
-                        "json"
-                      ],
-                      "required": [],
-                      "title": "format"
-                    },
-                    "level": {
-                      "default": "info",
-                      "description": " enum: [panic, debug, info, warning, error, fatal] @schema Log level",
-                      "enum": [
-                        "panic",
-                        "debug",
-                        "info",
-                        "warning",
-                        "error",
-                        "fatal"
-                      ],
-                      "required": [],
-                      "title": "level"
-                    }
-                  },
-                  "required": [],
-                  "title": "log",
-                  "type": "object"
-                },
-                "regex_domain_filter": {
-                  "default": "",
-                  "description": " It overrides domain filters and can be specified only once. example: `(example\\\\.org|company\\\\.com)$` or `example*`",
-                  "required": [],
-                  "title": "regex_domain_filter"
-                },
-                "request_timeout": {
-                  "default": "30s",
-                  "required": [],
-                  "title": "request_timeout",
-                  "type": "string"
-                },
-                "zone_id_filter": {
-                  "description": " example value: `023e105f4ecef8ad9ca31a8372d0c353`",
-                  "items": {
-                    "required": []
-                  },
-                  "required": [],
-                  "title": "zone_id_filter"
-                }
+            "regex_domain_filter": {
+              "default": "",
+              "description": "Limits possible domains and target zone with a regex. It overrides domain filters and can be specified only once. Example: `(example\\\\.org|company\\\\.com)$` or `example*`",
+              "required": [],
+              "title": "regex_domain_filter"
+            },
+            "request_timeout": {
+              "default": "30s",
+              "required": [],
+              "title": "request_timeout",
+              "type": "string"
+            },
+            "zone_id_filter": {
+              "description": " example value: `023e105f4ecef8ad9ca31a8372d0c353`",
+              "items": {
+                "required": []
               },
-              "required": [
-                "log",
-                "request_timeout"
-              ],
-              "title": "common",
-              "type": "object"
+              "required": [],
+              "title": "zone_id_filter"
             }
           },
           "required": [
-            "common",
-            "cloudflare"
+            "log",
+            "request_timeout"
           ],
           "title": "in_tree",
           "type": "object"
@@ -505,45 +534,19 @@
           "required": [],
           "title": "name"
         },
-        "ports": {
-          "description": "Ports",
-          "properties": {
-            "health": {
-              "default": "7978",
-              "description": "The health port",
-              "required": [],
-              "title": "health"
-            },
-            "metrics": {
-              "default": "7978",
-              "description": "The metrics port",
-              "required": [],
-              "title": "metrics"
-            },
-            "webhook": {
-              "default": "8888",
-              "description": "The webhook/http  port",
-              "required": [],
-              "title": "webhook"
-            }
-          },
-          "required": [],
-          "title": "ports",
-          "type": "object"
-        },
         "type": {
           "default": "in-tree",
-          "description": "Webhook Provider. `in-tree` or `out-tree` `in-tree` will use `external-dns` as webhook provider. With `out-tree`, you need to provide the image",
+          "description": "Provider. `in-tree` or `webhook`",
           "enum": [
             "in-tree",
-            "out-tree"
+            "webhook"
           ],
           "required": [],
           "title": "type"
         }
       },
       "required": [
-        "ports",
+        "endpoints",
         "in_tree"
       ],
       "title": "provider"

@@ -94,6 +94,11 @@ EOF
 kubee kubectl apply -n external-dns -f /tmp/dns-definition-test.yaml
 ```
 
+## Dashboard
+
+See example here:
+https://gitlab.com/gitlab-com/runbooks/-/blob/6726ba6de1563c8623c0874755acfd09c205c6b5/dashboards/external-dns/main.dashboard.jsonnet
+
 ## Support 
 ### CRD ownership fix
 

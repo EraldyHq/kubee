@@ -1,3 +1,4 @@
+{{/* Sercice for the Monitoring of External DNS*/}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -10,7 +11,7 @@ spec:
   ports:
     - name: http
       {{- /* Port of the service */}}
-      port: {{.Values.provider.ports.metrics}}
+      port: 7979
       {{- /* Port of the container */}}
-      targetPort: {{.Values.provider.ports.metrics}}
+      targetPort: 7979
       protocol: TCP
