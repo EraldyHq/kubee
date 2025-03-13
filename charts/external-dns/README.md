@@ -27,8 +27,10 @@ These sources are automatically enabled.
  
 ### Monitoring
 
-Prometheus is automatically configured if enabled.
-You can monitor [Rate Limit Metrics](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/#monitoring)
+[External DNS Monitoring](https://kubernetes-sigs.github.io/external-dns/latest/docs/monitoring/) is automatically configured if enabled
+to:
+* gather the metrics.
+* and alert in case of failure.
 
 ### Support In-tree and WebHook DNS Provider
 
@@ -104,6 +106,7 @@ kubee helmet --cluster cluster-name play external-dns
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
+| image | string | `"registry.k8s.io/external-dns/external-dns:v0.15.1"` | Image with the [External DNS version](https://github.com/kubernetes-sigs/external-dns/releases) |
 | namespace | string | `"external-dns"` | The installation namespace |
 | provider.args | list | `[]` | An array of args to be added to the external dns server Providers are driven by some args. Refer to their documentation to discover them. |
 | provider.env | list | `[]` | An array of name, value env stored in secrets and passed as env. Providers secret are driven by env. Refer to their documentation to discover them. |
@@ -116,7 +119,6 @@ kubee helmet --cluster cluster-name play external-dns
 | server.cache_time | string | `"4h"` | The local DNS cache to avoid [rate limiting](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/) If a DNS entry is deleted/modified manually, the recovery will need to wait this interval for resynchronization. Or you need to restart the pod. |
 | server.interval | string | `"1m"` | Interval for DNS sync. |
 | server.policy | string | `"upsert-only"` | Policy Synchronization. `upsert-only`: Prevent deleting any records. `sync`: if you want DNS entries to get deleted as well |
-| version | string | `"0.15.1"` | [External DNS version](https://github.com/kubernetes-sigs/external-dns/releases) |
 
 There is more parameters in the [values file](values.yaml)
 
