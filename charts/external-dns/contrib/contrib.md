@@ -50,6 +50,14 @@ with default value [here](https://github.com/kubernetes-sigs/external-dns/blob/7
 
 * [Cache Monitoring Metrics](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/rate-limits.md#monitoring)
 
+## Bootstrap
+
+```bash
+kubee helmet dependency-update
+dl-dependency-scripts
+```
+
+
 ## WebHook
 
 https://github.com/kubernetes-sigs/external-dns/pull/3063
