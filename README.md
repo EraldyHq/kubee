@@ -10,11 +10,20 @@ Install in no time, in your VPS:
 * [kubernetes](https://github.com/kubernetes/kubernetes), the container leader hosting platform
 * and a set of integrated packaged applications (known as `charts` in Kubernetes)
 
+## Why Easy?
+
+Because we are starting from the `simplest Kubernetes cluster` as stated in the [official documentation](https://kubernetes.io/docs/setup/production-environment/#production-control-plane).
+
+> The simplest Kubernetes cluster has the entire control plane
+> and worker node services running on the same machine.
+> You can grow that environment by adding worker nodes.
+
 ## Features
 
 * Single node Kubernetes with a goal on low memory consumption. A single node can host 110 containers, that's a lot of applications.
 * Zero configuration. The [kubee charts](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) being aware of each other, they are preconfigured and needs a minimal set of parameters.
-* Cluster configuration. Every chart configuration is saved in a [single cluster values file](https://github.com/EraldyHq/kubee/blob/main/docs/site/cluster-values.md) making it quick and easy to see the state of the cluster.
+* Cluster configuration. Every chart configuration is saved in a [single cluster values file](https://github.com/EraldyHq/kubee/blob/main/docs/site/cluster-values.md)
+ making it quick and easy to see the state of the cluster.
 * One-shot Chart Installation. CRDs dependencies are automatically managed.
 
 ## App examples
@@ -36,11 +45,13 @@ Install in no time, in your VPS:
 |-----------|---------|------|----------|
 | [AlertManager ](https://github.com/EraldyHq/kubee/blob/main/charts/alertmanager/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring
 | [ArgoCd ](https://github.com/EraldyHq/kubee/blob/main/charts/argocd/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | ci-cd
+| [BlackBox Exporter ](https://github.com/EraldyHq/kubee/blob/main/charts/blackbox-exporter/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring
 | [Cert-Manager ](https://github.com/EraldyHq/kubee/blob/main/charts/cert-manager/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | certificate
 | [Cert-Manager Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/cert-manager-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | certificate
 | [Cluster ](https://github.com/EraldyHq/kubee/blob/main/charts/cluster/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | library | cluster
 | [Dex ](https://github.com/EraldyHq/kubee/blob/main/charts/dex/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | auth
 | [External Dns ](https://github.com/EraldyHq/kubee/blob/main/charts/external-dns/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | dns
+| [External Dns Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/external-dns-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | dns
 | [External Secrets Charts](https://github.com/EraldyHq/kubee/blob/main/charts/external-secrets/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | secret
 | [External Secret Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/external-secrets-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | secret
 | [Gogs ](https://github.com/EraldyHq/kubee/blob/main/charts/gogs/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | git
