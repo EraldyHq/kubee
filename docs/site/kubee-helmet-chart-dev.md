@@ -1,6 +1,7 @@
+# Kubee Helmet Chart Dev
 
-
-## Type
+This page contains information for developer that wants to develop [Kubee chart](kubee-helmet-chart.md)
+## Kind
 
 ### CRDS
 
@@ -8,9 +9,19 @@ Charts that ends up with `crds` are CRDS charts.
 These charts are dedicated Helm Chart
 that follows the [Helm CRD Method 2](https://helm.sh/docs/chart_best_practices/custom_resource_definitions/#method-2-separate-charts).
 
+### Cluster Chart
+
+[Cluster chart](cluster-chart.md) drives the provisioning of [cluster](cluster.md).
+They use the templaing capability of Helm to create a dynamic configuration based on the [cluster configuration values file](cluster-values.md).
+
+### Library
+
+A `library chart` is a chart that has common values and function.
+It is not meant to be installed. As of today, kubee has only one library chart, the `kubee-cluster` chart.
+
 ### App
 
-Non CRD charts are app charts.
+All other charts are `app` charts.
 
 ## Annotations
 
@@ -28,7 +39,7 @@ metadata:
     {{- include "kubee-manifest-labels" . | indent 4}}
 ```
 
-### Chart Kind and Status
+### Chart Meta (Kind, Status, ...)
 
 Example:
 ```yaml
@@ -37,6 +48,8 @@ annotations:
       #  "stable" - can be installed
       #  "incubator" - been developed
       #  "deprecated" - no more maintained
+  # A lead, the description in Chart.yaml is a short description
+  chart.kubee/lead: "A big lead"
   chart.kubee/category: monitoring 
   chart.kubee/kind: "crds"
     #  "app"  - apps
@@ -54,11 +67,18 @@ annotations:
 
 ### CRD Dependency Charts
 
-By default, `kubee helmet` will look for a Chart called `kubee-(chartName)-crds`.
-
-You can define an external CRD chart with the `chart.kubee/crds` annotations in the `Chart.yaml`.
+You can define a CRD chart with the `chart.kubee/crds` annotations in the `Chart.yaml`.
 
 Example:
+* On a `kubee crds chart`
+```yaml
+annotations:
+    chart.kubee/crds: |
+        - name: kubee-prometheus-crds
+          version: 0.79.2
+          repository: file://../prometheus-crds
+```
+* On a `external crds chart`
 ```yaml
 annotations:
   chart.kubee/crds: |
@@ -85,54 +105,22 @@ Cross Dependency are only used to share values.
 When developing a Chart, you should:
 * add them in `Chart.yml` and disable them with a condition
 ```yaml
-- name: kubee-traefik-forward-auth
+- name: kubee-traefik
   version: 0.0.1
-  alias: traefik_forward_auth
+  alias: traefik
   condition: kubee_internal.install_cross_dependency
 ```
-* add them as symlink
-* add the cross-dependency sub-charts directory in the `helmignore` file to avoid symlink recursion
+* Install them locally
+```bash
+kubee helmet update-dependency chart-name
+# or
+task dep
+```
 
-Example: The chart `kubee-dex` depends on the `kubee-traefik-forward-auth` that depends on the `kubee-dex` chart
+Example: The chart `kubee-dex` depends on the `kubee-oauth2-proxy` that depends on the `kubee-dex` chart
 creating a recursion.
 
-To avoid this recursion, add the `kubee-traefik-forward-auth/charts` in the `helmignore` file
-```ignore
-charts/kubee-traefik-forward-auth/charts
-```
-
-## Helm Schema
-
-We filter on the current chart
-because if we change a schema of a dependency, 
-we need to regenerate all dependent schema,
-and it does not work for now.
-```bash
-helm schema --helm-docs-compatibility-mode -k additionalProperties --dependencies-filter kubee-mailpit
-```
-Why?
-* because empty default value are seen as required and some dependent chart such as Traefik are out of control
-
-To make it work, we need to create a script that make a custom call for each chart.
-
-## Helm Schema: no schema found error
-
-Just FYI.
-With the error:
-```
-If you'd like to use helm-schema on your chart dependencies as well, you have to build and unpack them before.
-You'll avoid the "missing dependency" error message.
-```
-
-What they mean is when you have all your chart dependency in the `charts/`, you need:
-```bash
-# go where your Chart.lock/yaml is located
-cd <chart-name>
-
-# build dependencies and untar them
-helm dep build
-ls charts/*.tgz |xargs -n1 tar -C charts/ -xzf
-```
+To avoid this recursion, we delete all dependency in the `charts/dep/Chart.yaml` file
 
 
 ## FAQ
@@ -143,3 +131,41 @@ The crd are not in the `crds` directory
 because we want this manifests to be able to upgrade.
 
 The home of [Kubee Charts](../../docs/site/kubee-helmet-chart.md)
+
+## Note
+
+### Helm Schema
+
+We filter on the current chart
+because if we change a schema of a dependency,
+we need to regenerate all dependent schema,
+and it does not work for now.
+```bash
+helm schema --helm-docs-compatibility-mode -k additionalProperties --dependencies-filter kubee-mailpit
+```
+Why?
+* because empty default value are seen as required and some dependent chart such as Traefik are out of control
+
+To make it work, we need to create a script that make a custom call for each chart.
+
+## Support 
+### Helm Schema: no schema found error
+
+Just FYI.
+With the error:
+```
+If you'd like to use helm-schema on your chart dependencies as well, you have to build and unpack them before.
+You'll avoid the "missing dependency" error message.
+```
+
+What they mean is when you have all your chart dependency in the `charts/`, you need to un-tar:
+```bash
+# go where your Chart.lock/yaml is located
+cd <chart-name>
+
+# build dependencies and untar them
+helm dep build
+ls charts/*.tgz |xargs -n1 tar -C charts/ -xzf
+```
+
+We tackle this problem with the `helmet update-dependency` command

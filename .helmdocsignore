@@ -9,6 +9,7 @@ charts/vault/charts
 charts/argocd/charts
 charts/mariadb/charts
 charts/postal/charts
+charts/blackbox-exporter/charts
 charts/traefik-forward-auth/charts
 charts/grafana/charts
 charts/alertmanager/charts

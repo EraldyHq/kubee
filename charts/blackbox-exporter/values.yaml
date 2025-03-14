@@ -1,0 +1,28 @@
+
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
+enabled: false
+
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace
+namespace: monitoring
+
+# -- Blackbox exporter [version](https://github.com/prometheus/blackbox_exporter/releases)
+#
+version: 0.26.0
+
+
+# used by kube-prometheus to reload
+reloader:
+  # [Version](https://github.com/jimmidyson/configmap-reload/tags)
+  version: 0.14.0

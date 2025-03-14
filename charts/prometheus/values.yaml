@@ -81,7 +81,7 @@ exporter_auth:
   # that handle RBAC authorization
   kube_rbac_proxy:
     enabled: false
-    version: 'v0.18.2'
+    version: '0.18.2'
 
 # -- Grafana cloud remote write prometheus integration
 grafana_cloud:

@@ -44,13 +44,6 @@ local k3sConfigPatch = {
   cadvisorSelector: self.kubeletSelector,  // the default is 'job="cadvisor"'
 };
 
-local stripLeadingV(value) =
-  if std.type(value) != 'string' then
-    value
-  else if std.startsWith(value, 'v') then
-    std.substr(value, 1, std.length(value) - 1)
-  else
-    value;
 
 
 // The kube-prometheus values
@@ -63,9 +56,9 @@ local kpValues = {
       // RbacProxy is used by kube-prometheus to protect exporter endpoints
       kubeRbacProxy: error 'must provide version',
     } + (import 'kube-prometheus/versions.json') + {
-      kubeStateMetrics: stripLeadingV(kxValues.kube_state_metrics_version),
-      nodeExporter: stripLeadingV(kxValues.node_exporter_version),
-      kubeRbacProxy: stripLeadingV(kxValues.rbac_version),
+      kubeStateMetrics: kxValues.kube_state_metrics_version,
+      nodeExporter: kxValues.node_exporter_version,
+      kubeRbacProxy: kxValues.rbac_version,
     },
     images: {
       kubeStateMetrics: 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v' + $.common.versions.kubeStateMetrics,

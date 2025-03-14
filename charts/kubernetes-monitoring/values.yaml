@@ -1,5 +1,3 @@
-
-
 # @schema
 # title: Enabled
 # type: boolean
@@ -57,8 +55,8 @@ kube_state_metrics:
   # -- Enable [Kube State Metrics Exporter](https://github.com/kubernetes/kube-state-metrics).
   # It exports apps/functional state metrics.
   enabled: true
-  # -- [Kube State Metrics Version](https://github.com/kubernetes/kube-state-metrics/releases)
-  version: 'v2.14.0'
+  # -- [Kube State Metrics Version](https://github.com/kubernetes/kube-state-metrics/releases) without the `v`
+  version: '2.14.0'
   # -- The scrape interval
   scrape_interval: '60s'
   # -- The max memory of the exporter
@@ -69,8 +67,8 @@ node_exporter:
   # -- Enable [Node Exporter](https://github.com/prometheus/node_exporter)
   # It will gather server resources metrics
   enabled: true
-  # -- [Node Exporter Version](https://github.com/prometheus/node_exporter/releases)
-  version: 'v1.8.2'
+  # -- [Node Exporter Version](https://github.com/prometheus/node_exporter/releases) without the `v`
+  version: '1.8.2'
   # -- Scrape Interval (Default was 15s)
   scrape_interval: '45s'
   # -- Max memory of the exporter (On Kube Prometheus, it was set to 180Mi)

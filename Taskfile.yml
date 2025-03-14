@@ -64,7 +64,7 @@ tasks:
     cmds:
       - |
         # Create the .helmdocsignore file
-        HELM_DOCS_IGNORE=".helmdocsignore"        
+        HELM_DOCS_IGNORE="{{.TASK_DIR}}/.helmdocsignore"        
         rm "$HELM_DOCS_IGNORE"
         echo "# Ignore charts dependencies directories" >> "$HELM_DOCS_IGNORE"
         echo "# Should be at the root of repo see issue: https://github.com/norwoodj/helm-docs/issues/206" >> "$HELM_DOCS_IGNORE"

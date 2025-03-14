@@ -1,0 +1,49 @@
+
+{{ template "kubee-header" .}}
+
+This is a {{ template "kubee-jsonnet-chart-label"  "jsonnet chart" }} that installs [Prometheus Blackbox Exporter](https://github.com/prometheus/blackbox_exporter)
+to be able to perform monitoring probe/check on multiple protocol (https, dns, tcp, ...). 
+
+
+## Chart Features
+
+### Mixin
+
+https://monitoring.mixins.dev/blackbox_exporter/
+
+### Probe
+
+You can then create [Probes](https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.Probe)
+
+Example:
+```yaml
+kind: Probe
+apiVersion: monitoring.coreos.com/v1
+metadata:
+  name: kubee-website
+spec:
+  interval: 60s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter.monitoring.svc.cluster.local:19115
+  targets:
+    staticConfig:
+      static:
+      - http://kubee.eraldy.com
+      - https://kubee.eraldy.com
+```
+
+The kubee {{ template "kubee-chart-page-label" "prometheus" }} installation select
+all probes in all namespaces.
+
+{{ template "kubee-chart-features-section" . }}
+
+{{ template "kubee-installation-instruction" . }}
+
+{{ template "chart.valuesSection" . }}
+
+## Contrib / Dev
+
+See [contrib](contrib/contrib.md)
+
+

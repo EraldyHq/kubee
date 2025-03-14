@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "dependencies": [
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/adinhodovic/blackbox-exporter-mixin.git"
+        }
+      },
+      "version": "main"
+    }
+  ],
+  "legacyImports": true
+}
