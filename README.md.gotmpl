@@ -48,7 +48,7 @@ Because we are starting from the `simplest Kubernetes cluster` as stated in the 
 {{- range $key, $values := $model }}
 {{- $name := trimPrefix "kubee-" $key }}
 {{- $description := trimSuffix "Chart" (trimPrefix "Kubee " $values.description)  }}
-{{- if or (eq $values.status "internal") }}
+{{- if or (eq $values.kind "internal") }}
 {{ continue }}
 {{- end }}
 | [{{ $description }}]({{ template "kubee-chart-url"}}/{{$name}}/README.md) | {{ template "kubee-chart-status-label" $values.status }} | {{ $values.kind }} | {{ $values.category }}  

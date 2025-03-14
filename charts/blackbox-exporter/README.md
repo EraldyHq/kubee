@@ -4,12 +4,13 @@
 
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![AppVersion: 0.28.0](https://img.shields.io/badge/AppVersion-0.28.0-informational?style=flat-square)
 
-# Kubee BlackBox Export Chart
+# Kubee BlackBox Exporter Chart
 
 > [!WARNING]
 > This chart is in the [alpha status](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) and is not fit to be installed or upgraded
 
 This is a [jsonnet chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/jsonnet-chart.md) that installs [Prometheus Blackbox Exporter](https://github.com/prometheus/blackbox_exporter)
+to be able to perform monitoring probe/check on multiple protocol (https, dns, tcp, ...).
 
 ## Chart Features
 

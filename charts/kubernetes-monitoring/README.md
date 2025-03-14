@@ -63,7 +63,7 @@ kubee helmet --cluster cluster-name play kubernetes-monitoring
 | kube_state_metrics.enabled | bool | `true` | Enable [Kube State Metrics Exporter](https://github.com/kubernetes/kube-state-metrics). It exports apps/functional state metrics. |
 | kube_state_metrics.memory | string | `"50Mi"` | The max memory of the exporter |
 | kube_state_metrics.scrape_interval | string | `"60s"` | The scrape interval |
-| kube_state_metrics.version | string | `"v2.14.0"` | [Kube State Metrics Version](https://github.com/kubernetes/kube-state-metrics/releases) |
+| kube_state_metrics.version | string | `"2.14.0"` | [Kube State Metrics Version](https://github.com/kubernetes/kube-state-metrics/releases) without the `v` |
 | kubelet.enabled | bool | `true` | Enable kubelet monitoring |
 | kubelet.scrape_interval | string | `"45s"` | Scrape interval. Why 45s. Headlamp uses a CPU rate functon over 1 minutes If the scrape interval is above 1m, there is no data returned |
 | kubelet.scrape_metrics_optimization | bool | `true` | Metrics Optimization. For memory and cost optimization, low level metrics are dropped For api server, Buckets metrics are high cardinality metrics that are not used in alerting but in debugging and consume a lot of memory |
@@ -72,7 +72,7 @@ kubee helmet --cluster cluster-name play kubernetes-monitoring
 | node_exporter.memory | string | `"50Mi"` | Max memory of the exporter (On Kube Prometheus, it was set to 180Mi) |
 | node_exporter.scrape_interval | string | `"45s"` | Scrape Interval (Default was 15s) |
 | node_exporter.scrape_metrics_optimization | bool | `true` | Memory and cost optimization. Low levels metrics are dropped |
-| node_exporter.version | string | `"v1.8.2"` | [Node Exporter Version](https://github.com/prometheus/node_exporter/releases) |
+| node_exporter.version | string | `"1.8.2"` | [Node Exporter Version](https://github.com/prometheus/node_exporter/releases) without the `v` |
 
 ## Dev/Contrib
 

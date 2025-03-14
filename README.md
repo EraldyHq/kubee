@@ -76,7 +76,7 @@ Because we are starting from the `simplest Kubernetes cluster` as stated in the 
 | [Traefik Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/traefik-crds/README.md) | [deprecated](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | proxy
 | [Traefik Forward Auth ](https://github.com/EraldyHq/kubee/blob/main/charts/traefik-forward-auth/README.md) | [deprecated](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | auth
 | [Trust manager crds chart](https://github.com/EraldyHq/kubee/blob/main/charts/trust-manager-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | certificate
-| [Values ](https://github.com/EraldyHq/kubee/blob/main/charts/values/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | internal | internal
+
 | [Vault ](https://github.com/EraldyHq/kubee/blob/main/charts/vault/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | secret
 | [Whoami ](https://github.com/EraldyHq/kubee/blob/main/charts/whoami/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | http
 

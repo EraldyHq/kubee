@@ -6,6 +6,9 @@
 
 # Kubee Values Chart
 
+> [!WARNING]
+> This chart is an `internal` chart and cannot be installed or upgraded
+
 A utility chart to get the result of merged values files.
 
 ## Why ?

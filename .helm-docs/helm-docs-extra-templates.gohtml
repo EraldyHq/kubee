@@ -92,5 +92,10 @@ kubee helmet --cluster cluster-name play {{ trimPrefix "kubee-" .Name }}
 > [!WARNING]
 > This chart is in the {{ template "kubee-chart-status-label" (printf "%s status" $chartStatus) }} and is not fit to be installed or upgraded
 {{- end }}
+{{ $chartKind := index $chartYaml.annotations "chart.kubee/kind" }}
+{{- if (eq $chartKind "internal") }}
+> [!WARNING]
+> This chart is an `internal` chart and cannot be installed or upgraded
+{{- end }}
 
 {{end}}
