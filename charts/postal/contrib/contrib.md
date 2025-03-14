@@ -4,6 +4,19 @@
 This helm is based on the [container](https://docs.postalserver.io/other/containers)
 
 
+## database install and upgrade
+
+
+ArgoCD documentation on Helm handling:
+
+•	⁠https://argo-cd.readthedocs.io/en/stable/user-guide/helm/#helm-hooks
+
+Specifically:
+
+'install' vs 'upgrade' vs 'sync'
+Argo CD cannot know if it is running a first-time "install" or an "upgrade" - every operation is a "sync'. This means that, by default, apps that have pre-install and pre-upgrade will have those hooks run at the same time.
+
+
 
 ## Config
 
