@@ -114,9 +114,3 @@ https://gitlab.com/gitlab-com/runbooks/-/blob/6726ba6de1563c8623c0874755acfd09c2
 kubee kubectl patch CustomResourceDefinition dnsendpoints.externaldns.k8s.io --type=merge   -p '{"metadata": {"labels": {"app.kubernetes.io/managed-by": "Helm"}, "annotations": {"meta.helm.sh/release-namespace": "external-dns", "meta.helm.sh/release-name": "external-dns-crds"}}}'
 ```
 
-## Support 
-### CRD ownership fix
-
-```bash
-kubee kubectl patch CustomResourceDefinition dnsendpoints.externaldns.k8s.io --type=merge   -p '{"metadata": {"labels": {"app.kubernetes.io/managed-by": "Helm"}, "annotations": {"meta.helm.sh/release-namespace": "external-dns", "meta.helm.sh/release-name": "external-dns-crds"}}}'
-```

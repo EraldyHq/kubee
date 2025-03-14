@@ -124,7 +124,12 @@ spec:
             {{- range .Values.server.sources }}
             - '--source={{.}}'
             {{- end }}
-            {{- if .Values.traefik.enabled}}
+            {{- if eq .Values.server.auto_sources true}}
+            - '--source=ingress'
+            - '--source=service'
+            - '--source=crd'
+            {{- end}}
+            {{- if and (eq .Values.traefik.enabled true) (eq .Values.server.auto_sources true) }}
             {{- /* # https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/  */}}
             - '--source=traefik-proxy'
             - '--traefik-disable-legacy' # https://github.com/kubernetes-sigs/external-dns/issues/4834
@@ -133,13 +138,14 @@ spec:
             - '--registry={{.Values.server.registry.type}}'
             {{- if eq .Values.server.registry.type "txt"}}
             - '--txt-owner-id={{.Values.server.registry.txt.owner_id}}'
+              {{- if and (eq .Values.server.registry.txt.prefix "") (eq .Values.server.registry.txt.suffix "")}}{{fail "txt prefix and suffix should not be both empty, otherwise apex record inserion will not work"}}{{end}}
               {{- if ne .Values.server.registry.txt.prefix ""}}
-                {{- if not contains "%{record_type}" .Values.server.registry.txt.prefix }}{{fail "txt prefix should contains %{record_type}"}}{{end}}
+                {{- if not (contains "%{record_type}" .Values.server.registry.txt.prefix )}}{{fail "txt prefix should contains %{record_type}"}}{{end}}
             - '--txt-prefix={{.Values.server.registry.txt.prefix}}'
               {{- end }}
               {{- if ne .Values.server.registry.txt.suffix ""}}
-                {{- if ne .Values.server.registry.txt.prefix ""}}{{fail "txt prefix and suffix can not be set together"}}{{end}}
-                {{- if not contains "%{record_type}" .Values.server.registry.txt.suffix }}{{fail "txt suffix should contains %{record_type}"}}{{end}}
+                {{- if ne .Values.server.registry.txt.prefix ""}}{{fail "txt prefix and suffix can not be set together. They are mutually exclusive. Set the prefix to the empty string."}}{{end}}
+                {{- if not (contains "%{record_type}" .Values.server.registry.txt.suffix) }}{{fail "txt suffix should contains %{record_type}"}}{{end}}
             - '--txt-suffix={{.Values.server.registry.txt.suffix}}'
               {{- end }}
               {{- if eq .Values.server.registry.txt.encrypt true}}

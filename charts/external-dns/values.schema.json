@@ -300,6 +300,12 @@
       "title": "global",
       "type": "object"
     },
+    "image": {
+      "default": "registry.k8s.io/external-dns/external-dns:v0.15.1",
+      "description": "Image with the [External DNS version](https://github.com/kubernetes-sigs/external-dns/releases)",
+      "required": [],
+      "title": "image"
+    },
     "kubee_internal": {
       "description": "@ignored Internal Kubee constant",
       "properties": {
@@ -558,9 +564,16 @@
     },
     "server": {
       "properties": {
+        "auto_sources": {
+          "default": true,
+          "description": " type: boolean @schema @ignored When auto-source is enabled, the following sources are added: [service](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/service/). for services without ingress such as loadbalancer [ingress](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/ingress/) [Crd](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/crd/) [traefik](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/) if enabled in the cluster file",
+          "required": [],
+          "title": "auto_sources",
+          "type": "boolean"
+        },
         "cache_time": {
-          "default": "4h",
-          "description": "The local DNS cache to avoid [rate limiting](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/) If a DNS entry is deleted/modified manually, the recovery will need to wait this interval for resynchronization. Or you need to restart the pod.",
+          "default": "0m",
+          "description": "The local DNS cache to avoid [rate limiting](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/) If a DNS entry is deleted/modified manually, the recovery will need to wait this interval for resynchronization. Or you need to restart the pod. You turned if off with the value `0m`, or you empty the cache by restarting the pod",
           "required": [],
           "title": "cache_time"
         },
@@ -621,7 +634,7 @@
         "record_filtering": {
           "properties": {
             "exclude": {
-              "description": " type: array items:    enum: [A, AAAA, CNAME, NS, SRV, MX, TXT] @schema Record types to exclude",
+              "description": " type: array items:    enum: [A, AAAA, CNAME, NS, SRV, MX, TXT, NAPTR] @schema Record types to exclude",
               "items": {
                 "enum": [
                   "A",
@@ -630,7 +643,8 @@
                   "NS",
                   "SRV",
                   "MX",
-                  "TXT"
+                  "TXT",
+                  "NAPTR"
                 ],
                 "required": []
               },
@@ -639,7 +653,7 @@
               "type": "array"
             },
             "managed": {
-              "description": " type: array items:    enum: [A, AAAA, CNAME, NS, SRV, MX, TXT] @schema Record types to manage",
+              "description": " type: array items:    enum: [A, AAAA, CNAME, NS, SRV, MX, TXT, NAPTR] @schema Record types to manage",
               "items": {
                 "enum": [
                   "A",
@@ -648,7 +662,8 @@
                   "NS",
                   "SRV",
                   "MX",
-                  "TXT"
+                  "TXT",
+                  "NAPTR"
                 ],
                 "required": []
               },
@@ -686,8 +701,8 @@
                   "title": "owner_id"
                 },
                 "prefix": {
-                  "default": "",
-                  "description": " Could contain record type template like '%{record_type}-prefix-'. Mutual exclusive with txt-suffix! `%{record_type}` should be included, as any other value will cause a weird duplication of database records.",
+                  "default": "kubee-%{record_type}-",
+                  "description": " It should contain record type template like 'prefix-%{record_type}-'. Mutual exclusive with txt-suffix! `%{record_type}` should be included, as any other value will cause a weird duplication of database records. This is optional, but we set a default otherwise apex records are not created as you may have txt field for site verification",
                   "required": [],
                   "title": "prefix"
                 },
@@ -722,7 +737,7 @@
           "type": "object"
         },
         "sources": {
-          "description": " type: array items:   type: string @schema @ignored [Source](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/about/) [Traefik](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/) is added if enabled.",
+          "description": " type: array items:   type: string @schema @ignored [Source](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/about/)",
           "items": {
             "required": [],
             "type": "string"
@@ -752,12 +767,6 @@
       ],
       "title": "server",
       "type": "object"
-    },
-    "version": {
-      "default": "0.15.1",
-      "description": "[External DNS version](https://github.com/kubernetes-sigs/external-dns/releases)",
-      "required": [],
-      "title": "version"
     }
   },
   "required": [

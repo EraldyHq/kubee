@@ -51,10 +51,12 @@ server:
       # @schema
       # A name that identifies this instance of ExternalDNS
       owner_id: "kubee"
-      # A custom string that's prefixed to each ownership DNS record (optional).
-      # Could contain record type template like '%{record_type}-prefix-'. Mutual exclusive with txt-suffix!
+      # Txt record prefix
+      # It should contain record type template like 'prefix-%{record_type}-'. Mutual exclusive with txt-suffix!
       # `%{record_type}` should be included, as any other value will cause a weird duplication of database records.
-      prefix: ''
+      # This is optional, but we set a default
+      # otherwise apex records are not created as you may have txt field for site verification
+      prefix: 'kubee-%{record_type}-'
       # A custom string that's suffixed to the host portion of each ownership DNS record (optional).
       # Could contain record type template like '-%{record_type}-suffix'. Mutual exclusive with txt-prefix!
       # `%{record_type}` should be included, as any other value will cause a weird duplication of database records.
@@ -74,11 +76,17 @@ server:
   #   type: string
   # @schema
   # @ignored [Source](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/about/)
-  # [Traefik](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/) is added if enabled.
-  sources:
-    - service # For services without ingress such as loadbalancer https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/service/
-    - ingress # https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/ingress/
-    - crd
+  sources: []
+
+  # @schema
+  # type: boolean
+  # @schema
+  # @ignored When auto-source is enabled, the following sources are added:
+  # [service](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/service/). for services without ingress such as loadbalancer
+  # [ingress](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/ingress/)
+  # [Crd](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/crd/)
+  # [traefik](https://kubernetes-sigs.github.io/external-dns/latest/docs/sources/traefik-proxy/) if enabled in the cluster file
+  auto_sources: true
 
 
   # -- Interval for DNS sync.
@@ -87,7 +95,8 @@ server:
   # -- The local DNS cache to avoid [rate limiting](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/)
   # If a DNS entry is deleted/modified manually, the recovery will need to wait this interval for resynchronization.
   # Or you need to restart the pod.
-  cache_time: '4h' # You turned if off with the value `0m`, You empty the cache by restarting the pod., 1d
+  # You turned if off with the value `0m`, or you empty the cache by restarting the pod
+  cache_time: '0m'
 
   # @schema
   # const: false
@@ -101,7 +110,7 @@ server:
     # @schema
     # type: array
     # items:
-    #    enum: [A, AAAA, CNAME, NS, SRV, MX, TXT]
+    #    enum: [A, AAAA, CNAME, NS, SRV, MX, TXT, NAPTR]
     # @schema
     # Record types to manage
     managed: # [Ref](https://github.com/kubernetes-sigs/external-dns/blob/724b86b8b867db9420c51b6a8bc9d26118bf213d/pkg/apis/externaldns/types.go#L471C110-L471C124)
@@ -114,7 +123,7 @@ server:
     # @schema
     # type: array
     # items:
-    #    enum: [A, AAAA, CNAME, NS, SRV, MX, TXT]
+    #    enum: [A, AAAA, CNAME, NS, SRV, MX, TXT, NAPTR]
     # @schema
     # Record types to exclude
     exclude: [ ] # [Ref](https://github.com/kubernetes-sigs/external-dns/blob/724b86b8b867db9420c51b6a8bc9d26118bf213d/pkg/apis/externaldns/types.go#L472)

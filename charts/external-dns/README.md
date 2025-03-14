@@ -116,7 +116,7 @@ kubee helmet --cluster cluster-name play external-dns
 | provider.in_tree.regex_domain_filter | string | `""` | Limits possible domains and target zone with a regex. It overrides domain filters and can be specified only once. Example: `(example\\.org|company\\.com)$` or `example*` |
 | provider.name | string | `""` | The name of the provider (Required for an in-tree provider) |
 | provider.type | string | `"in-tree"` | Provider. `in-tree` or `webhook` |
-| server.cache_time | string | `"4h"` | The local DNS cache to avoid [rate limiting](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/) If a DNS entry is deleted/modified manually, the recovery will need to wait this interval for resynchronization. Or you need to restart the pod. |
+| server.cache_time | string | `"0m"` | The local DNS cache to avoid [rate limiting](https://kubernetes-sigs.github.io/external-dns/latest/docs/rate-limits/) If a DNS entry is deleted/modified manually, the recovery will need to wait this interval for resynchronization. Or you need to restart the pod. You turned if off with the value `0m`, or you empty the cache by restarting the pod |
 | server.interval | string | `"1m"` | Interval for DNS sync. |
 | server.policy | string | `"upsert-only"` | Policy Synchronization. `upsert-only`: Prevent deleting any records. `sync`: if you want DNS entries to get deleted as well |
 
