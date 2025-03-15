@@ -25,6 +25,9 @@ namespace: 'grafana'
 # For a Grafana cloud instance, you need to enter: <Grafana-cloud-stack-name>.grafana.net
 hostname: ''
 
+# @schema
+# const: grafana
+# @schema
 # @ignored The name of the instance (known also as label)
 # It's used :
 # * as selector to apply CRD objects such as Dashboard, .... to this instance. https://grafana.github.io/grafana-operator/docs/overview/#instanceselector

@@ -209,8 +209,9 @@
       "title": "kubee_internal"
     },
     "name": {
+      "const": "grafana",
       "default": "grafana",
-      "description": " It's used : * as selector to apply CRD objects such as Dashboard, .... to this instance. https://grafana.github.io/grafana-operator/docs/overview/#instanceselector * as the instance name",
+      "description": " const: grafana @schema @ignored The name of the instance (known also as label) It's used : * as selector to apply CRD objects such as Dashboard, .... to this instance. https://grafana.github.io/grafana-operator/docs/overview/#instanceselector * as the instance name",
       "required": [],
       "title": "name"
     },

@@ -1,34 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "properties": {
-    "api_server": {
-      "description": "Scrape of the api server",
-      "properties": {
-        "enabled": {
-          "default": "true",
-          "description": "Enable Api Server monitoring",
-          "required": [],
-          "title": "enabled"
-        },
-        "scrape_interval": {
-          "default": "60s",
-          "description": "Scrape Interval (Normal default was 30s and 5s for sli)",
-          "required": [],
-          "title": "scrape_interval"
-        },
-        "scrape_metrics_optimization": {
-          "default": "true",
-          "description": "Metrics Optimization. For memory and cost optimization, low level metrics are dropped For api server, Buckets metrics are high cardinality metrics that are not used in alerting but in debugging and consume a lot of memory",
-          "required": [],
-          "title": "scrape_metrics_optimization"
-        }
-      },
-      "required": [],
-      "title": "api_server",
-      "type": "object"
-    },
     "cluster": {
-      "description": "The kubee cluster chart",
+      "description": "Kubee Cluster Chart",
       "properties": {
         "auth": {
           "description": "Cluster Auth",
@@ -171,26 +145,6 @@
       "title": "kubee-cluster",
       "type": "object"
     },
-    "core_dns": {
-      "description": "Scrape of the Core Dns server",
-      "properties": {
-        "enabled": {
-          "default": "true",
-          "description": "Enable Core DNS monitoring",
-          "required": [],
-          "title": "enabled"
-        },
-        "scrape_interval": {
-          "default": "30s",
-          "description": "Scrape Interval (normal default was 15s)",
-          "required": [],
-          "title": "scrape_interval"
-        }
-      },
-      "required": [],
-      "title": "core_dns",
-      "type": "object"
-    },
     "enabled": {
       "default": false,
       "description": "Boolean to indicate that this chart is or will be installed in the cluster",
@@ -204,77 +158,6 @@
       "title": "global",
       "type": "object"
     },
-    "kube_state_metrics": {
-      "properties": {
-        "enabled": {
-          "default": "true",
-          "description": "Enable [Kube State Metrics Exporter](https://github.com/kubernetes/kube-state-metrics). It exports apps/functional state metrics.",
-          "required": [],
-          "title": "enabled"
-        },
-        "memory": {
-          "default": "50Mi",
-          "description": "The max memory of the exporter",
-          "required": [],
-          "title": "memory"
-        },
-        "scrape_interval": {
-          "default": "60s",
-          "description": "The scrape interval",
-          "required": [],
-          "title": "scrape_interval"
-        },
-        "version": {
-          "default": "2.14.0",
-          "description": "[Kube State Metrics Version](https://github.com/kubernetes/kube-state-metrics/releases) without the `v`",
-          "required": [],
-          "title": "version"
-        }
-      },
-      "required": [],
-      "title": "kube_state_metrics",
-      "type": "object"
-    },
-    "kubee_internal": {
-      "description": "@ignored Internal Kubee constant",
-      "properties": {
-        "install_cross_dependency": {
-          "const": false,
-          "default": "false",
-          "description": " const: false @schema Constant used to not output template from kubee cross dependency in Chart.yaml Don't change, don't touch",
-          "required": [],
-          "title": "install_cross_dependency"
-        }
-      },
-      "required": [],
-      "title": "kubee_internal"
-    },
-    "kubelet": {
-      "description": "Scrape of the kubelet (CPU and Memory Resources)",
-      "properties": {
-        "enabled": {
-          "default": "true",
-          "description": "Enable kubelet monitoring",
-          "required": [],
-          "title": "enabled"
-        },
-        "scrape_interval": {
-          "default": "45s",
-          "description": "Scrape interval. Why 45s. Headlamp uses a CPU rate functon over 1 minutes If the scrape interval is above 1m, there is no data returned",
-          "required": [],
-          "title": "scrape_interval"
-        },
-        "scrape_metrics_optimization": {
-          "default": "true",
-          "description": "Metrics Optimization. For memory and cost optimization, low level metrics are dropped For api server, Buckets metrics are high cardinality metrics that are not used in alerting but in debugging and consume a lot of memory",
-          "required": [],
-          "title": "scrape_metrics_optimization"
-        }
-      },
-      "required": [],
-      "title": "kubelet",
-      "type": "object"
-    },
     "namespace": {
       "default": "monitoring",
       "description": "The installation namespace",
@@ -282,52 +165,34 @@
       "required": [],
       "title": "Namespace"
     },
-    "node_exporter": {
+    "reloader": {
+      "description": "used by kube-prometheus to reload",
       "properties": {
-        "enabled": {
-          "default": "true",
-          "description": "Enable [Node Exporter](https://github.com/prometheus/node_exporter) It will gather server resources metrics",
-          "required": [],
-          "title": "enabled"
-        },
-        "memory": {
-          "default": "50Mi",
-          "description": "Max memory of the exporter (On Kube Prometheus, it was set to 180Mi)",
-          "required": [],
-          "title": "memory"
-        },
-        "scrape_interval": {
-          "default": "45s",
-          "description": "Scrape Interval (Default was 15s)",
-          "required": [],
-          "title": "scrape_interval"
-        },
-        "scrape_metrics_optimization": {
-          "default": "true",
-          "description": "Memory and cost optimization. Low levels metrics are dropped",
-          "required": [],
-          "title": "scrape_metrics_optimization"
-        },
         "version": {
-          "default": "1.8.2",
-          "description": "[Node Exporter Version](https://github.com/prometheus/node_exporter/releases) without the `v`",
+          "default": "0.14.0",
+          "description": "[Version](https://github.com/jimmidyson/configmap-reload/tags)",
           "required": [],
-          "title": "version"
+          "title": "version",
+          "type": "string"
         }
       },
-      "required": [],
-      "title": "node_exporter",
+      "required": [
+        "version"
+      ],
+      "title": "reloader",
       "type": "object"
+    },
+    "version": {
+      "default": "0.26.0",
+      "description": "Blackbox exporter [version](https://github.com/prometheus/blackbox_exporter/releases) ",
+      "required": [],
+      "title": "version"
     }
   },
   "required": [
     "enabled",
     "namespace",
-    "kubelet",
-    "api_server",
-    "core_dns",
-    "kube_state_metrics",
-    "node_exporter"
+    "reloader"
   ],
   "type": "object"
 }

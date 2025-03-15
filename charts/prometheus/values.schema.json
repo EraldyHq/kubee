@@ -165,7 +165,7 @@
               "type": "boolean"
             },
             "version": {
-              "default": "v0.18.2",
+              "default": "0.18.2",
               "required": [],
               "title": "version",
               "type": "string"

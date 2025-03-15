@@ -29,7 +29,7 @@ The [admin user](https://github.com/EraldyHq/kubee/blob/main/docs/site/admin-use
 This chart comes prepackaged with the [ArgoCd Monitoring mixin](https://monitoring.mixins.dev/argo-cd-2/) (Prometheus Rules and Dashboards)
  
 ### CPU and memory control
-CPU and memory spike on Sync needs to be controlled. We [configure them by default](docs/argocd-cpu-memory-spikes.md)
+CPU and memory spike on Sync needs to be controlled. We [configure them by default](contrib/argocd-cpu-memory-spikes.md)
 
 ### Kubee Charts Features
 
@@ -59,4 +59,4 @@ For the whole set of values, see the [values file](values.yaml)
 
 ## Dev / Contrib
 
-See [contrib](contrib.md)
+See [contrib](contrib/contrib.md)

@@ -14,9 +14,9 @@ to be able to perform monitoring probe/check on multiple protocol (https, dns, t
 
 ## Chart Features
 
-### Mixin
+### Monitoring Alert and Dashboard
 
-https://monitoring.mixins.dev/blackbox_exporter/
+This kubee chart will install the following [Rules and Dashboard](https://monitoring.mixins.dev/blackbox_exporter/)
 
 ### Probe
 
