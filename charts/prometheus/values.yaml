@@ -64,7 +64,7 @@ max_block_duration: '30m'
 # Default was 30s.
 scrape_interval: '1m'
 
-# -- Exporter authentication.
+# @ignored Exporter authentication.
 # This is a global authentication configuration for all exporters
 exporter_auth:
   # Network Policy
@@ -77,11 +77,21 @@ exporter_auth:
   # We disable it by default:
   # - to minimize memory (20M by exporters) and the head-heck of authorization problem.
   # - because there is also network policy
+  # - because you need to set up the forward-auth with bearer.
   # If enabled, the exporter (node and state metrics) will get an extra containers
   # that handle RBAC authorization
   kube_rbac_proxy:
+    # If Rbac is enabled, to log in via internet (public net), you need the traefik auth middleware `forward-auth-bearer`
+    # to get a bearer to authenticate successfully. You can still reach the exporter via port forwarding (ie kubectl proxy)
     enabled: false
     version: '0.18.2'
+    resources:
+      limits:
+        memory: 30Mi
+      requests:
+        cpu: 10m
+        memory: 30Mi
+
 
 # -- Grafana cloud remote write prometheus integration
 grafana_cloud:

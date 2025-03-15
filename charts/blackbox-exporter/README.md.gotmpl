@@ -1,15 +1,23 @@
 
 {{ template "kubee-header" .}}
 
-This is a {{ template "kubee-jsonnet-chart-label"  "jsonnet chart" }} that installs [Prometheus Blackbox Exporter](https://github.com/prometheus/blackbox_exporter)
+This is a {{ template "kubee-jsonnet-chart-label"  "jsonnet chart" }} that installs
+[Prometheus Blackbox Exporter](https://github.com/prometheus/blackbox_exporter)
 to be able to perform monitoring probe/check on multiple protocol (https, dns, tcp, ...). 
 
 
 ## Chart Features
 
+### Access to the UI via Authenticated Ingress
+
+If the `hostname` value is not empty, a traefik `Ingress` is created with authentication
+so that you can reach it from the public net.
+
+
 ### Monitoring Alert and Dashboard
 
-This kubee chart will install the following [Rules and Dashboard](https://monitoring.mixins.dev/blackbox_exporter/)
+This kubee chart will install the following [Rules and Dashboard Mixin](https://monitoring.mixins.dev/blackbox_exporter/)
+
 
 ### Probe
 
@@ -25,7 +33,9 @@ spec:
   interval: 60s
   module: http_2xx
   prober:
-    url: blackbox-exporter.monitoring.svc.cluster.local:19115
+    url: blackbox-exporter.monitoring.svc.cluster.local:9115
+    # with rbac proxy enabled in prometheus
+    # url: blackbox-exporter.monitoring.svc.cluster.local:19115
   targets:
     staticConfig:
       static:

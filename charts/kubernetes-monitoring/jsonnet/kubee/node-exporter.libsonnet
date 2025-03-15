@@ -1,8 +1,6 @@
 // node-exporter metrics customization
 // that delete Rbac container
 //
-// Note: The dashoard is not the dashboard of the mixin because it does not take account the cluster
-// It's a node alone dashboard. Kubernetes Monitoring has a node dashboard.
 
 local defaults = {
   node_exporter_scrape_interval: error 'node_exporter_scrape_interval is not specified',

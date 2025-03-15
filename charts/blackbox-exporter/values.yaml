@@ -1,4 +1,3 @@
-
 # @schema
 # title: Enabled
 # type: boolean
@@ -17,15 +16,85 @@ enabled: false
 # -- The installation namespace
 namespace: monitoring
 
+# @schema
+# title: Hostname
+# description: The public hostname
+# required: true
+# format: hostname
+# @schema
+# -- The public hostname (an ingress is created if not empty)
+hostname: ''
+
+
 # -- Blackbox exporter [version](https://github.com/prometheus/blackbox_exporter/releases)
-#
 version: 0.26.0
 
-# -- The period in minutes to consider for the probe to fail
-# Why 2m? If we probe every minute, the alert seems to not fire if the interval is 1m
-probe_failed_interval: '2m'
 
-# used by kube-prometheus to reload
+# @ignored - The [modules](https://github.com/prometheus/blackbox_exporter/blob/master/CONFIGURATION.md)
+modules:
+  http_2xx:
+    http:
+      preferred_ip_protocol: "ip4"
+    prober: "http"
+  http_post_2xx:
+    http:
+      method: "POST"
+      preferred_ip_protocol: "ip4"
+    "prober": "http"
+  irc_banner:
+    prober: "tcp"
+    tcp:
+      "preferred_ip_protocol": "ip4"
+      "query_response":
+        - "send": "NICK prober"
+        - "send": "USER prober prober prober :prober"
+        - "expect": "PING :([^ ]+)"
+          "send": "PONG ${1}"
+        - "expect": "^:[^ ]+ 001"
+  "pop3s_banner":
+    "prober": "tcp"
+    "tcp":
+      "preferred_ip_protocol": "ip4"
+      "query_response":
+        - "expect": "^+OK"
+      "tls": true
+      "tls_config":
+        "insecure_skip_verify": false
+  "ssh_banner":
+    "prober": "tcp"
+    "tcp":
+      "preferred_ip_protocol": "ip4"
+      "query_response":
+        - "expect": "^SSH-2.0-"
+  "tcp_connect":
+    "prober": "tcp"
+    "tcp":
+      "preferred_ip_protocol": "ip4"
+
+# @ignored
+resources:
+  limits:
+    memory: 30Mi
+  requests:
+    cpu: 10m
+    memory: 30Mi
+
+
+# [Monitoring Mixin Configuration](https://monitoring.mixins.dev/)
+mixin:
+  # Enable or disable the mixin creation
+  enabled: true
+  # -- The period in minutes to consider for the probe to fail
+  # Why 2m? If we probe every minute, the alert seems to not fire if the interval is 1m
+  probe_failed_interval: '2m'
+
+# @ignored The reloader is used by kube-prometheus to reload the config map (ie modules)
 reloader:
-  # [Version](https://github.com/jimmidyson/configmap-reload/tags)
+  # [Reloader Version](https://github.com/jimmidyson/configmap-reload/tags)
   version: 0.14.0
+  resources:
+    limits:
+      memory: 5Mi
+    requests:
+      cpu: 10m
+      memory: 5Mi

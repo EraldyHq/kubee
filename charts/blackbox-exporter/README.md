@@ -9,14 +9,20 @@
 > [!WARNING]
 > This chart is in the [alpha status](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) and is not fit to be installed or upgraded
 
-This is a [jsonnet chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/jsonnet-chart.md) that installs [Prometheus Blackbox Exporter](https://github.com/prometheus/blackbox_exporter)
+This is a [jsonnet chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/jsonnet-chart.md) that installs
+[Prometheus Blackbox Exporter](https://github.com/prometheus/blackbox_exporter)
 to be able to perform monitoring probe/check on multiple protocol (https, dns, tcp, ...).
 
 ## Chart Features
 
+### Access to the UI via Authenticated Ingress
+
+If the `hostname` value is not empty, a traefik `Ingress` is created with authentication
+so that you can reach it from the public net.
+
 ### Monitoring Alert and Dashboard
 
-This kubee chart will install the following [Rules and Dashboard](https://monitoring.mixins.dev/blackbox_exporter/)
+This kubee chart will install the following [Rules and Dashboard Mixin](https://monitoring.mixins.dev/blackbox_exporter/)
 
 ### Probe
 
@@ -32,7 +38,9 @@ spec:
   interval: 60s
   module: http_2xx
   prober:
-    url: blackbox-exporter.monitoring.svc.cluster.local:19115
+    url: blackbox-exporter.monitoring.svc.cluster.local:9115
+    # with rbac proxy enabled in prometheus
+    # url: blackbox-exporter.monitoring.svc.cluster.local:19115
   targets:
     staticConfig:
       static:
@@ -63,10 +71,11 @@ kubee helmet --cluster cluster-name play blackbox-exporter
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
+| hostname | string | `""` | The public hostname (an ingress is created if not empty) |
+| mixin.enabled | bool | `true` |  |
+| mixin.probe_failed_interval | string | `"2m"` | The period in minutes to consider for the probe to fail Why 2m? If we probe every minute, the alert seems to not fire if the interval is 1m |
 | namespace | string | `"monitoring"` | The installation namespace |
-| probe_failed_interval | string | `"2m"` | The period in minutes to consider for the probe to fail Why 2m? If we probe every minute, the alert seems to not fire if the interval is 1m |
-| reloader.version | string | `"0.14.0"` |  |
-| version | string | `"0.26.0"` | Blackbox exporter [version](https://github.com/prometheus/blackbox_exporter/releases)  |
+| version | string | `"0.26.0"` | Blackbox exporter [version](https://github.com/prometheus/blackbox_exporter/releases) |
 
 ## Contrib / Dev
 

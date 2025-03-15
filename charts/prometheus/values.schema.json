@@ -153,16 +153,63 @@
       "type": "boolean"
     },
     "exporter_auth": {
-      "description": "Exporter authentication. This is a global authentication configuration for all exporters",
+      "description": " This is a global authentication configuration for all exporters",
       "properties": {
         "kube_rbac_proxy": {
-          "description": " # https://github.com/brancz/kube-rbac-proxy Kube Prometheus uses rbac-proxy to add an authorization layer on exporter We disable it by default: - to minimize memory (20M by exporters) and the head-heck of authorization problem. - because there is also network policy If enabled, the exporter (node and state metrics) will get an extra containers that handle RBAC authorization",
+          "description": " # https://github.com/brancz/kube-rbac-proxy Kube Prometheus uses rbac-proxy to add an authorization layer on exporter We disable it by default: - to minimize memory (20M by exporters) and the head-heck of authorization problem. - because there is also network policy - because you need to set up the forward-auth with bearer. If enabled, the exporter (node and state metrics) will get an extra containers that handle RBAC authorization",
           "properties": {
             "enabled": {
-              "default": false,
+              "default": "false",
+              "description": " to get a bearer to authenticate successfully. You can still reach the exporter via port forwarding (ie kubectl proxy)",
               "required": [],
-              "title": "enabled",
-              "type": "boolean"
+              "title": "enabled"
+            },
+            "resources": {
+              "properties": {
+                "limits": {
+                  "properties": {
+                    "memory": {
+                      "default": "30Mi",
+                      "required": [],
+                      "title": "memory",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "memory"
+                  ],
+                  "title": "limits",
+                  "type": "object"
+                },
+                "requests": {
+                  "properties": {
+                    "cpu": {
+                      "default": "10m",
+                      "required": [],
+                      "title": "cpu",
+                      "type": "string"
+                    },
+                    "memory": {
+                      "default": "30Mi",
+                      "required": [],
+                      "title": "memory",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "cpu",
+                    "memory"
+                  ],
+                  "title": "requests",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "limits",
+                "requests"
+              ],
+              "title": "resources",
+              "type": "object"
             },
             "version": {
               "default": "0.18.2",
@@ -172,8 +219,8 @@
             }
           },
           "required": [
-            "enabled",
-            "version"
+            "version",
+            "resources"
           ],
           "title": "kube_rbac_proxy"
         },

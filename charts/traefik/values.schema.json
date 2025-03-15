@@ -298,7 +298,7 @@
           "title": "forward_auth"
         },
         "forward_auth_bearer": {
-          "description": " Forward Auth middleware to oauth2-proxy that pass through a signed bearer It can be applied on Kube API client such as Kubernetes Dashboard'",
+          "description": " Forward Auth middleware to oauth2-proxy that pass through a signed bearer It can be applied on Kube API client such as Kubernetes Dashboard or Rbac Proxy",
           "properties": {
             "name": {
               "const": "forward-auth-bearer",

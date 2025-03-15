@@ -102,7 +102,7 @@ middlewares:
     name: 'forward-auth'
   # @ignored
   # Forward Auth middleware to oauth2-proxy that pass through a signed bearer
-  # It can be applied on Kube API client such as Kubernetes Dashboard'
+  # It can be applied on Kube API client such as Kubernetes Dashboard or Rbac Proxy
   forward_auth_bearer:
     # @schema
     # const: forward-auth-bearer

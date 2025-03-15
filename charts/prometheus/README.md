@@ -39,7 +39,6 @@ kubee helmet --cluster cluster-name play prometheus
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
-| exporter_auth | object | `{"kube_rbac_proxy":{"enabled":false,"version":"0.18.2"},"network_policy":{"enabled":true}}` | Exporter authentication. This is a global authentication configuration for all exporters |
 | grafana_cloud | object | `{"enabled":false,"password":"","relabel_keep_regex":"","username":""}` | Grafana cloud remote write prometheus integration |
 | hostname | string | `""` | The public hostname. If not empty, an ingress is added |
 | max_block_duration | string | `"30m"` | The duration that Prometheus keeps the data in memory. The default is 2h. If the value is 2h, no arguments is applied. It's the prometheus tsdb server argument --storage.tsdb.max-block-duration=2h) Note that the default value is * 1h for the prometheus query ui * 1h for the grafana explore panel (ie last hour) * 15m for Kubernetes dashboard * 24h for Headlamp We chose 30m to be below the target of 400Mi memory size with kubernetes monitoring installed |
