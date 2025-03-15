@@ -11,7 +11,8 @@ local values = {
   reloader_version: extValues.reloader.version,
   grafana_hostname: extValues.grafana.hostname,
   grafana_enabled: extValues.grafana.enabled,
-  grafana_name: extValues.grafana.name
+  grafana_name: extValues.grafana.name,
+  probe_failed_interval: extValues.probe_failed_interval
 
 };
 
@@ -20,6 +21,7 @@ local blackboxExporter = (import 'kubee/blackbox-exporter.libsonnet')(values);
 local mixin = (import 'blackbox-exporter-mixin/mixin.libsonnet') + {
             _config+:: {
               grafanaUrl: 'https://' + values.grafana_hostname,
+              probeFailedInterval: values.probe_failed_interval
             },
           };
 // Returned Objects

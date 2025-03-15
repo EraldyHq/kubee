@@ -165,6 +165,12 @@
       "required": [],
       "title": "Namespace"
     },
+    "probe_failed_interval": {
+      "default": "2m",
+      "description": "The period in minutes to consider for the probe to fail Why 2m? If we probe every minute, the alert seems to not fire if the interval is 1m",
+      "required": [],
+      "title": "probe_failed_interval"
+    },
     "reloader": {
       "description": "used by kube-prometheus to reload",
       "properties": {

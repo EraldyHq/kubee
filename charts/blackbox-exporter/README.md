@@ -64,6 +64,7 @@ kubee helmet --cluster cluster-name play blackbox-exporter
 |-----|------|---------|-------------|
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
 | namespace | string | `"monitoring"` | The installation namespace |
+| probe_failed_interval | string | `"2m"` | The period in minutes to consider for the probe to fail Why 2m? If we probe every minute, the alert seems to not fire if the interval is 1m |
 | reloader.version | string | `"0.14.0"` |  |
 | version | string | `"0.26.0"` | Blackbox exporter [version](https://github.com/prometheus/blackbox_exporter/releases)  |
 

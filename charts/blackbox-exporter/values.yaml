@@ -21,6 +21,9 @@ namespace: monitoring
 #
 version: 0.26.0
 
+# -- The period in minutes to consider for the probe to fail
+# Why 2m? If we probe every minute, the alert seems to not fire if the interval is 1m
+probe_failed_interval: '2m'
 
 # used by kube-prometheus to reload
 reloader:
