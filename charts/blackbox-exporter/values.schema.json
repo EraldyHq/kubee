@@ -145,6 +145,376 @@
       "title": "kubee-cluster",
       "type": "object"
     },
+    "conf": {
+      "description": "The",
+      "properties": {
+        "enabled": {
+          "default": "true",
+          "description": "Disable the creation of the [modules](https://github.com/prometheus/blackbox_exporter/blob/master/CONFIGURATION.md) `ConfigMap` to take over and generate them. (Configmap Name should be `blackbox-exporter-configuration`)",
+          "required": [],
+          "title": "enabled"
+        },
+        "modules": {
+          "properties": {
+            "http_2xx": {
+              "properties": {
+                "http": {
+                  "properties": {
+                    "preferred_ip_protocol": {
+                      "default": "ip4",
+                      "required": [],
+                      "title": "preferred_ip_protocol",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "preferred_ip_protocol"
+                  ],
+                  "title": "http",
+                  "type": "object"
+                },
+                "prober": {
+                  "default": "http",
+                  "required": [],
+                  "title": "prober",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "http",
+                "prober"
+              ],
+              "title": "http_2xx",
+              "type": "object"
+            },
+            "http_post_2xx": {
+              "properties": {
+                "http": {
+                  "properties": {
+                    "method": {
+                      "default": "POST",
+                      "required": [],
+                      "title": "method",
+                      "type": "string"
+                    },
+                    "preferred_ip_protocol": {
+                      "default": "ip4",
+                      "required": [],
+                      "title": "preferred_ip_protocol",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "method",
+                    "preferred_ip_protocol"
+                  ],
+                  "title": "http",
+                  "type": "object"
+                },
+                "prober": {
+                  "default": "http",
+                  "required": [],
+                  "title": "prober",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "http",
+                "prober"
+              ],
+              "title": "http_post_2xx",
+              "type": "object"
+            },
+            "irc_banner": {
+              "properties": {
+                "prober": {
+                  "default": "tcp",
+                  "required": [],
+                  "title": "prober",
+                  "type": "string"
+                },
+                "tcp": {
+                  "properties": {
+                    "preferred_ip_protocol": {
+                      "default": "ip4",
+                      "required": [],
+                      "title": "preferred_ip_protocol",
+                      "type": "string"
+                    },
+                    "query_response": {
+                      "items": {
+                        "anyOf": [
+                          {
+                            "properties": {
+                              "send": {
+                                "default": "NICK prober",
+                                "required": [],
+                                "title": "send",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "send"
+                            ],
+                            "type": "object"
+                          },
+                          {
+                            "properties": {
+                              "send": {
+                                "default": "USER prober prober prober :prober",
+                                "required": [],
+                                "title": "send",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "send"
+                            ],
+                            "type": "object"
+                          },
+                          {
+                            "properties": {
+                              "expect": {
+                                "default": "PING :([^ ]+)",
+                                "required": [],
+                                "title": "expect",
+                                "type": "string"
+                              },
+                              "send": {
+                                "default": "PONG ${1}",
+                                "required": [],
+                                "title": "send",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "expect",
+                              "send"
+                            ],
+                            "type": "object"
+                          },
+                          {
+                            "properties": {
+                              "expect": {
+                                "default": "^:[^ ]+ 001",
+                                "required": [],
+                                "title": "expect",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "expect"
+                            ],
+                            "type": "object"
+                          }
+                        ],
+                        "required": []
+                      },
+                      "required": [],
+                      "title": "query_response",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "preferred_ip_protocol",
+                    "query_response"
+                  ],
+                  "title": "tcp",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "prober",
+                "tcp"
+              ],
+              "title": "irc_banner",
+              "type": "object"
+            },
+            "pop3s_banner": {
+              "properties": {
+                "prober": {
+                  "default": "tcp",
+                  "required": [],
+                  "title": "prober",
+                  "type": "string"
+                },
+                "tcp": {
+                  "properties": {
+                    "preferred_ip_protocol": {
+                      "default": "ip4",
+                      "required": [],
+                      "title": "preferred_ip_protocol",
+                      "type": "string"
+                    },
+                    "query_response": {
+                      "items": {
+                        "anyOf": [
+                          {
+                            "properties": {
+                              "expect": {
+                                "default": "^+OK",
+                                "required": [],
+                                "title": "expect",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "expect"
+                            ],
+                            "type": "object"
+                          }
+                        ],
+                        "required": []
+                      },
+                      "required": [],
+                      "title": "query_response",
+                      "type": "array"
+                    },
+                    "tls": {
+                      "default": true,
+                      "required": [],
+                      "title": "tls",
+                      "type": "boolean"
+                    },
+                    "tls_config": {
+                      "properties": {
+                        "insecure_skip_verify": {
+                          "default": false,
+                          "required": [],
+                          "title": "insecure_skip_verify",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "insecure_skip_verify"
+                      ],
+                      "title": "tls_config",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "preferred_ip_protocol",
+                    "query_response",
+                    "tls",
+                    "tls_config"
+                  ],
+                  "title": "tcp",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "prober",
+                "tcp"
+              ],
+              "title": "pop3s_banner",
+              "type": "object"
+            },
+            "ssh_banner": {
+              "properties": {
+                "prober": {
+                  "default": "tcp",
+                  "required": [],
+                  "title": "prober",
+                  "type": "string"
+                },
+                "tcp": {
+                  "properties": {
+                    "preferred_ip_protocol": {
+                      "default": "ip4",
+                      "required": [],
+                      "title": "preferred_ip_protocol",
+                      "type": "string"
+                    },
+                    "query_response": {
+                      "items": {
+                        "anyOf": [
+                          {
+                            "properties": {
+                              "expect": {
+                                "default": "^SSH-2.0-",
+                                "required": [],
+                                "title": "expect",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "expect"
+                            ],
+                            "type": "object"
+                          }
+                        ],
+                        "required": []
+                      },
+                      "required": [],
+                      "title": "query_response",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "preferred_ip_protocol",
+                    "query_response"
+                  ],
+                  "title": "tcp",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "prober",
+                "tcp"
+              ],
+              "title": "ssh_banner",
+              "type": "object"
+            },
+            "tcp_connect": {
+              "properties": {
+                "prober": {
+                  "default": "tcp",
+                  "required": [],
+                  "title": "prober",
+                  "type": "string"
+                },
+                "tcp": {
+                  "properties": {
+                    "preferred_ip_protocol": {
+                      "default": "ip4",
+                      "required": [],
+                      "title": "preferred_ip_protocol",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "preferred_ip_protocol"
+                  ],
+                  "title": "tcp",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "prober",
+                "tcp"
+              ],
+              "title": "tcp_connect",
+              "type": "object"
+            }
+          },
+          "required": [
+            "http_2xx",
+            "http_post_2xx",
+            "irc_banner",
+            "pop3s_banner",
+            "ssh_banner",
+            "tcp_connect"
+          ],
+          "title": "modules",
+          "type": "object"
+        }
+      },
+      "required": [
+        "modules"
+      ],
+      "title": "conf",
+      "type": "object"
+    },
     "enabled": {
       "default": false,
       "description": "Boolean to indicate that this chart is or will be installed in the cluster",
@@ -168,378 +538,49 @@
     "mixin": {
       "description": "[Monitoring Mixin Configuration](https://monitoring.mixins.dev/)",
       "properties": {
-        "enabled": {
-          "default": true,
-          "description": "Enable or disable the mixin creation",
-          "required": [],
-          "title": "enabled",
-          "type": "boolean"
+        "alerts": {
+          "properties": {
+            "enabled": {
+              "default": true,
+              "description": "Enable or disable the alerts if you want to create custom alerts",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "probe_failed_interval": {
+              "default": "1m",
+              "description": "The period in minutes to consider for any probe to fail",
+              "required": [],
+              "title": "probe_failed_interval"
+            }
+          },
+          "required": [
+            "enabled"
+          ],
+          "title": "alerts",
+          "type": "object"
         },
-        "probe_failed_interval": {
-          "default": "2m",
-          "description": "The period in minutes to consider for the probe to fail Why 2m? If we probe every minute, the alert seems to not fire if the interval is 1m",
-          "required": [],
-          "title": "probe_failed_interval"
+        "dashboard": {
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ],
+          "title": "dashboard",
+          "type": "object"
         }
       },
       "required": [
-        "enabled"
+        "alerts",
+        "dashboard"
       ],
       "title": "mixin",
-      "type": "object"
-    },
-    "modules": {
-      "properties": {
-        "http_2xx": {
-          "properties": {
-            "http": {
-              "properties": {
-                "preferred_ip_protocol": {
-                  "default": "ip4",
-                  "required": [],
-                  "title": "preferred_ip_protocol",
-                  "type": "string"
-                }
-              },
-              "required": [
-                "preferred_ip_protocol"
-              ],
-              "title": "http",
-              "type": "object"
-            },
-            "prober": {
-              "default": "http",
-              "required": [],
-              "title": "prober",
-              "type": "string"
-            }
-          },
-          "required": [
-            "http",
-            "prober"
-          ],
-          "title": "http_2xx",
-          "type": "object"
-        },
-        "http_post_2xx": {
-          "properties": {
-            "http": {
-              "properties": {
-                "method": {
-                  "default": "POST",
-                  "required": [],
-                  "title": "method",
-                  "type": "string"
-                },
-                "preferred_ip_protocol": {
-                  "default": "ip4",
-                  "required": [],
-                  "title": "preferred_ip_protocol",
-                  "type": "string"
-                }
-              },
-              "required": [
-                "method",
-                "preferred_ip_protocol"
-              ],
-              "title": "http",
-              "type": "object"
-            },
-            "prober": {
-              "default": "http",
-              "required": [],
-              "title": "prober",
-              "type": "string"
-            }
-          },
-          "required": [
-            "http",
-            "prober"
-          ],
-          "title": "http_post_2xx",
-          "type": "object"
-        },
-        "irc_banner": {
-          "properties": {
-            "prober": {
-              "default": "tcp",
-              "required": [],
-              "title": "prober",
-              "type": "string"
-            },
-            "tcp": {
-              "properties": {
-                "preferred_ip_protocol": {
-                  "default": "ip4",
-                  "required": [],
-                  "title": "preferred_ip_protocol",
-                  "type": "string"
-                },
-                "query_response": {
-                  "items": {
-                    "anyOf": [
-                      {
-                        "properties": {
-                          "send": {
-                            "default": "NICK prober",
-                            "required": [],
-                            "title": "send",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "send"
-                        ],
-                        "type": "object"
-                      },
-                      {
-                        "properties": {
-                          "send": {
-                            "default": "USER prober prober prober :prober",
-                            "required": [],
-                            "title": "send",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "send"
-                        ],
-                        "type": "object"
-                      },
-                      {
-                        "properties": {
-                          "expect": {
-                            "default": "PING :([^ ]+)",
-                            "required": [],
-                            "title": "expect",
-                            "type": "string"
-                          },
-                          "send": {
-                            "default": "PONG ${1}",
-                            "required": [],
-                            "title": "send",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "expect",
-                          "send"
-                        ],
-                        "type": "object"
-                      },
-                      {
-                        "properties": {
-                          "expect": {
-                            "default": "^:[^ ]+ 001",
-                            "required": [],
-                            "title": "expect",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "expect"
-                        ],
-                        "type": "object"
-                      }
-                    ],
-                    "required": []
-                  },
-                  "required": [],
-                  "title": "query_response",
-                  "type": "array"
-                }
-              },
-              "required": [
-                "preferred_ip_protocol",
-                "query_response"
-              ],
-              "title": "tcp",
-              "type": "object"
-            }
-          },
-          "required": [
-            "prober",
-            "tcp"
-          ],
-          "title": "irc_banner",
-          "type": "object"
-        },
-        "pop3s_banner": {
-          "properties": {
-            "prober": {
-              "default": "tcp",
-              "required": [],
-              "title": "prober",
-              "type": "string"
-            },
-            "tcp": {
-              "properties": {
-                "preferred_ip_protocol": {
-                  "default": "ip4",
-                  "required": [],
-                  "title": "preferred_ip_protocol",
-                  "type": "string"
-                },
-                "query_response": {
-                  "items": {
-                    "anyOf": [
-                      {
-                        "properties": {
-                          "expect": {
-                            "default": "^+OK",
-                            "required": [],
-                            "title": "expect",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "expect"
-                        ],
-                        "type": "object"
-                      }
-                    ],
-                    "required": []
-                  },
-                  "required": [],
-                  "title": "query_response",
-                  "type": "array"
-                },
-                "tls": {
-                  "default": true,
-                  "required": [],
-                  "title": "tls",
-                  "type": "boolean"
-                },
-                "tls_config": {
-                  "properties": {
-                    "insecure_skip_verify": {
-                      "default": false,
-                      "required": [],
-                      "title": "insecure_skip_verify",
-                      "type": "boolean"
-                    }
-                  },
-                  "required": [
-                    "insecure_skip_verify"
-                  ],
-                  "title": "tls_config",
-                  "type": "object"
-                }
-              },
-              "required": [
-                "preferred_ip_protocol",
-                "query_response",
-                "tls",
-                "tls_config"
-              ],
-              "title": "tcp",
-              "type": "object"
-            }
-          },
-          "required": [
-            "prober",
-            "tcp"
-          ],
-          "title": "pop3s_banner",
-          "type": "object"
-        },
-        "ssh_banner": {
-          "properties": {
-            "prober": {
-              "default": "tcp",
-              "required": [],
-              "title": "prober",
-              "type": "string"
-            },
-            "tcp": {
-              "properties": {
-                "preferred_ip_protocol": {
-                  "default": "ip4",
-                  "required": [],
-                  "title": "preferred_ip_protocol",
-                  "type": "string"
-                },
-                "query_response": {
-                  "items": {
-                    "anyOf": [
-                      {
-                        "properties": {
-                          "expect": {
-                            "default": "^SSH-2.0-",
-                            "required": [],
-                            "title": "expect",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "expect"
-                        ],
-                        "type": "object"
-                      }
-                    ],
-                    "required": []
-                  },
-                  "required": [],
-                  "title": "query_response",
-                  "type": "array"
-                }
-              },
-              "required": [
-                "preferred_ip_protocol",
-                "query_response"
-              ],
-              "title": "tcp",
-              "type": "object"
-            }
-          },
-          "required": [
-            "prober",
-            "tcp"
-          ],
-          "title": "ssh_banner",
-          "type": "object"
-        },
-        "tcp_connect": {
-          "properties": {
-            "prober": {
-              "default": "tcp",
-              "required": [],
-              "title": "prober",
-              "type": "string"
-            },
-            "tcp": {
-              "properties": {
-                "preferred_ip_protocol": {
-                  "default": "ip4",
-                  "required": [],
-                  "title": "preferred_ip_protocol",
-                  "type": "string"
-                }
-              },
-              "required": [
-                "preferred_ip_protocol"
-              ],
-              "title": "tcp",
-              "type": "object"
-            }
-          },
-          "required": [
-            "prober",
-            "tcp"
-          ],
-          "title": "tcp_connect",
-          "type": "object"
-        }
-      },
-      "required": [
-        "http_2xx",
-        "http_post_2xx",
-        "irc_banner",
-        "pop3s_banner",
-        "ssh_banner",
-        "tcp_connect"
-      ],
-      "title": "modules",
       "type": "object"
     },
     "namespace": {
@@ -671,7 +712,7 @@
     "enabled",
     "namespace",
     "hostname",
-    "modules",
+    "conf",
     "resources",
     "mixin",
     "reloader"

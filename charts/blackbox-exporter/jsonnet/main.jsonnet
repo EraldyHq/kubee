@@ -11,10 +11,12 @@ local values = {
   grafana_hostname: extValues.grafana.hostname,
   grafana_enabled: extValues.grafana.enabled,
   grafana_name: extValues.grafana.name,
-  probe_failed_interval: extValues.mixin.probe_failed_interval,
-  mixin_enabled: extValues.mixin.enabled,
+  mixin_probe_failed_interval: extValues.mixin.alerts.probe_failed_interval,
+  mixin_alerts_enabled: extValues.mixin.alerts.enabled,
+  mixin_dashboard_enabled: extValues.mixin.dashboard.enabled,
   reloader_version: extValues.reloader.version,
-  blackbox_modules: extValues.modules,
+  blackbox_conf_enabled: extValues.conf.enabled,
+  blackbox_conf_modules: extValues.conf.modules,
   blackbox_resources: extValues.resources,
   blackbox_hostname: extValues.hostname,
   traefik_namespace: extValues.traefik.namespace,
@@ -30,7 +32,7 @@ local blackBoxExporterKp = (import 'kube-prometheus/components/blackbox-exporter
   image: 'quay.io/prometheus/blackbox-exporter:v' + values.version,
   configmapReloaderImage: 'ghcr.io/jimmidyson/configmap-reload:v' + values.reloader_version,
   kubeRbacProxyImage: 'quay.io/brancz/kube-rbac-proxy:v' + values.rbac_version,
-  modules: values.blackbox_modules,
+  modules: values.blackbox_conf_modules,
   kubeRbacProxy:: {
     resources: values.rbac_resources,
   },
@@ -74,7 +76,16 @@ local blackBoxExporterKubee = blackBoxExporterKp {
       },
     },
   },
-  // Without Rbacl the port is the http port 
+  // Don't delete the configuration
+  // It permits the user to take over without breaking the deployment
+  configuration+: {
+    metadata+: {
+      annotations+: {
+        'helm.sh/resource-policy': 'keep',
+      },
+    },
+  },
+  // Without Rbacl the port is the http port
   [if values.rbac_enabled == false then 'service']+: {
     spec+: {
       ports: [
@@ -130,21 +141,27 @@ local blackBoxExporterKubee = blackBoxExporterKp {
 
 };
 
+
 // Returned Objects
 {
   ['blackbox-exporter-' + name]:
     blackBoxExporterKubee[name]
   for name in std.objectFields(blackBoxExporterKubee)
-  // filter out network policy to debug Traefik
-  // Even with our custom conf, we get a Bad Gayeway ???
-  if !std.member(['NetworkPolicy'], blackBoxExporterKubee[name].kind)
+  if !std.member(
+        // We filter out network policy because even with our custom network policy,
+        // we get a Bad Gayeway error from Traefik ???
+        ['NetworkPolicy']
+        + (
+if values.blackbox_conf_enabled == false then ['ConfigMap'] else []
+        ), blackBoxExporterKubee[name].kind
+)
 } +
-(if !values.mixin_enabled then {} else import 'kubee/mixin.libsonnet')(
+(import 'kubee/mixin.libsonnet')(
   values {
     mixin: (import 'blackbox-exporter-mixin/mixin.libsonnet') + {
       _config+:: {
         grafanaUrl: 'https://' + values.grafana_hostname,
-        probeFailedInterval: values.probe_failed_interval,
+        mixin_probeFailedInterval: values.probe_failed_interval,
         blackboxExporterSelector: '',  // job value is not "blackbox-exporter" but the name of the CRD Probe ie probe/namespace/prob-crd-name
       },
     },
@@ -152,6 +169,8 @@ local blackBoxExporterKubee = blackBoxExporterKp {
     grafana_name: values.grafana_name,
     grafana_folder_label: 'BlackBox Exporter',
     grafana_hostname: values.grafana_hostname,
-    grafana_enabled: values.grafana_enabled,
+    grafana_enabled: values.grafana_enabled && values.mixin_dashboard_enabled,
+    rules_enabled: true,
+    alerts_enabled: values.mixin_alerts_enabled,
   }
 )

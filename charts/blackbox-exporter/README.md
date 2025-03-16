@@ -70,9 +70,9 @@ kubee helmet --cluster cluster-name play blackbox-exporter
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| conf.enabled | bool | `true` | Disable the creation of the [modules](https://github.com/prometheus/blackbox_exporter/blob/master/CONFIGURATION.md) `ConfigMap` to take over and generate them. (Configmap Name should be `blackbox-exporter-configuration`) |
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
 | hostname | string | `""` | The public hostname (an ingress is created if not empty) |
-| mixin.enabled | bool | `true` |  |
 | mixin.probe_failed_interval | string | `"2m"` | The period in minutes to consider for the probe to fail Why 2m? If we probe every minute, the alert seems to not fire if the interval is 1m |
 | namespace | string | `"monitoring"` | The installation namespace |
 | version | string | `"0.26.0"` | Blackbox exporter [version](https://github.com/prometheus/blackbox_exporter/releases) |

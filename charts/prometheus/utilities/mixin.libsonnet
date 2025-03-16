@@ -6,7 +6,7 @@
 
 // A kubee mixin function
 // to create the Kubernetes Manifests
-// * PromtetheusRule from the Promtheuse Operator
+// * PrometheusRule from the Promtheuse Operator
 // * GrafanaDashboard from the Grafana Operator
 
 local defaultValues = {
@@ -17,6 +17,8 @@ local defaultValues = {
   grafana_name: error 'grafana_name is required',  // for the grafana instance selection
   grafana_folder_label: error 'grafana_folder_label is required',
   grafana_enabled: error 'grafana_enabled is required',
+  alerts_enabled: error 'alerts_enabled is required',
+  rules_enabled: error 'rules_enabled is required',
 
 };
 
@@ -25,8 +27,8 @@ function(params)
 
   local values = defaultValues + params;
 
-  local ruleGroups = if std.objectHasAll(values.mixin, 'prometheusRules') then values.mixin.prometheusRules.groups else [];
-  local alertGroups = if std.objectHasAll(values.mixin, 'prometheusAlerts') then values.mixin.prometheusAlerts.groups else [];
+  local ruleGroups = if values.rules_enabled && std.objectHasAll(values.mixin, 'prometheusRules') then values.mixin.prometheusRules.groups else [];
+  local alertGroups = if values.alerts_enabled && std.objectHasAll(values.mixin, 'prometheusAlerts') then values.mixin.prometheusAlerts.groups else [];
   local totalRules = ruleGroups+alertGroups;
 
   // Returned object
