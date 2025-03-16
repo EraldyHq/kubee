@@ -153,7 +153,12 @@ The certificates are:
 ### Why Only Cloudflare for DNS01?
 
 The [DNS01 configuration](https://cert-manager.io/docs/configuration/acme/dns01/) is not
-really standardized. If you need another one, opens an [issue or pull request](https://github.com/EraldyHq/kubee/issues)
+really standardized.
+
+The direction of `cert-manager` is to use [external-dns](https://github.com/EraldyHq/kubee/blob/main/charts/external-dns/README.md)
+to support `DNS01` challenge. See [Integration with ExternalDNS](https://github.com/cert-manager/cert-manager/issues/3521)
+
+If you need help or another one, opens an [issue](https://github.com/EraldyHq/kubee/issues)
 .
 
 ## Contrib / Dev

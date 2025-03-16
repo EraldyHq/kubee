@@ -56,7 +56,7 @@ server:
       # `%{record_type}` should be included, as any other value will cause a weird duplication of database records.
       # This is optional, but we set a default
       # otherwise apex records are not created as you may have txt field for site verification
-      prefix: 'kubee-%{record_type}-'
+      prefix: '%{record_type}._meta.'
       # A custom string that's suffixed to the host portion of each ownership DNS record (optional).
       # Could contain record type template like '-%{record_type}-suffix'. Mutual exclusive with txt-prefix!
       # `%{record_type}` should be included, as any other value will cause a weird duplication of database records.

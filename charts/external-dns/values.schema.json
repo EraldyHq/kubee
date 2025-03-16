@@ -701,7 +701,7 @@
                   "title": "owner_id"
                 },
                 "prefix": {
-                  "default": "kubee-%{record_type}-",
+                  "default": "%{record_type}._meta.",
                   "description": " It should contain record type template like 'prefix-%{record_type}-'. Mutual exclusive with txt-suffix! `%{record_type}` should be included, as any other value will cause a weird duplication of database records. This is optional, but we set a default otherwise apex records are not created as you may have txt field for site verification",
                   "required": [],
                   "title": "prefix"
