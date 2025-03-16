@@ -46,7 +46,8 @@ resources:
 # -- Retention. How long to retain data (it's the prometheus server argument storage.tsdb.retention.time=24h).
 # Data in memory is 2 hour old, by setting retention to 2h, we don't allow to query data over 2 hours and to load data in memory
 # The default is 24h.
-# Why 30m? Equal to max_block_duration so that we are sure that we will not increase memory of the prometheus pod
+# Why 30m? Equal to `max_block_duration` so that we are sure that we will not increase memory of the prometheus pod
+# You can see the value in Prometheus Gui under `Status > Runtime and Build Information`
 retention: '30m'
 
 # -- The duration that Prometheus keeps the data in memory.
