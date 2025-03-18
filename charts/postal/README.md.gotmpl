@@ -39,10 +39,16 @@ dex:
 ```
 
 > [!WARNING] 
-> Import: the value of `KUBEE_POSTAL_SIGNING_KEY` should:
+> The value of `KUBEE_POSTAL_SIGNING_KEY` should:
 > * be double-quoted 
 > * have carriage returns replaced by the characters `\n`
-> otherwise Yaml processing (Helm, Yq) will replace the carriage returns by a space
+> otherwise Yaml processing will replace the carriage returns by a space
+>
+> Example if you store your private key in {{ template "kubee-pass-label" "pass" }}
+> ```bash
+> export KUBEE_POSTAL_SIGNING_KEY
+> KUBEE_POSTAL_SIGNING_KEY="$(pass 'kube/postal/signing-key' | awk 'BEGIN{RS="\n";ORS="\\n"}1')"
+> ```
 
 ### Install
 

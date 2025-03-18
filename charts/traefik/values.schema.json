@@ -200,6 +200,34 @@
     "entrypoints": {
       "description": " Constant Name of additional entrypoint Used by template that creates IngressRoute (http and tcp)",
       "properties": {
+        "smtp": {
+          "properties": {
+            "name": {
+              "const": "smtp",
+              "default": "smtp",
+              "description": " const: smtp @schema The port for SMTP (25)",
+              "required": [],
+              "title": "name"
+            }
+          },
+          "required": [],
+          "title": "smtp",
+          "type": "object"
+        },
+        "smtpes": {
+          "properties": {
+            "name": {
+              "const": "smtpes",
+              "default": "smtpes",
+              "description": " const: smtpes @schema The port for SMTP Explicit TLS (587)",
+              "required": [],
+              "title": "name"
+            }
+          },
+          "required": [],
+          "title": "smtpes",
+          "type": "object"
+        },
         "smtps": {
           "properties": {
             "name": {
@@ -216,7 +244,9 @@
         }
       },
       "required": [
-        "smtps"
+        "smtps",
+        "smtp",
+        "smtpes"
       ],
       "title": "entrypoints"
     },
@@ -491,6 +521,55 @@
                 "protocol"
               ],
               "title": "smtp"
+            },
+            "smtpes": {
+              "description": " It creates the smtp [entrypoint](https://doc.traefik.io/traefik/routing/entrypoints/) - \"--entryPoints.smtpes.address=:8587/tcp\"",
+              "properties": {
+                "expose": {
+                  "description": "Defines whether the port is listed in the service if service.type is LoadBalancer or NodePort.",
+                  "properties": {
+                    "default": {
+                      "default": true,
+                      "required": [],
+                      "title": "default",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "default"
+                  ],
+                  "title": "expose",
+                  "type": "object"
+                },
+                "exposedPort": {
+                  "default": 587,
+                  "description": "Port on the host",
+                  "required": [],
+                  "title": "exposedPort",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 8587,
+                  "description": "Container port",
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "protocol": {
+                  "default": "TCP",
+                  "description": "Protocol",
+                  "required": [],
+                  "title": "protocol",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "port",
+                "exposedPort",
+                "expose",
+                "protocol"
+              ],
+              "title": "smtpes"
             },
             "smtps": {
               "description": "SMTP submission over TLS",

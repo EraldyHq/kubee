@@ -46,7 +46,7 @@ kubee helmet --cluster cluster-name play prometheus
 | new_relic | object | `{"bearer":"","enabled":false,"relabel_keep_regex":""}` | New relic remote write prometheus integration |
 | operator.resources.memory | string | `"50Mi"` | Prometheus Operator max memory |
 | resources | object | `{"memory":"400Mi"}` | Prometheus Server Memory Limit |
-| retention | string | `"30m"` | Retention. How long to retain data (it's the prometheus server argument storage.tsdb.retention.time=24h). Data in memory is 2 hour old, by setting retention to 2h, we don't allow to query data over 2 hours and to load data in memory The default is 24h. Why 30m? Equal to max_block_duration so that we are sure that we will not increase memory of the prometheus pod |
+| retention | string | `"30m"` | Retention. How long to retain data (it's the prometheus server argument storage.tsdb.retention.time=24h). Data in memory is 2 hour old, by setting retention to 2h, we don't allow to query data over 2 hours and to load data in memory The default is 24h. Why 30m? Equal to `max_block_duration` so that we are sure that we will not increase memory of the prometheus pod You can see the value in Prometheus Gui under `Status > Runtime and Build Information` |
 | scrape_interval | string | `"1m"` | The default scrape interval for target It does influence memory as Prometheus keeps by default 2 hours of scraping in memory (max_block_duration) Default was 30s. |
 | secret.kind | string | `"Secret"` | Kind of secret created Values supported are `Secret` or `ExternalSecret` |
 | version | string | `"3.1.0"` | The [prometheus version](https://github.com/prometheus/prometheus/releases) |

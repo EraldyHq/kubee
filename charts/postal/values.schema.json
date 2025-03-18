@@ -258,6 +258,13 @@
         },
         "smtp_server": {
           "properties": {
+            "enable_private_network_middleware": {
+              "default": false,
+              "description": "Restrict the traefik port to private network",
+              "required": [],
+              "title": "enable_private_network_middleware",
+              "type": "boolean"
+            },
             "resources": {
               "description": "Resources",
               "properties": {
@@ -289,7 +296,8 @@
             }
           },
           "required": [
-            "resources"
+            "resources",
+            "enable_private_network_middleware"
           ],
           "title": "smtp_server",
           "type": "object"
@@ -490,10 +498,6 @@
                   {
                     "required": [],
                     "type": "string"
-                  },
-                  {
-                    "required": [],
-                    "type": "string"
                   }
                 ],
                 "required": []
@@ -510,7 +514,7 @@
             },
             "return_path_domain": {
               "default": "rp.{{ .Values.postal.hostname }}",
-              "description": "The return path hostname",
+              "description": "The return path hostname (should be in the MX record)",
               "required": [],
               "title": "return_path_domain",
               "type": "string"
@@ -523,8 +527,8 @@
               "type": "string"
             },
             "spf_include": {
-              "default": "spf.{{ .Values.postal.hostname }}",
-              "description": "The location of the SPF record",
+              "default": "{{ .Values.postal.hostname }}",
+              "description": "The include statement in the SPF record",
               "required": [],
               "title": "spf_include",
               "type": "string"
@@ -1015,7 +1019,7 @@
           "properties": {
             "default_bind_address": {
               "default": "::",
-              "description": " enum: [ '0.0.0.0', '::' ] @schema The default bind address the SMTP server should listen on unless overriden by the BIND_ADDRESS environment variable It should be all otherwise the connection is refused for kubelet",
+              "description": " enum: [ '0.0.0.0', '::' ] @schema The default bind address the SMTP server should listen on unless overridden by the BIND_ADDRESS environment variable It should be all otherwise the connection is refused for kubelet",
               "enum": [
                 "0.0.0.0",
                 "::"
@@ -1094,7 +1098,7 @@
             "tls_enabled": {
               "const": true,
               "default": "true",
-              "description": "Enable TLS for the SMTP server (requires certificate)",
+              "description": "Enable [TLS for the SMTP server (requires certificate)](https://docs.postalserver.io/features/smtp-tls)",
               "required": [],
               "title": "tls_enabled"
             },

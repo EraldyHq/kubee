@@ -37,7 +37,7 @@ postal:
   enabled: true
   hostname: 'postal.example.com' # You should own this domain
   conf_secrets:
-    dkim_signing_key: '${KUBEE_POSTAL_SIGNING_KEY}' # Generate the private key via `openssl genrsa -out path/to/signing.key 2048`
+    dkim_signing_key: "${KUBEE_POSTAL_SIGNING_KEY}" # Generate the private key via `openssl genrsa -out path/to/signing.key 2048`
     db_password: '${KUBEE_POSTAL_MARIADB_PASSWORD}'
     rails_secret_key: '${KUBEE_POSTAL_RAILS_SECRET}'
     smtp_password: '${KUBEE_POSTAL_SMTP_PASSWORD}'
@@ -48,6 +48,18 @@ dex:
     postal:
       secret: '${KUBEE_DEX_POSTAL_SECRET}'
 ```
+
+> [!WARNING]
+> The value of `KUBEE_POSTAL_SIGNING_KEY` should:
+> * be double-quoted
+> * have carriage returns replaced by the characters `\n`
+> otherwise Yaml processing will replace the carriage returns by a space
+>
+> Example if you store your private key in [pass](https://github.com/EraldyHq/kubee/blob/main/docs/site/pass.md)
+> ```bash
+> export KUBEE_POSTAL_SIGNING_KEY
+> KUBEE_POSTAL_SIGNING_KEY="$(pass 'kube/postal/signing-key' | awk 'BEGIN{RS="\n";ORS="\\n"}1')"
+> ```
 
 ### Install
 
