@@ -131,6 +131,18 @@ entrypoints:
     # @schema
     # The port for SMTP over TLS (465)
     name: 'smtps'
+  smtp:
+    # @schema
+    # const: smtp
+    # @schema
+    # The port for SMTP (25)
+    name: 'smtp'
+  smtpes:
+    # @schema
+    # const: smtpes
+    # @schema
+    # The port for SMTP Explicit TLS (587)
+    name: 'smtpes'
 
 # @ignored
 # Traefik Helm Values
@@ -236,6 +248,19 @@ traefik:
       port: 8465
       # Port on the host
       exposedPort: 465
+      # Defines whether the port is listed in the service if service.type is LoadBalancer or NodePort.
+      expose:
+        default: true
+      # Protocol
+      protocol: TCP
+    # Add the smtp explicit tls port
+    # It creates the smtp [entrypoint](https://doc.traefik.io/traefik/routing/entrypoints/)
+    # - "--entryPoints.smtpes.address=:8587/tcp"
+    smtpes:
+      # Container port
+      port: 8587
+      # Port on the host
+      exposedPort: 587
       # Defines whether the port is listed in the service if service.type is LoadBalancer or NodePort.
       expose:
         default: true

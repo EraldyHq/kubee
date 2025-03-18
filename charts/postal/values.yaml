@@ -220,7 +220,7 @@ conf_yaml:
     # @schema
     # const: true
     # @schema
-    # -- Enable TLS for the SMTP server (requires certificate)
+    # -- Enable [TLS for the SMTP server (requires certificate)](https://docs.postalserver.io/features/smtp-tls)
     tls_enabled: true
     # The path to the SMTP server's TLS certificate
     tls_certificate_path: /config/smtp.cert
@@ -400,6 +400,8 @@ conf_kube:
     resources:
       memory: ''
       cpu: ''
+    # Restrict the traefik port to private network
+    enable_private_network_middleware: false
   web_server:
     service_name: web
     service_port: 80

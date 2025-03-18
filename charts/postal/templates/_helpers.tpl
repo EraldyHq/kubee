@@ -94,7 +94,12 @@ readinessProbe:
         subPath: postal.yml
         readOnly: true
       - name: smtp-tls
-        mountPath: /config/certs
+        mountPath: {{.Values.conf_yaml.smtp_server.tls_private_key_path}}
+        subPath: tls.key
+        readOnly: true
+      - name: smtp-tls
+        mountPath: {{.Values.conf_yaml.smtp_server.tls_certificate_path}}
+        subPath: tls.crt
         readOnly: true
 volumes:
   - name: config-map

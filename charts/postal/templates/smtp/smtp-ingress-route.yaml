@@ -1,0 +1,32 @@
+{{/*https://doc.traefik.io/traefik/routing/providers/kubernetes-crd/#kind-ingressroutetcp*/}}
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: {{ include "kubee-name" . }}
+  namespace: {{ .Values.namespace }}
+spec:
+  entryPoints:
+    {{- /* Postal does not support implicit TLS and has only one port    */}}
+    {{- /* It requires explicit TLS https://github.com/orgs/postalserver/discussions/3326 */}}
+    - {{.Values.traefik.entrypoints.smtp.name}}
+    - {{.Values.traefik.entrypoints.smtpes.name}}
+  routes:
+    - match: HostSNI(`{{ required "postal hostname is required" .Values.hostname }}`)
+      priority: 10
+      {{- if and (eq .Values.conf_kube.smtp_server.enable_private_network_middleware true) ( gt (len .Values.traefik.auth.private_networks) 0 ) }}
+      middlewares:
+        - name: {{ .Values.traefik.middlewares.private_network.name }}
+          namespace: {{ .Values.traefik.namespace }}
+      {{- end }}
+      services:
+        - name: {{.Values.conf_kube.smtp_server.service_name}}
+          port: smtp
+          weight: 10
+          # With the proxy proxyProtocol the termination happens at traefik
+          # and no certificate is shown
+          # proxyProtocol:
+          #  version: 2
+          tls: false # Should be false with a tls passthrough otherwise the termination happens on the traefik side
+  tls:
+    # Tls termination happens on the service/pods side
+    passthrough: true
