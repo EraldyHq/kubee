@@ -1,5 +1,5 @@
-{{- if ne .Values.cluster.distriution "k3s"}}
-{{ fail "Cluster is not k3s, sotrage class is unknown/unimplemented" }}
+{{- if ne .Values.cluster.distribution "k3s"}}
+{{ fail (printf "Cluster dsitribution is not k3s but %s, storage class is unknown/unimplemented" .Values.cluster.distribution)}}
 {{- end}}
 {{ $ := mergeOverwrite $ (dict "component" "mariadb") }}
 apiVersion: v1

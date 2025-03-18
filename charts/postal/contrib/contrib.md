@@ -3,20 +3,73 @@
 
 This helm is based on the [container](https://docs.postalserver.io/other/containers)
 
+## Ports
 
-## database install and upgrade
+Postal doesn't support is implicit TLS
+
+## Return Path
+
+```http request
+Return-Path: <kvmsrm@psrp.postal.eraldy.com>
+```
+
+## Example DNS configuration
+
+With the sub-domain `postal.example.com`
+
+* A:
+```bash
+dig A postal.eraldy.com +short
+```
+```
+x.x.x.x
+```
+* AAAA:
+```bash
+dig AAAA postal.eraldy.com +short
+```
+```
+x.x.x.x
+```
+* Mx:
+```bash
+dig MX postal.example.com +short
+```
+```
+10 postal.example.com.
+```
+* Spf:
+```bash
+dig TXT postal.example.com +short
+```
+```
+"v=spf1 a mx include:postal.example.com ~all"
+```
+* Dkim
+```bash
+dig TXT postal-a1ekqz._domainkey.postal.example.com +short
+```
+```
+v=DKIM1; t=s; h=sha256; p=MIGfMA0GCSxxxxxxx
+```
+* Return Path
+```bash
+dig CNAME +short psrp.postal.example.com 
+```
+```
+postal.example.com.
+```
 
 
-ArgoCD documentation on Helm handling:
-
-•	⁠https://argo-cd.readthedocs.io/en/stable/user-guide/helm/#helm-hooks
-
-Specifically:
-
-'install' vs 'upgrade' vs 'sync'
-Argo CD cannot know if it is running a first-time "install" or an "upgrade" - every operation is a "sync'. This means that, by default, apps that have pre-install and pre-upgrade will have those hooks run at the same time.
+## Database install and upgrade on ArgoCd
 
 
+ArgoCD documentation on Helm handling: https://argo-cd.readthedocs.io/en/stable/user-guide/helm/#helm-hooks
+
+Specifically: 'install' vs 'upgrade' vs 'sync'
+Argo CD cannot know if it is running a first-time "install" or an "upgrade" 
+every operation is a "sync'. This means that, by default, 
+apps that have pre-install and pre-upgrade will have those hooks run at the same time.
 
 ## Config
 
@@ -44,6 +97,9 @@ insert into users (id, uuid, first_name, last_name, email_address, password_dige
                    admin, oidc_uid, oidc_issuer)
 values ();
 ```
+
+
+
 
 ## Search Note
 

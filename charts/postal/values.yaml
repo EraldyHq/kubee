@@ -206,7 +206,7 @@ conf_yaml:
     # enum: [ '0.0.0.0', '::' ]
     # @schema
     # The default bind address the SMTP server should listen on unless
-    # overriden by the BIND_ADDRESS environment variable
+    # overridden by the BIND_ADDRESS environment variable
     # It should be all otherwise the connection is refused for kubelet
     default_bind_address: '::'
     # The default port for the SMTP server health server to listen on
@@ -253,12 +253,11 @@ conf_yaml:
     # There are given as instruction to add them as MX records in a third party domain
     # (ie Postal Server)
     mx_records:
-      - 'mx1.{{ .Values.postal.hostname }}'
-      - 'mx2.{{ .Values.postal.hostname }}'
-    # The location of the SPF record
-    spf_include: 'spf.{{ .Values.postal.hostname }}'
-    # The return path hostname
-    return_path_domain: 'rp.{{ .Values.postal.hostname }}'
+      - '{{ .Values.postal.hostname }}'
+    # The include statement in the SPF record
+    spf_include: '{{ .Values.postal.hostname }}'
+    # The return path hostname (should be in the MX record)
+    return_path_domain: '{{ .Values.postal.hostname }}'
     # The domain to use for hosting route-specific addresses
     route_domain: 'routes.{{ .Values.postal.hostname }}'
     # The CNAME which tracking domains should be pointed to
