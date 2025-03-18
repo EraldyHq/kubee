@@ -1,0 +1,3 @@
+{{- if eq (index .Values.conf_yaml.dns.mx_records 0) .Values.conf_yaml.dns.return_path_domain }}
+{{ fail "You can't configure mx to the same value as return_path_domain. See https://github.com/postalserver/postal/issues/200#issuecomment-305448529" }}
+{{- end }}

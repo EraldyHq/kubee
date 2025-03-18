@@ -40,12 +40,16 @@ and start a transaction.
 
 ### Test Transaction from outside the cluster
 
-```yaml
+```bash
+telnet postal.eraldy.com 25 # May be blocked by your internet provider
+# you need to test it from the cluster
+telnet postal.eraldy.com 587
 openssl s_client \
   -crlf \
   -starttls smtp \
   -connect postal.eraldy.com:25
 ```
+
 ## Return Path
 
 ```http request
@@ -56,13 +60,14 @@ Return-Path: <kvmsrm@psrp.postal.eraldy.com>
 
 With the sub-domain `postal.example.com`
 
-* A:
+* A mx
 ```bash
 dig A postal.eraldy.com +short
 ```
 ```
-x.x.x.x
+x.x.x.x # your server ip
 ```
+
 * AAAA:
 ```bash
 dig AAAA postal.eraldy.com +short
@@ -91,12 +96,19 @@ dig TXT postal-a1ekqz._domainkey.postal.example.com +short
 ```
 v=DKIM1; t=s; h=sha256; p=MIGfMA0GCSxxxxxxx
 ```
-* Return Path
+* A return path (should not be the same name as mx)
+```bash
+dig A rp.postal.eraldy.com + short
+```
+```
+x.x.x.x # your server ip
+```
+* CNAME Return Path
 ```bash
 dig CNAME +short psrp.postal.example.com 
 ```
 ```
-postal.example.com.
+rp.postal.example.com.
 ```
 
 
@@ -224,6 +236,14 @@ kubee kubectl -n postal port-forward svc/mariadb 3306
 ```
 
 ## Support
+
+### 550 Invalid server token
+
+For any reason, mx should be equal to return_path_domain
+https://github.com/postalserver/postal/issues/200#issuecomment-305448529
+
+`550` implies that the domain on the email address 
+that Postal is seeing is not one it is aware of.
 
 ### Bad password
 

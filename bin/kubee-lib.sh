@@ -760,7 +760,7 @@ kubee::print_chart_values(){
   # Note
   # `yq --no-doc` at the end delete the doc separator `---`
   # Otherwise it's seen in jsonnet as an array of objects
-  # By default helm adds in the head
+  # By default helm adds the separator
   # ---
   ## Source: kubee-values/templates/values.yaml
   if ! echo::eval "helm template fake-release-name $PATH_VALUES_CHART --show-only templates/values.yaml -f $(array::join --sep ' -f ' "${CHART_VALUES_FILES[@]}") | yq --no-doc 'select(document_index == 0)'"; then

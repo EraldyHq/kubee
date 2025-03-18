@@ -11,7 +11,8 @@ spec:
     - {{.Values.traefik.entrypoints.smtp.name}}
     - {{.Values.traefik.entrypoints.smtpes.name}}
   routes:
-    - match: HostSNI(`{{ required "postal hostname is required" .Values.hostname }}`)
+    {{- /* No TLS  */}}
+    - match: HostSNI(`*`)
       priority: 10
       {{- if and (eq .Values.conf_kube.smtp_server.enable_private_network_middleware true) ( gt (len .Values.traefik.auth.private_networks) 0 ) }}
       middlewares:
@@ -26,7 +27,4 @@ spec:
           # and no certificate is shown
           # proxyProtocol:
           #  version: 2
-          tls: false # Should be false with a tls passthrough otherwise the termination happens on the traefik side
-  tls:
-    # Tls termination happens on the service/pods side
-    passthrough: true
+          tls: false # Should be false

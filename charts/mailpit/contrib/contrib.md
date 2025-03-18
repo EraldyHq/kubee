@@ -16,8 +16,14 @@ TLS is mandatory.
 task dep
 ```
 
+## Test Email
 
-
+```bash
+swaks \
+  --to nico@postal.eraldy.com \
+  --server postal.eraldy.com \
+  --port 587
+```
 
 ## Test With OpenSsl
 

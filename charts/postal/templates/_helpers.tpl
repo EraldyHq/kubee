@@ -101,6 +101,11 @@ readinessProbe:
         mountPath: {{.Values.conf_yaml.smtp_server.tls_certificate_path}}
         subPath: tls.crt
         readOnly: true
+      - name: config-secret
+        {{- /* Path seems to be fixed - https://docs.postalserver.io/other/containers#configuration */}}
+        mountPath: /config/signing.key
+        subPath: dkim-signing-key
+        readOnly: true
 volumes:
   - name: config-map
     configMap:
