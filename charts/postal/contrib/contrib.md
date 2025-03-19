@@ -8,47 +8,6 @@ This helm is based on the [container](https://docs.postalserver.io/other/contain
 Postal doesn't support is implicit TLS.
 It requires explicit TLS https://github.com/orgs/postalserver/discussions/3326
 
-## Test 
-### Open Port
-
-```bash
-nc -vz postal.eraldy.com 25
-```
-```
-Starting Nmap 7.95 ( https://nmap.org ) at 2025-03-18 16:15 CET
-Nmap scan report for postal.eraldy.com (188.245.43.250)
-Host is up (0.020s latency).
-rDNS record for 188.245.43.250: whoami.eraldy.com
-
-PORT   STATE    SERVICE
-25/tcp filtered smtp
-
-Nmap done: 1 IP address (1 host up) scanned in 0.25 seconds
-```
-
-### Test Transaction from the cluster
-
-Connect
-* From a cluster shell:
-```bash
-# without startls
-telnet smtp.postal 25
-# without starttls
-openssl s_client -crlf -starttls smtp -connect smtp.postal:25
-```
-and start a transaction.
-
-### Test Transaction from outside the cluster
-
-```bash
-telnet postal.eraldy.com 25 # May be blocked by your internet provider
-# you need to test it from the cluster
-telnet postal.eraldy.com 587
-openssl s_client \
-  -crlf \
-  -starttls smtp \
-  -connect postal.eraldy.com:25
-```
 
 ## Return Path
 
@@ -56,60 +15,6 @@ openssl s_client \
 Return-Path: <kvmsrm@psrp.postal.eraldy.com>
 ```
 
-## Example DNS configuration
-
-With the sub-domain `postal.example.com`
-
-* A mx
-```bash
-dig A postal.eraldy.com +short
-```
-```
-x.x.x.x # your server ip
-```
-
-* AAAA:
-```bash
-dig AAAA postal.eraldy.com +short
-```
-```
-x.x.x.x
-```
-* Mx:
-```bash
-dig MX postal.example.com +short
-```
-```
-10 postal.example.com.
-```
-* Spf:
-```bash
-dig TXT postal.example.com +short
-```
-```
-"v=spf1 a mx include:postal.example.com ~all"
-```
-* Dkim
-```bash
-dig TXT postal-a1ekqz._domainkey.postal.example.com +short
-```
-```
-v=DKIM1; t=s; h=sha256; p=MIGfMA0GCSxxxxxxx
-```
-* A return path (should not be the same name as mx)
-```bash
-dig A rp.postal.eraldy.com + short
-```
-```
-x.x.x.x # your server ip
-```
-* CNAME Return Path
-```bash
-dig CNAME +short psrp.postal.example.com 
-```
-```
-rp.postal.example.com.
-```
 
 
 ## Database install and upgrade on ArgoCd

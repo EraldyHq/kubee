@@ -14,4 +14,8 @@ spec:
       # That's why we use the same
       port: {{.Values.conf_yaml.smtp_server.default_port}}
       targetPort: smtp
+    - name: health
+      port: {{.Values.conf_yaml.smtp_server.default_health_server_port}}
+      targetPort: health
+
 

@@ -1,0 +1,16 @@
+{{ $ := mergeOverwrite $ (dict "component" "worker") }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kubee-name" . }}
+  labels:
+    {{- include "kubee-manifest-labels" . | indent 4}}
+spec:
+  selector:
+    {{- include "kubee-pod-labels" . | indent 4}}
+  ports:
+    - name: health
+      port: {{.Values.conf_yaml.worker.default_health_server_port}}
+      targetPort: health
+
+

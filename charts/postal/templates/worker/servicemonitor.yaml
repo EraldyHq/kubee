@@ -16,6 +16,6 @@ spec:
     matchLabels:
       {{- include "kubee-pod-labels" . | indent 6}}
   endpoints:
-    - port: web
+    - port: health
       path: /metrics
 {{- end }}
