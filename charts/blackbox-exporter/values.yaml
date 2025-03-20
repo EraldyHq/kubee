@@ -93,6 +93,7 @@ mixin:
     enabled: true
     # -- The period in minutes to consider for any probe to fail
     # 2m to take into account dns server or tcp failure
+    # a dns probe takes on average 25ms
     probe_failed_interval: '2m'
   dashboard:
     # @ignored Enable or disable the dashboard
