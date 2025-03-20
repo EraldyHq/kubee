@@ -92,7 +92,8 @@ mixin:
     # Enable or disable the alerts if you want to create custom alerts
     enabled: true
     # -- The period in minutes to consider for any probe to fail
-    probe_failed_interval: '1m'
+    # 2m to take into account dns server or tcp failure
+    probe_failed_interval: '2m'
   dashboard:
     # @ignored Enable or disable the dashboard
     enabled: true
