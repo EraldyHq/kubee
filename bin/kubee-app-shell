@@ -83,7 +83,7 @@ kubee::set_kubeconfig_env
 # Set the known default shell
 if [ "$SHELL_NAME" == "" ]; then
   case "$KUBEE_APP_NAME" in
-    "prometheus"|"vault")
+    "prometheus"|"vault"|"pushgateway")
       SHELL_NAME=/bin/sh;
       ;;
     *)

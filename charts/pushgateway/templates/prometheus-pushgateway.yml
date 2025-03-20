@@ -18,3 +18,18 @@ spec:
           image: 'prom/pushgateway:{{.Values.version}}'
           ports:
             - containerPort: 9091
+          args:
+      {{- if ne .Values.hostname ""}}
+            - '--web.external-url=https://{{.Values.hostname}}'
+      {{- end }}
+      {{- if eq .Values.persistence.enabled true}}
+            - '--persistence.file=/var/lib/pushgateway/metrics.dat'
+            - '--persistence.interval={{.Values.persistence.interval}}'
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/pushgateway
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "pushgateway-pvc-name" .}}
+      {{- end }}

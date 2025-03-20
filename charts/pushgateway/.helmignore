@@ -1,2 +1,5 @@
 jsonnet/vendor
 jsonnet/out
+contrib
+README.md.gotmpl
+.gitignore

@@ -1,0 +1,17 @@
+{{- if eq .Values.persistence.enabled true}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "pushgateway-pvc-name" .}}
+  labels:
+      {{- include "kubee-manifest-labels" . | indent 4}}
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{.Values.persistence.storage_class}}
+  resources:
+    requests:
+      storage: {{.Values.persistence.size}}
+{{- end}}
