@@ -73,10 +73,9 @@ tasks:
   # Generate all README helm-docs for all charts
   docs-all:
     cmds:
-      - |
-        # A -exec command must be terminated with a ; (A parameter of its own) 
-        # You usually need to type \; or ';' to avoid shell interpretation 
+      - | 
         find "{{.TASK_DIR}}/charts" -maxdepth 2 -mindepth 1 -type f  -name "Chart.yaml"  | xargs -I {} bash -c 'cd "$(dirname "{}")" && task docs || exit 255'
+      - task readme
 
   # Generate the root Readme.md
   readme:

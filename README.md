@@ -43,48 +43,47 @@ Because we are starting from the `simplest Kubernetes cluster` as stated in the 
 
 | Kubee Chart | Status  | Kind | Category |
 |-----------|---------|------|----------|
-| [AlertManager ](https://github.com/EraldyHq/kubee/blob/main/charts/alertmanager/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring
-| [ArgoCd ](https://github.com/EraldyHq/kubee/blob/main/charts/argocd/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | ci-cd
-| [BlackBox Exporter ](https://github.com/EraldyHq/kubee/blob/main/charts/blackbox-exporter/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring
-| [Cert-Manager ](https://github.com/EraldyHq/kubee/blob/main/charts/cert-manager/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | certificate
-| [Cert-Manager Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/cert-manager-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | certificate
-| [Cluster ](https://github.com/EraldyHq/kubee/blob/main/charts/cluster/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | library | cluster
-| [Dex ](https://github.com/EraldyHq/kubee/blob/main/charts/dex/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | auth
-| [External Dns ](https://github.com/EraldyHq/kubee/blob/main/charts/external-dns/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | dns
-| [External Dns Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/external-dns-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | dns
-| [External Secrets Charts](https://github.com/EraldyHq/kubee/blob/main/charts/external-secrets/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | secret
-| [External Secret Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/external-secrets-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | secret
-| [Gogs ](https://github.com/EraldyHq/kubee/blob/main/charts/gogs/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | git
-| [Grafana ](https://github.com/EraldyHq/kubee/blob/main/charts/grafana/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring
-| [Grafana Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/grafana-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | monitoring
-| [Healthchecks ](https://github.com/EraldyHq/kubee/blob/main/charts/healthchecks/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring
-| [K3s-ansible Cluster ](https://github.com/EraldyHq/kubee/blob/main/charts/k3s-ansible/README.md) | [beta](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | cluster | k3s
-| [Keycloak ](https://github.com/EraldyHq/kubee/blob/main/charts/keycloak/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | auth
-| [Kubernetes Dashboard ](https://github.com/EraldyHq/kubee/blob/main/charts/kubernetes-dashboard/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | kubernetes
-| [Kubernetes Monitoring ](https://github.com/EraldyHq/kubee/blob/main/charts/kubernetes-monitoring/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | kubernetes
-| [Mailpit ](https://github.com/EraldyHq/kubee/blob/main/charts/mailpit/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | mail
-| [Mail ](https://github.com/EraldyHq/kubee/blob/main/charts/mailu/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | mail
-| [Mariadb ](https://github.com/EraldyHq/kubee/blob/main/charts/mariadb/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | database
-| [Node Exporter ](https://github.com/EraldyHq/kubee/blob/main/charts/node-exporter/README.md) | [deprecated](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring
-| [Oauth2-Proxy ](https://github.com/EraldyHq/kubee/blob/main/charts/oauth2-proxy/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | auth
-| [Postal ](https://github.com/EraldyHq/kubee/blob/main/charts/postal/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | mail
-| [Prometheus ](https://github.com/EraldyHq/kubee/blob/main/charts/prometheus/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring
-| [Prometheus Adapter ](https://github.com/EraldyHq/kubee/blob/main/charts/prometheus-adapter/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring
-| [Prometheus Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/prometheus-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | monitoring
-| [PushGateway ](https://github.com/EraldyHq/kubee/blob/main/charts/pushgateway/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring
-| [Traefik ](https://github.com/EraldyHq/kubee/blob/main/charts/traefik/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | proxy
-| [Traefik Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/traefik-crds/README.md) | [deprecated](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | proxy
-| [Traefik Forward Auth ](https://github.com/EraldyHq/kubee/blob/main/charts/traefik-forward-auth/README.md) | [deprecated](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | auth
-| [Trust manager crds chart](https://github.com/EraldyHq/kubee/blob/main/charts/trust-manager-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | certificate
+| [AlertManager ](https://github.com/EraldyHq/kubee/blob/main/charts/alertmanager/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring  |
+| [ArgoCd ](https://github.com/EraldyHq/kubee/blob/main/charts/argocd/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | ci-cd  |
+| [BlackBox Exporter ](https://github.com/EraldyHq/kubee/blob/main/charts/blackbox-exporter/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring  |
+| [Cert-Manager ](https://github.com/EraldyHq/kubee/blob/main/charts/cert-manager/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | certificate  |
+| [Cert-Manager Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/cert-manager-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | certificate  |
+| [Cluster ](https://github.com/EraldyHq/kubee/blob/main/charts/cluster/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | library | cluster  |
+| [Dex ](https://github.com/EraldyHq/kubee/blob/main/charts/dex/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | auth  |
+| [External Dns ](https://github.com/EraldyHq/kubee/blob/main/charts/external-dns/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | dns  |
+| [External Dns Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/external-dns-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | dns  |
+| [External Secrets Charts](https://github.com/EraldyHq/kubee/blob/main/charts/external-secrets/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | secret  |
+| [External Secret Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/external-secrets-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | secret  |
+| [Gogs ](https://github.com/EraldyHq/kubee/blob/main/charts/gogs/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | git  |
+| [Grafana ](https://github.com/EraldyHq/kubee/blob/main/charts/grafana/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring  |
+| [Grafana Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/grafana-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | monitoring  |
+| [Healthchecks ](https://github.com/EraldyHq/kubee/blob/main/charts/healthchecks/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring  |
+| [K3s-ansible Cluster ](https://github.com/EraldyHq/kubee/blob/main/charts/k3s-ansible/README.md) | [beta](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | cluster | k3s  |
+| [Keycloak ](https://github.com/EraldyHq/kubee/blob/main/charts/keycloak/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | auth  |
+| [Kubernetes Dashboard ](https://github.com/EraldyHq/kubee/blob/main/charts/kubernetes-dashboard/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | kubernetes  |
+| [Kubernetes Monitoring ](https://github.com/EraldyHq/kubee/blob/main/charts/kubernetes-monitoring/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | kubernetes  |
+| [Mailpit ](https://github.com/EraldyHq/kubee/blob/main/charts/mailpit/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | mail  |
+| [Mail ](https://github.com/EraldyHq/kubee/blob/main/charts/mailu/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | mail  |
+| [Mariadb ](https://github.com/EraldyHq/kubee/blob/main/charts/mariadb/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | database  |
+| [Node Exporter ](https://github.com/EraldyHq/kubee/blob/main/charts/node-exporter/README.md) | [deprecated](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring  |
+| [Oauth2-Proxy ](https://github.com/EraldyHq/kubee/blob/main/charts/oauth2-proxy/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | auth  |
+| [Postal ](https://github.com/EraldyHq/kubee/blob/main/charts/postal/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | mail  |
+| [Prometheus ](https://github.com/EraldyHq/kubee/blob/main/charts/prometheus/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring  |
+| [Prometheus Adapter ](https://github.com/EraldyHq/kubee/blob/main/charts/prometheus-adapter/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring  |
+| [Prometheus Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/prometheus-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | monitoring  |
+| [PushGateway ](https://github.com/EraldyHq/kubee/blob/main/charts/pushgateway/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring  |
+| [Traefik ](https://github.com/EraldyHq/kubee/blob/main/charts/traefik/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | proxy  |
+| [Traefik Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/traefik-crds/README.md) | [deprecated](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | proxy  |
+| [Traefik Forward Auth ](https://github.com/EraldyHq/kubee/blob/main/charts/traefik-forward-auth/README.md) | [deprecated](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | auth  |
+| [Trust manager crds chart](https://github.com/EraldyHq/kubee/blob/main/charts/trust-manager-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | certificate  |
 
-| [Vault ](https://github.com/EraldyHq/kubee/blob/main/charts/vault/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | secret
-| [Whoami ](https://github.com/EraldyHq/kubee/blob/main/charts/whoami/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | http
+| [Vault ](https://github.com/EraldyHq/kubee/blob/main/charts/vault/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | secret  |
+| [Whoami ](https://github.com/EraldyHq/kubee/blob/main/charts/whoami/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | http  |
 
 Note that you are not limited to Kubee Charts.
-You can install yourself any chart,
-but you would need to configure them yourself.
+You can install any Helm chart or Kubernetes Manifest, but you would need to discover the configuration yourself.
 
-To make your charts, `kubee`  compatible and reuse the configuration of dependent chart,
+To make your charts, `kubee`  compatible and reuse the configuration of dependent charts,
 you can read the [kubee chart documentation](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md).
 
 ## Steps
