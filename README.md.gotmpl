@@ -51,7 +51,7 @@ Because we are starting from the `simplest Kubernetes cluster` as stated in the 
 {{- if or (eq $values.kind "internal") }}
 {{ continue }}
 {{- end }}
-| [{{ $description }}]({{ template "kubee-chart-url"}}/{{$name}}/README.md) | {{ template "kubee-chart-status-label" $values.status }} | {{ $values.kind }} | {{ $values.category }}  
+| [{{ $description }}]({{ template "kubee-chart-url"}}/{{$name}}/README.md) | {{ template "kubee-chart-status-label" $values.status }} | {{ $values.kind }} | {{ $values.category }}  |
 {{- end }}
 
 Note that you are not limited to Kubee Charts. 
