@@ -23,11 +23,23 @@ namespace: 'monitoring'
 # minLength: 1
 # format: hostname
 # @schema
-# -- The public hostname (install an ingress if not empty)
+# -- The public hostname (Create an authenticated ingress if not empty)
 hostname: ''
 
 # -- The [pushgateway version](https://hub.docker.com/r/prom/pushgateway)
 version: 'v1.10.0'
+
+# -- Enable Metrics Persistence on a volume
+persistence:
+  # Enable
+  enabled: true
+  # Size of the volume
+  size: 50Mi
+  # Interval to flush the metrics to the persistence file.
+  interval: '5m'
+  # Storage Class (The volume manager)
+  # By default, [k3s local-path](https://docs.k3s.io/storage#setting-up-the-local-storage-provider)
+  storage_class: local-path
 
 
 # -- @ignored Internal Kubee constant

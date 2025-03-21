@@ -27,11 +27,28 @@ INSTANCE="github-s3"
 * The push
 ```bash
 PUSHGATEWAY_API_URL=${PUSHGATEWAY_API_URL:-http://pushgateway.monitoring.svc.cluster.local:9091/metrics}
-echo "$RESULT" | curl --fail -m 10 --retry 5 -s --data-binary @- "$PUSHGATEWAY_API_URL/job/$JOB/instance/$INSTANCE"
+echo "$RESULT" | curl --fail --max-time 10 --retry 5 -s --data-binary @- "$PUSHGATEWAY_API_URL/job/$JOB/instance/$INSTANCE"
 ```
+where the retry parameters may be:
+* `--max-time 10`     (how long each retry will wait)
+* `--retry 5`         (it will retry 5 times)
+* `--retry-delay 0`   (an exponential backoff algorithm)
+* `--retry-max-time`  (total time before it's considered failed)
 
 
 ## Features
+
+### Persistent by Default
+
+Pushgateway receives metrics from batch/ephemeral jobs that
+run generally on a long interval.
+
+Without persistence, the metrics are gone on a restart
+and your alerts will fire. 
+
+To avoid this behavior, we persist by default, the metrics.
+
+
 
 {{ template "kubee-chart-features-section" . }}
 
@@ -49,6 +66,6 @@ echo "$RESULT" | curl --fail -m 10 --retry 5 -s --data-binary @- "$PUSHGATEWAY_A
 
 ## Contrib / Dev
 
-See [contrib](contrib.md)
+See [contrib](contrib/contrib.md)
 
 

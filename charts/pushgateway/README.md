@@ -38,6 +38,16 @@ echo "$RESULT" | curl --fail -m 10 --retry 5 -s --data-binary @- "$PUSHGATEWAY_A
 
 ## Features
 
+### Persistent by Default
+
+Pushgateway receives metrics from batch/ephemeral jobs that
+run generally on a long interval.
+
+Without persistence, the metrics are gone on a restart
+and your alerts will fire.
+
+To avoid this behavior, we persist by default, the metrics.
+
 ### Kubee Charts Features
 
   These [kubee charts](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) add their features when `enabled`.
@@ -59,9 +69,10 @@ kubee helmet --cluster cluster-name play pushgateway
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
 | hostname | string | `""` | The public hostname (install an ingress if not empty) |
 | namespace | string | `"monitoring"` | The installation namespace |
+| persistence | object | `{"enabled":true,"interval":"5m","size":"50Mi","storage_class":"local-path"}` | Enable Metrics Persistence on a volume |
 | version | string | `"v1.10.0"` | The [pushgateway version](https://hub.docker.com/r/prom/pushgateway) |
 
 ## Contrib / Dev
 
-See [contrib](contrib.md)
+See [contrib](contrib/contrib.md)
 

@@ -86,7 +86,7 @@ include "kubee-name-prefix" (dict "Release" $.Release )
     Return the name of an object
     Component name should be a property
     Usage Example:
-    {{- include "kubee-name" (merge . (dict "component" "web")) }}
+    {{- include "kubee-name" (dict "Chart" .Chart "component" "web") }}
 */}}
 {{- define "kubee-name" }}
 {{- printf "%s-%s-%s" (required "app.kubernetes.io/name chart annotation is required " (index .Chart.Annotations "app.kubernetes.io/name")) (required "component property is required " .component) (include "kubee-prefix" .)}}
