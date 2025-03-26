@@ -21,6 +21,7 @@ where:
   * \`conf\`               - Print the inventory file
   * \`ping\`               - Verify the connection to the hosts
   * \`play\`               - Upgrade or install k3s
+  * \`reboot\`             - Restart k3s
   * \`reboot\`             - Reboot the hosts
   * \`uninstall\`          - Uninstall k3s
   * \`upgrade\`            - Upgrade k3s
@@ -93,6 +94,16 @@ install_play(){
   set_private_key_file
   ansible-playbook -i "$inventory" ans_e.ans_e_base.kubee_site.yml
 }
+
+restart(){
+  if ! inventory=$(ansible_inventory_file); then
+      echo::err "Error while generating the ansible inventory file"
+      return 1
+  fi
+  set_private_key_file
+  ansible-playbook -i "$inventory" ans_e.ans_e_base.kubee_restart.yml
+}
+
 
 uninstall(){
 
@@ -203,6 +214,10 @@ main(){
             ping
             return
           ;;
+          "restart")
+            restart
+            return
+            ;;
           "--help"|"-h"|"help")
             synopsis
             return

@@ -64,7 +64,7 @@ fi
 
 
 case $CLUSTER_COMMAND in
-"play"|"conf"|"inv"|"inventory"|"upgrade"|"ping"|"reboot"|"uninstall")
+"play"|"conf"|"inv"|"inventory"|"upgrade"|"ping"|"reboot"|"uninstall"|"restart")
 
     # K3s Cluster Chart Values
     CLUSTER_CHART=$(kubee::print_chart_values "cluster" | yq '.chart')
