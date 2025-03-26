@@ -59,8 +59,11 @@ kube_state_metrics:
   version: '2.14.0'
   # -- The scrape interval
   scrape_interval: '60s'
-  # -- The max memory of the exporter
+  # -- The max memory of the exporter (without optimization, minimum 150Mi to allow the memory spike at startup)
   memory: '50Mi'
+  # -- Optimize memory.
+  # This exporter has a [memory spike](https://github.com/kubernetes/kube-state-metrics/issues/958) at startup due to config map and secrets loading.
+  memory_optimization: true
 
 
 node_exporter:

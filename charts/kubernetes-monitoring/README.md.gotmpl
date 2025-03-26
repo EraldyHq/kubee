@@ -35,6 +35,11 @@ The Kubernetes components metrics reference list is available [here](https://kub
 * `apiserver_xxx`: Api server metrics
 * `kubeexx`: Kubelet metrics:
 
+### Auto Kube-State-Metrics Memory Optimization
+
+`Kube State Metrics` by default will load all resources objects causing [a spike in memory](https://github.com/kubernetes/kube-state-metrics/issues/958)
+`Kubee` resolves this problem by not loading `configMap` and `secrets` that takes the most of the memory.
+
 
 {{ template "kubee-chart-features-section" . }}
 

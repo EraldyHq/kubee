@@ -34,7 +34,7 @@ jb install github.com/prometheus/node_exporter/docs/node-mixin@master
 * Try it out with
 * helmet
 ```bash
-kubee -c clusterName helmet template kubernetes-monitoring --out > /tmp/all.yaml
+kubee -c clusterName helmet template --out kubernetes-monitoring > /tmp/all.yaml
 ```
 * or Raw Jsonnet command
 ```bash
@@ -81,6 +81,25 @@ The api server endpoint gives you metrics from:
 * and `proxy`
   The kubelet endpoint gives you metrics from:
 * the `cadvisor`
+
+### Kube-state-metrics memory pikes on startup
+
+Kube-state-metrics is not focused on the health of the individual Kubernetes components, but rather on the health of the various objects inside, such as deployments, nodes and pods.
+
+As stated in [resource recommendation](
+https://github.com/kubernetes/kube-state-metrics/tree/main?tab=readme-ov-file#resource-recommendation), resource usage for kube-state-metrics changes with the Kubernetes objects (Pods/Nodes/Deployments/Secrets etc.) size of the cluster.
+
+ie the memory picks depends on the list of exported resources `--resources=`
+
+See:
+* [issue](https://github.com/kubernetes/kube-state-metrics/issues/958)
+* [Kube-state-metrics 20x spikes in memory usage at restart](https://github.com/kubernetes/kube-state-metrics/issues/2302)
+
+
+Resolution:
+- no secret as Helm charts store its data in secrets by defaults
+- no configmaps?
+in [resource options](https://github.com/kubernetes/kube-state-metrics/blob/main/docs/developer/cli-arguments.md)
 
 ## Note
 

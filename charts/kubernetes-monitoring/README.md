@@ -37,6 +37,11 @@ The Kubernetes components metrics reference list is available [here](https://kub
 * `apiserver_xxx`: Api server metrics
 * `kubeexx`: Kubelet metrics:
 
+### Auto Kube-State-Metrics Memory Optimization
+
+`Kube State Metrics` by default will load all resources objects causing [a spike in memory](https://github.com/kubernetes/kube-state-metrics/issues/958)
+`Kubee` resolves this problem by not loading `configMap` and `secrets` that takes the most of the memory.
+
 ### Kubee Charts Features
 
   These [kubee charts](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) add their features when `enabled`.
@@ -61,7 +66,8 @@ kubee --cluster cluster-name helmet play kubernetes-monitoring
 | core_dns.scrape_interval | string | `"30s"` | Scrape Interval (normal default was 15s) |
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
 | kube_state_metrics.enabled | bool | `true` | Enable [Kube State Metrics Exporter](https://github.com/kubernetes/kube-state-metrics). It exports apps/functional state metrics. |
-| kube_state_metrics.memory | string | `"50Mi"` | The max memory of the exporter |
+| kube_state_metrics.memory | string | `"50Mi"` | The max memory of the exporter (without optimization, minimum 150Mi to allow the memory spike at startup) |
+| kube_state_metrics.memory_optimization | bool | `true` | Optimize memory. This exporter has a [memory spike](https://github.com/kubernetes/kube-state-metrics/issues/958) at startup due to config map and secrets loading. |
 | kube_state_metrics.scrape_interval | string | `"60s"` | The scrape interval |
 | kube_state_metrics.version | string | `"2.14.0"` | [Kube State Metrics Version](https://github.com/kubernetes/kube-state-metrics/releases) without the `v` |
 | kubelet.enabled | bool | `true` | Enable kubelet monitoring |

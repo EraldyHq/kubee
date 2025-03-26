@@ -140,7 +140,7 @@ jsonnet_processing(){
     echo::info "Jsonnet: No directory found"
     return
   fi
-  echo::info "Jsonnet: project processing"
+  echo::info "Jsonnet: Project processing"
 
   pushd "$JSONNET_DIR" > /dev/null
   echo::debug "Working directory for jsonnet processing is $JSONNET_DIR"

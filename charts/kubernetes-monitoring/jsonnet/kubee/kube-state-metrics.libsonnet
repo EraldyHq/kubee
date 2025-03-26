@@ -1,10 +1,13 @@
 // Kube-state metrics customization
 // that delete Rbac
 
-
+local defaults = {
+  memory_optimization: error 'memory_optimization is not specified',
+};
 
 function(params)
 
+  local values = defaults + params;
 
   // The kube-prometheus lib
   local kpStateMetrics = (import '../kube-prometheus/components/kube-state-metrics.libsonnet')(params);
@@ -73,6 +76,9 @@ function(params)
                   runAsGroup: 65534,
                 },
                 resources: params.resources,
+                args: if values.memory_optimization then [
+                    '--resources=certificatesigningrequests,cronjobs,daemonsets,deployments,endpoints,horizontalpodautoscalers,ingresses,jobs,leases,limitranges,mutatingwebhookconfigurations,namespaces,networkpolicies,nodes,persistentvolumeclaims,persistentvolumes,poddisruptionbudgets,pods,replicasets,replicationcontrollers,resourcequotas,services,statefulsets,storageclasses,validatingwebhookconfigurations,volumeattachments'
+                ] else []
               },
             ],
           },

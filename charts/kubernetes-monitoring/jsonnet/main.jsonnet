@@ -15,6 +15,7 @@ local kxValues = {
   kube_state_metrics_scrape_interval: validation.notNullOrEmpty(kxExtValues, 'kube_state_metrics.scrape_interval'),
   kube_state_metrics_memory: validation.notNullOrEmpty(kxExtValues, 'kube_state_metrics.memory'),
   kube_state_metrics_version: validation.notNullOrEmpty(kxExtValues, 'kube_state_metrics.version'),
+  kube_state_metrics_memory_optimization: validation.notNullOrEmpty(kxExtValues,'kube_state_metrics.memory_optimization'),
   kubelet_enabled: validation.notNullOrEmpty(kxExtValues, 'kubelet.enabled'),
   kubelet_scrape_interval: validation.notNullOrEmpty(kxExtValues, 'kubelet.scrape_interval'),
   kubelet_scrape_metrics_optimization: validation.notNullOrEmpty(kxExtValues, 'kubelet.scrape_metrics_optimization'),
@@ -79,6 +80,7 @@ local kpValues = {
       limits: { memory: kxValues.kube_state_metrics_memory },
     },
     scrapeInterval: kxValues.kube_state_metrics_scrape_interval,
+    memory_optimization: kxValues.kube_state_metrics_memory_optimization
   },
   kubernetesControlPlane: {
     namespace: $.common.namespace,
