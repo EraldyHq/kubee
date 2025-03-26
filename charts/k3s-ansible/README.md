@@ -43,7 +43,7 @@ The `play` command deploys Kubernetes on the cluster hosts (Repeatable install a
 ```bash
 kubee --cluster clusterName --cluster-chart k3s-ansible cluster play
 ```
-Play will execute the [site playbook](https://github.com/k3s-io/k3s-ansible/blob/master/playbooks/site.yml)
+Play will execute the [site playbook](https://github.com/gerardnico/ansible-e-base-collection/blob/main/playbooks/kubee_site.yml)
 
 ### Upgrade
 
@@ -63,7 +63,16 @@ kubee --cluster clusterName --cluster-chart k3s-ansible cluster uninstall
 
 Uninstall will execute the [reset playbook](https://github.com/k3s-io/k3s-ansible/blob/master/playbooks/reset.yml)
 
-### Reboot
+### Restart k3s
+
+Restart k3s
+```bash
+kubee --cluster clusterName --cluster-chart k3s-ansible cluster restart
+```
+
+Play will execute the [restart playbook](https://github.com/gerardnico/ansible-e-base-collection/blob/main/playbooks/kubee_restart.yml)
+
+### Reboot the nodes
 
 Reboot the servers hosts then the agents hosts.
 ```bash

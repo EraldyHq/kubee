@@ -74,7 +74,7 @@ kubee helmet --cluster cluster-name play blackbox-exporter
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
 | hostname | string | `""` | The public hostname (an ingress is created if not empty) |
 | mixin.alerts.enabled | bool | `true` |  |
-| mixin.alerts.probe_failed_interval | string | `"1m"` | The period in minutes to consider for any probe to fail |
+| mixin.alerts.probe_failed_interval | string | `"2m"` | The period in minutes to consider for any probe to fail 2m to take into account dns server or tcp failure a dns probe takes on average 25ms |
 | mixin.dashboard | object | `{}` |  |
 | namespace | string | `"monitoring"` | The installation namespace |
 | version | string | `"0.26.0"` | Blackbox exporter [version](https://github.com/prometheus/blackbox_exporter/releases) |

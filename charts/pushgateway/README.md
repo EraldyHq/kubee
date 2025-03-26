@@ -33,8 +33,13 @@ INSTANCE="github-s3"
 * The push
 ```bash
 PUSHGATEWAY_API_URL=${PUSHGATEWAY_API_URL:-http://pushgateway.monitoring.svc.cluster.local:9091/metrics}
-echo "$RESULT" | curl --fail -m 10 --retry 5 -s --data-binary @- "$PUSHGATEWAY_API_URL/job/$JOB/instance/$INSTANCE"
+echo "$RESULT" | curl --fail --max-time 10 --retry 5 -s --data-binary @- "$PUSHGATEWAY_API_URL/job/$JOB/instance/$INSTANCE"
 ```
+where the retry parameters may be:
+* `--max-time 10`     (how long each retry will wait)
+* `--retry 5`         (it will retry 5 times)
+* `--retry-delay 0`   (an exponential backoff algorithm)
+* `--retry-max-time`  (total time before it's considered failed)
 
 ## Features
 
@@ -67,7 +72,7 @@ kubee helmet --cluster cluster-name play pushgateway
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | enabled | bool | `false` | Boolean to indicate that this chart is or will be installed in the cluster |
-| hostname | string | `""` | The public hostname (install an ingress if not empty) |
+| hostname | string | `""` | The public hostname (Create an authenticated ingress if not empty) |
 | namespace | string | `"monitoring"` | The installation namespace |
 | persistence | object | `{"enabled":true,"interval":"5m","size":"50Mi","storage_class":"local-path"}` | Enable Metrics Persistence on a volume |
 | version | string | `"v1.10.0"` | The [pushgateway version](https://hub.docker.com/r/prom/pushgateway) |
