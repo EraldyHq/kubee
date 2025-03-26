@@ -12,7 +12,7 @@ in a standalone mode.
 ## Installation
 
 ```bash
-kubee helmet --cluster cluster-name play vault
+kubee --cluster cluster-name helmet play vault
 ```
 
 ## Features

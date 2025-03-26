@@ -19,7 +19,7 @@ mariadb:
 * Play
 
 ```bash
-kubee helmet --cluster cluster-name play mariadb
+kubee --cluster cluster-name helmet play mariadb
 ```
 
 ## Features

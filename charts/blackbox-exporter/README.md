@@ -63,7 +63,7 @@ all probes in all namespaces.
 ## Installation
 
 ```bash
-kubee helmet --cluster cluster-name play blackbox-exporter
+kubee --cluster cluster-name helmet play blackbox-exporter
 ```
 
 ## Values

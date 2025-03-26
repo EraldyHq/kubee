@@ -47,7 +47,7 @@ The Kubernetes components metrics reference list is available [here](https://kub
 ## Installation
 
 ```bash
-kubee helmet --cluster cluster-name play kubernetes-monitoring
+kubee --cluster cluster-name helmet play kubernetes-monitoring
 ```
 
 ## Values

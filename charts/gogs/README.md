@@ -22,7 +22,7 @@ This [kubee crds chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/cr
 ## Installation
 
 ```bash
-kubee helmet --cluster cluster-name play gogs
+kubee --cluster cluster-name helmet play gogs
 ```
 
 ## Values

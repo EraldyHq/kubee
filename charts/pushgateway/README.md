@@ -64,7 +64,7 @@ To avoid this behavior, we persist by default, the metrics.
 ## Install
 
 ```bash
-kubee helmet --cluster cluster-name play pushgateway
+kubee --cluster cluster-name helmet play pushgateway
 ```
 
 ## Values

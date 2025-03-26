@@ -44,7 +44,7 @@ cluster:
 ### Installation
 
 ```bash
-kubee helmet --cluster cluster-name play kubernetes-dashboard
+kubee --cluster cluster-name helmet play kubernetes-dashboard
 ```
 
 ### Access the dashboard

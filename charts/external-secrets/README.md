@@ -24,7 +24,7 @@ It will optionally configure [vault](https://github.com/EraldyHq/kubee/blob/main
 ## Installation
 
 ```bash
-kubee helmet --cluster cluster-name play external-secrets
+kubee --cluster cluster-name helmet play external-secrets
 ```
 
 ## Values

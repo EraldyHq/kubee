@@ -33,7 +33,7 @@ mailpit:
 * Play
 
 ```bash
-kubee helmet --cluster cluster-name play mailpit
+kubee --cluster cluster-name helmet play mailpit
 ```
 
 * Once installed,

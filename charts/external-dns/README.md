@@ -98,7 +98,7 @@ external_dns:
 ### Play
 
 ```bash
-kubee helmet --cluster cluster-name play external-dns
+kubee --cluster cluster-name helmet play external-dns
 ```
 
 ## Values

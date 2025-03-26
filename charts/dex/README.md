@@ -65,7 +65,7 @@ DEX_FORWARD_AUTH_CLI_SECRET=$(pass "cluster_name/dex/forward-auth-cli-secret")
 ## Installation
 
 ```bash
-kubee helmet --cluster cluster-name play dex
+kubee --cluster cluster-name helmet play dex
 ```
 
 ## Values

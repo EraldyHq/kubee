@@ -54,7 +54,7 @@ It's implemented with the [watchdog alert](https://runbooks.prometheus-operator.
 ## Installation
 
 ```bash
-kubee helmet --cluster cluster-name play alertmanager
+kubee --cluster cluster-name helmet play alertmanager
 ```
 
 ## Values

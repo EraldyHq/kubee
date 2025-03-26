@@ -49,7 +49,7 @@ can use a remote instance such as a [Grafana Cloud instance](https://grafana.com
 ## Installation
 
 ```bash
-kubee helmet --cluster cluster-name play grafana
+kubee --cluster cluster-name helmet play grafana
 ```
 
 ## Values

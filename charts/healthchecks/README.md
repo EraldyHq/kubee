@@ -37,7 +37,7 @@ This chart aims to monitor `healthcheck.io` itself thanks to [TargetDownAlert](h
 ## Installation
 
 ```bash
-kubee helmet --cluster cluster-name play healthchecks
+kubee --cluster cluster-name helmet play healthchecks
 ```
 
 ## Values

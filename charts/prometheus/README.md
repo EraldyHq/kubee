@@ -31,7 +31,7 @@ This [jsonnet kubee chart](https://github.com/EraldyHq/kubee/blob/main/docs/site
 ## Install
 
 ```bash
-kubee helmet --cluster cluster-name play prometheus
+kubee --cluster cluster-name helmet play prometheus
 ```
 
 ## Values

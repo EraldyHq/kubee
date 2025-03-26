@@ -67,7 +67,7 @@
 
 {{ define "kubee-installation-command" }}
 ```bash
-kubee helmet --cluster cluster-name play {{ trimPrefix "kubee-" .Name }}
+kubee --cluster cluster-name helmet play {{ trimPrefix "kubee-" .Name }}
 ```
 {{end}}
 {{ define "kubee-installation-instruction" }}

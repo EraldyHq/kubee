@@ -39,7 +39,7 @@ https://github.com/lukaszbudnik/keycloak-kubernetes/blob/main/keycloak.yaml
 ## Installation
 
 ```bash
-kubee helmet --cluster cluster-name play keycloak
+kubee --cluster cluster-name helmet play keycloak
 ```
 
 ## Values

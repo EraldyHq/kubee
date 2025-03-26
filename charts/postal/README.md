@@ -64,7 +64,7 @@ dex:
 ### Install
 
 ```bash
-kubee helmet --cluster cluster-name play postal
+kubee --cluster cluster-name helmet play postal
 ```
 
 ### Create your first admin user
