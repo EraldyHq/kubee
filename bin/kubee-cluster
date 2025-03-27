@@ -26,6 +26,7 @@ Commands:
 * ping             Verify the connection to the clusters hosts
 * play             Deploy Kubernetes on the cluster hosts
 * reboot           Reboot the clusters host operating system
+* restart          Restart Kubernetes
 * shell            Get a shell in the cluster
 * upgrade          Upgrade Kubernetes on the cluster hosts
 * uninstall        Uninstall Kubernetes on the cluster hosts
