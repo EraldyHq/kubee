@@ -1,0 +1,56 @@
+# @schema
+# title: Enabled
+# type: boolean
+# required: true
+# default: false
+# @schema
+# -- Boolean to indicate that this chart is or will be installed in the cluster
+enabled: false
+# @schema
+# title: Namespace
+# description: The installation namespace
+# required: true
+# minLength: 1
+# @schema
+# -- The installation namespace
+namespace: 'kuberhealthy'
+
+# @schema
+# title: Hostname
+# description: The public hostname
+# format: hostname
+# @schema
+# -- The public hostname
+hostname: ''
+
+# @ignored
+kuberhealthy:
+  prometheus:
+    # @schema
+    # const: false
+    # @schema
+    # We create it
+    enabled: true
+    grafanaDashboard:
+      # It creates a configmap called grafana-kuberhealthy
+      enabled: true
+    serviceMonitor:
+      enabled: true
+    prometheusRule:
+      enabled: true
+  # No Check by default please
+  check:
+    daemonset:
+      enabled: false
+    deployment:
+      enabled: false
+    dnsInternal:
+      enabled: false
+# -- @ignored Internal Kubee constant
+kubee_internal:
+  # @schema
+  # const: false
+  # @schema
+  # Constant used to not output template from kubee cross dependency in Chart.yaml
+  # Don't change, don't touch
+  install_cross_dependency: false

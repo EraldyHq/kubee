@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+# This script update the version
+# and crd from the upstream traefik sub-chart
+
+source bashlib-error.sh
+error::set_strict_mode
+error::set_trap
+source bashlib-echo.sh
+source bashlib-command.sh
+
+# this works for executed script or sourced script
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+# Get the version
+VERSION=$(yq '.version' "$SCRIPT_DIR"/../Chart.yaml | tr -d '~' )
+if [ "$VERSION" == "" ]; then
+  echo::err "Unable to retrieve the version (the value was empty)"
+  exit 1
+fi
+echo::info "Updating crds for the chart $VERSION"
+
+FILES=("comcast.github.io_khchecks.yaml" "comcast.github.io_khjobs.yaml" "comcast.github.io_khstates.yaml")
+
+
+TEMPLATE_DIR="$SCRIPT_DIR/../templates"
+mkdir -p "$(dirname "$TEMPLATE_DIR")"
+for FILE in "${FILES[@]}"; do
+    TARGET="$TEMPLATE_DIR/$FILE"
+    URL="https://raw.githubusercontent.com/kuberhealthy/kuberhealthy/refs/tags/v$VERSION/deploy/helm/kuberhealthy/crds/$FILE"
+    echo::info "Download the CRD $FILE of Kuberhealthy $VERSION"
+    echo::info "Url: $URL"
+    echo::info "Target: $TARGET"
+    # curl --help http
+    # --location  to follow redirections
+    # --silent
+    # --fail Fail fast with no output on HTTP errors
+    command::echo_eval "curl --location -o $TARGET --fail $URL"
+done
+
+
+echo::success "The crds chart was updated"

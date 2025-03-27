@@ -1,0 +1,26 @@
+apiVersion: v2
+name: kubee-kuberhealthy-crds
+description: Kubee kuberhealthy Crds Chart
+
+# A chart can be either an 'application' or a 'library' chart.
+type: application
+
+# This is the chart version.
+# kuberhealthy Operator Version
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 2.8.0-rc2
+
+# This is the version number of the application being deployed.
+appVersion: "0.0.0"
+
+keywords:
+  - crds
+  - kuberhealthy
+  - kubee
+
+annotations:
+  chart.kubee/status: "stable"
+  chart.kubee/kind: "crds"
+  chart.kubee/category: "monitoring"
+  chart.kubee/engines: |
+    - helm

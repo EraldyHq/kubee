@@ -90,4 +90,4 @@ Reboot will execute the [reboot playbook](https://github.com/k3s-io/k3s-ansible/
 | hosts.servers | list | `[]` | The Servers (Mandatory) The number of hosts server must be odd to avoid split brain issues with etcd The minimum number is: - 1 for a single server cluster - 3 for a [high availability cluster](https://docs.k3s.io/datastore/ha-embedded) |
 | server_args | list | `[]` | The [k3s Server Args](https://docs.k3s.io/cli/server) Example: `--kube-apiserver-arg="admission-control-config-file=/var/lib/rancher/k3s/server/psa.yaml"` |
 | token | string | `""` | The [k3s Token](https://docs.k3s.io/cli/token) (Mandatory). A random secret value that should not change ever because it's used to encrypt the data on disk. You can generate one with `openssl rand -base64 64 | tr -d '\n'`) |
-| version | string | `"v1.32.1+k3s1"` | The [K3s version](https://github.com/k3s-io/k3s/releases) |
+| version | string | `"v1.32.2+k3s1"` | The [K3s version](https://github.com/k3s-io/k3s/releases) |

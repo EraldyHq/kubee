@@ -60,6 +60,8 @@ Because we are starting from the `simplest Kubernetes cluster` as stated in the 
 | [Healthchecks ](https://github.com/EraldyHq/kubee/blob/main/charts/healthchecks/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring  |
 | [K3s-ansible Cluster ](https://github.com/EraldyHq/kubee/blob/main/charts/k3s-ansible/README.md) | [beta](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | cluster | k3s  |
 | [Keycloak ](https://github.com/EraldyHq/kubee/blob/main/charts/keycloak/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | auth  |
+| [Kuberhealthy ](https://github.com/EraldyHq/kubee/blob/main/charts/kuberhealthy/README.md) | [beta](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | test  |
+| [kuberhealthy Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/kuberhealthy-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | monitoring  |
 | [Kubernetes Dashboard ](https://github.com/EraldyHq/kubee/blob/main/charts/kubernetes-dashboard/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | kubernetes  |
 | [Kubernetes Monitoring ](https://github.com/EraldyHq/kubee/blob/main/charts/kubernetes-monitoring/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | kubernetes  |
 | [Mailpit ](https://github.com/EraldyHq/kubee/blob/main/charts/mailpit/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | mail  |
@@ -76,7 +78,6 @@ Because we are starting from the `simplest Kubernetes cluster` as stated in the 
 | [Traefik Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/traefik-crds/README.md) | [deprecated](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | proxy  |
 | [Traefik Forward Auth ](https://github.com/EraldyHq/kubee/blob/main/charts/traefik-forward-auth/README.md) | [deprecated](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | auth  |
 | [Trust manager crds chart](https://github.com/EraldyHq/kubee/blob/main/charts/trust-manager-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | certificate  |
-
 | [Vault ](https://github.com/EraldyHq/kubee/blob/main/charts/vault/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | secret  |
 | [Whoami ](https://github.com/EraldyHq/kubee/blob/main/charts/whoami/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | http  |
 

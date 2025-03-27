@@ -1,0 +1,24 @@
+
+{{ template "kubee-header" .}}
+
+## About
+
+This app installs the [Kuberhealthy](https://kuberhealthy.github.io/kuberhealthy/) operator.
+It manages  and executes synthetic test monitoring defined in Docker images.
+
+
+## Features
+
+
+{{ template "kubee-chart-features-section" . }}
+
+
+{{ template "kubee-installation-instruction" . }}
+
+
+{{ template "chart.valuesSection" . }}
+| `kuberhealthy` | | | [Optional Kuberhealthy Operator Helm Values](https://github.com/kuberhealthy/kuberhealthy/blob/{{ template "chart.appVersion" . }}/deploy/helm/kuberhealthy/values.yaml)
+
+
+
+

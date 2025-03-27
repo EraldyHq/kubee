@@ -1,6 +1,6 @@
 apiVersion: v2
-name: kubee-grafana
-description: Kubee Grafana Chart
+name: kubee-kuberhealthy
+description: Kubee Kuberhealthy Chart
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives
@@ -18,28 +18,28 @@ version: 0.0.1
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "v5.16.0" # Grafana Operator version used in the README to get the values.yaml
+appVersion: "v2.8.0-rc2" # Kuberhealthy Operator version used in the README to get the values.yaml
 
 annotations:
-  app.kubernetes.io/name: "grafana"
+  app.kubernetes.io/name: "kuberhealthy"
   artifacthub.io/operator: "true"
-  chart.kubee/status: "stable"
+  chart.kubee/status: "beta"
   chart.kubee/kind: "app"
-  chart.kubee/category: "monitoring"
+  chart.kubee/category: "test"
   chart.kubee/engines: |
     - helm
   chart.chart.kubee/crds: |
-    - name: kubee-grafana-crds
-      version: 5.16.0
-      repository: file://../grafana-crds
+    - name: kubee-kuberhealthy-crds
+      version: 2.8.0-rc2
+      repository: file://../kuberhealthy-crds
 
 
 dependencies:
   # ie https://github.com/grafana/grafana-operator/pkgs/container/helm-charts%2Fgrafana-operator
   # https://github.com/grafana/grafana-operator/releases
-  - name: grafana-operator
-    version: "v5.16.0"
-    repository: "oci://ghcr.io/grafana/helm-charts"
+  - name: kuberhealthy
+    version: '104' # Should not be possible but it's.
+    repository: https://kuberhealthy.github.io/kuberhealthy/helm-repos
     #condition: xxx.enabled
   - name: kubee-cluster
     version: 0.0.1
@@ -59,4 +59,9 @@ dependencies:
     version: 0.0.1
     repository: file://../traefik
     alias: traefik
+    condition: kubee_internal.install_cross_dependency
+  - name: kubee-grafana
+    version: 0.0.1
+    repository: file://../grafana
+    alias: grafana
     condition: kubee_internal.install_cross_dependency
