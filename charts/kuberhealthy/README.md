@@ -8,10 +8,20 @@
 
 ## About
 
-This app installs the [Kuberhealthy](https://kuberhealthy.github.io/kuberhealthy/) operator.
-It manages  and executes synthetic test monitoring defined in Docker images.
+This [Kubee Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) installs the [Kuberhealthy](https://kuberhealthy.github.io/kuberhealthy/) operator.
+
+`Kuberhealthy`:
+* executes synthetic test monitoring
+* exports the result as Prometheus Metrics.
+
+It's a kind of [Blackbox Prometheus Exporter](https://github.com/EraldyHq/kubee/blob/main/charts/blackbox-exporter/README.md)
+where you can define your own probes.
 
 ## Features
+
+### Crds
+
+`CRDs` have been moved in their own chart and protected against unwanted deletion.
 
 ### Kubee Charts Features
 

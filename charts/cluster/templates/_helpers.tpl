@@ -89,5 +89,11 @@ include "kubee-name-prefix" (dict "Release" $.Release )
     {{- include "kubee-name" (dict "Chart" .Chart "component" "web") }}
 */}}
 {{- define "kubee-name" }}
-{{- printf "%s-%s-%s" (required "app.kubernetes.io/name chart annotation is required " (index .Chart.Annotations "app.kubernetes.io/name")) (required "component property is required " .component) (include "kubee-prefix" .)}}
+{{- $appName := required "app.kubernetes.io/name chart annotation is required " (index .Chart.Annotations "app.kubernetes.io/name")}}
+{{- $kubePrefix := include "kubee-prefix" . }}
+{{- if hasKey . "component" }}
+{{- printf "%s-%s-%s" $appName .component $kubePrefix }}
+{{- else }}
+{{- printf "%s-%s" $appName $kubePrefix }}
+{{- end }}
 {{- end }}

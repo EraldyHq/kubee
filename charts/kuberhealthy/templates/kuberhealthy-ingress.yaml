@@ -1,0 +1,33 @@
+{{- if ne .Values.hostname ""}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{include "kubee-name" .}}
+  namespace: {{ .Values.namespace }}
+  labels: {{ include "kubee-manifest-labels" . | nindent 4}}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.traefik.namespace }}-{{ .Values.traefik.auth.middleware_name }}@kubernetescrd'
+    {{- if ne .Values.cert_manager.enabled false }}
+    cert-manager.io/cluster-issuer: '{{ require "Internal: Public Issuer name should be not null" .Values.cert_manager.issuers.public.name }}'
+    {{- end }}
+spec:
+  rules:
+    - host: '{{ .Values.hostname }}'
+      http:
+        paths:
+          - backend:
+              service:
+                name: 'kuberhealthy'
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  {{- if ne .Values.cert_manager.enabled false }}
+  tls:
+    - hosts:
+        - '{{ .Values.hostname }}'
+      secretName: '{{include "kubee-name" (dict "Chart" .Chart "component" "cert") }}'
+  {{- end }}
+{{- end -}}

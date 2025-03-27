@@ -3,7 +3,9 @@
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaFolder
 metadata:
-  name: kuberhealthy
+  name: {{ include "kubee-name" . }}
+  namespace: {{.Values.namespace}}
+  labels: {{ include "kubee-manifest-labels" . | nindent 4}}
 spec:
   allowCrossNamespaceImport: true
   instanceSelector:
@@ -15,13 +17,16 @@ spec:
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:
-  name: kuberhealthy
+  name: {{ include "kubee-name" . }}
+  namespace: {{.Values.namespace}}
+  labels: {{ include "kubee-manifest-labels" . | nindent 4}}
 spec:
   allowCrossNamespaceImport: true
   instanceSelector:
     matchLabels:
       dashboards: "{{.Values.grafana.name}}"
   configMapRef:
+    {{- /* As seen in the kuberhealthy chart   */}}
     name: 'grafana-kuberhealthy'
     key: 'grafana-kuberhealthy.json'
   folderUID: {{ $folderId }}

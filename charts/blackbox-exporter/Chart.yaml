@@ -28,7 +28,7 @@ keywords:
 
 annotations:
   app.kubernetes.io/name: "blackbox"
-  chart.kubee/status: "alpha"
+  chart.kubee/status: "stable"
   chart.kubee/lead: "Check your services with HTTP, DNS, TCP, ..."
   chart.kubee/kind: "app"
   chart.kubee/category: "monitoring"

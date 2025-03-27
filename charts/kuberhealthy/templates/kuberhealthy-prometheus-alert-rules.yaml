@@ -1,0 +1,22 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ template "kubee-name" . }}
+  namespace: {{ .Values.namespace }}
+  labels: {{ include "kubee-manifest-labels" . | nindent 4}}
+spec:
+  groups:
+    - name: kuberhealthy
+      rules:
+        - alert: KuberhealthyError
+          expr: kuberhealthy_running < 1
+          for: 5m
+          annotations:
+            description: Kuberhealthy is not healthy
+        - alert: ClusterUnhealthy
+          expr: kuberhealthy_cluster_state < 1
+          for: 5m
+          annotations:
+            description: Kuberhealthy shows that the cluster is not healthy
+{{- end }}

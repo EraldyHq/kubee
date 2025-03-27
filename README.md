@@ -25,6 +25,9 @@ Because we are starting from the `simplest Kubernetes cluster` as stated in the 
 * Cluster configuration. Every chart configuration is saved in a [single cluster values file](https://github.com/EraldyHq/kubee/blob/main/docs/site/cluster-values.md)
  making it quick and easy to see the state of the cluster.
 * One-shot Chart Installation. CRDs dependencies are automatically managed.
+* Authentication Ready. All infra apps are automatically secured by authentication (`basicAuth` by default, oidc if [Dex](https://github.com/EraldyHq/kubee/blob/main/charts/dex/README.md))
+* Secure Ready. With the internal `kubee` ca, all communication are encrypted (ssl/https) and the servers get certificates that are automatically rotated.
+* Ingress Ready. Access any service by setting just the hostname.
 
 ## App examples
 
@@ -45,7 +48,7 @@ Because we are starting from the `simplest Kubernetes cluster` as stated in the 
 |-----------|---------|------|----------|
 | [AlertManager ](https://github.com/EraldyHq/kubee/blob/main/charts/alertmanager/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring  |
 | [ArgoCd ](https://github.com/EraldyHq/kubee/blob/main/charts/argocd/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | ci-cd  |
-| [BlackBox Exporter ](https://github.com/EraldyHq/kubee/blob/main/charts/blackbox-exporter/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring  |
+| [BlackBox Exporter ](https://github.com/EraldyHq/kubee/blob/main/charts/blackbox-exporter/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring  |
 | [Cert-Manager ](https://github.com/EraldyHq/kubee/blob/main/charts/cert-manager/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | certificate  |
 | [Cert-Manager Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/cert-manager-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | certificate  |
 | [Cluster ](https://github.com/EraldyHq/kubee/blob/main/charts/cluster/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | library | cluster  |
@@ -60,7 +63,7 @@ Because we are starting from the `simplest Kubernetes cluster` as stated in the 
 | [Healthchecks ](https://github.com/EraldyHq/kubee/blob/main/charts/healthchecks/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | monitoring  |
 | [K3s-ansible Cluster ](https://github.com/EraldyHq/kubee/blob/main/charts/k3s-ansible/README.md) | [beta](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | cluster | k3s  |
 | [Keycloak ](https://github.com/EraldyHq/kubee/blob/main/charts/keycloak/README.md) | [alpha](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | auth  |
-| [Kuberhealthy ](https://github.com/EraldyHq/kubee/blob/main/charts/kuberhealthy/README.md) | [beta](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | test  |
+| [Kuberhealthy ](https://github.com/EraldyHq/kubee/blob/main/charts/kuberhealthy/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | test  |
 | [kuberhealthy Crds ](https://github.com/EraldyHq/kubee/blob/main/charts/kuberhealthy-crds/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | crds | monitoring  |
 | [Kubernetes Dashboard ](https://github.com/EraldyHq/kubee/blob/main/charts/kubernetes-dashboard/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | kubernetes  |
 | [Kubernetes Monitoring ](https://github.com/EraldyHq/kubee/blob/main/charts/kubernetes-monitoring/README.md) | [stable](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) | app | kubernetes  |

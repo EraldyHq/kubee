@@ -24,6 +24,9 @@ Because we are starting from the `simplest Kubernetes cluster` as stated in the 
 * Zero configuration. The {{ template "kubee-chart-label" "kubee charts" }} being aware of each other, they are preconfigured and needs a minimal set of parameters.
 * Cluster configuration. Every chart configuration is saved in a {{ template "kubee-cluster-values-file-label" "single cluster values file" }} making it quick and easy to see the state of the cluster.
 * One-shot Chart Installation. CRDs dependencies are automatically managed.
+* Authentication Ready. All infra apps are automatically secured by authentication (`basicAuth` by default, oidc if [Dex]({{ template "kubee-chart-url"}}/dex/README.md))
+* Secure Ready. With the internal `kubee` ca, all communication are encrypted (ssl/https) and the servers get certificates that are automatically rotated.
+* Ingress Ready. Access any service by setting just the hostname.
 
 ## App examples
 
@@ -38,6 +41,7 @@ Because we are starting from the `simplest Kubernetes cluster` as stated in the 
 * No downtime thanks to [Rolling Update](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/)
 * CI/CD Deployment with [ArgoCd](charts/argocd/README.md), Flux
 
+ 
 ## List of Kubee Charts
 
 

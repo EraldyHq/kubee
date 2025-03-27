@@ -25,6 +25,16 @@ hostname: ''
 
 # @ignored
 kuberhealthy:
+  # kuberhealthy pods
+  resources:
+    requests:
+      cpu: 10m # same as black box
+      memory: 50Mi
+    limits:
+      cpu: null # no cpu limites please
+      memory: 50Mi
+  deployment:
+    replicas: 1 # 2 by default
   prometheus:
     # @schema
     # const: false
@@ -35,9 +45,19 @@ kuberhealthy:
       # It creates a configmap called grafana-kuberhealthy
       enabled: true
     serviceMonitor:
-      enabled: true
+      # @schema
+      # const: false
+      # @schema
+      # We create it
+      enabled: false
     prometheusRule:
-      enabled: true
+      # @schema
+      # const: false
+      # @schema
+      # We create it
+      enabled: false
+  podDisruptionBudget:
+      enabled: false
   # No Check by default please
   check:
     daemonset:

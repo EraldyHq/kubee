@@ -23,12 +23,12 @@ appVersion: "v2.8.0-rc2" # Kuberhealthy Operator version used in the README to g
 annotations:
   app.kubernetes.io/name: "kuberhealthy"
   artifacthub.io/operator: "true"
-  chart.kubee/status: "beta"
+  chart.kubee/status: "stable"
   chart.kubee/kind: "app"
   chart.kubee/category: "test"
   chart.kubee/engines: |
     - helm
-  chart.chart.kubee/crds: |
+  chart.kubee/crds: |
     - name: kubee-kuberhealthy-crds
       version: 2.8.0-rc2
       repository: file://../kuberhealthy-crds

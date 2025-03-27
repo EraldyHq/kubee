@@ -1,0 +1,19 @@
+{{- if .Values.prometheus.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "kubee-name" . }}
+  namespace: {{ .Values.namespace }}
+  labels: {{ include "kubee-manifest-labels" . | nindent 4}}
+spec:
+  selector:
+    matchLabels:
+      {{/* That's what used the kuberhealthy helm chart*/}}
+      app: {{ .Chart.Name }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.namespace }}
+  endpoints:
+  - port: http
+    interval: {{ .Values.prometheus.scrape_interval }}
+{{- end -}}
