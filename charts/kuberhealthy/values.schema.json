@@ -1,14 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "properties": {
-    "api_token": {
-      "default": "",
-      "description": "The auth credential (used only for an external instance). See [doc](https://grafana.com/docs/grafana-cloud/developer-resources/infrastructure-as-code/grafana-operator/operator-dashboards-folders-datasources/#grafana-operator-setup)",
-      "required": [],
-      "title": "api_token"
-    },
     "cluster": {
-      "description": "The kubee cluster chart",
+      "description": "Kubee Cluster Chart",
       "properties": {
         "auth": {
           "description": "Cluster Auth",
@@ -151,29 +145,6 @@
       "title": "kubee-cluster",
       "type": "object"
     },
-    "data_sources": {
-      "description": " The data sources created",
-      "properties": {
-        "prometheus": {
-          "properties": {
-            "name": {
-              "const": "Prometheus",
-              "default": "Prometheus",
-              "description": " const: Prometheus @schema By default, the dashboard got the source name from the prompt or from the default kuberhealthy has it hardcoded as Prometheus",
-              "required": [],
-              "title": "name"
-            }
-          },
-          "required": [],
-          "title": "prometheus",
-          "type": "object"
-        }
-      },
-      "required": [
-        "prometheus"
-      ],
-      "title": "data_sources"
-    },
     "enabled": {
       "default": false,
       "description": "Boolean to indicate that this chart is or will be installed in the cluster",
@@ -189,7 +160,7 @@
     },
     "hostname": {
       "default": "",
-      "description": "The public hostname The hostname may be used in Prometheus alert to reference dashboard For a Grafana cloud instance, you need to enter: \u003cGrafana-cloud-stack-name\u003e.grafana.net",
+      "description": "The public hostname",
       "format": "hostname",
       "required": [],
       "title": "Hostname"
@@ -208,35 +179,235 @@
       "required": [],
       "title": "kubee_internal"
     },
-    "name": {
-      "const": "grafana",
-      "default": "grafana",
-      "description": " const: grafana @schema @ignored The name of the instance (known also as label) It's used : * as selector to apply CRD objects such as Dashboard, .... to this instance. https://grafana.github.io/grafana-operator/docs/overview/#instanceselector * as the instance name",
-      "required": [],
-      "title": "name"
+    "kuberhealthy": {
+      "properties": {
+        "check": {
+          "description": "No Check by default please",
+          "properties": {
+            "daemonset": {
+              "properties": {
+                "enabled": {
+                  "default": false,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "title": "daemonset",
+              "type": "object"
+            },
+            "deployment": {
+              "properties": {
+                "enabled": {
+                  "default": false,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "title": "deployment",
+              "type": "object"
+            },
+            "dnsInternal": {
+              "properties": {
+                "enabled": {
+                  "default": false,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "title": "dnsInternal",
+              "type": "object"
+            }
+          },
+          "required": [
+            "daemonset",
+            "deployment",
+            "dnsInternal"
+          ],
+          "title": "check",
+          "type": "object"
+        },
+        "deployment": {
+          "properties": {
+            "replicas": {
+              "default": 1,
+              "required": [],
+              "title": "replicas",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "replicas"
+          ],
+          "title": "deployment",
+          "type": "object"
+        },
+        "podDisruptionBudget": {
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ],
+          "title": "podDisruptionBudget",
+          "type": "object"
+        },
+        "prometheus": {
+          "properties": {
+            "enabled": {
+              "const": false,
+              "default": "true",
+              "description": " const: false @schema We create it",
+              "required": [],
+              "title": "enabled"
+            },
+            "grafanaDashboard": {
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "description": "It creates a configmap called grafana-kuberhealthy",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "title": "grafanaDashboard",
+              "type": "object"
+            },
+            "prometheusRule": {
+              "properties": {
+                "enabled": {
+                  "const": false,
+                  "default": "false",
+                  "description": " const: false @schema We create it",
+                  "required": [],
+                  "title": "enabled"
+                }
+              },
+              "required": [],
+              "title": "prometheusRule",
+              "type": "object"
+            },
+            "serviceMonitor": {
+              "properties": {
+                "enabled": {
+                  "const": false,
+                  "default": "false",
+                  "description": " const: false @schema We create it",
+                  "required": [],
+                  "title": "enabled"
+                }
+              },
+              "required": [],
+              "title": "serviceMonitor",
+              "type": "object"
+            }
+          },
+          "required": [
+            "grafanaDashboard",
+            "serviceMonitor",
+            "prometheusRule"
+          ],
+          "title": "prometheus",
+          "type": "object"
+        },
+        "resources": {
+          "description": "kuberhealthy pods",
+          "properties": {
+            "limits": {
+              "properties": {
+                "cpu": {
+                  "default": "null",
+                  "required": [],
+                  "title": "cpu",
+                  "type": "null"
+                },
+                "memory": {
+                  "default": "50Mi",
+                  "required": [],
+                  "title": "memory",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "title": "limits",
+              "type": "object"
+            },
+            "requests": {
+              "properties": {
+                "cpu": {
+                  "default": "10m",
+                  "required": [],
+                  "title": "cpu",
+                  "type": "string"
+                },
+                "memory": {
+                  "default": "50Mi",
+                  "required": [],
+                  "title": "memory",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "title": "requests",
+              "type": "object"
+            }
+          },
+          "required": [
+            "requests",
+            "limits"
+          ],
+          "title": "resources",
+          "type": "object"
+        }
+      },
+      "required": [
+        "resources",
+        "deployment",
+        "prometheus",
+        "podDisruptionBudget",
+        "check"
+      ],
+      "title": "kuberhealthy",
+      "type": "object"
     },
     "namespace": {
-      "default": "grafana",
+      "default": "kuberhealthy",
       "description": "The installation namespace",
       "minLength": 1,
       "required": [],
       "title": "Namespace"
-    },
-    "type": {
-      "default": "internal",
-      "description": "The type of instance: * internal: installation of grafana in the cluster. * external: grafana api (for instance: grafana cloud instance, if external, the `api_token` is mandatory). An empty type does not install any instance",
-      "enum": [
-        "internal",
-        "external",
-        ""
-      ],
-      "required": [],
-      "title": "type"
     }
   },
   "required": [
     "enabled",
-    "namespace"
+    "namespace",
+    "kuberhealthy"
   ],
   "type": "object"
 }

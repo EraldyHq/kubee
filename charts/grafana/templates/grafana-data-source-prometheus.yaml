@@ -11,11 +11,15 @@ spec:
     matchLabels:
       dashboards: "{{ .Values.name }}"
   datasource:
-    name: {{ .Values.data_sources.prometheus.name }} # used by default by mixins
-    isDefault: true # sometimes they use just default
+    {{- /* this is it, this is the name seen in the prompt ....    */}}
+    uid: {{ .Values.data_sources.prometheus.name }}
+    {{- /* this is a display name, seen only on the edit form  */}}
+    name: {{ .Values.data_sources.prometheus.name }}
+    {{- /* sometimes dashboard use just default */}}
+    isDefault: true
     type: prometheus
     access: proxy
-    {{/* prometheus-name is the default name of kube-prometheus */}}
+    {{- /* prometheus-name is the default name of kube-prometheus */}}
     url: http://prometheus-{{ .Values.prometheus.name }}.{{ .Values.prometheus.namespace }}:9090
     jsonData:
       'tlsSkipVerify': true

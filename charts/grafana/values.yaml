@@ -53,9 +53,11 @@ api_token: ''
 data_sources:
   prometheus:
     # @schema
-    # const: prometheus
+    # const: Prometheus
     # @schema
-    name: 'prometheus'
+    # By default, the dashboards got the source name from the prompt or from the default
+    # kuberhealthy has it hardcoded as Prometheus
+    name: 'Prometheus'
 
 
 # -- @ignored Internal Kubee constant
