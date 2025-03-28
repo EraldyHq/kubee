@@ -1,23 +1,19 @@
 {{- if ne .Values.prometheus.enabled false -}}
-
+{{- $component := "metrics" }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "traefik-name-prefix" . }}-metrics
+  name: {{ include "kubee-name" (dict "Chart" .Chart "component" $component) }}
   namespace: {{ .Values.namespace }}
-  labels:
-    app.kubernetes.io/name: traefik
-    app.kubernetes.io/instance: {{ .Release.name }}
-    app.kubernetes.io/component: metrics
+  labels: {{ include "kubee-manifest-labels" (dict "Chart" $.Chart "Release" $.Release "component" $component) | nindent 4}}
 spec:
   type: ClusterIP
   selector:
     app.kubernetes.io/name: traefik
-    app.kubernetes.io/instance: traefik-kube-system
+    app.kubernetes.io/instance: 'traefik-{{.Values.namespace}}'
   ports:
   - port: 9100
     name: "metrics"
     targetPort: metrics
     protocol: TCP
-
 {{- end }}

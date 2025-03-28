@@ -1,19 +1,18 @@
 {{/* If not enabled=false*/}}
 {{- if ne .Values.prometheus.enabled false -}}
-
+{{ $component := "metrics" }}
 # https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#use-prometheus-operator
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: '{{ include "traefik-name-prefix" . }}'
   namespace: '{{ .Values.namespace }}'
-  labels:
-    app.kubernetes.io/name: '{{ .Release.Name }}'
+  labels: {{- include "kubee-manifest-labels" (dict "Chart" $.Chart "Release" $.Release "component" $component) | nindent 4}}
 spec:
   endpoints:
     - port: metrics
       path: /metrics
-      interval: 30s
+      interval: {{.Values.prometheus.scrape_interval}}
       # With true, Prometheus takes the service label of Traefik and not of the server (ie the kubernetes service)
       # If you don't see the traefik service but the kube service in the prometheus promql editor, there may be a cache
       # check with the remote_write config
@@ -36,12 +35,11 @@ spec:
         - sourceLabels: [ __name__ ]
           regex: "traefik_(.*)"
           action: keep
-  #  namespaceSelector:
-  #    matchNames:
-  #      - Release.Namespace
+  namespaceSelector:
+      matchNames:
+        - {{.Values.namespace}}
   selector:
-    matchLabels:
-      app.kubernetes.io/name: '{{ .Release.Name }}'
-      app.kubernetes.io/component: metrics
+    matchLabels: {{- include "kubee-matched-labels" (dict "Chart" $.Chart "Release" $.Release "component" $component) | nindent 6}}
+
 
 {{- end -}}
