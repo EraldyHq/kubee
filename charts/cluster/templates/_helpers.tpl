@@ -13,7 +13,14 @@ https://helm.sh/docs/chart_template_guide/named_templates/#declaring-and-using-t
 {{- end }}
 
 
-
+{{/*
+    Grafana Uid
+    The uid can have a maximum length of 40 characters and helm does not have a md5 function
+    https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#identifier-id-vs-unique-identifier-uid
+*/}}
+{{- define "kubee-grafana-uid" }}
+{{- . | sha1sum | substr 0 40 }}
+{{- end }}
 
 
 {{/*
@@ -47,10 +54,7 @@ include "kubee-name-prefix" (dict "Release" $.Release )
     https://helm.sh/docs/chart_best_practices/labels/#standard-labels
     Component name should be a property
     Usage Example:
-    {{- include "kubee-manifest-labels" (merge . (dict "component" "web")) }}
-    or
-    {{ $ := mergeOverwrite $ (dict "component" "cloudflare") }}
-    {{- include "kubee-manifest-labels" $ | indent 4}}
+    {{- include "kubee-manifest-labels" (dict "Chart" $.Chart "Release" $.Release "component" "web") }}
     
     app/name is used by old cli as default such as kubenav for pod selection of Prometheus
 */}}
@@ -72,9 +76,22 @@ include "kubee-name-prefix" (dict "Release" $.Release )
     Component name should be a property
     App version is not needed to make the pod unique as it's part of the Release Name
     Usage Example:
-    {{- include "kubee-pod-labels" (merge . (dict "component" "web")) }}
+    {{- include "kubee-pod-labels" (dict "Chart" $.Chart "Release" $.Release "component" "web") }}
 */}}
 {{- define "kubee-pod-labels" }}
+{{ printf "app.kubernetes.io/name: %s" (required "app.kubernetes.io/name chart annotation is required " (index .Chart.Annotations "app.kubernetes.io/name")) }}
+{{- if hasKey . "component" }}
+{{ printf "app.kubernetes.io/component: %s" (required "component property is required " .component)}}
+{{- end}}
+{{ printf "app.kubernetes.io/instance: %s" .Release.Name }}
+{{- end }}
+
+{{/*
+    Return the matched labels for a resource
+    Usage Example:
+    {{- include "kubee-matched-labels" (dict "Chart" $.Chart "Release" $.Release "component" "web") }}
+*/}}
+{{- define "kubee-matched-labels" }}
 {{ printf "app.kubernetes.io/name: %s" (required "app.kubernetes.io/name chart annotation is required " (index .Chart.Annotations "app.kubernetes.io/name")) }}
 {{- if hasKey . "component" }}
 {{ printf "app.kubernetes.io/component: %s" (required "component property is required " .component)}}
