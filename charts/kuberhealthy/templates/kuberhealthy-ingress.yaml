@@ -10,7 +10,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.middlewares: '{{ .Values.traefik.namespace }}-{{ .Values.traefik.auth.middleware_name }}@kubernetescrd'
     {{- if ne .Values.cert_manager.enabled false }}
-    cert-manager.io/cluster-issuer: '{{ require "Internal: Public Issuer name should be not null" .Values.cert_manager.issuers.public.name }}'
+    cert-manager.io/cluster-issuer: '{{ required "Internal: Public Issuer name should be not null" .Values.cert_manager.issuers.public.name }}'
     {{- end }}
 spec:
   rules:
