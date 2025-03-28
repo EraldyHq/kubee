@@ -62,8 +62,9 @@ retention: '30m'
 max_block_duration: '30m'
 # -- The default scrape interval for target
 # It does influence memory as Prometheus keeps by default 2 hours of scraping in memory (max_block_duration)
-# Default was 30s.
-scrape_interval: '1m'
+# Default was 30s. Don't go above or equal to 1 m. Otherwise, dashboards that shows data at the 1m interval may not show any data.
+scrape_interval: '55s'
+# Example: Traefik dashboard interval (auto or 1m is 1m)
 
 # @ignored Exporter authentication.
 # This is a global authentication configuration for all exporters

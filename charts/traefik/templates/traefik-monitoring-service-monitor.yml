@@ -24,13 +24,17 @@ spec:
       # not that service is the traefik service and not the kube server thanks to `honorLabels: true`
       relabelings:
         - action: labeldrop
-          regex: '^(pod|job|namespace|container)$'
+          # We don't delete pod here because
+          # job is mandatory for the grafana dashboard mixin
+          regex: '^(pod|namespace|container)$'
       metricRelabelings:
         # We can delete this labels only after the scrape
         # because they are the URI information of the scrape
         # `instance` (hostname) and `endpoint` (port)
         - action: labeldrop
-          regex: '^(instance|endpoint)$'
+          # We don't delete instance here because
+          # instance is mandatory for the grafana dashboard mixin
+          regex: '^(endpoint)$'
         # Keep the `traefik_*` metrics, drop all internal exporter metrics (go, prom, ...)
         - sourceLabels: [ __name__ ]
           regex: "traefik_(.*)"
