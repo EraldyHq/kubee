@@ -214,9 +214,15 @@
         },
         "memory": {
           "default": "50Mi",
-          "description": "The max memory of the exporter",
+          "description": "The max memory of the exporter (without optimization, minimum 150Mi to allow the memory spike at startup)",
           "required": [],
           "title": "memory"
+        },
+        "memory_optimization": {
+          "default": "true",
+          "description": "Optimize memory. This exporter has a [memory spike](https://github.com/kubernetes/kube-state-metrics/issues/958) at startup due to config map and secrets loading.",
+          "required": [],
+          "title": "memory_optimization"
         },
         "scrape_interval": {
           "default": "60s",

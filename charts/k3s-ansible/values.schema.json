@@ -100,7 +100,7 @@
       "title": "token"
     },
     "version": {
-      "default": "v1.32.1+k3s1",
+      "default": "v1.32.2+k3s1",
       "description": "The [K3s version](https://github.com/k3s-io/k3s/releases)",
       "required": [],
       "title": "version"

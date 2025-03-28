@@ -548,8 +548,8 @@
               "type": "boolean"
             },
             "probe_failed_interval": {
-              "default": "1m",
-              "description": "The period in minutes to consider for any probe to fail",
+              "default": "2m",
+              "description": "The period in minutes to consider for any probe to fail 2m to take into account dns server or tcp failure a dns probe takes on average 25ms",
               "required": [],
               "title": "probe_failed_interval"
             }

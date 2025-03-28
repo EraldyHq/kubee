@@ -160,7 +160,7 @@
     },
     "hostname": {
       "default": "",
-      "description": "The public hostname (install an ingress if not empty)",
+      "description": "The public hostname (Create an authenticated ingress if not empty)",
       "format": "hostname",
       "minLength": 1,
       "required": [],
@@ -186,6 +186,44 @@
       "minLength": 1,
       "required": [],
       "title": "Namespace"
+    },
+    "persistence": {
+      "description": "Enable Metrics Persistence on a volume",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "description": "Enable",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "interval": {
+          "default": "5m",
+          "description": "Interval to flush the metrics to the persistence file.",
+          "required": [],
+          "title": "interval",
+          "type": "string"
+        },
+        "size": {
+          "default": "50Mi",
+          "description": "Size of the volume",
+          "required": [],
+          "title": "size",
+          "type": "string"
+        },
+        "storage_class": {
+          "default": "local-path",
+          "description": " By default, [k3s local-path](https://docs.k3s.io/storage#setting-up-the-local-storage-provider)",
+          "required": [],
+          "title": "storage_class"
+        }
+      },
+      "required": [
+        "enabled",
+        "size",
+        "interval"
+      ],
+      "title": "persistence"
     },
     "version": {
       "default": "v1.10.0",
