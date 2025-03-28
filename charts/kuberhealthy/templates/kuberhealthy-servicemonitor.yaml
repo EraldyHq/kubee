@@ -8,8 +8,8 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{/* That's what used the kuberhealthy helm chart*/}}
-      app: {{ .Chart.Name }}
+      {{- /* kuberhealthy uses {{ .Chart.Name }} that becomes kuberhealthy */}}
+      app: 'kuberhealthy'
   namespaceSelector:
     matchNames:
       - {{ .Values.namespace }}

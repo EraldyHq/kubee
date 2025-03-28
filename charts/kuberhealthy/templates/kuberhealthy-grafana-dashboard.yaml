@@ -1,5 +1,6 @@
 {{- if eq .Values.grafana.enabled true }}
-{{ $folderId := sha256sum "folder-kuberhealthy" }}
+{{- /* The uid can have a maximum length of 40 characters. */}}
+{{- $folderId := include "kubee-grafana-uid" "folder-kuberhealthy" }}
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaFolder
 metadata:
