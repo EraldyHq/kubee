@@ -44,6 +44,7 @@ fi
 # @args $1 - the release name
 # @args $2 - the release namespace
 # @args $3 - the release version that should be installed
+# @args $4 - the chart name in Chart.yaml
 # @exitcode 1 - if the chart is not installed or with another app version or any fatal error
 is_helm_chart_installed() {
 
@@ -54,6 +55,8 @@ is_helm_chart_installed() {
   # NAME                    NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                           APP VERSION
   # mariadb-operator-crds   mariadb         1               2025-03-08 12:34:19.800138202 +0100 CET deployed        mariadb-operator-crds-0.37.1    0.0.0
   local CHART_RELEASE_VERSION="$3"
+  local CHART_YAML_NAME="$4"
+
 
   if [ "$CHART_RELEASE_NAME" == "" ]; then
     echo::err "Internal: the release name should not be empty"
@@ -90,11 +93,14 @@ is_helm_chart_installed() {
     exit 1
   fi
 
-  # example value for ACTUAL_CHART_NAME: kubee-cert-manager-crds-1.17.1
-  # we take the last part
-  local ACTUAL_CHART_RELEASE_VERSION=${ACTUAL_CHART_NAME##*-}
+
+  # `helm list` does not give back the version, we need to derive it from the `chart` property value (ie ACTUAL_CHART_NAME)
+  # ACTUAL_CHART_NAME: kubee-cert-manager-crds-1.17.1-xxx
+  # We take don't take the last part because semver allows also a `-` sep
+  # CHART_YAML_NAME=kubee-cert-manager-crds
+  local ACTUAL_CHART_RELEASE_VERSION=${ACTUAL_CHART_NAME#"${CHART_YAML_NAME}-"}
   if [[ "$ACTUAL_CHART_RELEASE_VERSION" != "$CHART_RELEASE_VERSION" ]]; then
-    echo::info "Chart app version mismatch for release $CHART_RELEASE_NAME (Actual Version: $ACTUAL_CHART_RELEASE_VERSION. Asked Version: $CHART_RELEASE_VERSION)"
+    echo::info "Chart app version mismatch for chart $CHART_YAML_NAME, release $CHART_RELEASE_NAME (Actual Version: $ACTUAL_CHART_RELEASE_VERSION. Asked Version: $CHART_RELEASE_VERSION)"
     return 1
   fi
 
@@ -361,7 +367,7 @@ kubee_crds_function(){
       HELM_CHART_CRDS_RELEASE_NAME="${HELM_CHART_CRDS_RELEASE_NAME#kubee-}"
     fi
 
-    if is_helm_chart_installed "$HELM_CHART_CRDS_RELEASE_NAME" "$CHART_NAMESPACE" "$HELM_CHART_CRDS_VERSION"; then
+    if is_helm_chart_installed "$HELM_CHART_CRDS_RELEASE_NAME" "$CHART_NAMESPACE" "$HELM_CHART_CRDS_VERSION" "$HELM_CHART_CRDS_NAME"; then
       echo::debug "CRD Chart Release $HELM_CHART_CRDS_RELEASE_NAME is already installed in the namespace $CHART_NAMESPACE with the appVersion $HELM_CHART_CRDS_VERSION"
       continue
     fi
