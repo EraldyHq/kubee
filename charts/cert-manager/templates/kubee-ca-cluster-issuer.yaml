@@ -32,7 +32,7 @@ spec:
     organizations:
       - cluster.local
       - cert-manager
-  duration: '87600h'  # ie 3650 days, 10 years, default to 90 days
+  duration: '87600h'  # ie 3650 days, 10 years, default to 90 days. same as k3s ;) https://docs.k3s.io/advanced
   issuerRef:
     kind: Issuer
     name: {{ include "kubee-name" . }}
