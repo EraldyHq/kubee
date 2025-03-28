@@ -43,3 +43,11 @@ argocd admin notifications template get
 The ArgoCd version is:
 * in the [URL path of the kustomization file](../kustomization.yml)
 * in the [appVersion of the Chart manifest](../Chart.yaml)
+
+## Support
+
+### On Upgrade, ArgoCd Controller 
+
+ArgoCd Controller may need to:
+* be restarted manually as it's a statefulset
+* or even to delete the pods to update it
