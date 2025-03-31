@@ -1,4 +1,6 @@
 .helmignore
+.gitignore
 out
 vendors
 contrib
+README.md.gotmpl

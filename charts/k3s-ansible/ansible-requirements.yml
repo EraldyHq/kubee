@@ -1,6 +1,3 @@
-# Roles
-# https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#installing-multiple-roles-from-a-file
-
 # Doc: Collections
 # https://docs.ansible.com/ansible/latest/collections_guide/collections_installing.html#install-multiple-collections-with-a-requirements-file
 collections:

@@ -6,67 +6,20 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
 
 
 
-# @internal
-synopsis(){
-
-local CLI_NAME;
-CLI_NAME=$(basename "$(script::get_actual_script)" | tr "-" " ")
-cat << EOT
-
-$CLI_NAME - Cluster Management
-
-Usage:
-\`\`\`bash
-$CLI_NAME command
-\`\`\`
-
-Commands:
-
-* conf             Print the cluster configuration
-* ping             Verify the connection to the clusters hosts
-* play             Deploy Kubernetes on the cluster hosts
-* reboot           Reboot the clusters host operating system
-* restart          Restart Kubernetes
-* shell            Get a shell in the cluster
-* upgrade          Upgrade Kubernetes on the cluster hosts
-* uninstall        Uninstall Kubernetes on the cluster hosts
-
-Options:
-
-* -h --help        Show this help message
-
-
-EOT
-}
-
-
 
 # Assign the first argument to a string
 CLUSTER_COMMAND="${1:-}"
-if [ "$CLUSTER_COMMAND" = "" ]; then
-    synopsis
-    echo::err "A command is mandatory"
-    exit 1
-fi
-shift  # Remove the first argument from the argument list
-
-# Help Asked should not fail for the doc
-# We test if before the error warning
-if [[ $CLUSTER_COMMAND =~ help|-h|--help ]]; then
-  doc::help synopsis
-  exit
-fi
-
-if [[ $CLUSTER_COMMAND == "synopsis" ]]; then
-  synopsis
-  exit
+if [ "$CLUSTER_COMMAND" != "" ]; then
+  shift  # Remove the first argument from the argument list
 fi
 
 
 
 case $CLUSTER_COMMAND in
-"play"|"conf"|"inv"|"inventory"|"upgrade"|"ping"|"reboot"|"uninstall"|"restart")
-
+  "shell")
+    source kubee-app-shell "busybox" "$@" || error::exit $?
+    ;;
+  *)
     # K3s Cluster Chart Values
     CLUSTER_CHART=$(kubee::print_chart_values "cluster" | yq '.chart')
 
@@ -79,11 +32,5 @@ case $CLUSTER_COMMAND in
     echo::eval "source kubee-helmet $* $CLUSTER_COMMAND $CLUSTER_CHART" || error::exit $?
 
     ;;
-"shell")
-    source kubee-app-shell "busybox" "$@" || error::exit $?
-    ;;
-*)
-  doc::help synopsis
-  echo::err "Command $CLUSTER_COMMAND is unknown"
-  exit 1
+
 esac

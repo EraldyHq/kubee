@@ -9,10 +9,10 @@ synopsis(){
 
   cat << EOF
 
-  Manage a k3s cluster with k3s-ansible (https://github.com/k3s-io/k3s-ansible)
+Manage a k3s cluster with the \`k3s-ansible\` cluster chart
 
 \`\`\`bash
-kubee-driver command
+kubee cluster command
 \`\`\`
 
 where:
@@ -21,11 +21,12 @@ where:
   * \`conf\`               - Print the inventory file
   * \`ping\`               - Verify the connection to the hosts
   * \`play\`               - Upgrade or install k3s
-  * \`reboot\`             - Restart k3s
+  * \`restart\`            - Restart k3s
   * \`reboot\`             - Reboot the hosts
+  * \`rotate-certs\`       - Rotate certs (Stop, rotate and start k3s)
+  * \`shell\`              - Get a shell in the cluster
   * \`uninstall\`          - Uninstall k3s
   * \`upgrade\`            - Upgrade k3s
-
 
 EOF
 
@@ -53,7 +54,7 @@ ansible_inventory_file(){
        BASHLIB_INFRA_TEMPLATE_LEVEL=$BASHLIB_ECHO_LEVEL
      fi
      if ! echo::eval "BASHLIB_ECHO_LEVEL=$BASHLIB_INFRA_TEMPLATE_LEVEL; source kubee-helmet-helm template -s templates/ansible-inventory.yml 2>$COMMAND_STDOUT_FD >| $KUBEE_INVENTORY_FILE"; then
-       echo::err "An error occurred while templating the infra chart"
+       echo::err "An error occurred while templating the k3s-ansible chart"
        return 1
      fi
      echo "$KUBEE_INVENTORY_FILE"
@@ -102,6 +103,16 @@ restart(){
   fi
   set_private_key_file
   ansible-playbook -i "$inventory" ans_e.ans_e_base.kubee_restart.yml
+}
+
+
+rotate_certs(){
+  if ! inventory=$(ansible_inventory_file); then
+      echo::err "Error while generating the ansible inventory file"
+      return 1
+  fi
+  set_private_key_file
+  ansible-playbook -i "$inventory" ans_e.ans_e_base.kubee_rotate_certs.yml
 }
 
 
@@ -182,10 +193,19 @@ set_private_key_file(){
   fi
 }
 
+install_collections_required(){
+  echo::debug "Installing ansible collections requirements:"
+  local SCRIPT_DIR
+  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  ansible-galaxy install -r "$SCRIPT_DIR/../ansible-requirements.yml" > "$COMMAND_STDOUT_FD"
+}
 
 main(){
 
   echo::debug "Starting k3s-ansible driver with the args: $*"
+
+  # Making sure that we have the required collections
+  install_collections_required
 
   while [[ $# -gt 0 ]]
     do
@@ -210,6 +230,10 @@ main(){
             reboot
             return
             ;;
+          "rotate-certs")
+            rotate_certs
+            return
+            ;;
           "ping")
             ping
             return
@@ -218,7 +242,7 @@ main(){
             restart
             return
             ;;
-          "--help"|"-h"|"help")
+          "--help"|"-h"|"help"|"synopsis")
             synopsis
             return
             ;;
