@@ -20,6 +20,8 @@ Because we are starting from the `simplest Kubernetes cluster` as stated in the 
 
 ## Features
 
+Works out of the box
+
 * Single node Kubernetes with a goal on low memory consumption. A single node can host 110 containers, that's a lot of applications.
 * Zero configuration. The [kubee charts](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) being aware of each other, they are preconfigured and needs a minimal set of parameters.
 * Cluster configuration. Every chart configuration is saved in a [single cluster values file](https://github.com/EraldyHq/kubee/blob/main/docs/site/cluster-values.md)
