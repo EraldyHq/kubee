@@ -161,7 +161,7 @@ if values.blackbox_conf_enabled == false then ['ConfigMap'] else []
     mixin: (import 'blackbox-exporter-mixin/mixin.libsonnet') + {
       _config+:: {
         grafanaUrl: 'https://' + values.grafana_hostname,
-        mixin_probeFailedInterval: values.probe_failed_interval,
+        probeFailedInterval: values.mixin_probe_failed_interval,
         blackboxExporterSelector: '',  // job value is not "blackbox-exporter" but the name of the CRD Probe ie probe/namespace/prob-crd-name
       },
     },
