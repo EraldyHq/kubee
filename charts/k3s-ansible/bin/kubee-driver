@@ -20,7 +20,7 @@ where:
   * \`install\`            - Install k3s
   * \`conf\`               - Print the inventory file
   * \`ping\`               - Verify the connection to the hosts
-  * \`play\`               - Upgrade or install k3s
+  * \`play\`               - Upgrade or install k3s (and upgrade os packages)
   * \`restart\`            - Restart k3s
   * \`reboot\`             - Reboot the hosts
   * \`rotate-certs\`       - Rotate certs (Stop, rotate and start k3s)
