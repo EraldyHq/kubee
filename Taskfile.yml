@@ -93,3 +93,9 @@ tasks:
         # Path argument in helm-docs should be relative to chart-search-root (not absolute ...)
         (cd $OUTPUT_DIR; helm-docs --template-files={{.TASK_DIR}}/.helm-docs/helm-docs-extra-templates.gohtml --template-files=README.md.gotmpl)
         cp "$OUTPUT_DIR/README.md" "README.md"
+  # Doc formatting
+  # Does not verify the links ...
+  doc-lint:
+    cmds:
+      - |
+        markdownlint docs/site/cluster-creation.md
