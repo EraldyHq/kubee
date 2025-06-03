@@ -31,6 +31,16 @@ Works out of the box
 * Secure Ready. With the internal `kubee` ca, all communication are encrypted (ssl/https) and the servers get certificates that are automatically rotated.
 * Ingress Ready. Access any service by setting just the hostname.
 
+## BYOC: Bring your own cloud
+
+kubee is a Bring Your Own Cloud (BYOC) app that allows you
+to run applications using your own cloud infrastructure
+and resources rather than relying on
+a third-party vendor.
+
+BYOC, the Next Evolution of SaaS
+https://thenewstack.io/saas-is-broken-why-bring-your-own-cloud-byoc-is-the-future/
+
 ## App examples
 
 * `Admin Dashboard` with [Kubernetes Dashboard](./charts/kubernetes-dashboard)
