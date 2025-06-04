@@ -173,3 +173,10 @@ Note: They update the image tag with this [script](https://github.com/cert-manag
 
 * Headlamp Plugin
 * Kubenav Plugin
+
+## Support
+
+### CertManagerCertExpirySoon
+
+The `certmanager_certificate_expiration_timestamp_seconds` is the `Not After`
+(some it's not updated, restarting cert-manager solves the problem)
