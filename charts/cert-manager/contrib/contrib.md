@@ -93,7 +93,7 @@ as the issuer with `letsencrypt`, ie
 
 They use a keep policy on each CRD to not delete them if the chart is deleted.
 Example:
-```gotemplate`
+```gotemplate
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -168,3 +168,8 @@ defaultPackageImage:
 Note: They update the image tag with this [script](https://github.com/cert-manager/trust-manager/blob/v0.16.0/make/debian-trust-package-fetch.sh) in this [file](https://github.com/cert-manager/trust-manager/blob/v0.16.0/make/00_debian_bookworm_version.mk)
 
 [Ref Documentation](https://cert-manager.io/docs/trust/trust-manager/#securely-maintaining-a-trust-manager-installation)
+
+### UI
+
+* Headlamp Plugin
+* Kubenav Plugin

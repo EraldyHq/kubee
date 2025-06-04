@@ -147,6 +147,9 @@ case "$KUBEE_COMMAND" in
   "cert")
     source kubee-cert "$@" || error::exit $?
     ;;
+  "cmctl")
+      source kubee-cmctl "$@" || error::exit $?
+      ;;
   "jwt")
       # Deprecated
       source kubee-jwt "$@" || error::exit $?

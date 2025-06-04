@@ -14,7 +14,7 @@ source "kubee-lib.sh"
 synopsis(){
   cat <<EOF
 \`\`\`bash
-$(basename "$0") [-n|--namespace namespaceName] [cmctl args]
+$(basename "$0") cmctl args
 \`\`\`
 
 A kubee wrapper around [cmctl](https://cert-manager.io/docs/reference/cmctl/)
@@ -22,58 +22,30 @@ A kubee wrapper around [cmctl](https://cert-manager.io/docs/reference/cmctl/)
 EOF
 }
 
+
 if [ "${1:-}" == "synopsis" ]; then
   synopsis
   exit
 fi
 
-args=()
+args=("$@")
 
-KUBEE_APP_NAMESPACE=${KUBEE_APP_NAMESPACE:-}
+# Parsing
 while [[ $# -gt 0 ]]
 do
    case  "$1" in
-    -n|--namespace)
-      shift
-      if [ "${1:-}" == "" ]; then
-        echo::err "The -n or --namespace flag expects a value"
-        exit 1
-      fi
-      KUBEE_APP_NAMESPACE="$1"
-      ;;
-    --all-namespaces)
-      # The created kubeconfig needs a namespace
-      # In a all-namespace query we set it to default
-      KUBEE_APP_NAMESPACE="default"
-      args+=("$1")
-      ;;
-    *)
-      args+=("$1")
+    --help|-h)
+      cmctl --help
+      echo::echo ""
+      echo::echo "kubee cmctl allows also kubee global flag such as cluster"
+      echo::echo "ie"
+      echo::echo "kubee --cluster cluster_name cmctl ..."
+      exit 0
       ;;
    esac
    shift
 done
 
 
-
-# Get env
-# Get env
-source kubee-env || error::exit $?
-
-
-
-
-###########################
-# Connection test
-###########################
-# We test the connection because otherwise the user
-# may get a message that a resource could not be found
-# where the culprit should have been the connection
-# Test Connection
-# Debug
-if [ "$BASHLIB_ECHO_LEVEL" == "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
-  kube::test_connection
-fi
-
-
-cmctl "${args[@]}"
+kubee::set_kubeconfig_env
+echo::eval "cmctl ${args[*]}"
