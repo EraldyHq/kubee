@@ -157,6 +157,17 @@ apply(){
         ;;
   esac
 
+  # Update dependencies if they are missing in the charts dir
+  # We use our own to create symlinks so that an update is reflected
+  #
+  # Helm note: With --dependency-update, it will create the Chart.lock
+  # HELM_COMMAND+=("--dependency-update")
+  # The subdirectory (not local as it's used in sub function)
+  CHART_CHARTS_DIRECTORY="$CHART_DIRECTORY/charts"
+  if [ -z "$(ls -A "$CHART_CHARTS_DIRECTORY" 2>/dev/null)" ]; then
+      # directory does not exists or is empty
+      update-dependencies
+  fi
   # values and namespace
   # For all chart expected for crd chart, the values and namespace
   # should be given
@@ -168,16 +179,12 @@ apply(){
     # App executions
     HELM_COMMAND+=("-f" "${CHART_VALUES_PATH}")
 
-    # Update dependencies if they are missing in the charts dir
-    # It will create the Chart.lock
-    # HELM_COMMAND+=("--dependency-update")
-
   fi
 
   # Post renderer
-
+  # Script dir if the bin directory is not in the path it would not work
   HELM_COMMAND+=(
-    "--post-renderer" "kubee-helm-post-renderer"
+    "--post-renderer" "$KUBEE_BIN/kubee-helm-post-renderer"
     "--post-renderer-args" "--chart-dir=$CHART_DIRECTORY"
     "--post-renderer-args" "--chart-namespace=$CHART_NAMESPACE"
     "--post-renderer-args" "--chart-output-dir=$CHART_OUTPUT_DIR"
@@ -416,7 +423,6 @@ update-dependencies(){
 
 
   # The charts dependency directory
-  local CHART_CHARTS_DIRECTORY="$CHART_DIRECTORY/charts"
   if [ "${OPTION_FORCE:-}" != "" ]; then
     echo::debug "Force called, deleting the charts directory"
     echo::eval "rm -rf $CHART_CHARTS_DIRECTORY"
