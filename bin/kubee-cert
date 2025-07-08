@@ -62,8 +62,6 @@ fi
 # Print the CA and TLS cert of a secret in plain text
 function print_cert_secret(){
 
-  # This is a kubectl command - set kubeconfig
-  kubee::set_kubeconfig_env
 
   local SECRET_NAME=""
   local SECRET_NAMESPACE=${KUBEE_CONNECTION_NAMESPACE}
@@ -161,6 +159,8 @@ if [ "$COMMAND" == "" ]; then
 fi
 shift
 
+# This is a kubectl wrapper command - set kubeconfig
+kubee::set_kubeconfig_env
 
 case "$COMMAND" in
   "config-client")
@@ -179,9 +179,6 @@ case "$COMMAND" in
     # see also
     # kubectl describe certificate xxxx
     ;;
-  "verify_jwt")
-    verify_jwt "$@"
-  ;;
   *)
     doc::help synopsis
     echo::err "command $COMMAND not found"

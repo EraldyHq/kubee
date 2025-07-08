@@ -30,25 +30,35 @@ It's a `zero-trust` connection tool.
 
 ## How to create the secrets in path
 
- ```bash
- # Set the config where to extract the information
- export KUBECONFIG="$HOME/.kube/config"
- # The pass home directory (default to kubee)
- export KUBEE_PASS_HOME="kubee"
+```bash
+# Set the config where to extract the information
+export KUBECONFIG="$HOME/.kube/config"
+# The pass home directory (default to kubee)
+export KUBEE_PASS_HOME="kubee"
 
- # Get the cluster and user name from the KUBECONFIG
- # or set your own
- KUBEE_CLUSTER_NAME=$(kubectl config view --minify --raw --output 'jsonpath={$.clusters[0].name}')
- KUBEE_USER_NAME=$(kubectl config view --minify --raw --output 'jsonpath={$.users[0].name}')
+# Get the cluster and user name from the KUBECONFIG
+# or set your own
+KUBEE_CLUSTER_NAME=$(kubectl config view --minify --raw --output 'jsonpath={$.clusters[0].name}')
+KUBEE_USER_NAME=$(kubectl config view --minify --raw --output 'jsonpath={$.users[0].name}')
 
- # Store the user and cluster properties in path
- kubectl config view --minify --raw --output 'jsonpath={$.users[0].client-certificate-data}' | pass insert -m "$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-certificate-data"
- kubectl config view --minify --raw --output 'jsonpath={$.users[0].client-key-data}' | pass insert -m "$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-key-data"
- kubectl config view --minify --raw --output 'jsonpath={$.clusters[0].certificate-authority-data}' | pass insert -m "$KUBEE_PASS_HOME/clusters/$KUBEE_CLUSTER_NAME/certificate-authority-data"
- # The server URI is derived from KUBEE_CLUSTER_SERVER_IP
- ```
+# Store the client 
+kubectl config view --minify --raw --output 'jsonpath={$.users[0].client-certificate-data}' | pass insert -m "$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-certificate-data"
+kubectl config view --minify --raw --output 'jsonpath={$.users[0].client-key-data}' | pass insert -m "$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-key-data"
+
+# Store the certificate authority
+kubectl config view --minify --raw --output 'jsonpath={$.clusters[0].certificate-authority-data}' | pass insert -m "$KUBEE_PASS_HOME/clusters/$KUBEE_CLUSTER_NAME/certificate-authority-data"
+# The server URI is derived from KUBEE_CLUSTER_SERVER_IP
+```
+
 ## How to see the generated config file
 
 ```bash
-kubee-kubectl config view
+kubee kubectl config view
 ```
+
+## How to test
+
+```bash
+kubee kubectl cluster-info
+```
+
