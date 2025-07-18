@@ -21,7 +21,11 @@ spec:
     access: proxy
     {{- /* prometheus-name is the default name of kube-prometheus */}}
     url: http://prometheus-{{ .Values.prometheus.name }}.{{ .Values.prometheus.namespace }}:9090
+    {{- /* Json Data: https://github.com/grafana/grafana/blob/2c2ac096fe66df155b68f1578bfc1137e7af53e8/public/app/plugins/datasource/prometheus/types.ts#L38  */}}
     jsonData:
-      'tlsSkipVerify': true
-      'timeInterval': "5s"
+      tlsSkipVerify: true
+      {{- /* Scrape interval is time interval*/}}
+      {{- /* https://stackoverflow.com/questions/66369969/set-scrape-interval-in-provisioned-prometheus-data-source-in-grafana*/}}
+      timeInterval: "{{.Values.prometheus.scrape_interval}}"
+      queryTimeout: "59s"
 {{- end -}}

@@ -55,11 +55,15 @@ Optionally:
   * you can update the client cert if you use [pass to store it](kubeconfig-pass.md)
 ```bash
 # set your names
+KUBEE_PASS_HOME=kubee
 KUBEE_CLUSTER_NAME=beau # cluster name
 KUBEE_USER_NAME=default # user name
 
 # Save the new client
-KUBECONFIG=~/.kube/k3s.yaml kubectl config view --minify --raw --output 'jsonpath={$.users[0].client-certificate-data}' | pass insert -m "$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-certificate-data"
-KUBECONFIG=~/.kube/k3s.yaml kubectl config view --minify --raw --output 'jsonpath={$.users[0].client-key-data}' | pass insert -m "$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-key-data"
+KUBECONFIG=~/.kube/k3s.yaml kubectl config view --minify --raw --output 'jsonpath={$.users[0].user.client-certificate-data}' | pass insert -m "$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-certificate-data"
+KUBECONFIG=~/.kube/k3s.yaml kubectl config view --minify --raw --output 'jsonpath={$.users[0].user.client-key-data}' | pass insert -m "$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-key-data"
+
+# Test
+./kubee kubectl cluster-info
 ```
 
