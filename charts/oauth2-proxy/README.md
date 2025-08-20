@@ -7,7 +7,7 @@
 # Kubee Oauth2-Proxy Chart
 
 ## About
-This [Kubee Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) installs [Oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/) as:
+This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) installs [Oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/) as:
 * an authentication middleware (reverse proxy)
 * to allow authentication via the [Traefik forward auth rule](https://doc.traefik.io/traefik/middlewares/http/forwardauth/)
 * with [dex](https://github.com/EraldyHq/kubee/blob/main/charts/dex/README.md) as identity provider

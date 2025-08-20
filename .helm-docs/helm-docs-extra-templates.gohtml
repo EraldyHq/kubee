@@ -30,6 +30,8 @@
 
 {{/* Create an URL */}}
 {{ define "kubee-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee chart{{end}}]({{ template "kubee-site-url" .}}/kubee-helmet-chart.md){{ end }}
+{{/* Create an URL for an app chart */}}
+{{ define "kubee-app-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee app chart{{end}}]({{ template "kubee-site-url" .}}/app-chart.md){{ end }}
 
 {{ define "kubee-enabled-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}enabled{{end}}]({{ template "kubee-site-url" .}}/chart-enabled.md){{ end }}
 

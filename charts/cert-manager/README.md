@@ -7,7 +7,7 @@
 # Kubee Cert-Manager Chart
 
 ## About
-This `kubee chart` will install [cert-manager](https://cert-manager.io/) to manage certificates.
+This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) will install [cert-manager](https://cert-manager.io/) to manage certificates.
 
 ## Installation
 
@@ -93,6 +93,10 @@ The [cert-manager mixin](https://monitoring.mixins.dev/cert-manager/) is install
 to create:
 * the [grafana dashboard](https://monitoring.mixins.dev/cert-manager/#dashboards) if the [grafana chart ](../grafana/README.md) is enabled
 * the [alerts](https://monitoring.mixins.dev/cert-manager/#alerts) if the [prometheus chart](../prometheus/README.md) is enabled
+
+By default, the certificate:
+* duration is of 90 days
+* is renewed at 2/3 through its actual duration
 
 ### Automatic DNS01 Cloudflare challenge configuration
 

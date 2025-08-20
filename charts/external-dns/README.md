@@ -6,7 +6,7 @@
 
 # Kubee External Dns Chart
 
-This [kubee chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) will install [external-dns](https://github.com/kubernetes-sigs/external-dns)
+This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) will install [external-dns](https://github.com/kubernetes-sigs/external-dns)
 
 `External DNS` can update your domain/public DNS based on:
 * [metadata annotations](https://kubernetes-sigs.github.io/external-dns/latest/docs/annotations/annotations/) on Ingress, Service, ...

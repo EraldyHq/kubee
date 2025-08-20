@@ -8,7 +8,7 @@
 
 ## About
 
-This app:
+This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md):
 * installs the [Grafana Operator](#grafana-operator)
 * instantiate a `Grafana Instance`
 

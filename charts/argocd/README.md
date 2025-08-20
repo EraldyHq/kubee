@@ -6,7 +6,13 @@
 
 # Kubee ArgoCd Chart
 
-This [kubee chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) installs [Argo CD](https://argo-cd.readthedocs.io/), Declarative GitOps CD for Kubernetes
+This [kubee app chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) installs [Argo CD](https://argo-cd.readthedocs.io/), Declarative GitOps CD for Kubernetes
+
+## Installation/Update
+
+```bash
+kubee --cluster cluster-name helmet play argocd
+```
 
 ## Features
 

@@ -6,7 +6,7 @@
 
 # Kubee Kubernetes Dashboard Chart
 
-The `Kubee Kubernetes Dashboard Chart` is a [Kubee Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) that installs the [kubernetes-dashboard](https://github.com/kubernetes/dashboard).
+The `Kubee Kubernetes Dashboard Chart` is a [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) that installs the [kubernetes-dashboard](https://github.com/kubernetes/dashboard).
 
 ## Features
 

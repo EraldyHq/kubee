@@ -6,7 +6,8 @@
 
 # Kubee Whoami Chart
 
-`Whoami` is an `app` that permits to debug and test traefik. It will print the HTTP request.
+`Whoami` is a [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) that installs an `app` that permits to debug and test traefik.
+It will print the HTTP request.
 
 ## Features
 

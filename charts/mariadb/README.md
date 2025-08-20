@@ -6,7 +6,7 @@
 
 # Kubee Mariadb Chart
 
-This [kubee chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) installs the [MariaDb Operator](https://github.com/mariadb-operator/mariadb-operator)
+This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) installs the [MariaDb Operator](https://github.com/mariadb-operator/mariadb-operator)
 to help you maintain and create [MariaDb database](https://mariadb.com/)
 
 ## Installation

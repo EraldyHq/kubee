@@ -1,6 +1,6 @@
 # What is a Jsonnet Helmet Chart
 
-A `Jsonnet Helmet chart` is a [Helmet chart](kubee-helmet-chart.md) that has only
+A `Jsonnet Helmet chart` is a [Helmet app chart](app-chart.md) that has only
 a [Jsonnet project](jsonnet-project.md).
 
 

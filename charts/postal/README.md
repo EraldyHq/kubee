@@ -6,7 +6,7 @@
 
 # Kubee Postal Chart
 
-This [Kubee Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) installs [Postal](https://docs.postalserver.io/).
+This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) installs [Postal](https://docs.postalserver.io/).
 
 `Postal` is a `programmatic email server` known also as `Mail delivery platform`.
 

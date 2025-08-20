@@ -6,7 +6,7 @@
 
 # Kubee Traefik Chart
 
-This [kubee chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) installs the [traefik proxy](https://traefik.io)
+This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) installs the [traefik proxy](https://traefik.io)
 
 <img src="contrib/traefik-entrypoints-illustration.jpg" alt="Alt text" width="1000">
 

@@ -6,7 +6,7 @@
 
 # Kubee Mailpit Chart
 
-This [kubee chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) installs the Mail Catcher, [Mailpit](https://github.com/axllent/mailpit).
+This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) installs the Mail Catcher, [Mailpit](https://github.com/axllent/mailpit).
 
 ## Features
 

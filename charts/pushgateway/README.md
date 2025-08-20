@@ -6,7 +6,7 @@
 
 # Kubee PushGateway Chart
 
-This [Kubee Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) installs [pushgateway exporter](https://github.com/prometheus/pushgateway)
+This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) installs [pushgateway exporter](https://github.com/prometheus/pushgateway)
 to monitor cron/ephemeral task.
 
 You can push metrics to it that will be gathered by Prometheus.

@@ -8,8 +8,6 @@ A `Kubee Chart` is a helm chart that supports:
 * a [cluster values file](cluster-values.md)
 * [CRDs chart](crds-chart.md) as dependencies
 
-They are installed with `kubee helmet`.
-
 
 ## Definition
 

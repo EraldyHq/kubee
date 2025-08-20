@@ -6,7 +6,7 @@
 
 # Kubee External Secrets Charts
 
-This [kubee chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) installs [external secrets](https://external-secrets.io/latest/) `0.14.3`
+This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) installs [external secrets](https://external-secrets.io/latest/) `0.14.3`
 
 ## Features
 

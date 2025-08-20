@@ -6,7 +6,7 @@
 
 # Kubee Vault Chart
 
-A [kubee chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) that [installs Vault](https://developer.hashicorp.com/vault/docs/platform/k8s)
+A [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) that [installs Vault](https://developer.hashicorp.com/vault/docs/platform/k8s)
 in a standalone mode.
 
 ## Installation

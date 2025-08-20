@@ -12,7 +12,7 @@
 > [!WARNING]
 > [Incorporated to kubernetes-monitoring](../../charts/kubernetes-monitoring/README.md)
 
-This [kubee chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) installs:
+This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) installs:
 * Node exporter (prometheus exporter that gather OS system metrics.)
 * and the Node mixins (alert and dashboard)
 

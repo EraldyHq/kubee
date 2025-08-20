@@ -21,7 +21,7 @@
 >
 > We let it here so that others that still want to use it have a reference of a working configuration.
 
-This kubee chart will:
+This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) will:
 * install [traefik-forward-auth](https://github.com/thomseddon/traefik-forward-auth).
 * to forward ingress authentication to [dex](../dex/README.md)
 

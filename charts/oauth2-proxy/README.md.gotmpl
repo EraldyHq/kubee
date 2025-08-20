@@ -2,7 +2,7 @@
 {{ template "kubee-header" .}}
 
 ## About
-This {{ template "kubee-chart-label" "Kubee Chart" }} installs [Oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/) as:
+This {{ template "kubee-app-chart-label" "Kubee App Chart"}} installs [Oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/) as:
 * an authentication middleware (reverse proxy)
 * to allow authentication via the [Traefik forward auth rule](https://doc.traefik.io/traefik/middlewares/http/forwardauth/)
 * with {{ template "kubee-chart-page-label" "dex" }} as identity provider

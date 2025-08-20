@@ -9,7 +9,7 @@
 > [!WARNING]
 > This chart is in the [alpha status](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) and is not fit to be installed or upgraded
 
-This [kubee crds chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/crds-chart.md) installs the `Git service` [Gogs](https://gogs.io/)
+This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) installs the `Git service` [Gogs](https://gogs.io/)
 
 `WIP: Not finished`
 

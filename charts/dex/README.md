@@ -6,7 +6,7 @@
 
 # Kubee Dex Chart
 
-This [kubee chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) installs the [dex identity provider](https://dexidp.io/).
+This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) installs the [dex identity provider](https://dexidp.io/).
 
 `Dex` supports:
 * a local password store
