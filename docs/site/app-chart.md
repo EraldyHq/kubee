@@ -1,21 +1,27 @@
 # Kubee App Chart
 
 
-An `app chart` is:
-  * a [kubee chart](kubee-helmet-chart.md) that contains an application.
-  * that create dynamically and  install a [helm chart](https://helm.sh) 
+An `app chart` is a [kubee chart](kubee-helmet-chart.md) that install/upgrade an application.
+
+## Helm Wrapper
+
+An `app chart`
+  * create a [helm chart](https://helm.sh) dynamically with:
+    * helm templating, 
+    * jsonnet
+    * kustomize
+  * and install/upgrade it  
+
+`App Charts` are therefore generated `Helm` Charts.
+
+You:
+* use any [Helm command](https://helm.sh/docs/helm/helm/) to manage them
+* except for the [installation and upgrade](#installation--upgrade)
+
+## Operation/Command
 
 
-
-# Operation/Command
-
-
-`App Chart` are `Helm` Chart.
-You can therefore:
-* use any [Helm command](https://helm.sh/docs/helm/helm/)
-* except for the installation and upgrade
-
-## Installation / Upgrade
+### Installation / Upgrade
 
 They are installed with `kubee helmet`.
 
@@ -27,10 +33,10 @@ kubee --cluster cluster-name helmet play chart-name
 
 Example for the `kubernetes-dashboard` chart
 ```bash
-kubee --cluster cluster-name helmet play chart-name
+kubee --cluster cluster-name helmet play kubernetes-dashboard
 ```
 
-## List
+### List
 
 
 Example:
@@ -47,7 +53,7 @@ helm list -n namespace
 kubee --cluster cluster-name helm list -n namespace
 ```
 
-## Uninstall/Delete
+### Uninstall/Delete
 
 
 Using helm to delete a chart
