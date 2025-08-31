@@ -250,10 +250,8 @@ kubee::get_cluster_directory(){
     local KUBEE_CLUSTER_DIRS=()
     IFS=":" read -ra KUBEE_CLUSTER_DIRS <<< "${KUBEE_CLUSTERS_PATH:-}"
     # this works for executed script or sourced script
-    local KUBEE_BIN
-    KUBEE_BIN=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
     local KUBEE_RESOURCE_CLUSTERS_DIR
-    KUBEE_RESOURCE_CLUSTERS_DIR=$(realpath "$KUBEE_BIN/../examples/clusters")
+    KUBEE_RESOURCE_CLUSTERS_DIR=$(realpath "$KUBEE_HOME/examples/clusters")
     local KUBEE_CLUSTER_DIRS+=("$KUBEE_RESOURCE_CLUSTERS_DIR")
     for KUBEE_CLUSTER_DIR in "${KUBEE_CLUSTER_DIRS[@]}"; do
         if [ ! -d "$KUBEE_CLUSTER_DIR" ]; then
@@ -444,16 +442,14 @@ kubee::set_env(){
   # This is a global constant because it's used by the kubee-cluster and kubee-helmet command as a cluster is also a chart
   CRD_SUFFIX="-crds"
 
-  # Kubee bin - the bin directory
-  # Why? Because if you use eval command with source, the BASH_SOURCE[0] becomes tmp
-  export KUBEE_BIN
-  KUBEE_BIN=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
   # KUBEE_RESOURCE_STABLE_CHARTS_DIR is not function local in the get_chart_directory function
   # because we use it in case of error in the message
   # this works for executed script or sourced script
   # This is a global constant because it's used by the kubee-cluster and kubee-helmet command as a cluster is also a chart
   export KUBEE_RESOURCE_STABLE_CHARTS_DIR
-  KUBEE_RESOURCE_STABLE_CHARTS_DIR=$(realpath "$KUBEE_BIN/../charts")
+  # Kubee Home - the home directory
+  # Why? Because if you use eval command with source, the BASH_SOURCE[0] becomes tmp
+  KUBEE_RESOURCE_STABLE_CHARTS_DIR=$(realpath "$KUBEE_HOME/charts")
 
   # The cluster
   KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}

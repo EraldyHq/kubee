@@ -51,6 +51,12 @@ if [ "${1:-}" == "synopsis" ]; then
    exit
 fi
 
+# Kubee Home (Ie installation path)
+# Homebrew uses link so we need realpath
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+export KUBEE_HOME
+KUBEE_HOME="$(dirname "$(realpath "$SCRIPT_DIR")")"
+
 # Connection variables
 export KUBEE_CONNECTION_NAMESPACE=${KUBEE_CONNECTION_NAMESPACE:-"default"}
 export KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
