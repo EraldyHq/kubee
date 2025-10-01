@@ -3,12 +3,18 @@
 ## About
 
 
-k3s is the parent process for all containers, 
-you need to drill down to see which pod/container is actually consuming resources
+System should run at a reasonable:
+  * CPU utilization level (e.g. 20-30%) 
+  * and load average of 2-3.
+
+
 
 ## CPU Analytics
 
 Since k3s runs everything on the host (not in VMs), the problematic process will show up directly in top.
+
+k3s is the parent process for all containers,
+you need to drill down to see which pod/container is actually consuming resources
 
 ### Top
 

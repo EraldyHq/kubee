@@ -16,12 +16,12 @@ This script may implement the following command:
 * `play`      : install a Kubernetes distribution in the cluster hosts
 * `reboot`    : reboot the cluster hosts (ie operating system) in order
 * `uninstall` : uninstall the Kubernetes distribution in the cluster hosts
-* `upgrade`   : upgrade the Kubernetes distribution in the cluster hosts
+* `upgrade`   : [upgrade the Kubernetes distribution](k3s-upgrade.md) in the cluster hosts
 
 
 ## Default Cluster Chart
 
-The default cluster chart is the [k3s-ansible cluster chart](../../charts/k3s-ansible).
+The default cluster chart is the [k3s-ansible cluster chart](../../charts/k3s-ansible/README.md).
 
 ## How to set a different cluster chart
 

@@ -56,6 +56,8 @@ fi
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 export KUBEE_HOME
 KUBEE_HOME="$(dirname "$(realpath "$SCRIPT_DIR")")"
+export KUBEE_BIN
+KUBEE_BIN="$KUBEE_HOME/bin"
 
 # Connection variables
 export KUBEE_CONNECTION_NAMESPACE=${KUBEE_CONNECTION_NAMESPACE:-"default"}

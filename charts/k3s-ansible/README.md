@@ -47,7 +47,9 @@ Play will execute the [site playbook](https://github.com/gerardnico/ansible-e-ba
 
 ### Upgrade
 
-Upgrade the version in [values](values.yaml) and run:
+* [Choose the next minor version](../../docs/site/k3s-upgrade.md)
+* Change it in your [cluster file](../../docs/site/cluster-values.md) in the [version value](values.yaml)
+* Run:
 ```bash
 kubee --cluster clusterName --cluster-chart k3s-ansible cluster upgrade
 ```
