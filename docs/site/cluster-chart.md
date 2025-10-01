@@ -21,11 +21,11 @@ This script may implement the following command:
 
 ## Default Cluster Chart
 
-The default cluster chart is the [k3s-ansible cluster chart](../../resources/charts/stable/k3s-ansible).
+The default cluster chart is the [k3s-ansible cluster chart](../../charts/k3s-ansible).
 
 ## How to set a different cluster chart
 
-The cluster chart value is set in the `chart` property of the [kubee cluster chart](../../resources/charts/stable/cluster/README.md)
+The cluster chart value is set in the `chart` property of the [kubee cluster chart](../../charts/cluster/README.md)
 
 Example: in your [cluster values file](cluster-values.md)
 ```yaml

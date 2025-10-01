@@ -98,4 +98,4 @@ tasks:
   doc-lint:
     cmds:
       - |
-        markdownlint docs/site/cluster-creation.md
+        {{.TASKFILE_DIR}}/contrib/markdown-lint

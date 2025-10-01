@@ -69,7 +69,7 @@ local values =  {
 
 ## Data Validation
 
-To validate, you can take example in our [validation library](../../resources/charts/alertmanager/jsonnet/kubee/validation.libsonnet).
+To validate, you can take example in our [validation library](../../charts/alertmanager/jsonnet/kubee/validation.libsonnet).
 
 Minimal Example:
 ```jsonnet

@@ -10,9 +10,9 @@ A library of kubernetes functions
 ## Index
 
 * [kube::get_qualified_app_name](#kubeget_qualified_app_name)
-* [kubee::get_app_label](#kubeget_app_label)
+* [kubee::get_app_label](#kubeeget_app_label)
 * [kube::get_resources_by_app_name](#kubeget_resources_by_app_name)
-* [kubee::get_resource_by_app_name](#kubeget_resource_by_app_name)
+* [kubee::get_resource_by_app_name](#kubeeget_resource_by_app_name)
 * [kube::get_json_path](#kubeget_json_path)
 * [kube::test_connection](#kubetest_connection)
 * [kubee::get_cluster_directory](#kubeeget_cluster_directory)

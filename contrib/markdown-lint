@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Markdown Link Check Script
+# This script loops through all subdirectories and runs markdown-link-check
+# while avoiding 'test' and 'build' directories
+
+set -e  # Exit on any error
+
+checked_dirs=0
+# Loop through all subdirectories
+for childPath in docs/*; do
+  if [ ! -d "$childPath" ]; then
+      continue
+  fi
+  if [[ "$childPath" =~ (bin|man) ]]; then
+      continue
+  fi
+  echo "$childPath"
+  markdown-link-check \
+            --config contrib/markdown-lint-config.json \
+            --quiet \
+            "$childPath"
+done
+
+
+echo "$checked_dirs found"

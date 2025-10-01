@@ -37,4 +37,4 @@ resources:
 
 ## Example of Kustomization Project
 
-Check the [kubee-argocd](../../resources/charts/argocd) chart for a kustomization example.
+Check the [kubee-argocd](../../charts/argocd) chart for a kustomization example.
