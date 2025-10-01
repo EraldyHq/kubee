@@ -61,4 +61,17 @@ kubee --cluster clusterName cluster upgrade
 ```
 
 
+## Support
+
+### Downgrade not supported
+
+[Not supported](https://docs.k3s.io/upgrades/automated#downgrade-prevention)
+but you [can rollback](https://docs.k3s.io/upgrades/roll-back)
+
+If you cannot restore the database, you cannot roll back to a previous minor version.
+
+See [k3s-backup](k3s-backup.md)
+
+
+
 

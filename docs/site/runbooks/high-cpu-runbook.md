@@ -102,8 +102,6 @@ journalctl -u k3s -f --since "15 minutes ago"
 journalctl -e -u k3s
 ```
 
-Check the database size [for vaccum / compaction error](../k3s-datastore.md)
+Check the database size [for vaccum / compaction error](../k3s-datastore-sqlite.md)
 
 Similar: https://github.com/k3s-io/k3s/discussions/10306
-
-
