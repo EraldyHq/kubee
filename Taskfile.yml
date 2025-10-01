@@ -96,6 +96,7 @@ tasks:
         (cd $OUTPUT_DIR; helm-docs --template-files={{.TASK_DIR}}/.helm-docs/helm-docs-extra-templates.gohtml --template-files=README.md.gotmpl)
         cp "$OUTPUT_DIR/README.md" "README.md"
   # Check the links
+  # do check also the url?
   docs-lint:
     cmds:
       - |
