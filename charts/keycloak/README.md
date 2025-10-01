@@ -50,7 +50,3 @@ kubee --cluster cluster-name helmet play keycloak
 | namespace | string | `"keycloak"` |  |
 | version | string | `"26.1.2"` |  |
 
-## Dev/Contrib
-
-See [Contrib](contrib.md)
-

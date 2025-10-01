@@ -71,11 +71,13 @@ tasks:
         find "charts" -maxdepth 2 -mindepth 1 -type d  -name "charts" >> "$HELM_DOCS_IGNORE"
 
   # Generate all README helm-docs for all charts
+  # and the ling
   docs-all:
     cmds:
       - | 
         find "{{.TASK_DIR}}/charts" -maxdepth 2 -mindepth 1 -type f  -name "Chart.yaml"  | xargs -I {} bash -c 'cd "$(dirname "{}")" && task docs || exit 255'
       - task readme
+      - task doc-lint
 
   # Generate the root Readme.md
   readme:
@@ -93,9 +95,8 @@ tasks:
         # Path argument in helm-docs should be relative to chart-search-root (not absolute ...)
         (cd $OUTPUT_DIR; helm-docs --template-files={{.TASK_DIR}}/.helm-docs/helm-docs-extra-templates.gohtml --template-files=README.md.gotmpl)
         cp "$OUTPUT_DIR/README.md" "README.md"
-  # Doc formatting
-  # Does not verify the links ...
-  doc-lint:
+  # Check the links
+  docs-lint:
     cmds:
       - |
         {{.TASKFILE_DIR}}/contrib/markdown-lint

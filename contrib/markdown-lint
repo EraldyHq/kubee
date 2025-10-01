@@ -6,7 +6,6 @@
 
 set -e  # Exit on any error
 
-checked_dirs=0
 # Loop through all subdirectories
 for childPath in docs/*; do
   if [ ! -d "$childPath" ]; then
@@ -22,5 +21,14 @@ for childPath in docs/*; do
             "$childPath"
 done
 
+echo "README main"
+markdown-link-check \
+            --config contrib/markdown-lint-config.json \
+            --quiet \
+            "README.md"
 
-echo "$checked_dirs found"
+echo "README charts"
+markdown-link-check \
+            --config contrib/markdown-lint-config.json \
+            --quiet \
+            charts/**/README.md
