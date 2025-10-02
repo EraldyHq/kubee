@@ -10,7 +10,13 @@ https://docs.k3s.io/datastore
 ```bash
 du -sh /var/lib/rancher/k3s/server/db/*
 ```
-
+Working Example:
+```
+8.0K    /var/lib/rancher/k3s/server/db/etcd
+71M     /var/lib/rancher/k3s/server/db/state.db
+32K     /var/lib/rancher/k3s/server/db/state.db-shm
+4.3M    /var/lib/rancher/k3s/server/db/state.db-wal
+```
 As long as:
 * [compaction](#compaction) is working,
 * and you restart k3s periodically
@@ -149,4 +155,6 @@ EOF
 systemctl start k3s
 ```
 
+## Discussion
 
+https://github.com/k3s-io/k3s/discussions/13011
