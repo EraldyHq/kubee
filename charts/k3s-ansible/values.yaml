@@ -13,6 +13,11 @@ token: ''
 # Example: `--kube-apiserver-arg="admission-control-config-file=/var/lib/rancher/k3s/server/psa.yaml"`
 server_args: [ ]
 
+# -- A cron expression to schedule a k3s restart
+# A restart is mandatory as k3s performs database operation at startup such as compaction.
+# Restarting k3s does not stop the containers, the apps are still working
+restart_cron: 0 11 * * *
+
 # Hosts
 hosts:
   # -- The Servers (Mandatory)
@@ -48,3 +53,6 @@ hosts:
       username: ''
       # The public key of the private key
       public_key: ''
+    # -- [Optional] - Upgrade cron.
+    # A cron expression to schedule the upgrade of the os
+    upgrade_cron: '0 2 * * 0'

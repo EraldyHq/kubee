@@ -89,3 +89,7 @@ k3s_cluster:
     # The admin user Public key that is added to the `authorized_keys`
     # The key is mandatory if the admin username is not empty
     kubee_os_admin_public_key: "{{.Values.hosts.all.admin_user.public_key}}"
+    # Upgrade cron
+    kubee_os_upgrade_cron: "{{.Values.hosts.all.upgrade_cron}}"
+    # The cron expression for the restart
+    kubee_k3s_restart_cron: "{{.Values.restart_cron}}"
