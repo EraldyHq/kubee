@@ -10,8 +10,9 @@ source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-bash.sh
 source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 # shellcheck source=./kubee-lib.sh
-source "kubee-lib.sh"
+source "${SCRIPT_DIR}/kubee-lib.sh"
 
 synopsis(){
   cat <<EOF
@@ -53,7 +54,6 @@ fi
 
 # Kubee Home (Ie installation path)
 # Homebrew uses link so we need realpath
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 export KUBEE_HOME
 KUBEE_HOME="$(dirname "$(realpath "$SCRIPT_DIR")")"
 export KUBEE_BIN
