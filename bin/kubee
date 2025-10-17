@@ -138,29 +138,29 @@ bash::trap "exit_code=\$?; if [ \$exit_code -ne 0 ]; then echo -e \"${BASHLIB_ER
 
 case "$KUBEE_COMMAND" in
   "cluster")
-     source kubee-cluster "$@" || error::exit $?
+     source "${KUBEE_BIN}/kubee-cluster" "$@" || error::exit $?
     ;;
   "app")
-    source kubee-app "$@" || error::exit $?
+    source "${KUBEE_BIN}/kubee-app" "$@" || error::exit $?
     ;;
   "helmet")
-    source kubee-helmet "$@"
+    source "${KUBEE_BIN}/kubee-helmet" "$@"
     ;;
   "helm")
-    source kubee-helm "$@" || error::exit $?
+    source "${KUBEE_BIN}/kubee-helm" "$@" || error::exit $?
     ;;
   "kubectl")
-    source kubee-kubectl "$@" || error::exit $?
+    source "${KUBEE_BIN}/kubee-kubectl" "$@" || error::exit $?
     ;;
   "cert")
-    source kubee-cert "$@" || error::exit $?
+    source "${KUBEE_BIN}/kubee-cert" "$@" || error::exit $?
     ;;
   "cmctl")
-      source kubee-cmctl "$@" || error::exit $?
+      source "${KUBEE_BIN}/kubee-cmctl" "$@" || error::exit $?
       ;;
   "jwt")
       # Deprecated
-      source kubee-jwt "$@" || error::exit $?
+      source "${KUBEE_BIN}/kubee-jwt" "$@" || error::exit $?
       ;;
   *)
     doc::help synopsis

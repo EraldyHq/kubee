@@ -46,7 +46,7 @@ shift
 
 case "$COMMAND" in
   "shell")
-    source kubee-app-shell "$@"
+    source "$KUBEE_BIN/kubee-app-shell" "$@"
     ;;
   "service")
      APP_NAME=${1:-}
@@ -63,7 +63,7 @@ case "$COMMAND" in
      echo::tip "Access them locally via the DNS name: name.namespace.svc.cluster.local"
     ;;
   "restart")
-    source kubee-app-restart "$@"
+    source "${KUBEE_BIN}/kubee-app-restart" "$@"
     ;;
   *)
     doc::help synopsis
